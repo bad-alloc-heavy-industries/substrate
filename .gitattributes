@@ -1,1 +1,2 @@
 substrate/* linguist-language=C++
+substrate/meson.build linguist-language=Meson
