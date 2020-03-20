@@ -51,8 +51,10 @@ TEST_CASE("fd_t write", "[fd_t]")
 	REQUIRE(file.write(i8));
 	REQUIRE(file.writeLE(u16));
 	REQUIRE(file.writeLE(u32));
+	REQUIRE(file.writeLE(u64));
 	REQUIRE(file.writeBE(u16));
 	REQUIRE(file.writeBE(u32));
+	REQUIRE(file.writeBE(u64));
 }
 
 template<typename T> void read(fd_t &file, const T &expected)
@@ -90,8 +92,10 @@ TEST_CASE("fd_t read", "[fd_t]")
 	read(file, i8);
 	readLE(file, u16);
 	readLE(file, u32);
+	readLE(file, u64);
 	readBE(file, u16);
 	readBE(file, u32);
+	readBE(file, u64);
 }
 
 ANON_TEST_CASE()
