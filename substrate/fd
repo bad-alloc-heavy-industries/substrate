@@ -16,223 +16,229 @@
 #include <memory>
 #include <array>
 
+namespace substrate
+{
+	namespace internal
+	{
 #ifndef _WINDOWS
-using stat_t = struct stat;
+		using stat_t = struct stat;
+		using ::fstat;
 
-inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
-	{ return lseek(fd, offset, whence); }
-inline off_t fdtell(const int32_t fd) noexcept
-	{ return lseek(fd, 0, SEEK_CUR); }
+		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
+			{ return lseek(fd, offset, whence); }
+		inline off_t fdtell(const int32_t fd) noexcept
+			{ return lseek(fd, 0, SEEK_CUR); }
 #else
-#define O_NOCTTY _O_BINARY
-using mode_t = int32_t;
-using ssize_t = typename std::make_signed<std::size_t>::type;
-using stat_t = struct _stat64;
+#	define O_NOCTTY _O_BINARY
+		using mode_t = int32_t;
+		using ssize_t = typename std::make_signed<std::size_t>::type;
+		using stat_t = struct _stat64;
 
-inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
-inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
-	{ return _lseeki64(fd, offset, whence); }
-inline off_t fdtell(const int32_t fd) noexcept
-	{ return _telli64(fd); }
+		inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
+		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
+			{ return _lseeki64(fd, offset, whence); }
+		inline off_t fdtell(const int32_t fd) noexcept
+			{ return _telli64(fd); }
 #endif
+	}
 
 #ifdef __GNUC__
-#define WARN_UNUSED		__attribute__((warn_unused_result))
+#	define WARN_UNUSED		__attribute__((warn_unused_result))
 #else
-#define WARN_UNUSED
+#	define WARN_UNUSED
 #endif
 
-/*!
- * @internal
- * While this is supposed to be a very thin, RAII-only layer,
- * between a file descriptor and the code that uses it, due to the need to know
- * EOF outside of just read() calls, this also holds a flag for that express purpose.
- */
-struct fd_t final
-{
-private:
-	int32_t fd;
-	mutable bool eof;
-
-public:
-	constexpr fd_t() noexcept : fd{-1}, eof{false} { }
-	constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
-	fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
-		fd{::open(file, flags, mode)}, eof{false} { }
-	fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
-	~fd_t() noexcept { if (fd != -1) close(fd); }
-	void operator =(fd_t &&fd_) noexcept { swap(fd_); }
-	operator int32_t() const noexcept WARN_UNUSED { return fd; }
-	bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
-	bool valid() const noexcept WARN_UNUSED { return fd != -1; }
-	bool isEOF() const noexcept WARN_UNUSED { return eof; }
-	void swap(fd_t &desc) noexcept
+	/*!
+	* While this is supposed to be a very thin, RAII-only layer,
+	* between a file descriptor and the code that uses it, due to the need to know
+	* EOF outside of just read() calls, this also holds a flag for that express purpose.
+	*/
+	struct fd_t final
 	{
-		std::swap(fd, desc.fd);
-		std::swap(eof, desc.eof);
-	}
-	void invalidate() noexcept { fd = -1; }
+	private:
+		int32_t fd;
+		mutable bool eof;
 
-	bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
-	{
-		if (eof)
-			return false;
-		const ssize_t result = read(value, valueLen, nullptr);
-		if (!result && valueLen)
-			eof = true;
-		else if (result < 0)
-			return false;
-		resultLen = size_t(result);
-		return resultLen == valueLen;
-	}
-
-	bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
-	{
-		size_t resultLen = 0;
-		return read(value, valueLen, resultLen);
-	}
-
-	bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
-	{
-		const ssize_t result = write(value, valueLen, nullptr);
-		if (result < 0)
-			return false;
-		return size_t(result) == valueLen;
-	}
-
-#ifndef _WINDOWS
-	ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
-		{ return ::read(fd, bufferPtr, len); }
-	ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
-		{ return ::write(fd, bufferPtr, valueLen); }
-#else
-	ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
-		{ return ::read(fd, bufferPtr, uint32_t(len)); }
-	ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
-		{ return ::write(fd, bufferPtr, uint32_t(valueLen)); }
-#endif
-	off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
-		{ return fdseek(fd, offset, whence); }
-	off_t tell() const noexcept WARN_UNUSED { return fdtell(fd); }
-	fd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
-
-	stat_t stat() const noexcept WARN_UNUSED
-	{
-		stat_t fileStat{};
-		if (!::fstat(fd, &fileStat))
-			return fileStat;
-		return {};
-	}
-
-	off_t length() const noexcept WARN_UNUSED
-	{
-		stat_t fileStat{};
-		const int result = fstat(fd, &fileStat);
-		return result ? -1 : fileStat.st_size;
-	}
-
-	template<typename T> bool read(T &value) const noexcept
-		{ return read(&value, sizeof(T)); }
-	template<typename T> bool write(const T &value) const noexcept
-		{ return write(&value, sizeof(T)); }
-	template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
-		{ return read(value.get(), sizeof(T)); }
-	template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
-		{ return write(value.get(), sizeof(T)); }
-	template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
-		{ return read(value.get(), sizeof(T) * valueCount); }
-	template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
-		{ return write(value.get(), sizeof(T) * valueCount); }
-	template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
-		{ return read(value.data(), sizeof(T) * N); }
-	template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
-		{ return write(value.data(), sizeof(T) * N); }
-
-	template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
-	{
-		static_assert(length <= N, "Can't request to read more than the std::array<> length");
-		return read(value.data(), sizeof(T) * length);
-	}
-
-	template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
-	{
-		static_assert(length <= N, "Can't request to write more than the std::array<> length");
-		return write(value.data(), sizeof(T) * length);
-	}
-
-	bool readLE(uint16_t &value) const noexcept WARN_UNUSED
-	{
-		std::array<uint8_t, 2> data{};
-		const bool result = read(data);
-		value = (uint16_t(data[1]) << 8U) | data[0];
-		return result;
-	}
-
-	bool writeLE(const uint16_t value) const noexcept WARN_UNUSED
-	{
-		const std::array<uint8_t, 2> data
+	public:
+		constexpr fd_t() noexcept : fd{-1}, eof{false} { }
+		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
+		fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
+			fd{::open(file, flags, mode)}, eof{false} { }
+		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
+		~fd_t() noexcept { if (fd != -1) close(fd); }
+		void operator =(fd_t &&fd_) noexcept { swap(fd_); }
+		operator int32_t() const noexcept WARN_UNUSED { return fd; }
+		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
+		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
+		bool isEOF() const noexcept WARN_UNUSED { return eof; }
+		void swap(fd_t &desc) noexcept
 		{
-			uint8_t(value),
-			uint8_t(value >> 8U)
-		};
-		return write(data);
-	}
+			std::swap(fd, desc.fd);
+			std::swap(eof, desc.eof);
+		}
+		void invalidate() noexcept { fd = -1; }
 
-	bool readLE(uint32_t &value) const noexcept WARN_UNUSED
-	{
-		std::array<uint8_t, 4> data{};
-		const bool result = read(data);
-		value = (uint32_t(data[3]) << 24U) | (uint32_t(data[2]) << 16U) |
-			(uint32_t(data[1]) << 8U) | data[0];
-		return result;
-	}
-
-	bool writeLE(const uint32_t value) const noexcept WARN_UNUSED
-	{
-		const std::array<uint8_t, 4> data
+		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
 		{
-			uint8_t(value),
-			uint8_t(value >> 8U),
-			uint8_t(value >> 16U),
-			uint8_t(value >> 24U)
-		};
-		return write(data);
-	}
+			if (eof)
+				return false;
+			const ssize_t result = read(value, valueLen, nullptr);
+			if (!result && valueLen)
+				eof = true;
+			else if (result < 0)
+				return false;
+			resultLen = size_t(result);
+			return resultLen == valueLen;
+		}
 
-	bool readBE(uint16_t &value) const noexcept WARN_UNUSED
-	{
-		std::array<uint8_t, 2> data{};
-		const bool result = read(data);
-		value = (uint16_t(data[0]) << 8U) | data[1];
-		return result;
-	}
+		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			size_t resultLen = 0;
+			return read(value, valueLen, resultLen);
+		}
 
-	bool readBE(uint32_t &value) const noexcept WARN_UNUSED
-	{
-		std::array<uint8_t, 4> data{};
-		const bool result = read(data);
-		value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
-			(uint32_t(data[2]) << 8U) | data[3];
-		return result;
-	}
+		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			const ssize_t result = write(value, valueLen, nullptr);
+			if (result < 0)
+				return false;
+			return size_t(result) == valueLen;
+		}
 
-	bool seekRel(const off_t offset) const noexcept WARN_UNUSED
-	{
-		const off_t currentPos = tell();
-		if (currentPos == -1 || currentPos + offset < 0)
-			return false;
-		return seek(offset, SEEK_CUR) == currentPos + offset;
-	}
+	#ifndef _WINDOWS
+		ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return ::read(fd, bufferPtr, len); }
+		ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return ::write(fd, bufferPtr, valueLen); }
+	#else
+		ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return ::read(fd, bufferPtr, uint32_t(len)); }
+		ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return ::write(fd, bufferPtr, uint32_t(valueLen)); }
+	#endif
+		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
+			{ return internal::fdseek(fd, offset, whence); }
+		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
+		fd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
 
-	fd_t(const fd_t &) = delete;
-	fd_t &operator =(const fd_t &) = delete;
-};
+		internal::stat_t stat() const noexcept WARN_UNUSED
+		{
+			internal::stat_t fileStat{};
+			if (!internal::fstat(fd, &fileStat))
+				return fileStat;
+			return {};
+		}
 
-inline void swap(fd_t &a, fd_t &b) noexcept { a.swap(b); }
+		off_t length() const noexcept WARN_UNUSED
+		{
+			internal::stat_t fileStat{};
+			const int result = internal::fstat(fd, &fileStat);
+			return result ? -1 : fileStat.st_size;
+		}
+
+		template<typename T> bool read(T &value) const noexcept
+			{ return read(&value, sizeof(T)); }
+		template<typename T> bool write(const T &value) const noexcept
+			{ return write(&value, sizeof(T)); }
+		template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
+			{ return read(value.get(), sizeof(T)); }
+		template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
+			{ return write(value.get(), sizeof(T)); }
+		template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+			{ return read(value.get(), sizeof(T) * valueCount); }
+		template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+			{ return write(value.get(), sizeof(T) * valueCount); }
+		template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
+			{ return read(value.data(), sizeof(T) * N); }
+		template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+			{ return write(value.data(), sizeof(T) * N); }
+
+		template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
+		{
+			static_assert(length <= N, "Can't request to read more than the std::array<> length");
+			return read(value.data(), sizeof(T) * length);
+		}
+
+		template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+		{
+			static_assert(length <= N, "Can't request to write more than the std::array<> length");
+			return write(value.data(), sizeof(T) * length);
+		}
+
+		bool readLE(uint16_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 2> data{};
+			const bool result = read(data);
+			value = (uint16_t(data[1]) << 8U) | data[0];
+			return result;
+		}
+
+		bool writeLE(const uint16_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 2> data
+			{
+				uint8_t(value),
+				uint8_t(value >> 8U)
+			};
+			return write(data);
+		}
+
+		bool readLE(uint32_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 4> data{};
+			const bool result = read(data);
+			value = (uint32_t(data[3]) << 24U) | (uint32_t(data[2]) << 16U) |
+				(uint32_t(data[1]) << 8U) | data[0];
+			return result;
+		}
+
+		bool writeLE(const uint32_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 4> data
+			{
+				uint8_t(value),
+				uint8_t(value >> 8U),
+				uint8_t(value >> 16U),
+				uint8_t(value >> 24U)
+			};
+			return write(data);
+		}
+
+		bool readBE(uint16_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 2> data{};
+			const bool result = read(data);
+			value = (uint16_t(data[0]) << 8U) | data[1];
+			return result;
+		}
+
+		bool readBE(uint32_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 4> data{};
+			const bool result = read(data);
+			value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
+				(uint32_t(data[2]) << 8U) | data[3];
+			return result;
+		}
+
+		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
+		{
+			const off_t currentPos = tell();
+			if (currentPos == -1 || currentPos + offset < 0)
+				return false;
+			return seek(offset, SEEK_CUR) == currentPos + offset;
+		}
+
+		fd_t(const fd_t &) = delete;
+		fd_t &operator =(const fd_t &) = delete;
+	};
+
+	inline void swap(fd_t &a, fd_t &b) noexcept { a.swap(b); }
 #ifndef _WINDOWS
-constexpr mode_t normalMode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH; // NOLINT(hicpp-signed-bitwise)
+	constexpr mode_t normalMode = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH; // NOLINT(hicpp-signed-bitwise)
 #else
-constexpr mode_t normalMode = _S_IWRITE | _S_IREAD; // NOLINT(hicpp-signed-bitwise)
+	constexpr mode_t normalMode = _S_IWRITE | _S_IREAD; // NOLINT(hicpp-signed-bitwise)
 #endif
+}
 
 #endif /*FD__HXX*/
