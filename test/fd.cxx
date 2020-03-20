@@ -62,6 +62,7 @@ template<typename T> void read(fd_t &file, const T &expected)
 	T result{};
 	REQUIRE(file.read(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
 template<typename T> void readLE(fd_t &file, const T expected)
@@ -69,6 +70,7 @@ template<typename T> void readLE(fd_t &file, const T expected)
 	T result{};
 	REQUIRE(file.readLE(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
 template<typename T> void readBE(fd_t &file, const T expected)
@@ -76,6 +78,7 @@ template<typename T> void readBE(fd_t &file, const T expected)
 	T result{};
 	REQUIRE(file.readBE(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
 TEST_CASE("fd_t read", "[fd_t]")
