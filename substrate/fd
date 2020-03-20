@@ -92,15 +92,23 @@ public:
 		return read(value, valueLen, resultLen);
 	}
 
+	bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+	{
+		const ssize_t result = write(value, valueLen, nullptr);
+		if (result < 0)
+			return false;
+		return size_t(result) == valueLen;
+	}
+
 #ifndef _WINDOWS
 	ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
 		{ return ::read(fd, bufferPtr, len); }
-	ssize_t write(const void *const bufferPtr, const size_t valueLen) const noexcept WARN_UNUSED
+	ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
 		{ return ::write(fd, bufferPtr, valueLen); }
 #else
 	ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
 		{ return ::read(fd, bufferPtr, uint32_t(len)); }
-	ssize_t write(const void *const bufferPtr, const size_t valueLen) const noexcept WARN_UNUSED
+	ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
 		{ return ::write(fd, bufferPtr, uint32_t(valueLen)); }
 #endif
 	off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
@@ -125,17 +133,31 @@ public:
 
 	template<typename T> bool read(T &value) const noexcept
 		{ return read(&value, sizeof(T)); }
+	template<typename T> bool write(const T &value) const noexcept
+		{ return write(&value, sizeof(T)); }
 	template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
 		{ return read(value.get(), sizeof(T)); }
+	template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
+		{ return write(value.get(), sizeof(T)); }
 	template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
 		{ return read(value.get(), sizeof(T) * valueCount); }
+	template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+		{ return write(value.get(), sizeof(T) * valueCount); }
 	template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
 		{ return read(value.data(), sizeof(T) * N); }
+	template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+		{ return write(value.data(), sizeof(T) * N); }
 
 	template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
 	{
 		static_assert(length <= N, "Can't request to read more than the std::array<> length");
 		return read(value.data(), sizeof(T) * length);
+	}
+
+	template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+	{
+		static_assert(length <= N, "Can't request to write more than the std::array<> length");
+		return write(value.data(), sizeof(T) * length);
 	}
 
 	bool readLE(uint16_t &value) const noexcept WARN_UNUSED

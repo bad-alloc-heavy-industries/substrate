@@ -26,7 +26,7 @@ TEST_CASE("fd_t bad fd", "[fd_t]")
 	REQUIRE_FALSE(file.isEOF());
 
 	REQUIRE(file.read(nullptr, 0, nullptr) == -1);
-	REQUIRE(file.write(nullptr, 0) == -1);
+	REQUIRE(file.write(nullptr, 0, nullptr) == -1);
 }
 
 TEST_CASE("fd_t bad open", "[fd_t]")
@@ -44,7 +44,10 @@ TEST_CASE("fd_t write", "[fd_t]")
 	REQUIRE(file.valid());
 	REQUIRE_FALSE(file.isEOF());
 
-	//
+	REQUIRE(file.write(testArray));
+	REQUIRE(file.write(testChar));
+	REQUIRE(file.write(u8));
+	REQUIRE(file.write(i8));
 }
 
 template<typename T> void read(fd_t &file, const T &expected)
