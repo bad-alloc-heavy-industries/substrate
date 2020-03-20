@@ -204,12 +204,49 @@ namespace substrate
 			return write(data);
 		}
 
+		bool readLE(uint64_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 8> data{};
+			const bool result = read(data);
+			value = (uint64_t(data[7]) << 56U) | (uint64_t(data[6]) << 48U) |
+				(uint64_t(data[5]) << 40U) | (uint64_t(data[4]) << 32U) |
+				(uint64_t(data[3]) << 24U) | (uint64_t(data[2]) << 16U) |
+				(uint64_t(data[1]) << 8U) | data[0];
+			return result;
+		}
+
+		bool writeLE(const uint64_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 8> data
+			{
+				uint8_t(value),
+				uint8_t(value >> 8U),
+				uint8_t(value >> 16U),
+				uint8_t(value >> 24U),
+				uint8_t(value >> 32U),
+				uint8_t(value >> 40U),
+				uint8_t(value >> 48U),
+				uint8_t(value >> 56U)
+			};
+			return write(data);
+		}
+
 		bool readBE(uint16_t &value) const noexcept WARN_UNUSED
 		{
 			std::array<uint8_t, 2> data{};
 			const bool result = read(data);
 			value = (uint16_t(data[0]) << 8U) | data[1];
 			return result;
+		}
+
+		bool writeBE(const uint16_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 2> data
+			{
+				uint8_t(value >> 8U),
+				uint8_t(value)
+			};
+			return write(data);
 		}
 
 		bool readBE(uint32_t &value) const noexcept WARN_UNUSED
@@ -219,6 +256,45 @@ namespace substrate
 			value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
 				(uint32_t(data[2]) << 8U) | data[3];
 			return result;
+		}
+
+		bool writeBE(const uint32_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 4> data
+			{
+				uint8_t(value >> 24U),
+				uint8_t(value >> 16U),
+				uint8_t(value >> 8U),
+				uint8_t(value)
+			};
+			return write(data);
+		}
+
+		bool readBE(uint64_t &value) const noexcept WARN_UNUSED
+		{
+			std::array<uint8_t, 8> data{};
+			const bool result = read(data);
+			value = (uint64_t(data[0]) << 56U) | (uint64_t(data[1]) << 48U) |
+				(uint64_t(data[2]) << 40U) | (uint64_t(data[3]) << 32U) |
+				(uint64_t(data[4]) << 24U) | (uint64_t(data[5]) << 16U) |
+				(uint64_t(data[6]) << 8U) | data[7];
+			return result;
+		}
+
+		bool writeBE(const uint64_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 8> data
+			{
+				uint8_t(value >> 56U),
+				uint8_t(value >> 48U),
+				uint8_t(value >> 40U),
+				uint8_t(value >> 32U),
+				uint8_t(value >> 24U),
+				uint8_t(value >> 16U),
+				uint8_t(value >> 8U),
+				uint8_t(value)
+			};
+			return write(data);
 		}
 
 		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
