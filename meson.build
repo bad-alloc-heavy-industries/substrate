@@ -4,6 +4,7 @@ project(
 	version: '0.0.1'
 )
 
+cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 
 headers = [
@@ -22,3 +23,5 @@ pkgconfig.generate(
 	version: meson.project_version(),
 	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 )
+
+subdir('test')
