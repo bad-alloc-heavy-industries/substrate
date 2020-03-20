@@ -51,6 +51,8 @@ TEST_CASE("fd_t write", "[fd_t]")
 	REQUIRE(file.write(i8));
 	REQUIRE(file.writeLE(u16));
 	REQUIRE(file.writeLE(u32));
+	REQUIRE(file.writeBE(u16));
+	REQUIRE(file.writeBE(u32));
 }
 
 template<typename T> void read(fd_t &file, const T &expected)
@@ -64,6 +66,13 @@ template<typename T> void readLE(fd_t &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readLE(result));
+	REQUIRE(result == expected);
+}
+
+template<typename T> void readBE(fd_t &file, const T expected)
+{
+	T result{};
+	REQUIRE(file.readBE(result));
 	REQUIRE(result == expected);
 }
 
@@ -81,6 +90,8 @@ TEST_CASE("fd_t read", "[fd_t]")
 	read(file, i8);
 	readLE(file, u16);
 	readLE(file, u32);
+	readBE(file, u16);
+	readBE(file, u32);
 }
 
 ANON_TEST_CASE()

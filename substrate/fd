@@ -212,6 +212,16 @@ namespace substrate
 			return result;
 		}
 
+		bool writeBE(const uint16_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 2> data
+			{
+				uint8_t(value >> 8U),
+				uint8_t(value)
+			};
+			return write(data);
+		}
+
 		bool readBE(uint32_t &value) const noexcept WARN_UNUSED
 		{
 			std::array<uint8_t, 4> data{};
@@ -219,6 +229,18 @@ namespace substrate
 			value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
 				(uint32_t(data[2]) << 8U) | data[3];
 			return result;
+		}
+
+		bool writeBE(const uint32_t value) const noexcept WARN_UNUSED
+		{
+			const std::array<uint8_t, 4> data
+			{
+				uint8_t(value >> 24U),
+				uint8_t(value >> 16U),
+				uint8_t(value >> 8U),
+				uint8_t(value)
+			};
+			return write(data);
 		}
 
 		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
