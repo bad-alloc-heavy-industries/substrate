@@ -7,14 +7,8 @@ project(
 cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 
-headers = [
-	'fd'
-]
-
-install_headers(
-	headers,
-	subdir: 'substrate'
-)
+subdir('substrate')
+subdir('test')
 
 pkgconfig.generate(
 	subdirs: '.',
@@ -23,5 +17,3 @@ pkgconfig.generate(
 	version: meson.project_version(),
 	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 )
-
-subdir('test')
