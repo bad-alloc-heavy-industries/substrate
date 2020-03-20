@@ -16,6 +16,8 @@
 #include <memory>
 #include <array>
 
+#include <substrate/internal/defs>
+
 namespace substrate
 {
 	namespace internal
@@ -41,12 +43,6 @@ namespace substrate
 			{ return _telli64(fd); }
 #endif
 	}
-
-#ifdef __GNUC__
-#	define WARN_UNUSED		__attribute__((warn_unused_result))
-#else
-#	define WARN_UNUSED
-#endif
 
 	/*!
 	* While this is supposed to be a very thin, RAII-only layer,
@@ -317,4 +313,4 @@ namespace substrate
 #endif
 }
 
-#endif /*FD__HXX*/
+#endif /* SUBSTRATE_FD */

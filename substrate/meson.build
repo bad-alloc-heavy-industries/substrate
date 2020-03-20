@@ -1,5 +1,9 @@
 headers = [
-	'fd'
+	'fd',
+
+
+	# Internal Headers
+	'internal/defs'
 ]
 
 install_headers(

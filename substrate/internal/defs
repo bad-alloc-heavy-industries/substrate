@@ -1,0 +1,12 @@
+#ifndef SUBSTRATE_INTERNAL_DEFS
+#define SUBSTRATE_INTERNAL_DEFS
+
+#ifdef __GNUC__
+#define ALIGN(X)        __attribute__ ((aligned (X)))
+#define WARN_UNUSED		__attribute__((warn_unused_result))
+#else
+#define ALIGN(X)
+#define WARN_UNUSED
+#endif
+
+#endif /* SUBSTRATE_INTERNAL_DEFS */
