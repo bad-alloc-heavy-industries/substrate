@@ -4,11 +4,12 @@
 #include <substrate/fd>
 #include <catch.hpp>
 
+using substrate::fd_t;
+
 constexpr static std::array<char, 4> testArray{'t', 'E', 'S', 't'};
 constexpr static char testChar{'.'};
 static std::string testString{"fileDescriptor"};
 
-UINT8_C();
 constexpr static auto u8{uint8_t(0x5A)};
 constexpr static auto i8{int8_t(0xA5)};
 constexpr static auto u16{uint16_t(0x125A)};
@@ -39,7 +40,7 @@ TEST_CASE("fd_t bad open", "[fd_t]")
 
 TEST_CASE("fd_t write", "[fd_t]")
 {
-	fd_t file{"fd.test", O_WRONLY | O_CREAT | O_EXCL, normalMode};
+	fd_t file{"fd.test", O_WRONLY | O_CREAT | O_EXCL, substrate::normalMode};
 	REQUIRE(file >= 0);
 	REQUIRE(file.valid());
 	REQUIRE_FALSE(file.isEOF());
