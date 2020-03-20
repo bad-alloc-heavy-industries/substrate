@@ -168,6 +168,16 @@ public:
 		return result;
 	}
 
+	bool writeLE(const uint16_t value) const noexcept WARN_UNUSED
+	{
+		const std::array<uint8_t, 2> data
+		{
+			uint8_t(value),
+			uint8_t(value >> 8U)
+		};
+		return write(data);
+	}
+
 	bool readLE(uint32_t &value) const noexcept WARN_UNUSED
 	{
 		std::array<uint8_t, 4> data{};
@@ -175,6 +185,18 @@ public:
 		value = (uint32_t(data[3]) << 24U) | (uint32_t(data[2]) << 16U) |
 			(uint32_t(data[1]) << 8U) | data[0];
 		return result;
+	}
+
+	bool writeLE(const uint32_t value) const noexcept WARN_UNUSED
+	{
+		const std::array<uint8_t, 4> data
+		{
+			uint8_t(value),
+			uint8_t(value >> 8U),
+			uint8_t(value >> 16U),
+			uint8_t(value >> 24U)
+		};
+		return write(data);
 	}
 
 	bool readBE(uint16_t &value) const noexcept WARN_UNUSED
