@@ -484,8 +484,18 @@ namespace substrate {
 	template<class T>
 	constexpr bool is_literal_type_v = std::is_literal_type<T>::value;
 
+#elif defined(SUBSTRATE_CXX11_COMPAT)
+	#include <substrate/internal/cxx11_compat>
 #endif
 #endif
+
+	/* Shift nibble */
+	template<typename T>
+	typename std::enable_if<std::is_integral<T>::value ,T>::type
+	constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept {
+		auto n = ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2);
+		return (((v | 0x00U) << n) | ((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~n)));
+	}
 
 	/* typename decoding */
 	template<typename T>

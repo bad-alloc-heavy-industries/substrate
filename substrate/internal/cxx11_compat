@@ -1,0 +1,195 @@
+#ifndef SUBSTRATE_INTERNAL_CXX11COMPAT
+#define SUBSTRATE_INTERNAL_CXX11COMPAT
+#include <type_traits>
+
+template<class T, class U, typename V = decltype(std::is_same<T, U>::value)>
+constexpr V is_same_v() { return std::is_same<T, U>::value; }
+
+template<class T, typename V = decltype(std::is_null_pointer<T>::value)>
+constexpr V is_null_pointer_v() { return std::is_null_pointer<T>::value; }
+
+template<class T, typename V = decltype(std::is_integral<T>::value)>
+constexpr V is_integral_v() { return std::is_integral<T>::value; }
+
+template<class T, typename V = decltype(std::is_floating_point<T>::value)>
+constexpr V is_floating_point_v() { return std::is_floating_point<T>::value; }
+
+template<class T, typename V = decltype(std::is_array<T>::value)>
+constexpr V is_array_v() { return std::is_array<T>::value; }
+
+template<class T, typename V = decltype(std::is_void<T>::value)>
+constexpr V is_void_v() { return std::is_void<T>::value; }
+
+template<class T, typename V = decltype(std::is_enum<T>::value)>
+constexpr V is_enum_v() { return std::is_enum<T>::value; }
+
+template<class T, typename V = decltype(std::is_union<T>::value)>
+constexpr V is_union_v() { return std::is_union<T>::value; }
+
+template<class T, typename V = decltype(std::is_class<T>::value)>
+constexpr V is_class_v() { return std::is_class<T>::value; }
+
+template<class T, typename V = decltype(std::is_function<T>::value)>
+constexpr V is_function_v() { return std::is_function<T>::value; }
+
+template<class T, typename V = decltype(std::is_pointer<T>::value)>
+constexpr V is_pointer_v() { return std::is_pointer<T>::value; }
+
+template<class T, typename V = decltype(std::is_lvalue_reference<T>::value)>
+constexpr V is_lvalue_reference_v() { return std::is_lvalue_reference<T>::value; }
+
+template<class T, typename V = decltype(std::is_rvalue_reference<T>::value)>
+constexpr V is_rvalue_reference_v() { return std::is_rvalue_reference<T>::value; }
+
+template<class T, typename V = decltype(std::is_member_object_pointer<T>::value)>
+constexpr V is_member_object_pointer_v() { return std::is_member_object_pointer<T>::value; }
+
+template<class T, typename V = decltype(std::is_member_function_pointer<T>::value)>
+constexpr V is_member_function_pointer_v() { return std::is_member_function_pointer<T>::value; }
+
+template<class T, typename V = decltype(std::is_fundamental<T>::value)>
+constexpr V is_fundamental_v() { return std::is_fundamental<T>::value; }
+
+template<class T, typename V = decltype(std::is_object<T>::value)>
+constexpr V is_object_v() { return std::is_object<T>::value; }
+
+template<class T, typename V = decltype(std::is_compound<T>::value)>
+constexpr V is_compound_v() { return std::is_compound<T>::value; }
+
+template<class T, typename V = decltype(std::is_reference<T>::value)>
+constexpr V is_reference_v() { return std::is_reference<T>::value; }
+
+template<class T, typename V = decltype(std::is_member_pointer<T>::value)>
+constexpr V is_member_pointer_v() { return std::is_member_pointer<T>::value; }
+
+template<class T, typename V = decltype(std::is_scalar<T>::value)>
+constexpr V is_scalar_v() { return std::is_scalar<T>::value; }
+
+template<class T, class U, typename V = decltype(std::is_base_of<T, U>::value)>
+constexpr V is_base_of_v() { return std::is_base_of<T, U>::value; }
+
+template<class T, class U, typename V = decltype(std::is_convertible<T, U>::value)>
+constexpr V is_convertible_v() { return std::is_convertible<T, U>::value; }
+
+template<class T, typename V = decltype(std::has_virtual_destructor<T>::value)>
+constexpr V has_virtual_destructor_v() { return std::has_virtual_destructor<T>::value; }
+
+template<class T, typename V = decltype(std::is_destructible<T>::value)>
+constexpr V is_destructible_v() { return std::is_destructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_destructible<T>::value)>
+constexpr V is_trivially_destructible_v() { return std::is_trivially_destructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_destructible<T>::value)>
+constexpr V is_nothrow_destructible_v() { return std::is_nothrow_destructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_move_assignable<T>::value)>
+constexpr V is_move_assignable_v() { return std::is_move_assignable<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_move_assignable<T>::value)>
+constexpr V is_trivially_move_assignable_v() { return std::is_trivially_move_assignable<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_move_assignable<T>::value)>
+constexpr V is_nothrow_move_assignable_v() { return std::is_nothrow_move_assignable<T>::value; }
+
+template<class T, typename V = decltype(std::is_copy_assignable<T>::value)>
+constexpr V is_copy_assignable_v() { return std::is_copy_assignable<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_copy_assignable<T>::value)>
+constexpr V is_trivially_copy_assignable_v() { return std::is_trivially_copy_assignable<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_copy_assignable<T>::value)>
+constexpr V is_nothrow_copy_assignable_v() { return std::is_nothrow_copy_assignable<T>::value; }
+
+template<class T, class U, typename V = decltype(std::is_assignable<T, U>::value)>
+constexpr V is_assignable_v() { return std::is_assignable<T, U>::value; }
+
+template<class T, class U, typename V = decltype(std::is_trivially_assignable<T, U>::value)>
+constexpr V is_trivially_assignable_v() { return std::is_trivially_assignable<T, U>::value; }
+
+template<class T, class U, typename V = decltype(std::is_nothrow_assignable<T, U>::value)>
+constexpr V is_nothrow_assignable_v() { return std::is_nothrow_assignable<T, U>::value; }
+
+template<class T, typename V = decltype(std::is_move_constructible<T>::value)>
+constexpr V is_move_constructible_v() { return std::is_move_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_move_constructible<T>::value)>
+constexpr V is_trivially_move_constructible_v() { return std::is_trivially_move_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_move_constructible<T>::value)>
+constexpr V is_nothrow_move_constructible_v() { return std::is_nothrow_move_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_copy_constructible<T>::value)>
+constexpr V is_copy_constructible_v() { return std::is_copy_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_copy_constructible<T>::value)>
+constexpr V is_trivially_copy_constructible_v() { return std::is_trivially_copy_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_copy_constructible<T>::value)>
+constexpr V is_nothrow_copy_constructible_v() { return std::is_nothrow_copy_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_default_constructible<T>::value)>
+constexpr V is_default_constructible_v() { return std::is_default_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_default_constructible<T>::value)>
+constexpr V is_trivially_default_constructible_v() { return std::is_trivially_default_constructible<T>::value; }
+
+template<class T, typename V = decltype(std::is_nothrow_default_constructible<T>::value)>
+constexpr V is_nothrow_default_constructible_v() { return std::is_nothrow_default_constructible<T>::value; }
+
+template<class T, class... Args>
+constexpr decltype(std::is_constructible<T, Args...>::value) is_constructible_v() {
+    return std::is_constructible<T, Args...>::value;
+}
+
+template<class T, class... Args>
+constexpr decltype(std::is_trivially_constructible<T, Args...>::value) is_trivially_constructible_v() {
+    return std::is_trivially_constructible<T, Args...>::value;
+}
+
+template<class T, class... Args>
+constexpr decltype(std::is_nothrow_constructible<T, Args...>::value) is_nothrow_constructible_v() {
+    return std::is_nothrow_constructible<T, Args...>::value;
+}
+
+template<class T, typename V = decltype(std::is_unsigned<T>::value)>
+constexpr V is_unsigned_v() { return std::is_unsigned<T>::value; }
+
+template<class T, typename V = decltype(std::is_signed<T>::value)>
+constexpr V is_signed_v() { return std::is_signed<T>::value; }
+
+template<class T, typename V = decltype(std::is_abstract<T>::value)>
+constexpr V is_abstract_v() { return std::is_abstract<T>::value; }
+
+template<class T, typename V = decltype(std::is_polymorphic<T>::value)>
+constexpr V is_polymorphic_v() { return std::is_polymorphic<T>::value; }
+
+template<class T, typename V = decltype(std::is_empty<T>::value)>
+constexpr V is_empty_v() { return std::is_empty<T>::value; }
+
+template<class T, typename V = decltype(std::is_pod<T>::value)>
+constexpr V is_pod_v() { return std::is_pod<T>::value; }
+
+template<class T, typename V = decltype(std::is_standard_layout<T>::value)>
+constexpr V is_standard_layout_v() { return std::is_standard_layout<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivially_copyable<T>::value)>
+constexpr V is_trivially_copyable_v() { return std::is_trivially_copyable<T>::value; }
+
+template<class T, typename V = decltype(std::is_trivial<T>::value)>
+constexpr V is_trivial_v() { return std::is_trivial<T>::value; }
+
+template<class T, typename V = decltype(std::is_volatile<T>::value)>
+constexpr V is_volatile_v() { return std::is_volatile<T>::value; }
+
+template<class T, typename V = decltype(std::is_const<T>::value)>
+constexpr V is_const_v() { return std::is_const<T>::value; }
+
+template<class T, typename V = decltype(std::is_literal_type<T>::value)>
+constexpr V is_literal_type_v() { return std::is_literal_type<T>::value; }
+
+template<class T, typename V = decltype(std::is_arithmetic<T>::value)>
+constexpr V is_arithmetic_v() { return std::is_arithmetic<T>::value; }
+
+#endif /* SUBSTRATE_INTERNAL_CXX11COMPAT */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
