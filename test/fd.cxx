@@ -50,32 +50,41 @@ TEST_CASE("fd_t write", "[fd_t]")
 	REQUIRE(file.write(u8));
 	REQUIRE(file.write(i8));
 	REQUIRE(file.writeLE(u16));
+	REQUIRE(file.writeLE(i16));
 	REQUIRE(file.writeLE(u32));
+	REQUIRE(file.writeLE(i32));
 	REQUIRE(file.writeLE(u64));
+	REQUIRE(file.writeLE(i64));
 	REQUIRE(file.writeBE(u16));
+	REQUIRE(file.writeBE(i16));
 	REQUIRE(file.writeBE(u32));
+	REQUIRE(file.writeBE(i32));
 	REQUIRE(file.writeBE(u64));
+	REQUIRE(file.writeBE(i64));
 }
 
-template<typename T> void read(fd_t &file, const T &expected)
+template<typename T> void read(const fd_t &file, const T &expected)
 {
 	T result{};
 	REQUIRE(file.read(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
-template<typename T> void readLE(fd_t &file, const T expected)
+template<typename T> void readLE(const fd_t &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readLE(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
-template<typename T> void readBE(fd_t &file, const T expected)
+template<typename T> void readBE(const fd_t &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readBE(result));
 	REQUIRE(result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
 TEST_CASE("fd_t read", "[fd_t]")
@@ -91,11 +100,17 @@ TEST_CASE("fd_t read", "[fd_t]")
 	read(file, u8);
 	read(file, i8);
 	readLE(file, u16);
+	readLE(file, i16);
 	readLE(file, u32);
+	readLE(file, i32);
 	readLE(file, u64);
+	readLE(file, i64);
 	readBE(file, u16);
+	readBE(file, i16);
 	readBE(file, u32);
+	readBE(file, i32);
 	readBE(file, u64);
+	readBE(file, i64);
 }
 
 ANON_TEST_CASE()
