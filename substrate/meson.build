@@ -2,6 +2,7 @@ headers = [
 	'fd',
 	'memfd',
 	'units',
+	'utility',
 
 
 	# Internal Headers

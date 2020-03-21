@@ -1,5 +1,5 @@
 testSrcs = [
-	'test.cxx', 'fd.cxx', 'units.cxx'
+	'test.cxx', 'fd.cxx', 'units.cxx', 'utility.cxx'
 ]
 
 if target_machine.system() == 'linux'
