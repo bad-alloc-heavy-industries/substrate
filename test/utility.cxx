@@ -1178,7 +1178,7 @@ TEST_CASE( "[C++14] make_unsigned_t helper", "[utility]")
 
 
 using substrate::decode_typename;
-TEST_CASE("C++ typename decoding", "[utility")
+TEST_CASE("C++ typename decoding", "[utility]")
 {
 	using A = int;
 	using Au = unsigned int;
