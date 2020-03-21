@@ -2,6 +2,13 @@
 #define SUBSTRATE_UTILITIES
 
 #include <type_traits>
+#include <typeinfo>
+#include <memory>
+#include <string>
+
+#ifndef _MSC_VER
+#include <cxxabi.h>
+#endif
 
 namespace substrate {
 
@@ -479,6 +486,27 @@ namespace substrate {
 
 #endif
 #endif
+
+	/* typename decoding */
+	template<typename T>
+	std::string decode_typename()
+	{
+		using _type_ref = typename substrate::remove_reference_t<T>;
+#ifndef _MSC_VER
+		auto demangler = abi::__cxa_demangle(typeid(_type_ref).name(), nullptr, nullptr, nullptr);
+#else
+		auto demangler = nullptr;
+#endif
+		std::unique_ptr<char, void(*)(void*)> _demangle(demangler, std::free);
+		std::string _type_name((_demangle != nullptr) ? _demangle.get() : typeid(_type_ref).name());
+
+		if (std::is_const<_type_ref>::value) _type_name += " const";
+		if (std::is_volatile<_type_ref>::value) _type_name += " volatile";
+		if (std::is_lvalue_reference<T>::value) _type_name += "&";
+		if (std::is_rvalue_reference<T>::value) _type_name += "&&";
+
+		return _type_name;
+	}
 
 }
 

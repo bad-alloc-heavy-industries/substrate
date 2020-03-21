@@ -1175,3 +1175,50 @@ TEST_CASE( "[C++14] make_unsigned_t helper", "[utility]")
 	REQUIRE(std::is_same<unsigned int, make_unsigned_t<int>>::value);
 }
 #endif
+
+
+using substrate::decode_typename;
+TEST_CASE("C++ typename decoding", "[utility")
+{
+	using A = int;
+	using Au = unsigned int;
+	using B = int *;
+	using Bu = unsigned int *;
+	using C = const int;
+	using Cu = const unsigned int;
+	using D = const int *;
+	using Du = const unsigned int *;
+	using E = int *const;
+	using Eu = unsigned int *const;
+	using F = volatile int;
+	using Fu = volatile unsigned int;
+	using H = int *volatile;
+	using Hu = unsigned int *volatile;
+	using G = volatile int *;
+	using Gu = volatile unsigned int *;
+	using I = int *const volatile;
+	using Iu = unsigned int *const volatile;
+	using J = const volatile int;
+	using Ju = const volatile unsigned int;
+
+	REQUIRE(decode_typename<A>() == "int");
+	REQUIRE(decode_typename<Au>() == "unsigned int");
+	REQUIRE(decode_typename<B>() == "int*");
+	REQUIRE(decode_typename<Bu>() == "unsigned int*");
+	REQUIRE(decode_typename<C>() == "int const");
+	REQUIRE(decode_typename<Cu>() == "unsigned int const");
+	REQUIRE(decode_typename<D>() == "int const*");
+	REQUIRE(decode_typename<Du>() == "unsigned int const*");
+	REQUIRE(decode_typename<E>() == "int* const");
+	REQUIRE(decode_typename<Eu>() == "unsigned int* const");
+	REQUIRE(decode_typename<F>() == "int volatile");
+	REQUIRE(decode_typename<Fu>() == "unsigned int volatile");
+	REQUIRE(decode_typename<G>() == "int volatile*");
+	REQUIRE(decode_typename<Gu>() == "unsigned int volatile*");
+	REQUIRE(decode_typename<H>() == "int* volatile");
+	REQUIRE(decode_typename<Hu>() == "unsigned int* volatile");
+	REQUIRE(decode_typename<I>() == "int* const volatile");
+	REQUIRE(decode_typename<Iu>() == "unsigned int* const volatile");
+	REQUIRE(decode_typename<J>() == "int const volatile");
+	REQUIRE(decode_typename<Ju>() == "unsigned int const volatile");
+}
