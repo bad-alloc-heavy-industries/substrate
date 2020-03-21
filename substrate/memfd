@@ -61,7 +61,7 @@ namespace substrate
 			else if (result < 0)
 				return false;
 			resultLen = size_t(result);
-			return resultLen = valueLen;
+			return resultLen == valueLen;
 		}
 
 		bool read(void *const value, size_t valueLen) const noexcept WARN_UNUSED
