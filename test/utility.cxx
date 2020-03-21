@@ -949,20 +949,6 @@ TEST_CASE( "[C++ 17] is_literal_type_v helper", "[utility]")
 
 	REQUIRE(is_literal_type_v<A>);
 }
-
-// using substrate::is_final_v;
-// TEST_CASE( "[C++17] is_final_v helper", "[utility]")
-// {
-// 	struct A {};
-// 	struct B final {};
-// 	struct C final : A {};
-
-// 	REQUIRE_FALSE(is_final_v<A>);
-
-// 	REQUIRE(is_final_v<B>);
-// 	REQUIRE(is_final_v<C>);
-// }
-
 #endif
 
 /* C++ 14 helpers */

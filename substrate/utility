@@ -477,8 +477,6 @@ namespace substrate {
 	template<class T>
 	constexpr bool is_literal_type_v = std::is_literal_type<T>::value;
 
-	// template<class T>
-	// constexpr bool is_final_v = std::is_final<T>::value;
 #endif
 #endif
 
