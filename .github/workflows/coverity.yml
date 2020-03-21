@@ -1,0 +1,82 @@
+name: Coverity
+
+on:
+  push:
+    branches:
+      - coverityScan
+
+jobs:
+  scan-linux:
+    runs-on: ubuntu-18.04
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo ::set-env name=PATH::"$HOME/.local/bin:$PATH"
+          echo ::set-env name=GITHUB_WORKSPACE::"`pwd`"
+          echo ::set-env name=COVERITY_PROJECT_NAME::bad-alloc-heavy-industries/substrate
+      - name: Setup GCC
+        shell: bash
+        run: |
+          CXX=${CC/#gcc/g++}
+          sudo apt-add-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install $CC $CXX
+          echo ::set-env name=CC::$CC
+          echo ::set-env name=CXX::$CXX
+        env:
+          CC: gcc-9
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+          sudo pip3 install --upgrade pip setuptools wheel
+          pip3 install --user meson
+          unzip ninja-linux.zip -d ~/.local/bin
+          rm ninja-linux.zip
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC --version
+          $CXX --version
+          [ $COVERAGE -ne 0 ] && $GCOV --version || true
+          meson --version
+          ninja --version
+      - name: Install Coverity
+        shell: bash
+        run: |
+          .github/installCoverity.sh
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      - name: Run Coverity
+        shell: bash
+        run: |
+          meson build --prefix=$HOME/.local
+          cov-build --dir cov-int ninja -C build
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      - name: Upload Coverity
+        shell: bash
+        run: |
+          VERSION=`meson introspect build --projectinfo | jq -r '.["version"]'`-`git rev-parse --short HEAD`
+          tar cJf substrate.tar.xz cov-int
+          curl --form token=${{ secrets.COVERITY_SCAN_TOKEN }} \
+            --form email=dx-mon@users.sourceforge.net \
+            --form file=@substrate.tar.xz \
+            --form version=$VERSION \
+            --form description"A collection of headers containing useful tools and gadgets for building C++ programs" \
+            https://scan.coverity.com/builds?project=substrate
+      - name: Debug
+        if: failure()
+        shell: bash
+        run: cat cov-int/build-log.txt
