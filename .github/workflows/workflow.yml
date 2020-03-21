@@ -29,6 +29,7 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
         run: |
+          echo ::set-env name=PATH::"$HOME/.local/bin:$PATH"
           echo ::set-env name=GITHUB_WORKSPACE::"`pwd`"
       - name: Coverage environment
         env:
