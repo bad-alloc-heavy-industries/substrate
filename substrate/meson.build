@@ -4,7 +4,7 @@ headers = [
 	'units',
 	'utility',
 	'enum_utils',
-
+	'bounded_iterator',
 
 	# Internal Headers
 	'internal/defs'
