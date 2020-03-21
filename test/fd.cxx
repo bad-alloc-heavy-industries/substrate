@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <array>
 #include <substrate/fd>
@@ -38,6 +39,20 @@ TEST_CASE("fd_t bad open", "[fd_t]")
 	REQUIRE_FALSE(file.isEOF());
 }
 
+std::unique_ptr<char []> toUnique(const std::string &value)
+{
+	std::unique_ptr<char []> result{new char[value.size()]};
+	memcpy(result.get(), value.data(), value.size());
+	return result;
+}
+
+std::unique_ptr<char> toUnique(const char value)
+{
+	std::unique_ptr<char> result{new char};
+	*result = value;
+	return result;
+}
+
 TEST_CASE("fd_t write", "[fd_t]")
 {
 	fd_t file{"fd.test", O_WRONLY | O_CREAT | O_EXCL, substrate::normalMode};
@@ -47,6 +62,10 @@ TEST_CASE("fd_t write", "[fd_t]")
 
 	REQUIRE(file.write(testArray));
 	REQUIRE(file.write(testChar));
+	auto arrPtr = toUnique(testString);
+	REQUIRE(file.write(arrPtr, testString.size()));
+	auto objPtr = toUnique(testChar);
+	REQUIRE(file.write(objPtr));
 	REQUIRE(file.write(u8));
 	REQUIRE(file.write(i8));
 	REQUIRE(file.writeLE(u16));
@@ -68,6 +87,24 @@ TEST_CASE("fd_t seek", "[fd_t]")
 	fd_t file{"fd.test", O_RDONLY};
 	REQUIRE(file.head());
 	REQUIRE(file.tail());
+}
+
+void readUnique(const fd_t &file, const std::string &expected)
+{
+	std::unique_ptr<char []> result{new char[expected.size()]};
+	REQUIRE(result != nullptr);
+	REQUIRE(file.read(result, expected.size()));
+	REQUIRE(memcmp(result.get(), expected.data(), expected.size()) == 0);
+	REQUIRE_FALSE(file.isEOF());
+}
+
+void readUnique(const fd_t &file, const char expected)
+{
+	std::unique_ptr<char> result{new char};
+	REQUIRE(result != nullptr);
+	REQUIRE(file.read(result));
+	REQUIRE(*result == expected);
+	REQUIRE_FALSE(file.isEOF());
 }
 
 template<typename T> void read(const fd_t &file, const T &expected)
@@ -103,7 +140,8 @@ TEST_CASE("fd_t read", "[fd_t]")
 
 	read(file, testArray);
 	read(file, testChar);
-	//read(file, testString);
+	readUnique(file, testString);
+	readUnique(file, testChar);
 	read(file, u8);
 	read(file, i8);
 	readLE(file, u16);
