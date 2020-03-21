@@ -1,0 +1,306 @@
+#ifndef SUBSTRATE_ENUM_UTILS
+#define SUBSTRATE_ENUM_UTILS
+
+#include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include <substrate/internal/defs>
+
+#include <substrate/utility>
+
+namespace substrate
+{
+	template<typename F>
+	struct enableEnumBitmask_t
+	{
+		static constexpr bool enabled = false;
+	};
+
+	template<class T>
+	struct enumPair_t final
+	{
+		using value_type = T;
+	private:
+		T _value;
+		const char* _name;
+	public:
+		constexpr enumPair_t() noexcept : _value{}, _name{} { }
+		constexpr enumPair_t(T value, const char* name) noexcept : _value{value}, _name{name} { }
+
+		void value(const T value) noexcept { _value = value; }
+		NO_DISCARD
+		T value() const noexcept WARN_UNUSED { return _value; }
+
+		void name(const char* name) noexcept { _name = name; }
+		NO_DISCARD
+		const char* name() const noexcept WARN_UNUSED { return _name; }
+	};
+
+
+
+	/* Extract a collection of flags set in a field */
+	/* This is kind of expensive run-time wise, being at leas O(n+1) but *shrug* */
+	template<typename T, typename A>
+	substrate::enable_if_t<std::is_enum<T>::value, std::vector<T>>
+	extract_flags(T flags, A& enum_table)
+	{
+		std::vector<T> _found_flags;
+		using ut = typename substrate::underlying_type_t<T>;
+		for (auto flag : enum_table)
+		{
+			if((flags & flag.value()) == flag.value() && static_cast<ut>(flag.value()) != 0)
+				_found_flags.emplace_back(flag.value());
+		}
+
+		if(_found_flags.size() == 0)
+			_found_flags.emplace_back(T{});
+
+		return _found_flags;
+	}
+
+	template<typename T, typename A>
+	substrate::enable_if_t<std::is_enum<T>::value, std::vector<enumPair_t<T>>>
+	extract_flag_pairs(T flags, A& enum_table)
+	{
+		std::vector<enumPair_t<T>> _found_flags;
+		using ut = typename substrate::underlying_type_t<T>;
+		for (auto flag : enum_table)
+		{
+			if((flags & flag.value()) == flag.value() && static_cast<ut>(flag.value()) != 0)
+				_found_flags.emplace_back(flag);
+		}
+
+		if(_found_flags.size() == 0)
+			_found_flags.emplace_back(enum_table[0]);
+
+		return _found_flags;
+	}
+
+	template<class Map, class Val>
+	std::string enum_name(Map m, Val v) noexcept
+	{
+		auto pos = std::find_if(
+			std::begin(m),
+			std::end(m),
+			[&v](const typename Map::value_type& t){
+				return (t.value() == v);
+			});
+		return (pos != std::end(m)) ?
+			pos->name() :
+			"UNKNOWN";
+	}
+
+	template<class Map>
+	typename Map::value_type::value_type enum_value(Map m, const std::string& n) noexcept
+	{
+		auto pos = std::find_if(
+			std::begin(m),
+			std::end(m),
+			[&n](const typename Map::value_type& t){
+				return (t.name() == n);
+			});
+
+		return (pos != std::end(m)) ?
+			pos->value() :
+			static_cast<typename Map::value_type::value_type>(0);
+	}
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F>
+operator|(F lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return static_cast<F>(
+		static_cast<utype>(lh) | static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1>
+operator|(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return static_cast<F1>(
+			static_cast<utype>(lh) | rh
+		);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F2>
+operator|(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return static_cast<F2>(
+			lh | static_cast<utype>(rh)
+		);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F>
+operator&(F lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return static_cast<F>(
+		static_cast<utype>(lh) & static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1>
+operator&(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return static_cast<F1>(
+			static_cast<utype>(lh) & rh
+		);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F2>
+operator&(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return static_cast<F2>(
+			lh & static_cast<utype>(rh)
+		);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F>
+operator~(F en)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return static_cast<F>(
+		~static_cast<utype>(en)
+	);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F>
+operator^(F lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return static_cast<F>(
+		static_cast<utype>(lh) ^ static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1>
+operator^(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return static_cast<F1>(
+			static_cast<utype>(lh) ^ rh
+		);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F2>
+operator^(F1 lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return static_cast<F2>(
+			lh ^ static_cast<utype>(rh)
+		);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F&>
+operator|=(F& lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return lh = static_cast<F>(
+		static_cast<utype>(lh) | static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1&>
+operator|=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return lh = static_cast<F1>(
+		static_cast<utype>(lh) | rh
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F1&>
+operator|=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return lh = (
+		lh | static_cast<utype>(rh)
+	);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled,F&>
+operator&=(F& lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return lh = static_cast<F>(
+		static_cast<utype>(lh) & static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1&>
+operator&=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return lh = static_cast<F1>(
+		static_cast<utype>(lh) & rh
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F1&>
+operator&=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return lh = (
+		lh & static_cast<utype>(rh)
+	);
+}
+
+template<typename F>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F>::enabled, F&>
+operator^=(F& lh, F rh)
+{
+	using utype = typename substrate::underlying_type_t<F>;
+	return lh = static_cast<F>(
+		static_cast<utype>(lh) ^ static_cast<utype>(rh)
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F1>::enabled && std::is_integral<F2>::value, F1&>
+operator^=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F1>;
+	return lh = static_cast<F1>(
+		static_cast<utype>(lh) ^ rh
+	);
+}
+
+template<typename F1, typename F2>
+typename substrate::enable_if_t<substrate::enableEnumBitmask_t<F2>::enabled && std::is_integral<F1>::value, F1&>
+operator^=(F1& lh, F2 rh)
+{
+	using utype = typename substrate::underlying_type_t<F2>;
+	return lh = (
+		lh ^ static_cast<utype>(rh)
+	);
+}
+
+#endif /* SUBSTRATE_ENUM_UTILS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

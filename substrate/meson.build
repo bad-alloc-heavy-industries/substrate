@@ -3,6 +3,7 @@ headers = [
 	'memfd',
 	'units',
 	'utility',
+	'enum_utils',
 
 
 	# Internal Headers
