@@ -26,6 +26,10 @@ namespace substrate
 		using stat_t = struct stat;
 		using ::fstat;
 
+		ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
+			{ return read(fd, bufferPtr, bufferLen); }
+		ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
+			{ return write(fd, bufferPtr, bufferLen); }
 		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
 			{ return lseek(fd, offset, whence); }
 		inline off_t fdtell(const int32_t fd) noexcept
@@ -36,6 +40,10 @@ namespace substrate
 		using ssize_t = typename std::make_signed<std::size_t>::type;
 		using stat_t = struct _stat64;
 
+		ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
+			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }
+		ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
+			{ return write(fd, bufferPtr, uint32_t(bufferLen)); }
 		inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
 		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
 			{ return _lseeki64(fd, offset, whence); }
@@ -102,17 +110,10 @@ namespace substrate
 			return size_t(result) == valueLen;
 		}
 
-	#ifndef _WINDOWS
 		ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return ::read(fd, bufferPtr, len); }
+			{ return internal::fdread(fd, bufferPtr, len); }
 		ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return ::write(fd, bufferPtr, valueLen); }
-	#else
-		ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return ::read(fd, bufferPtr, uint32_t(len)); }
-		ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return ::write(fd, bufferPtr, uint32_t(valueLen)); }
-	#endif
+			{ return internal::fdwrite(fd, bufferPtr, valueLen); }
 		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
 			{ return internal::fdseek(fd, offset, whence); }
 		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
