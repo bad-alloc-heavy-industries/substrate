@@ -10,8 +10,8 @@
 #include <cxxabi.h>
 #endif
 
-namespace substrate {
-
+namespace substrate
+{
 /* C++ 14 helpers */
 #if __cplusplus >= 201402L
 	template<bool B, class T = void>
@@ -507,13 +507,17 @@ namespace substrate {
 #else
 		auto demangler = nullptr;
 #endif
-		std::unique_ptr<char, void(*)(void*)> _demangle(demangler, std::free);
-		std::string _type_name((_demangle != nullptr) ? _demangle.get() : typeid(_type_ref).name());
+		std::unique_ptr<char, void(*)(void*)> _demangle{demangler, std::free};
+		std::string _type_name{_demangle ? _demangle.get() : typeid(_type_ref).name()};
 
-		if (std::is_const<_type_ref>::value) _type_name += " const";
-		if (std::is_volatile<_type_ref>::value) _type_name += " volatile";
-		if (std::is_lvalue_reference<T>::value) _type_name += "&";
-		if (std::is_rvalue_reference<T>::value) _type_name += "&&";
+		if (std::is_const<_type_ref>::value)
+			_type_name += " const";
+		if (std::is_volatile<_type_ref>::value)
+			_type_name += " volatile";
+		if (std::is_lvalue_reference<T>::value)
+			_type_name += "&";
+		if (std::is_rvalue_reference<T>::value)
+			_type_name += "&&";
 
 		return _type_name;
 	}
