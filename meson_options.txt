@@ -1,0 +1,1 @@
+option('valgrind_checks', type: 'boolean', value: true, description: 'Enables the valgrind run targets')
