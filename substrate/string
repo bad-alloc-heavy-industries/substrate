@@ -1,0 +1,25 @@
+#ifndef SUBSTRATE_STRING
+#define SUBSTRATE_STRING
+
+#include <cstring>
+#include <substrate/utility>
+
+namespace substrate
+{
+	inline std::unique_ptr<char []> stringDup(const char *const str) noexcept
+	{
+		if (!str)
+			return nullptr;
+		const size_t length = strlen(str) + 1;
+		auto result = make_unique_nothrow<char []>(length);
+		if (!result)
+			return nullptr;
+		strncpy(result.get(), str, length);
+		return result;
+	}
+
+	inline std::unique_ptr<char []> stringDup(const std::unique_ptr<char []> &str) noexcept
+		{ return stringDup(str.get()); }
+}
+
+#endif

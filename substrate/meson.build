@@ -6,6 +6,7 @@ headers = [
 	'enum_utils',
 	'fixed_vector',
 	'bounded_iterator',
+	'string',
 
 	# Internal Headers
 	'internal/defs',
