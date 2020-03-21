@@ -1,0 +1,98 @@
+name: GitHub Actions
+
+on:
+  push:
+  schedule:
+    - cron: "0 0 1 * *"
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        compiler:
+          - 'clang-5.0'
+          - 'clang-6.0'
+          - 'clang-7'
+          - 'clang-8'
+          - 'clang-9'
+          - 'gcc-5'
+          - 'gcc-6'
+          - 'gcc-7'
+          - 'gcc-8'
+          - 'gcc-9'
+        coverage: [false, true]
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo ::set-env name=PATH::"$HOME/.local/bin:$PATH"
+          echo ::set-env name=GITHUB_WORKSPACE::"`pwd`"
+      - name: Coverage environment
+        env:
+          COVERAGE: ${{ matrix.coverage }}
+        run: |
+          echo "Coverage enabled for build? ${{ matrix.coverage }}"
+          echo ::set-env name=COVERAGE::$([ $COVERAGE == "true" ] && echo -n 1 || echo -n 0)
+      - name: Setup GCC
+        if: startsWith(matrix.compiler, 'gcc')
+        shell: bash
+        run: |
+          CXX=${CC/#gcc/g++}
+          sudo apt-add-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install $CC $CXX
+          echo ::set-env name=CC::$CC
+          echo ::set-env name=CXX::$CXX
+          [ $COVERAGE -ne 0 ] && echo ::set-env name=GCOV::${CC/#gcc/gcov} || true
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Setup Clang
+        if: startsWith(matrix.compiler, 'clang')
+        shell: bash
+        run: |
+          sudo apt-add-repository "deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic${CC/#clang/} main"
+          sudo apt-get update
+          CXX=${CC/#clang/clang++}
+          sudo apt-get install $CC $CXX
+          echo ::set-env name=CC::$CC
+          echo ::set-env name=CXX::$CXX
+          [ $COVERAGE -ne 0 ] && echo ::set-env name=GCOV::"/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" || true
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+          sudo pip3 install --upgrade pip setuptools wheel
+          pip3 install --user meson
+          unzip ninja-linux.zip -d ~/.local/bin
+          rm ninja-linux.zip
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC --version
+          $CXX --version
+          [ $COVERAGE -ne 0 ] && $GCOV --version || true
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }}
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build  install
+      - name: Codecov
+        if: success() && matrix.coverage
+        run: bash <(curl -s https://codecov.io/bash) -x "$GCOV";
