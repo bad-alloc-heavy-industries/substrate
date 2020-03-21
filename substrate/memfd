@@ -29,6 +29,13 @@ namespace substrate
 		int32_t fd;
 		mutable bool eof;
 
+		template<typename T, typename U = T> inline T exchange(T &obj, U &&newVal)
+		{
+			T oldVal = std::move(obj);
+			obj = std::forward<U>(newVal);
+			return oldVal;
+		}
+
 	public:
 		constexpr memfd_t() noexcept : fd{-1}, eof{false} { }
 		constexpr memfd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
