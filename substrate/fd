@@ -26,9 +26,9 @@ namespace substrate
 		using stat_t = struct stat;
 		using ::fstat;
 
-		ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
+		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return read(fd, bufferPtr, bufferLen); }
-		ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
+		inline ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return write(fd, bufferPtr, bufferLen); }
 		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
 			{ return lseek(fd, offset, whence); }
@@ -40,9 +40,9 @@ namespace substrate
 		using ssize_t = typename std::make_signed<std::size_t>::type;
 		using stat_t = struct _stat64;
 
-		ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
+		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }
-		ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
+		inline ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return write(fd, bufferPtr, uint32_t(bufferLen)); }
 		inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
 		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
