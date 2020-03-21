@@ -27,7 +27,7 @@ template<typename T, typename value_t = typename typeOfVector<T>::type>
 template<typename T> void testIterEqual(T &vec)
 	{ REQUIRE(vec.begin() == vec.end()); }
 template<typename T> void testIterNotEqual(T &vec)
-	{ REQUIRE(vec.begin() != vec.end()); }
+	{ REQUIRE_FALSE(vec.begin() == vec.end()); }
 
 TEST_CASE("fixed vector traits", "[fixedVector_t]")
 {
