@@ -19,3 +19,4 @@ namespace substrate
 }
 
 #endif /* SUBSTRATE_UNITS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
