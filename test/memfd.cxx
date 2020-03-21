@@ -51,6 +51,12 @@ TEST_CASE("memfd_t write", "[memfd_t]")
 	REQUIRE(file.writeBE(u64));
 }
 
+TEST_CASE("memfd_t seek", "[memfd_t]")
+{
+	REQUIRE(file.head());
+	REQUIRE(file.tail());
+}
+
 template<typename T> void read(memfd_t<4096> &file, const T &expected)
 {
 	T result{};

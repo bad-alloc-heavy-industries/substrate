@@ -63,6 +63,13 @@ TEST_CASE("fd_t write", "[fd_t]")
 	REQUIRE(file.writeBE(i64));
 }
 
+TEST_CASE("fd_t seek", "[fd_t]")
+{
+	fd_t file{"fd.test", O_RDONLY};
+	REQUIRE(file.head());
+	REQUIRE(file.tail());
+}
+
 template<typename T> void read(const fd_t &file, const T &expected)
 {
 	T result{};

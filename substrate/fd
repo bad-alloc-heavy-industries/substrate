@@ -115,6 +115,10 @@ namespace substrate
 		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
 			{ return internal::fdseek(fd, offset, whence); }
 		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
+
+		bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
+		bool tail() const noexcept WARN_UNUSED { return seek(length(), SEEK_SET) == length(); }
+
 		fd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
 
 		internal::stat_t stat() const noexcept WARN_UNUSED

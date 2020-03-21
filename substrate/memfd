@@ -86,6 +86,11 @@ namespace substrate
 		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
 			{ return ::lseek(fd, offset, whence); }
 		off_t tell() const noexcept WARN_UNUSED { return ::lseek(fd, 0, SEEK_CUR); }
+
+		bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
+		bool tail() const noexcept WARN_UNUSED { return seek(length(), SEEK_SET) == length(); }
+
+
 		memfd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
 
 		int flags() const noexcept WARN_UNUSED { return ::fcntl(fd, F_GETFL); }
