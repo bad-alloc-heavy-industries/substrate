@@ -2,6 +2,8 @@ name: GitHub Actions
 
 on:
   push:
+    branches-ignore:
+      - 'coverityScan'
   schedule:
     - cron: "0 0 1 * *"
 
