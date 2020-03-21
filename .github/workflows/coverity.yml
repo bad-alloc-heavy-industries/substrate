@@ -18,7 +18,7 @@ jobs:
         run: |
           echo ::set-env name=PATH::"$HOME/.local/bin:$PATH"
           echo ::set-env name=GITHUB_WORKSPACE::"`pwd`"
-          echo ::set-env name=COVERITY_PROJECT_NAME::bad-alloc-heavy-industries/substrate
+          echo ::set-env name=COVERITY_PROJECT_NAME::substrate
       - name: Setup GCC
         shell: bash
         run: |
