@@ -51,13 +51,13 @@ if get_option('valgrind_checks')
 			'--tool=memcheck',
 			common_args,
 			'--xml=yes',
-			'--xml-file=@0@/sns-test.%p.err.xml'.format(meson.build_root()),
+			'--xml-file=@0@/@1@.%p.err.xml'.format(meson.build_root(), meson.project_name()),
 			'--leak-check=full',
 			'--show-leak-kinds=all',
 			'--leak-resolution=high',
 			'--leak-check-heuristics=all',
 			'--xtree-leak=yes',
-			'--xtree-leak-file=@0@/sns-test.%p.kcg'.format(meson.build_root()),
+			'--xtree-leak-file=@0@/@1@.%p.kcg'.format(meson.build_root(), meson.project_name()),
 			'--undef-value-errors=yes',
 			'--track-origins=yes',
 			'--expensive-definedness-checks=yes',
@@ -80,7 +80,7 @@ if get_option('valgrind_checks')
 			'--branch-sim=yes',
 			'--simulate-wb=yes',
 			'--cacheuse=yes',
-			'--callgrind-out-file=@0@/sns-test.%p.cg'.format(meson.build_root()),
+			'--callgrind-out-file=@0@/@1@.%p.cg'.format(meson.build_root(), meson.project_name()),
 			tests
 		],
 		depends: tests
@@ -94,7 +94,7 @@ if get_option('valgrind_checks')
 			'--heap=yes',
 			'--stacks=yes',
 			'--depth=50',
-			'--massif-out-file=@0@/sns-test.%p.mf'.format(meson.build_root()),
+			'--massif-out-file=@0@/@1@.%p.mf'.format(meson.build_root(), meson.project_name()),
 			tests
 		],
 		depends: tests
