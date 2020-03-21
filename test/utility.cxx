@@ -977,6 +977,15 @@ TEST_CASE( "[C++ 14] enable_if_t helper", "[utility]")
 using substrate::underlying_type_t;
 TEST_CASE( "[C++ 14] underlying_type_t helper", "[utility]")
 {
+	enum A : int {};
+	enum B : long {};
+	enum C : unsigned short{};
+	enum D {};
+
+	REQUIRE(std::is_same<int, underlying_type_t<A>>::value);
+	REQUIRE(std::is_same<long, underlying_type_t<B>>::value);
+	REQUIRE(std::is_same<unsigned short, underlying_type_t<C>>::value);
+	REQUIRE(std::is_same<unsigned int, underlying_type_t<D>>::value);
 
 }
 
