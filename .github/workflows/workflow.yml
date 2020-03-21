@@ -93,3 +93,6 @@ jobs:
         run: ninja -C build test
       - name: Install
         run: ninja -C build  install
+      - name: Codecov
+        if: success() && matrix.coverage
+        run: bash <(curl -s https://codecov.io/bash) -x "$GCOV";
