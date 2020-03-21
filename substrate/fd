@@ -3,10 +3,10 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <type_traits>
 #ifndef _WINDOWS
 #include <unistd.h>
 #else
-#include <type_traits>
 #include <io.h>
 #endif
 #include <sys/types.h>
@@ -227,6 +227,28 @@ namespace substrate
 			return write(data);
 		}
 
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+			bool readLE(T &value) const noexcept
+		{
+			typename std::make_unsigned<T>::type data{};
+			const auto result = readLE(data);
+			value = static_cast<T>(data);
+			return result;
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+			bool writeLE(const T value) const noexcept
+		{
+			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
+			return writeLE(data);
+		}
+
 		bool readBE(uint16_t &value) const noexcept WARN_UNUSED
 		{
 			std::array<uint8_t, 2> data{};
@@ -291,6 +313,28 @@ namespace substrate
 				uint8_t(value)
 			};
 			return write(data);
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+			bool readBE(T &value) const noexcept
+		{
+			typename std::make_unsigned<T>::type data{};
+			const auto result = readBE(data);
+			value = static_cast<T>(data);
+			return result;
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+			bool writeBE(const T value) const noexcept
+		{
+			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
+			return writeBE(data);
 		}
 
 		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
