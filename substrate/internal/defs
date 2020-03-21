@@ -1,6 +1,16 @@
 #ifndef SUBSTRATE_INTERNAL_DEFS
 #define SUBSTRATE_INTERNAL_DEFS
 
+#if !defined(__has_cpp_attribute)
+#define __has_cpp_attribute(x) 0
+#endif
+
+#if __has_cpp_attribute(nodiscard)
+#define NO_DISCARD [[nodiscard]]
+#else
+#define NO_DISCARD
+#endif
+
 #ifdef __GNUC__
 #define ALIGN(X)        __attribute__ ((aligned (X)))
 #define WARN_UNUSED		__attribute__((warn_unused_result))
@@ -10,3 +20,4 @@
 #endif
 
 #endif /* SUBSTRATE_INTERNAL_DEFS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
