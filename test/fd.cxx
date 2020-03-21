@@ -3,9 +3,11 @@
 #include <memory>
 #include <array>
 #include <substrate/fd>
+#include <substrate/utility>
 #include <catch.hpp>
 
 using substrate::fd_t;
+using substrate::make_unique;
 
 constexpr static std::array<char, 4> testArray{'t', 'E', 'S', 't'};
 constexpr static char testChar{'.'};
@@ -41,14 +43,14 @@ TEST_CASE("fd_t bad open", "[fd_t]")
 
 std::unique_ptr<char []> toUnique(const std::string &value)
 {
-	std::unique_ptr<char []> result{new char[value.size()]};
+	auto result{make_unique<char []>(value.size())};
 	memcpy(result.get(), value.data(), value.size());
 	return result;
 }
 
 std::unique_ptr<char> toUnique(const char value)
 {
-	std::unique_ptr<char> result{new char};
+	auto result{make_unique<char>()};
 	*result = value;
 	return result;
 }
@@ -99,7 +101,7 @@ TEST_CASE("fd_t seek", "[fd_t]")
 
 void readUnique(const fd_t &file, const std::string &expected)
 {
-	std::unique_ptr<char []> result{new char[expected.size()]};
+	auto result{make_unique<char []>(expected.size())};
 	REQUIRE(result != nullptr);
 	REQUIRE(file.read(result, expected.size()));
 	REQUIRE(memcmp(result.get(), expected.data(), expected.size()) == 0);
@@ -108,7 +110,7 @@ void readUnique(const fd_t &file, const std::string &expected)
 
 void readUnique(const fd_t &file, const char expected)
 {
-	std::unique_ptr<char> result{new char};
+	auto result{make_unique<char>()};
 	REQUIRE(result != nullptr);
 	REQUIRE(file.read(result));
 	REQUIRE(*result == expected);
