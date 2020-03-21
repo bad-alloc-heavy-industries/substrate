@@ -2179,3 +2179,24 @@ TEST_CASE("C++ typename decoding", "[utility]")
 	REQUIRE(decode_typename<J>() == "int const volatile");
 	REQUIRE(decode_typename<Ju>() == "unsigned int const volatile");
 }
+
+using substrate::shift_nibble;
+TEST_CASE("shift nibble", "[utility]") {
+	uint64_t value{0x000000000000000FLLU};
+
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x00000000000000F0LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x0000000000000F00LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x000000000000F000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x00000000000F0000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x0000000000F00000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x000000000F000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x00000000F0000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x0000000F00000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x000000F000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x00000F0000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x0000F00000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x000F000000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x00F0000000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0x0F00000000000000LLU);
+	REQUIRE((value = shift_nibble<decltype(value)>(value, 1U)) == 0xF000000000000000LLU);
+}
