@@ -67,12 +67,13 @@ namespace substrate
 		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
 		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
 		bool isEOF() const noexcept WARN_UNUSED { return eof; }
+		void invalidate() noexcept { fd = -1; }
+
 		void swap(fd_t &desc) noexcept
 		{
 			std::swap(fd, desc.fd);
 			std::swap(eof, desc.eof);
 		}
-		void invalidate() noexcept { fd = -1; }
 
 		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
 		{
@@ -140,6 +141,8 @@ namespace substrate
 			{ return read(&value, sizeof(T)); }
 		template<typename T> bool write(const T &value) const noexcept
 			{ return write(&value, sizeof(T)); }
+		template<typename T> bool read(std::unique_ptr<T> &value) const noexcept
+			{ return read(value.get(), sizeof(T)); }
 		template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
 			{ return read(value.get(), sizeof(T)); }
 		template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
@@ -235,7 +238,7 @@ namespace substrate
 			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 			std::is_signed<T>::value && sizeof(T) >= 2>::type
 		>
-			bool readLE(T &value) const noexcept
+		bool readLE(T &value) const noexcept
 		{
 			typename std::make_unsigned<T>::type data{};
 			const auto result = readLE(data);
@@ -247,7 +250,7 @@ namespace substrate
 			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 			std::is_signed<T>::value && sizeof(T) >= 2>::type
 		>
-			bool writeLE(const T value) const noexcept
+		bool writeLE(const T value) const noexcept
 		{
 			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
 			return writeLE(data);
@@ -323,7 +326,7 @@ namespace substrate
 			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 			std::is_signed<T>::value && sizeof(T) >= 2>::type
 		>
-			bool readBE(T &value) const noexcept
+		bool readBE(T &value) const noexcept
 		{
 			typename std::make_unsigned<T>::type data{};
 			const auto result = readBE(data);
@@ -335,7 +338,7 @@ namespace substrate
 			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 			std::is_signed<T>::value && sizeof(T) >= 2>::type
 		>
-			bool writeBE(const T value) const noexcept
+		bool writeBE(const T value) const noexcept
 		{
 			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
 			return writeBE(data);
