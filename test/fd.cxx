@@ -85,8 +85,16 @@ TEST_CASE("fd_t write", "[fd_t]")
 TEST_CASE("fd_t seek", "[fd_t]")
 {
 	fd_t file{"fd.test", O_RDONLY};
-	REQUIRE(file.head());
+	REQUIRE(file.valid());
+	REQUIRE(file.tell() == 0);
+	const off_t length = file.length();
+	REQUIRE(length == 78);
 	REQUIRE(file.tail());
+	REQUIRE(file.tell() == length);
+	REQUIRE(file.seek(-(length / 2), SEEK_CUR) == length / 2);
+	REQUIRE(file.seek(0, SEEK_END) == length);
+	REQUIRE(file.head());
+	REQUIRE_FALSE(file.isEOF());
 }
 
 void readUnique(const fd_t &file, const std::string &expected)
