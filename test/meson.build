@@ -2,6 +2,12 @@ testSrcs = [
 	'test.cxx', 'fd.cxx'
 ]
 
+if target_machine.system() == 'linux'
+	testSrcs += [
+		'memfd.cxx'
+	]
+endif
+
 tests = executable(
 	'tests',
 	testSrcs,
