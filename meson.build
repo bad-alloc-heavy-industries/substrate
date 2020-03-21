@@ -2,7 +2,8 @@ project(
 	'substrate',
 	'cpp',
 	default_options: [
-		'cpp_std=c++11'
+		'cpp_std=c++11',
+		'warning_level=3'
 	],
 	version: '0.0.1'
 )
