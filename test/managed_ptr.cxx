@@ -53,10 +53,7 @@ TEST_CASE("managedPtr_t<T>", "[managedPtr_t]")
 		REQUIRE(elided.get<testType_t>() == &ref);
 	}());
 
-	REQUIRE_NOTHROW([]()
-	{
-		auto value = make_managed<char>('B');
-		REQUIRE(value.valid());
-		REQUIRE(*value == 'B');
-	}());
+	auto value = make_managed_nothrow<char>('B');
+	REQUIRE(value.valid());
+	REQUIRE(*value == 'B');
 }
