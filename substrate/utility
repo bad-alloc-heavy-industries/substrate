@@ -544,7 +544,7 @@ namespace substrate
 		make_unique(const size_t num)
 	{
 		using type_t = remove_const_t<remove_extent_t<T>>;
-		return std::unique_ptr<T>{new type_t[num]{}};
+		return std::unique_ptr<T>{new type_t[num]{{}}};
 	}
 
 	template<typename T, typename... args_t> inline typename makeUnique_t<T>::invalidType
@@ -561,7 +561,7 @@ namespace substrate
 		make_unique_nothrow(const size_t num) noexcept
 	{
 		using type_t = remove_const_t<remove_extent_t<T>>;
-		return std::unique_ptr<T>{new (std::nothrow) type_t[num]{}};
+		return std::unique_ptr<T>{new (std::nothrow) type_t[num]{{}}};
 	}
 
 	template<typename T, typename... Args> inline typename makeUnique_t<T>::invalidType
