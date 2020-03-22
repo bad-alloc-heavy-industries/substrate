@@ -530,14 +530,14 @@ namespace substrate
 	template<typename T, typename... args_t> inline typename makeUnique_t<T>::uniqueType
 		make_unique(args_t &&...args)
 	{
-		using type_t = typename std::remove_const<T>::type;
+		using type_t = remove_const_t<T>;
 		return std::unique_ptr<T>{new type_t{std::forward<args_t>(args)...}};
 	}
 
 	template<typename T> inline typename makeUnique_t<T>::arrayType
 		make_unique(const size_t num)
 	{
-		using type_t = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+		using type_t = remove_const_t<remove_extent_t<T>>;
 		return std::unique_ptr<T>{new type_t[num]{}};
 	}
 
@@ -547,14 +547,14 @@ namespace substrate
 	template<typename T, typename... Args> inline typename makeUnique_t<T>::uniqueType
 		make_unique_nothrow(Args &&...args) noexcept(noexcept(T{std::forward<Args>(args)...}))
 	{
-		using type_t = typename std::remove_const<T>::type;
+		using type_t = remove_const_t<T>;
 		return std::unique_ptr<T>{new (std::nothrow) type_t{std::forward<Args>(args)...}};
 	}
 
 	template<typename T> inline typename makeUnique_t<T>::arrayType
 		make_unique_nothrow(const size_t num) noexcept
 	{
-		using type_t = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+		using type_t = remove_const_t<remove_extent_t<T>>;
 		return std::unique_ptr<T>{new (std::nothrow) type_t[num]{}};
 	}
 
