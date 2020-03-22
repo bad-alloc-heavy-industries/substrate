@@ -43,14 +43,14 @@ TEST_CASE("fd_t bad open", "[fd_t]")
 	REQUIRE_FALSE(file.isEOF());
 }
 
-std::unique_ptr<char []> toUnique(const std::string &value)
+static std::unique_ptr<char []> toUnique(const std::string &value)
 {
 	auto result{make_unique<char []>(value.size())};
 	memcpy(result.get(), value.data(), value.size());
 	return result;
 }
 
-std::unique_ptr<char> toUnique(const char value)
+static std::unique_ptr<char> toUnique(const char value)
 {
 	auto result{make_unique<char>()};
 	*result = value;
@@ -101,7 +101,7 @@ TEST_CASE("fd_t seek", "[fd_t]")
 	REQUIRE_FALSE(file.isEOF());
 }
 
-void readUnique(const fd_t &file, const std::string &expected)
+static void readUnique(const fd_t &file, const std::string &expected)
 {
 	auto result{make_unique<char []>(expected.size())};
 	REQUIRE(result != nullptr);
@@ -110,7 +110,7 @@ void readUnique(const fd_t &file, const std::string &expected)
 	REQUIRE_FALSE(file.isEOF());
 }
 
-void readUnique(const fd_t &file, const char expected)
+static void readUnique(const fd_t &file, const char expected)
 {
 	auto result{make_unique<char>()};
 	REQUIRE(result != nullptr);
@@ -119,7 +119,7 @@ void readUnique(const fd_t &file, const char expected)
 	REQUIRE_FALSE(file.isEOF());
 }
 
-template<typename T> void read(const fd_t &file, const T &expected)
+template<typename T> static void read(const fd_t &file, const T &expected)
 {
 	T result{};
 	REQUIRE(file.read(result));
@@ -127,7 +127,7 @@ template<typename T> void read(const fd_t &file, const T &expected)
 	REQUIRE_FALSE(file.isEOF());
 }
 
-template<typename T> void readLE(const fd_t &file, const T expected)
+template<typename T> static void readLE(const fd_t &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readLE(result));
@@ -135,7 +135,7 @@ template<typename T> void readLE(const fd_t &file, const T expected)
 	REQUIRE_FALSE(file.isEOF());
 }
 
-template<typename T> void readBE(const fd_t &file, const T expected)
+template<typename T> static void readBE(const fd_t &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readBE(result));

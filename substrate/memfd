@@ -126,6 +126,8 @@ namespace substrate
 			{ return read(&value, sizeof(T)); }
 		template<typename T> bool write(const T &value) const noexcept
 			{ return write(&value, sizeof(T)); }
+		template<typename T> bool read(std::unique_ptr<T> &value) const noexcept
+			{ return read(value.get(), sizeof(T)); }
 		template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
 			{ return read(value.get(), sizeof(T)); }
 		template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept

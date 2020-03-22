@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <array>
 #include <substrate/memfd>
+#include <substrate/utility>
 #include <catch.hpp>
 
 using substrate::memfd_t;
+using substrate::make_unique;
 
 constexpr static std::array<char, 4> testArray{'t', 'E', 'S', 't'};
 constexpr static char testChar{'.'};
@@ -31,8 +34,22 @@ TEST_CASE("memfd_t bad fd", "[memfd_t]")
 
 	REQUIRE(bad_file.read(nullptr, 0, nullptr) == -1);
 	REQUIRE(bad_file.write(nullptr, 0, nullptr) == -1);
+	REQUIRE_FALSE(bad_file.tail());
 }
 
+static std::unique_ptr<char []> toUnique(const std::string &value)
+{
+	auto result{make_unique<char []>(value.size())};
+	memcpy(result.get(), value.data(), value.size());
+	return result;
+}
+
+static std::unique_ptr<char> toUnique(const char value)
+{
+	auto result{make_unique<char>()};
+	*result = value;
+	return result;
+}
 
 TEST_CASE("memfd_t write", "[memfd_t]")
 {
@@ -42,6 +59,10 @@ TEST_CASE("memfd_t write", "[memfd_t]")
 
 	REQUIRE(file.write(testArray));
 	REQUIRE(file.write(testChar));
+	auto arrPtr = toUnique(testString);
+	REQUIRE(file.write(arrPtr, testString.size()));
+	auto objPtr = toUnique(testChar);
+	REQUIRE(file.write(objPtr));
 	REQUIRE(file.write(u8));
 	REQUIRE(file.write(i8));
 	REQUIRE(file.writeLE(u16));
@@ -58,21 +79,37 @@ TEST_CASE("memfd_t seek", "[memfd_t]")
 	REQUIRE(file.tail());
 }
 
-template<typename T> void read(memfd_t<4096> &file, const T &expected)
+static void readUnique(const memfd_t<4096> &file, const std::string &expected)
+{
+	auto result{make_unique<char []>(expected.size())};
+	REQUIRE(result != nullptr);
+	REQUIRE(file.read(result, expected.size()));
+	REQUIRE(memcmp(result.get(), expected.data(), expected.size()) == 0);
+}
+
+static void readUnique(const memfd_t<4096> &file, const char expected)
+{
+	auto result{make_unique<char>()};
+	REQUIRE(result != nullptr);
+	REQUIRE(file.read(result));
+	REQUIRE(*result == expected);
+}
+
+template<typename T> static void read(const memfd_t<4096> &file, const T &expected)
 {
 	T result{};
 	REQUIRE(file.read(result));
 	REQUIRE(result == expected);
 }
 
-template<typename T> void readLE(memfd_t<4096> &file, const T expected)
+template<typename T> static void readLE(const memfd_t<4096> &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readLE(result));
 	REQUIRE(result == expected);
 }
 
-template<typename T> void readBE(memfd_t<4096> &file, const T expected)
+template<typename T> static void readBE(const memfd_t<4096> &file, const T expected)
 {
 	T result{};
 	REQUIRE(file.readBE(result));
@@ -87,7 +124,8 @@ TEST_CASE("memfd_t read", "[memfd_t]")
 	REQUIRE(file.seek(0, SEEK_SET) == 0);
 	read(file, testArray);
 	read(file, testChar);
-	//read(file, testString);
+	readUnique(file, testString);
+	readUnique(file, testChar);
 	read(file, u8);
 	read(file, i8);
 	readLE(file, u16);
