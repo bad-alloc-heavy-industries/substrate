@@ -816,8 +816,8 @@ using substrate::is_abstract_v;
 TEST_CASE( "[C++ 17] is_abstract_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual void bar(); };
-	struct C { virtual void baz() = 0; };
+	struct B { virtual void bar(); virtual ~B() = default; };
+	struct C { virtual void baz() = 0; virtual ~C() = default; };
 	struct D : C {};
 
 	REQUIRE_FALSE(is_abstract_v<A>);
@@ -831,7 +831,7 @@ using substrate::is_polymorphic_v;
 TEST_CASE( "[C++ 17] is_polymorphic_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual void bar(); };
+	struct B { virtual void bar(); virtual ~B() = default; };
 	struct C : B {};
 
 	REQUIRE_FALSE(is_polymorphic_v<A>);
@@ -869,7 +869,7 @@ TEST_CASE( "[C++ 17] is_pod_v helper", "[utility]")
 	private:
 		int baz;
 	};
-	struct C { virtual void qux(); };
+	struct C { virtual void qux(); virtual ~C() = default;  };
 
 	REQUIRE_FALSE(is_pod_v<B>);
 	REQUIRE_FALSE(is_pod_v<C>);
@@ -886,7 +886,7 @@ TEST_CASE( "[C++ 17] is_standard_layout_v helper", "[utility]")
 	private:
 		int baz;
 	};
-	struct C { virtual void qux(); };
+	struct C { virtual void qux(); virtual ~C() = default;  };
 
 	REQUIRE_FALSE(is_standard_layout_v<B>);
 	REQUIRE_FALSE(is_standard_layout_v<C>);
@@ -899,7 +899,7 @@ TEST_CASE( "[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
 	struct A { int foo; };
 	struct B { B(B const&) {} };
-	struct C { virtual void baz(); };
+	struct C { virtual void baz(); virtual ~C() = default; };
 	struct D { int foo; D(D const&) = default; D(int qux) : foo(qux+1) {} };
 
 	REQUIRE_FALSE(is_trivially_copyable_v<B>);
@@ -1765,8 +1765,8 @@ using substrate::is_abstract_v;
 TEST_CASE( "[C++ 17] is_abstract_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual void bar(); };
-	struct C { virtual void baz() = 0; };
+	struct B { virtual void bar(); virtual ~B() = default; };
+	struct C { virtual void baz() = 0; virtual ~C() = default; };
 	struct D : C {};
 
 	REQUIRE_FALSE(is_abstract_v<A>());
@@ -1780,7 +1780,7 @@ using substrate::is_polymorphic_v;
 TEST_CASE( "[C++ 17] is_polymorphic_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual void bar(); };
+	struct B { virtual void bar(); virtual ~B() = default; };
 	struct C : B {};
 
 	REQUIRE_FALSE(is_polymorphic_v<A>());
@@ -1818,7 +1818,7 @@ TEST_CASE( "[C++ 17] is_pod_v helper", "[utility]")
 	private:
 		int baz;
 	};
-	struct C { virtual void qux(); };
+	struct C { virtual void qux(); virtual ~C() = default;  };
 
 	REQUIRE_FALSE(is_pod_v<B>());
 	REQUIRE_FALSE(is_pod_v<C>());
@@ -1835,7 +1835,7 @@ TEST_CASE( "[C++ 17] is_standard_layout_v helper", "[utility]")
 	private:
 		int baz;
 	};
-	struct C { virtual void qux(); };
+	struct C { virtual void qux(); virtual ~C() = default;  };
 
 	REQUIRE_FALSE(is_standard_layout_v<B>());
 	REQUIRE_FALSE(is_standard_layout_v<C>());
@@ -1848,7 +1848,7 @@ TEST_CASE( "[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
 	struct A { int foo; };
 	struct B { B(B const&) {} };
-	struct C { virtual void baz(); };
+	struct C { virtual void baz(); virtual ~C() = default; };
 	struct D { int foo; D(D const&) = default; D(int qux) : foo(qux+1) {} };
 
 	REQUIRE_FALSE(is_trivially_copyable_v<B>());
