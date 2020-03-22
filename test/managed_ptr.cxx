@@ -103,7 +103,9 @@ TEST_CASE("managedPtr_t<T []>", "managedPtr_t")
 		REQUIRE(elided.get<int32_t>() == &ref);
 	}());
 
-	auto value = make_managed_nothrow<char>('B');
+	auto value = make_managed_nothrow<int32_t []>(1);
 	REQUIRE(value.valid());
-	REQUIRE(*value == 'B');
+	REQUIRE_FALSE(value[0]);
+	value[0] = 32768;
+	REQUIRE(*value == 32768);
 }
