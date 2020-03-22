@@ -31,6 +31,7 @@ TEST_CASE("fd_t bad fd", "[fd_t]")
 
 	REQUIRE(file.read(nullptr, 0, nullptr) == -1);
 	REQUIRE(file.write(nullptr, 0, nullptr) == -1);
+	REQUIRE_FALSE(file.tail());
 }
 
 TEST_CASE("fd_t bad open", "[fd_t]")

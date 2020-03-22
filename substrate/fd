@@ -119,9 +119,15 @@ namespace substrate
 		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
 
 		bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
-		bool tail() const noexcept WARN_UNUSED { return seek(length(), SEEK_SET) == length(); }
-
 		fd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
+
+		bool tail() const noexcept WARN_UNUSED
+		{
+			const auto offset = length();
+			if (offset < 0)
+				return false;
+			return seek(offset, SEEK_SET) == offset;
+		}
 
 		internal::stat_t stat() const noexcept WARN_UNUSED
 		{
