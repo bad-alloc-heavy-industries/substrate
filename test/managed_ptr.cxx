@@ -41,5 +41,22 @@ TEST_CASE("managedPtr_t<T>", "[managedPtr_t]")
 		value.swap(invalid);
 		REQUIRE_FALSE(invalid.valid());
 		REQUIRE(value.valid());
+
+		managedPtr_t<void> elided{std::move(value)};
+		REQUIRE_FALSE(bool{value});
+		REQUIRE(bool{elided});
+		REQUIRE(elided);
+		void *const ptr = elided;
+		REQUIRE(elided.get() == ptr);
+		const void *const constPtr = elided;
+		REQUIRE(elided.get() == constPtr);
+		REQUIRE(elided.get<testType_t>() == &ref);
+	}());
+
+	REQUIRE_NOTHROW([]()
+	{
+		auto value = make_managed<char>('B');
+		REQUIRE(value.valid());
+		REQUIRE(*value == 'B');
 	}());
 }
