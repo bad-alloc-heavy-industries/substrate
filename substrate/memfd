@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #ifndef SUBSTRATE_MEMFD
 #define SUBSTRATE_MEMFD
 #ifdef _WINDOWS

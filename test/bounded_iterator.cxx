@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #include <array>
 #include <substrate/bounded_iterator>
 #include <catch.hpp>

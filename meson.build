@@ -5,7 +5,8 @@ project(
 		'cpp_std=c++11',
 		'warning_level=3'
 	],
-	version: '0.0.1'
+	version: '0.0.1',
+	license: 'BSD-3-Clause'
 )
 
 cxx = meson.get_compiler('cpp')

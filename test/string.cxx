@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #include <substrate/string>
 #include <catch.hpp>
 

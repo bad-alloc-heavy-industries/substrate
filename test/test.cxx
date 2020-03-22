@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #ifdef _WINDOWS
 #include <cstdlib>
 #include <crtdbg.h>
