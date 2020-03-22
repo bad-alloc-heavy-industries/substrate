@@ -51,8 +51,8 @@ namespace substrate
 			std::swap(deleteFunc, p.deleteFunc);
 		}
 
-		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value && std::is_base_of<T, U>::value>::type>
-			void swap(managedPtr_t<U> &p) noexcept
+		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value &&
+			std::is_base_of<T, U>::value>::type> void swap(managedPtr_t<U> &p) noexcept
 		{
 			if (deleteFunc)
 				deleteFunc(ptr);
@@ -120,6 +120,9 @@ namespace substrate
 		managedPtr_t &operator =(const managedPtr_t &) = delete;
 		managedPtr_t &operator =(const std::nullptr_t &) = delete;
 	};
+
+	template<typename T, typename U> inline void swap(managedPtr_t<T> &a, managedPtr_t<U> &b) noexcept
+		{ a.swap(b); }
 
 	template<typename T> struct makeManaged_t { using uniqueType = managedPtr_t<T>; };
 	template<typename T> struct makeManaged_t<T []> { using arrayType = managedPtr_t<T []>; };
