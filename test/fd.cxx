@@ -167,6 +167,12 @@ TEST_CASE("fd_t read", "[fd_t]")
 	readBE(file, i32);
 	readBE(file, u64);
 	readBE(file, i64);
+
+	char junk{};
+	REQUIRE_FALSE(file.read(junk));
+	REQUIRE(file.isEOF());
+	REQUIRE_FALSE(file.read(junk));
+	REQUIRE(file.isEOF());
 }
 
 ANON_TEST_CASE()
