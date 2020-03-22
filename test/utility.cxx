@@ -2216,3 +2216,33 @@ TEST_CASE("shift nibble", "[utility]") {
 	REQUIRE((value2 = shift_nibble<decltype(value2)>(value2, 4U)) == 0xCDEF0123456789ABLLU);
 	REQUIRE((value2 = shift_nibble<decltype(value2)>(value2, 4U)) == 0x0123456789ABCDEFLLU);
 }
+
+using substrate::bswap16;
+using substrate::bswap32;
+using substrate::bswap64;
+TEST_CASE("bswap tests", "[utility]")
+{
+	SECTION("bswap16")
+	{
+		REQUIRE(bswap16(0x3412U) == 0x1234U);
+		REQUIRE(bswap16(0x1234U) == 0x3412U);
+		REQUIRE(bswap16(0x2413U) == 0x1324U);
+		REQUIRE(bswap16(0x2143U) == 0x4321U);
+	}
+
+	SECTION("bswap32")
+	{
+		REQUIRE(bswap32(0x78563412U) == 0x12345678U);
+		REQUIRE(bswap32(0x12345678U) == 0x78563412U);
+		REQUIRE(bswap32(0x34127856U) == 0x56781234U);
+		REQUIRE(bswap32(0x56341278U) == 0x78123456U);
+	}
+
+	SECTION("bswap64")
+	{
+		REQUIRE(bswap64(0xEFCDAB8967452301LLU) == 0x0123456789ABCDEFLLU);
+		REQUIRE(bswap64(0x0123456789ABCDEFLLU) == 0xEFCDAB8967452301LLU);
+		REQUIRE(bswap64(0x89ABCDEF01234567LLU) == 0x67452301EFCDAB89LLU);
+		REQUIRE(bswap64(0xAB8967452301EFCDLLU) == 0xCDEF0123456789ABLLU);
+	}
+}
