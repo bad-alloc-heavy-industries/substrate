@@ -17,7 +17,7 @@ TEST_CASE("managedPtr_t<T>", "[managedPtr_t]")
 	REQUIRE_NOTHROW([]()
 	{
 		auto value = make_managed<testType_t>('A', 4000);
-		REQUIRE(bool{value});
+		REQUIRE(static_cast<bool>(value));
 		REQUIRE(value.valid());
 		REQUIRE((*value).testChar == 'A');
 		REQUIRE(value->testNum == 4000);
@@ -27,7 +27,7 @@ TEST_CASE("managedPtr_t<T>", "[managedPtr_t]")
 		REQUIRE(&ref == value.get());
 
 		managedPtr_t<testType_t> invalid{};
-		REQUIRE_FALSE(bool{invalid});
+		REQUIRE_FALSE(static_cast<bool>(invalid));
 		REQUIRE_FALSE(invalid.valid());
 		REQUIRE_FALSE(invalid.get());
 
@@ -43,8 +43,8 @@ TEST_CASE("managedPtr_t<T>", "[managedPtr_t]")
 		REQUIRE(value.valid());
 
 		managedPtr_t<void> elided{std::move(value)};
-		REQUIRE_FALSE(bool{value});
-		REQUIRE(bool{elided});
+		REQUIRE_FALSE(static_cast<bool>(value));
+		REQUIRE(static_cast<bool>(elided));
 		REQUIRE(elided);
 		void *const ptr = elided;
 		REQUIRE(elided.get() == ptr);
@@ -63,7 +63,7 @@ TEST_CASE("managedPtr_t<T []>", "managedPtr_t")
 	REQUIRE_NOTHROW([]()
 	{
 		auto value = make_managed<int32_t []>(2);
-		REQUIRE(bool{value});
+		REQUIRE(static_cast<bool>(value));
 		REQUIRE(value.valid());
 		REQUIRE_FALSE(value[0]);
 		value[0] = 42;
@@ -77,7 +77,7 @@ TEST_CASE("managedPtr_t<T []>", "managedPtr_t")
 		REQUIRE(&ref == value.get());
 
 		managedPtr_t<int32_t []> invalid{};
-		REQUIRE_FALSE(bool{invalid});
+		REQUIRE_FALSE(static_cast<bool>(invalid));
 		REQUIRE_FALSE(invalid.valid());
 		REQUIRE_FALSE(invalid.get());
 
@@ -93,8 +93,8 @@ TEST_CASE("managedPtr_t<T []>", "managedPtr_t")
 		REQUIRE(value.valid());
 
 		managedPtr_t<void> elided{std::move(value)};
-		REQUIRE_FALSE(bool{value});
-		REQUIRE(bool{elided});
+		REQUIRE_FALSE(static_cast<bool>(value));
+		REQUIRE(static_cast<bool>(elided));
 		REQUIRE(elided);
 		void *const ptr = elided;
 		REQUIRE(elided.get() == ptr);
