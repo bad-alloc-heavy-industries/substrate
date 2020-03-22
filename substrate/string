@@ -21,6 +21,36 @@ namespace substrate
 
 	inline std::unique_ptr<char []> stringDup(const std::unique_ptr<char []> &str) noexcept
 		{ return stringDup(str.get()); }
+
+	inline size_t stringsLength(const char *const part) noexcept { return strlen(part); }
+	template<typename... Args> inline size_t stringsLength(const char *const part, Args &&...args) noexcept
+		{ return strlen(part) + stringsLength(args...); }
+
+	inline std::unique_ptr<char []> stringsConcat(std::unique_ptr<char []> &&dst,
+		const size_t offset, const char *const part) noexcept
+	{
+		if (!dst)
+			return nullptr;
+		strcpy(dst.get() + offset, part);
+		return std::move(dst);
+	}
+
+	template<typename... Args> inline std::unique_ptr<char []>
+		stringsConcat(std::unique_ptr<char []> &&dst, const size_t offset,
+		const char *const part, Args &&...args) noexcept
+	{
+		if (!dst)
+			return nullptr;
+		strcpy(dst.get() + offset, part);
+		return stringsConcat(std::move(dst), offset + strlen(part), args...);
+	}
+
+	template<typename... Args> inline std::unique_ptr<char []>
+		stringConcat(const char *const part, Args &&...args) noexcept
+	{
+		return stringsConcat(make_unique_nothrow<char []>(
+			stringsLength(part, args...) + 1), 0, part, args...);
+	}
 }
 
 #endif /*SUBSTRATE_STRING*/
