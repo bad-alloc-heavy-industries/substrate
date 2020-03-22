@@ -510,8 +510,8 @@ TEST_CASE( "[C++ 17] is_nothrow_copy_assignable_v helper", "[utility]")
 using substrate::is_assignable_v;
 TEST_CASE( "[C++ 17] is_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_assignable_v<C, int>);
@@ -530,8 +530,8 @@ TEST_CASE( "[C++ 17] is_assignable_v helper", "[utility]")
 using substrate::is_trivially_assignable_v;
 TEST_CASE( "[C++ 17] is_trivially_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_trivially_assignable_v<B, int>);
@@ -550,8 +550,8 @@ TEST_CASE( "[C++ 17] is_trivially_assignable_v helper", "[utility]")
 using substrate::is_nothrow_assignable_v;
 TEST_CASE( "[C++ 17] is_nothrow_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_nothrow_assignable_v<B, int>);
@@ -1459,8 +1459,8 @@ TEST_CASE( "[C++ 17] is_nothrow_copy_assignable_v helper", "[utility]")
 using substrate::is_assignable_v;
 TEST_CASE( "[C++ 17] is_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_assignable_v<C, int>());
@@ -1479,8 +1479,8 @@ TEST_CASE( "[C++ 17] is_assignable_v helper", "[utility]")
 using substrate::is_trivially_assignable_v;
 TEST_CASE( "[C++ 17] is_trivially_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_trivially_assignable_v<B, int>());
@@ -1499,8 +1499,8 @@ TEST_CASE( "[C++ 17] is_trivially_assignable_v helper", "[utility]")
 using substrate::is_nothrow_assignable_v;
 TEST_CASE( "[C++ 17] is_nothrow_assignable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { int bar; B(int baz) { if (!baz) throw baz; } };
+	struct A { int foo{}; };
+	struct B { int bar{}; B(int baz) { if (!baz) throw baz; } };
 	struct C { B qux; };
 
 	REQUIRE_FALSE(is_nothrow_assignable_v<B, int>());
@@ -1547,7 +1547,7 @@ TEST_CASE( "[C++ 17] is_trivially_move_constructible_v helper", "[utility]")
 	REQUIRE_FALSE(is_trivially_move_constructible_v<D>());
 	REQUIRE_FALSE(is_trivially_move_constructible_v<E>());
 
-	REQUIRE(is_trivially_move_constructible_v<B>);
+	REQUIRE(is_trivially_move_constructible_v<B>());
 }
 
 using substrate::is_nothrow_move_constructible_v;
@@ -1598,7 +1598,7 @@ TEST_CASE( "[C++ 17] is_trivially_copy_constructible_v helper", "[utility]")
 	REQUIRE_FALSE(is_trivially_copy_constructible_v<D>());
 	REQUIRE_FALSE(is_trivially_copy_constructible_v<E>());
 
-	REQUIRE(is_trivially_copy_constructible_v<B>);
+	REQUIRE(is_trivially_copy_constructible_v<B>());
 }
 
 using substrate::is_nothrow_copy_constructible_v;
@@ -1757,8 +1757,8 @@ TEST_CASE( "[C++ 17] is_signed_v helper", "[utility]")
 	REQUIRE_FALSE(is_signed_v<E>());
 	REQUIRE_FALSE(is_signed_v<unsigned int>());
 
-	REQUIRE(is_signed_v<int>);
-	REQUIRE(is_signed_v<signed int>);
+	REQUIRE(is_signed_v<int>());
+	REQUIRE(is_signed_v<signed int>());
 }
 
 using substrate::is_abstract_v;
