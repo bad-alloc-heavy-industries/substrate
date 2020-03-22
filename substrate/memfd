@@ -99,10 +99,10 @@ namespace substrate
 		bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
 		bool tail() const noexcept WARN_UNUSED
 		{
-			const auto seeked = seek(length(), SEEK_SET);
-			if (seeked < 0)
+			const auto result = seek(length(), SEEK_SET);
+			if (result < 0)
 				return false;
-			return  size_t(seeked) == length();
+			return  size_t(result) == length();
 		}
 
 
