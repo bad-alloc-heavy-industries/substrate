@@ -119,12 +119,7 @@ namespace substrate
 			return {};
 		}
 
-		off_t length() const noexcept WARN_UNUSED
-		{
-			internal::stat_t fileStat{};
-			const int result = internal::fstat(fd, &fileStat);
-			return result ? -1 : fileStat.st_size;
-		}
+		size_t length() const noexcept WARN_UNUSED { return size; };
 
 		template<typename T> bool read(T &value) const noexcept
 			{ return read(&value, sizeof(T)); }
