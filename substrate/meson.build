@@ -7,6 +7,7 @@ headers = [
 	'fixed_vector',
 	'bounded_iterator',
 	'string',
+	'managed_ptr',
 
 	# Internal Headers
 	'internal/defs',

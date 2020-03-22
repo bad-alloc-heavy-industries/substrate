@@ -1,0 +1,164 @@
+#ifndef SUBSTRATE_MANAGED_PTR
+#define SUBSTRATE_MANAGED_PTR
+
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+#include <substrate/utility>
+
+namespace substrate
+{
+	using delete_t = void (*)(void *const);
+
+	template<typename T> typename std::enable_if<!std::is_array<T>::value>::type
+		deletePtr(void *const object) { delete static_cast<T *>(object); }
+	template<typename T> typename std::enable_if<std::is_array<T>::value>::type
+		deletePtr(void *const object) { delete [] static_cast<typename std::decay<T>::type>(object); }
+
+	template<typename T> struct managedPtr_t
+	{
+	private:
+		T *ptr;
+		delete_t deleteFunc;
+		friend struct managedPtr_t<void>;
+		template<typename U> friend struct managedPtr_t;
+
+	public:
+		using pointer = T *;
+		using reference = T &;
+
+		constexpr managedPtr_t() noexcept : ptr{nullptr}, deleteFunc{nullptr} { }
+		managedPtr_t(T *p) noexcept : ptr{p}, deleteFunc{deletePtr<T>} { }
+		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t{} { swap(p); }
+		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value &&
+			std::is_base_of<T, U>::value>::type> managedPtr_t(managedPtr_t<U> &&p) noexcept :
+			managedPtr_t{} { swap(p); }
+		~managedPtr_t() noexcept { if (deleteFunc) deleteFunc(ptr); }
+		managedPtr_t &operator =(managedPtr_t &&p) noexcept { swap(p); return *this; }
+
+		operator T &() const noexcept { return *ptr; }
+		explicit operator T &&() const = delete;
+		T &operator *() const noexcept { return *ptr; }
+		T *operator ->() const noexcept { return ptr; }
+		T *get() noexcept { return ptr; }
+		T *get() const noexcept { return ptr; }
+		bool valid() const noexcept { return ptr; }
+		explicit operator bool() const noexcept { return ptr; }
+
+		void swap(managedPtr_t &p) noexcept
+		{
+			std::swap(ptr, p.ptr);
+			std::swap(deleteFunc, p.deleteFunc);
+		}
+
+		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value && std::is_base_of<T, U>::value>::type>
+			void swap(managedPtr_t<U> &p) noexcept
+		{
+			if (deleteFunc)
+				deleteFunc(ptr);
+			ptr = p.ptr;
+			deleteFunc = p.deleteFunc;
+			p.ptr = nullptr;
+			p.deleteFunc = nullptr;
+		}
+
+		managedPtr_t(const managedPtr_t &) = delete;
+		managedPtr_t &operator =(const managedPtr_t &) = delete;
+	};
+
+	template<> struct managedPtr_t<void> final
+	{
+	private:
+		void *ptr;
+		delete_t deleteFunc;
+
+	public:
+		constexpr managedPtr_t() noexcept : ptr{nullptr}, deleteFunc{nullptr} { }
+		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t{} { swap(p); }
+		template<typename T, typename = typename std::enable_if<!std::is_same<T, void>::value>::type>
+			managedPtr_t(managedPtr_t<T> &&p) noexcept : managedPtr_t{} { swap(p); }
+		~managedPtr_t() noexcept { if (deleteFunc) deleteFunc(ptr); }
+		managedPtr_t &operator =(managedPtr_t &&p) noexcept { swap(p); return *this; }
+		template<typename T> managedPtr_t &operator =(T *obj) noexcept { return *this = managedPtr_t<T>(obj); }
+
+		template<typename T, typename = typename std::enable_if<!std::is_same<T, void>::value>::type>
+			managedPtr_t &operator =(managedPtr_t<T> &&p) noexcept
+		{
+			swap(p);
+			return *this;
+		}
+
+		operator const void *() const noexcept { return ptr; }
+		operator void *() noexcept { return ptr; }
+		void *get() noexcept { return ptr; }
+		template<typename T> T *get() noexcept { return static_cast<T *>(ptr); }
+		void *get() const noexcept { return ptr; }
+		template<typename T> T *get() const noexcept { return static_cast<T *const>(ptr); }
+		bool valid() const noexcept { return ptr; }
+		explicit operator bool() const noexcept { return ptr; }
+
+		void swap(managedPtr_t &p) noexcept
+		{
+			std::swap(ptr, p.ptr);
+			std::swap(deleteFunc, p.deleteFunc);
+		}
+
+		template<typename T, typename = typename std::enable_if<!std::is_same<T, void>::value>::type>
+			void swap(managedPtr_t<T> &p) noexcept
+		{
+			if (deleteFunc)
+				deleteFunc(ptr);
+			ptr = p.ptr;
+			deleteFunc = p.deleteFunc;
+			p.ptr = nullptr;
+			p.deleteFunc = nullptr;
+		}
+
+		managedPtr_t(void *) = delete;
+		managedPtr_t(const managedPtr_t &) = delete;
+		managedPtr_t &operator =(void *) = delete;
+		managedPtr_t &operator =(const managedPtr_t &) = delete;
+		managedPtr_t &operator =(const std::nullptr_t &) = delete;
+	};
+
+	template<typename T> struct makeManaged_t { using uniqueType = managedPtr_t<T>; };
+	template<typename T> struct makeManaged_t<T []> { using arrayType = managedPtr_t<T []>; };
+	template<typename T, size_t N> struct makeManaged_t<T [N]> { struct invalidType { }; };
+
+	template<typename T, typename... Args> inline typename makeManaged_t<T>::uniqueType
+		make_managed(Args &&...args)
+	{
+		using type_t = remove_const_t<T>;
+		return managedPtr_t<T>{new type_t{std::forward<Args>(args)...}};
+	}
+
+	template<typename T> inline typename makeManaged_t<T>::arrayType
+		make_managed(const size_t num)
+	{
+		using type_t = remove_const_t<remove_extent_t<T>>;
+		return managedPtr_t<T>{new type_t[num]{}};
+	}
+
+	template<typename T, typename... Args> inline typename makeManaged_t<T>::invalidType
+		make_managed(Args &&...) noexcept = delete;
+
+	template<typename T, typename... Args> inline typename makeManaged_t<T>::uniqueType
+		make_managed_nothrow(Args &&...args) noexcept(noexcept(T{std::forward<Args>(args)...}))
+	{
+		using type_t = remove_const_t<T>;
+		return managedPtr_t<T>{new (std::nothrow) type_t{std::forward<Args>(args)...}};
+	}
+
+	template<typename T> inline typename makeManaged_t<T>::arrayType
+		make_managed_nothrow(const size_t num) noexcept
+	{
+		using type_t = remove_const_t<remove_extent_t<T>>;
+		return managedPtr_t<T>{new (std::nothrow) type_t[num]{}};
+	}
+
+	template<typename T, typename... Args> inline typename makeManaged_t<T>::invalidType
+		make_managed_nothrow(Args &&...) noexcept = delete;
+}
+
+#endif /*SUBSTRATE_MANAGED_PTR*/
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
