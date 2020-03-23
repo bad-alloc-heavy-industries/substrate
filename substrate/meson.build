@@ -7,9 +7,10 @@ headers = [
 	'fixed_vector',
 	'bounded_iterator',
 	'string',
-	'managed_ptr',
+	'managed_ptr'
+]
 
-	# Internal Headers
+internal_headers = [
 	'internal/defs',
 	'internal/cxx11_compat'
 ]
@@ -17,4 +18,9 @@ headers = [
 install_headers(
 	headers,
 	subdir: 'substrate'
+)
+
+install_headers(
+	internal_headers,
+	subdir: 'substrate/internal'
 )
