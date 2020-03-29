@@ -20,6 +20,7 @@ pkgconfig.generate(
 	subdirs: '.',
 	name: 'substrate',
 	filebase: 'substrate',
+	libraries: [ libSubstrate ],
 	version: meson.project_version(),
 	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 )
