@@ -12,7 +12,6 @@
 #include <vector>
 
 #include <substrate/internal/defs>
-
 #include <substrate/utility>
 
 namespace substrate
