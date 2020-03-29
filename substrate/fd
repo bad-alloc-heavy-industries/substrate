@@ -72,13 +72,6 @@ namespace substrate
 		int32_t fd;
 		mutable bool eof;
 
-		template<typename T, typename U = T> inline T exchange(T &obj, U &&newVal)
-		{
-			T oldVal = std::move(obj);
-			obj = std::forward<U>(newVal);
-			return oldVal;
-		}
-
 	public:
 		constexpr fd_t() noexcept : fd{-1}, eof{false} { }
 		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
@@ -403,7 +396,8 @@ namespace substrate
 		{
 			if (!valid())
 				return {};
-			int32_t file = exchange(fd, -1);
+			const int32_t file = fd;
+			invalidate();
 			return {file, len, prot, flags, map_addr};
 		}
 #endif
