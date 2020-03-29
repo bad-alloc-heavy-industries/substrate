@@ -13,8 +13,7 @@ headers = [
 
 internal_headers = [
 	'internal/defs',
-	'internal/cxx11_compat',
-	'internal/export_control'
+	'internal/cxx11_compat'
 ]
 
 install_headers(
