@@ -63,13 +63,19 @@ namespace substrate
 
 		boundedIterator_t &operator +=(const size_t n) noexcept
 		{
-			(index + n) < max && (index + n) >= index ? index += n : index = max;
+			if (n < (max - index))
+				index += n;
+			else
+				index = max;
 			return *this;
 		}
 
 		boundedIterator_t &operator -=(const size_t n) noexcept
 		{
-			n < index ? index -= n : index = 0;
+			if (n < index)
+				index -= n;
+			else
+				index = 0;
 			return *this;
 		}
 
