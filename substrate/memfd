@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <string>
 
 #include <substrate/internal/defs>
 
@@ -41,10 +42,9 @@ namespace substrate
 		constexpr memfd_t() noexcept : fd{-1}, eof{false} { }
 		constexpr memfd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
 		memfd_t(const char *const file, const int flags) noexcept :
-			fd{::memfd_create(file, flags)}, eof{false}
-			{
-				::ftruncate(fd, size);
-			}
+			fd{::memfd_create(file, flags)}, eof{false} { ::ftruncate(fd, size); }
+		memfd_t(const std::string& file, const int flags) noexcept :
+			fd{::memfd_create(file.c_str(), flags)}, eof{false} { ::ftruncate(fd, size); }
 		memfd_t(memfd_t &&memfd_) noexcept { swap(memfd_); }
 		~memfd_t() noexcept { if (fd != -1) close(fd); }
 

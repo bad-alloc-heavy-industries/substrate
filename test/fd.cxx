@@ -43,6 +43,15 @@ TEST_CASE("fd_t bad open", "[fd_t]")
 	REQUIRE_FALSE(file.isEOF());
 }
 
+TEST_CASE("fd_t std::string open", "[fd_t]")
+{
+	std::string filename{"bad.file"};
+	fd_t file{filename, O_RDONLY};
+	REQUIRE(file == -1);
+	REQUIRE_FALSE(file.valid());
+	REQUIRE_FALSE(file.isEOF());
+}
+
 static std::unique_ptr<char []> toUnique(const std::string &value)
 {
 	auto result{make_unique<char []>(value.size())};

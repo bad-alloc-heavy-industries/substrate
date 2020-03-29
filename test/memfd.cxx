@@ -37,6 +37,16 @@ TEST_CASE("memfd_t bad fd", "[memfd_t]")
 	REQUIRE_FALSE(bad_file.tail());
 }
 
+
+TEST_CASE("memfd_t open string", "[memfd_t]")
+{
+	std::string filename{"testfilename"};
+	memfd_t<4096> str_memfd{filename, O_RDONLY};
+	REQUIRE(str_memfd.valid());
+	REQUIRE_FALSE(str_memfd.isEOF());
+
+}
+
 static std::unique_ptr<char []> toUnique(const std::string &value)
 {
 	auto result{make_unique<char []>(value.size())};
