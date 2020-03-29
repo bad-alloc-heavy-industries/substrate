@@ -6,6 +6,9 @@
 #include <typeinfo>
 #include <memory>
 #include <string>
+#include <limits>
+#include <vector>
+#include <cstdint>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>
@@ -589,6 +592,76 @@ namespace substrate
 		        ((x & 0x0000FF0000000000U) >> 24U) |
 		        ((x & 0x00FF000000000000U) >> 40U) |
 		        ((x & 0xFF00000000000000U) >> 56U));
+	}
+
+	/* LEB128 encoding and decoding */
+	template<typename T>
+	substrate::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, std::vector<uint8_t>>
+	leb128_encode(T num)
+	{
+		using U = typename std::make_unsigned<T>::type;
+		std::vector<uint8_t> enc{};
+		bool more{true};
+		int8_t byte{};
+		while(more)
+		{
+			byte = U(num & 0x7F);
+			num >>= 0x07;
+
+			if ((!num && !U(byte & 0x40)) || (num == -1 && U(byte & 0x40)))
+				more = false;
+			else
+				byte |= 0x80;
+			enc.emplace_back(uint8_t(byte));
+		}
+		return enc;
+	}
+
+	template<typename T>
+	substrate::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value, T>
+	leb128_decode(std::vector<uint8_t>& vec) {
+	    using U = typename std::make_unsigned<T>::type;
+	    T enc{};
+	    size_t shift{};
+	    for(auto& byte : vec) {
+	        enc |= U(byte & 0x7F) << shift;
+	        shift += 7;
+	    }
+	    if (shift < sizeof(T) * 8)
+	    {
+	        --shift;
+	        for (size_t i{1}; i < (sizeof(T) * 8) - shift; ++i)
+	            enc |= (enc & (U(1U) << shift)) << i;
+	    }
+	    return enc;
+	}
+
+	template<typename T>
+	substrate::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, std::vector<uint8_t>>
+	leb128_encode(T num)
+	{
+		std::vector<uint8_t> enc{};
+        do {
+            uint8_t byte{num & 0x7F};
+            num >>= 7;
+            if (num != 0)
+                byte |= 0x80;
+            enc.emplace_back(byte);
+        } while (num != 0);
+        return enc;
+	}
+
+	template<typename T>
+	substrate::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value, T>
+	leb128_decode(std::vector<uint8_t>& vec) {
+	    using U = typename std::make_unsigned<T>::type;
+	    T enc{};
+	    size_t shift{};
+	    for(auto& byte : vec) {
+	        enc |= U(byte & 0x7F) << shift;
+	        shift += 7;
+	    }
+	    return enc;
 	}
 }
 

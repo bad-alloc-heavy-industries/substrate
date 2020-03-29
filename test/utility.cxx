@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstdint>
 #include <string>
+#include <random>
 
 #if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
 #define SUBSTRATE_CXX11_COMPAT
@@ -2244,5 +2245,109 @@ TEST_CASE("bswap tests", "[utility]")
 		REQUIRE(bswap64(0x0123456789ABCDEFLLU) == 0xEFCDAB8967452301LLU);
 		REQUIRE(bswap64(0x89ABCDEF01234567LLU) == 0x67452301EFCDAB89LLU);
 		REQUIRE(bswap64(0xAB8967452301EFCDLLU) == 0xCDEF0123456789ABLLU);
+	}
+}
+
+using substrate::leb128_decode;
+using substrate::leb128_encode;
+TEST_CASE("leb128 tests", "[utility]")
+{
+	std::random_device rand;
+	const size_t check_itr = 8192;
+
+	SECTION("signed leb128 int8_t")
+	{
+		std::uniform_int_distribution<int8_t>   int8Dist{std::numeric_limits<int8_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = int8Dist(rand);
+			auto enc = leb128_encode<int8_t>(value);
+			auto res = leb128_decode<int8_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("signed leb128 int16_t")
+	{
+		std::uniform_int_distribution<int16_t> int16Dist{std::numeric_limits<int16_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = int16Dist(rand);
+			auto enc = leb128_encode<int16_t>(value);
+			auto res = leb128_decode<int16_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("signed leb128 int32_t")
+	{
+		std::uniform_int_distribution<int32_t> int32Dist{std::numeric_limits<int32_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = int32Dist(rand);
+			auto enc = leb128_encode<int32_t>(value);
+			auto res = leb128_decode<int32_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("signed leb128 int64_t")
+	{
+		std::uniform_int_distribution<int64_t> int64Dist{std::numeric_limits<int64_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = int64Dist(rand);
+			auto enc = leb128_encode<int64_t>(value);
+			auto res = leb128_decode<int64_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("unsigned leb128 uint8_t")
+	{
+		std::uniform_int_distribution<uint8_t>   uint8Dist{std::numeric_limits<uint8_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = uint8Dist(rand);
+			auto enc = leb128_encode<uint8_t>(value);
+			auto res = leb128_decode<uint8_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("unsigned leb128 uint16_t")
+	{
+		std::uniform_int_distribution<uint16_t> uint16Dist{std::numeric_limits<uint16_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = uint16Dist(rand);
+			auto enc = leb128_encode<uint16_t>(value);
+			auto res = leb128_decode<uint16_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("unsigned leb128 uint32_t")
+	{
+		std::uniform_int_distribution<uint32_t> uint32Dist{std::numeric_limits<uint32_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = uint32Dist(rand);
+			auto enc = leb128_encode<uint32_t>(value);
+			auto res = leb128_decode<uint32_t>(enc);
+			REQUIRE(value == res);
+		}
+	}
+
+	SECTION("unsigned leb128 uint64_t")
+	{
+		std::uniform_int_distribution<uint64_t> uint64Dist{std::numeric_limits<uint64_t>::min()};
+		for(size_t c{}; c < check_itr; ++c)
+		{
+			auto value = uint64Dist(rand);
+			auto enc = leb128_encode<uint64_t>(value);
+			auto res = leb128_decode<uint64_t>(enc);
+			REQUIRE(value == res);
+		}
 	}
 }
