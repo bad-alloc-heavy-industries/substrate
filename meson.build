@@ -13,6 +13,7 @@ cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 
 subdir('substrate')
+subdir('impl')
 subdir('test')
 
 pkgconfig.generate(

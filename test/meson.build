@@ -16,6 +16,7 @@ tests = executable(
 	include_directories: include_directories(
 		'..', 'catch2/single_include/catch2'
 	),
+	link_with: libSubstrate,
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
 	install: false
@@ -27,10 +28,8 @@ test(
 	workdir: meson.current_build_dir()
 )
 
-
 valgrind = find_program('valgrind', required: false)
 if get_option('valgrind_checks') and valgrind.found()
-
 	common_args = [
 		'--track-fds=yes',
 		'--demangle=yes',
