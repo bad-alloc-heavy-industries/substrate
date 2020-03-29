@@ -3,21 +3,33 @@
 #define SUBSTRATE_INTERNAL_DEFS
 
 #if !defined(__has_cpp_attribute)
-#define __has_cpp_attribute(x) 0
+#	define __has_cpp_attribute(x) 0
 #endif
 
 #if __has_cpp_attribute(nodiscard)
-#define NO_DISCARD [[nodiscard]]
+#	define NO_DISCARD [[nodiscard]]
 #else
-#define NO_DISCARD
+#	define NO_DISCARD
 #endif
 
 #ifdef __GNUC__
-#define ALIGN(X)        __attribute__ ((aligned (X)))
-#define WARN_UNUSED		__attribute__((warn_unused_result))
+#	define ALIGN(X)        __attribute__ ((aligned (X)))
+#	define WARN_UNUSED		__attribute__((warn_unused_result))
 #else
-#define ALIGN(X)
-#define WARN_UNUSED
+#	define ALIGN(X)
+#	define WARN_UNUSED
+#endif
+
+#ifdef _WINDOWS
+#	ifdef SUBSTRATE_BUILD_INTERNAL
+#		define SUBSTRATE_API __declspec(dllexport)
+#	else
+#		define SUBSTRATE_API __declspec(dllimport)
+#	endif
+#	define SUBSTRATE_CLS_API SUBSTRATE_API
+#else
+#	define SUBSTRATE_CLS_API __attribute__ ((visibility("default")))
+#	define SUBSTRATE_API extern SUBSTRATE_CLS_API
 #endif
 
 #endif /* SUBSTRATE_INTERNAL_DEFS */
