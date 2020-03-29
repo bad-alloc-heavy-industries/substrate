@@ -1,0 +1,34 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#pragma once
+#if !defined(SUBSTRATE_INTERNAL_EXPORT_CONTROL)
+#define SUBSTRATE_INTERNAL_EXPORT_CONTROL
+
+#ifdef _WINDOWS
+	#ifdef _LIBSUBSTRATE
+		#define SUBSTRATE_API __declspec(dllexport)
+	#else
+		#define SUBSTRATE_API __declspec(dllimport)
+	#endif
+	#define SUBSTRATE_DEFAULT_VISIBILITY
+	#define SUBSTRATE_CLS_API SUBSTRATE_API
+#else
+	#define SUBSTRATE_DEFAULT_VISIBILITY __attribute__ ((visibility("default")))
+	#define SUBSTRATE_CLS_API SUBSTRATE_DEFAULT_VISIBILITY
+	#define SUBSTRATE_API extern SUBSTRATE_CLS_API
+#endif
+
+#if __cplusplus >= 201402L
+		#define SUBSTRATE_DEPRECATE_R(reson) [[deprecated(reson)]]
+		#define SUBSTRATE_DEPRECATE() [[deprecated]]
+#else
+	#ifdef _WINDOWS
+		#define SUBSTRATE_DEPRECATE_R(reson) __declspec(deprecated(reson))
+		#define SUBSTRATE_DEPRECATE() __declspec(deprecated)
+	#else
+		#define SUBSTRATE_DEPRECATE_R(reson) __attribute__ ((deprecated(reson)))
+		#define SUBSTRATE_DEPRECATE() __attribute__ ((deprecated))
+	#endif
+#endif
+
+#endif /* SUBSTRATE_INTERNAL_EXPORT_CONTROL */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
