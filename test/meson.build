@@ -27,8 +27,8 @@ test(
 )
 
 
-if get_option('valgrind_checks')
-	valgrind = find_program('valgrind', required: true)
+valgrind = find_program('valgrind', required: false)
+if get_option('valgrind_checks') and valgrind.found()
 
 	common_args = [
 		'--track-fds=yes',
