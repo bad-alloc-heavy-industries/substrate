@@ -32,5 +32,18 @@
 #	define SUBSTRATE_API extern SUBSTRATE_CLS_API
 #endif
 
+#if __cplusplus >= 201402L
+#	define SUBSTRATE_DEPRECATE_R(reson) [[deprecated(reson)]]
+#	define SUBSTRATE_DEPRECATE() [[deprecated]]
+#else
+#	ifdef _WINDOWS
+#		define SUBSTRATE_DEPRECATE_R(reson) __declspec(deprecated(reson))
+#		define SUBSTRATE_DEPRECATE() __declspec(deprecated)
+#	else
+#		define SUBSTRATE_DEPRECATE_R(reson) [[gnu::deprecated(reason)]]
+#		define SUBSTRATE_DEPRECATE() __attribute__ ((deprecated))
+#	endif
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
