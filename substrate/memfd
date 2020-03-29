@@ -15,6 +15,9 @@
 #include <string>
 
 #include <substrate/internal/defs>
+#ifdef SUBSTRATE_MANAGED_PTR
+#include <substrate/utility>
+#endif
 
 namespace substrate
 {
@@ -54,13 +57,13 @@ namespace substrate
 
 		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
 		bool isEOF() const noexcept WARN_UNUSED { return eof; }
+		void invalidate() noexcept { fd = -1; }
 
 		void swap(memfd_t &desc)
 		{
 			std::swap(fd, desc.fd);
 			std::swap(eof, desc.eof);
 		}
-		void invalidate() noexcept { fd = -1; }
 
 		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
 		{
@@ -107,7 +110,6 @@ namespace substrate
 			return  size_t(result) == length();
 		}
 
-
 		memfd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
 
 		int flags() const noexcept WARN_UNUSED { return ::fcntl(fd, F_GETFL); }
@@ -141,6 +143,24 @@ namespace substrate
 			{ return read(value.data(), sizeof(T) * N); }
 		template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
 			{ return write(value.data(), sizeof(T) * N); }
+
+#ifdef SUBSTRATE_MANAGED_PTR
+	template<typename T> enable_if_t<!std::is_array<T>::value, bool>
+		read(const managedPtr_t<T> &value) const noexcept { return read(value.get(), sizeof(T)); }
+	template<typename T> enable_if_t<!std::is_array<T>::value, bool>
+		write(const managedPtr_t<T> &value) const noexcept { return write(value.get(), sizeof(T)); }
+	template<typename T> bool read(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
+		{ return read(value.get(), valueLen); }
+	template<typename T> bool write(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
+		{ return write(value.get(), valueLen); }
+#endif
+
+#ifdef SUBSTRATE_FIXED_VECTOR
+	template<typename T> bool read(const fixedVector_t<T> &value) const noexcept
+		{ return read(value.data(), sizeof(T) * value.size()); }
+	template<typename T> bool write(const fixedVector_t<T> &value) const noexcept
+		{ return write(value.data(), sizeof(T) * value.size()); }
+#endif
 
 		template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
 		{
@@ -220,6 +240,28 @@ namespace substrate
 			return write(data);
 		}
 
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+		bool readLE(T &value) const noexcept
+		{
+			typename std::make_unsigned<T>::type data{};
+			const auto result = readLE(data);
+			value = static_cast<T>(data);
+			return result;
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+		bool writeLE(const T value) const noexcept
+		{
+			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
+			return writeLE(data);
+		}
+
 		bool readBE(uint16_t &value) const noexcept WARN_UNUSED
 		{
 			std::array<uint8_t, 2> data{};
@@ -284,6 +326,28 @@ namespace substrate
 				uint8_t(value)
 			};
 			return write(data);
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+		bool readBE(T &value) const noexcept
+		{
+			typename std::make_unsigned<T>::type data{};
+			const auto result = readBE(data);
+			value = static_cast<T>(data);
+			return result;
+		}
+
+		template<typename T, typename = typename std::enable_if<
+			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
+			std::is_signed<T>::value && sizeof(T) >= 2>::type
+		>
+		bool writeBE(const T value) const noexcept
+		{
+			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
+			return writeBE(data);
 		}
 
 		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
