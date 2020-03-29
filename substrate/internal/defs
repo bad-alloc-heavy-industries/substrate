@@ -27,8 +27,10 @@
 #		define SUBSTRATE_API __declspec(dllimport)
 #	endif
 #	define SUBSTRATE_CLS_API SUBSTRATE_API
+#	define SUBSTRATE_CLS_MAYBE_API
 #else
 #	define SUBSTRATE_CLS_API __attribute__ ((visibility("default")))
+#	define SUBSTRATE_CLS_MAYBE_API SUBSTRATE_CLS_API
 #	define SUBSTRATE_API extern SUBSTRATE_CLS_API
 #endif
 

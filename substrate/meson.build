@@ -8,7 +8,8 @@ headers = [
 	'bounded_iterator',
 	'string',
 	'managed_ptr',
-	'socket'
+	'socket',
+	'console'
 ]
 
 internal_headers = [

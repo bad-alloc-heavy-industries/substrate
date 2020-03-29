@@ -1,5 +1,5 @@
 libSubstrateSrcs = [
-	'socket.cxx'
+	'socket.cxx', 'console.cxx'
 ]
 
 deps = []
