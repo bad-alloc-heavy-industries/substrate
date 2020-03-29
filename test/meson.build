@@ -5,7 +5,8 @@ testSrcs = [
 
 if target_machine.system() == 'linux'
 	testSrcs += [
-		'memfd.cxx'
+		'memfd.cxx',
+		'mmap.cxx'
 	]
 endif
 
