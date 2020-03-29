@@ -642,7 +642,7 @@ namespace substrate
 	{
 		std::vector<uint8_t> enc{};
         do {
-            uint8_t byte{num & 0x7F};
+            uint8_t byte = num & 0x7F;
             num >>= 7;
             if (num != 0)
                 byte |= 0x80;
