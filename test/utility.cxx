@@ -159,7 +159,7 @@ struct SU_traits {};
 
 template<class T, class U>
 struct SU_traits<U T::*> {
-    using member_type = U;
+	using member_type = U;
 };
 
 using substrate::is_function_v;
@@ -1108,7 +1108,7 @@ struct SU_traits {};
 
 template<class T, class U>
 struct SU_traits<U T::*> {
-    using member_type = U;
+	using member_type = U;
 };
 
 using substrate::is_function_v;

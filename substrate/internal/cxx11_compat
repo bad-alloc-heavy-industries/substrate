@@ -139,18 +139,21 @@ template<class T, typename V = decltype(std::is_nothrow_default_constructible<T>
 inline constexpr V is_nothrow_default_constructible_v() { return std::is_nothrow_default_constructible<T>::value; }
 
 template<class T, class... Args>
-inline constexpr decltype(std::is_constructible<T, Args...>::value) is_constructible_v() {
-    return std::is_constructible<T, Args...>::value;
+inline constexpr decltype(std::is_constructible<T, Args...>::value) is_constructible_v()
+{
+	return std::is_constructible<T, Args...>::value;
 }
 
 template<class T, class... Args>
-inline constexpr decltype(std::is_trivially_constructible<T, Args...>::value) is_trivially_constructible_v() {
-    return std::is_trivially_constructible<T, Args...>::value;
+inline constexpr decltype(std::is_trivially_constructible<T, Args...>::value) is_trivially_constructible_v()
+{
+	return std::is_trivially_constructible<T, Args...>::value;
 }
 
 template<class T, class... Args>
-inline constexpr decltype(std::is_nothrow_constructible<T, Args...>::value) is_nothrow_constructible_v() {
-    return std::is_nothrow_constructible<T, Args...>::value;
+inline constexpr decltype(std::is_nothrow_constructible<T, Args...>::value) is_nothrow_constructible_v()
+{
+	return std::is_nothrow_constructible<T, Args...>::value;
 }
 
 template<class T, typename V = decltype(std::is_unsigned<T>::value)>

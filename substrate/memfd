@@ -41,7 +41,8 @@ namespace substrate
 		constexpr memfd_t() noexcept : fd{-1}, eof{false} { }
 		constexpr memfd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
 		memfd_t(const char *const file, const int flags) noexcept :
-			fd{::memfd_create(file, flags)}, eof{false} {
+			fd{::memfd_create(file, flags)}, eof{false}
+			{
 				::ftruncate(fd, size);
 			}
 		memfd_t(memfd_t &&memfd_) noexcept { swap(memfd_); }
