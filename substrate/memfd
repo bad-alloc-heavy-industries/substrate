@@ -18,6 +18,7 @@
 #ifdef SUBSTRATE_MANAGED_PTR
 #include <substrate/utility>
 #endif
+#include <substrate/mmap>
 
 namespace substrate
 {
@@ -356,6 +357,17 @@ namespace substrate
 			if (currentPos == -1 || currentPos + offset < 0)
 				return false;
 			return seek(offset, SEEK_CUR) == currentPos + offset;
+		}
+
+		mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept WARN_UNUSED
+			{ return map(prot, length(), flags); }
+
+		mmap_t map(const int32_t prot, const off_t len, const int flags, void* map_addr = nullptr) noexcept WARN_UNUSED
+		{
+			if (!valid())
+				return {};
+			int32_t file = exchange(fd, -1);
+			return {file, len, prot, flags, map_addr};
 		}
 
 		memfd_t(const memfd_t &) = delete;

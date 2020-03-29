@@ -22,7 +22,7 @@ namespace substrate {
 		void* _addr;
 
 		mmap_t(const mmap_t &map, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED, void* addr = nullptr) noexcept :
-			_fd(-1), _len(len), _addr(::mmap(addr, len, prot, flags, map._fd, 0)) { if (_addr == MAP_FAILED) _addr = nullptr; }
+			_fd{-1}, _len{len}, _addr{::mmap(addr, len, prot, flags, map._fd, 0)} { if (_addr == MAP_FAILED) _addr = nullptr; }
 
 		template<typename T>
 		T *index(const off_t idx) const
@@ -32,10 +32,10 @@ namespace substrate {
 			throw std::out_of_range("mmap_t index out of range");
 		}
 	public:
-		constexpr mmap_t() noexcept : _fd(-1), _addr(nullptr), _len(0) { }
+		constexpr mmap_t() noexcept : _fd{-1}, _len{0}, _addr{nullptr} { }
 		mmap_t(const int32_t fd, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED, void* addr = nullptr) noexcept :
-			_fd(fd), _len(len), _addr(::mmap(addr, len, prot, flags, fd, 0)) { if (_addr == MAP_FAILED) _addr = nullptr; }
-		mmap_t(mmap_t &&map) noexcept : mmap_t() { swap(map); }
+			_fd{fd}, _len{len}, _addr{::mmap(addr, len, prot, flags, fd, 0)} { if (_addr == MAP_FAILED) _addr = nullptr; }
+		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
 		~mmap_t() noexcept { if (_fd != -1 && _addr) ::close(_fd); ::munmap(_addr, _len); }
 		void operator =(mmap_t &&map) noexcept { swap(map); }
 
