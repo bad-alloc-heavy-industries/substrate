@@ -7,7 +7,8 @@ headers = [
 	'fixed_vector',
 	'bounded_iterator',
 	'string',
-	'managed_ptr'
+	'managed_ptr',
+	'socket'
 ]
 
 internal_headers = [

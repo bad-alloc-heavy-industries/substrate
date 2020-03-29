@@ -1,0 +1,76 @@
+#ifndef SUBSTRATE_SOCKET
+#define SUBSTRATE_SOCKET
+
+#ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
+#include <ws2tcpip.h>
+#undef WIN32_LEAN_AND_MEAN
+#include <type_traits>
+
+using ssize_t = typename std::make_signed<size_t>::type;
+#endif
+
+#include <substrate/internal/defs>
+
+struct sockaddr;
+struct sockaddr_storage;
+
+namespace substrate
+{
+#ifndef _MSC_VER
+	using socklen_t = unsigned int;
+	using sockType_t = int32_t;
+#else
+	using sockType_t = SOCKET;
+#endif
+
+	struct socket_t final
+	{
+	private:
+		sockType_t socket;
+
+		bool bind(const void *const addr, const size_t len) const noexcept;
+		bool connect(const void *const addr, const size_t len) const noexcept;
+
+	public:
+		constexpr socket_t() noexcept : socket{-1} { }
+		constexpr socket_t(const int32_t s) noexcept : socket{s} { }
+		SUBSTRATE_CLS_API socket_t(const int family, const int type, const int protocol = 0) noexcept;
+		socket_t(const socket_t &) = delete;
+		socket_t(socket_t &&s) noexcept : socket_t{} { swap(s); }
+		SUBSTRATE_CLS_API ~socket_t() noexcept;
+
+		socket_t &operator =(const socket_t &) = delete;
+		void operator =(socket_t &&s) noexcept { swap(s); }
+		operator int32_t() const noexcept { return socket; }
+		bool operator ==(const int32_t s) const noexcept { return socket == s; }
+		bool operator !=(const int32_t s) const noexcept { return socket != s; }
+		void swap(socket_t &s) noexcept { std::swap(socket, s.socket); }
+		bool valid() const noexcept { return socket != -1; }
+
+		template<typename T> bool bind(const T &addr) const noexcept
+			{ return bind(static_cast<const void *>(&addr), sizeof(T)); }
+		SUBSTRATE_CLS_API bool bind(const sockaddr_storage &addr) const noexcept;
+		template<typename T> bool connect(const T &addr) const noexcept
+			{ return connect(static_cast<const void *>(&addr), sizeof(T)); }
+		SUBSTRATE_CLS_API bool connect(const sockaddr_storage &addr) const noexcept;
+		SUBSTRATE_CLS_API bool listen(const int32_t queueLength) const noexcept;
+		SUBSTRATE_CLS_API socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
+		SUBSTRATE_CLS_API ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
+		SUBSTRATE_CLS_API ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
+		SUBSTRATE_CLS_API char peek() const noexcept;
+	};
+
+	inline void swap(socket_t &a, socket_t &b) noexcept
+		{ return a.swap(b); }
+
+	enum class socketType_t : uint8_t
+	{
+		unknown,
+		ipv4,
+		ipv6,
+		dontCare
+	};
+}
+
+#endif /*SUBSTRATE_SOCKET*/
