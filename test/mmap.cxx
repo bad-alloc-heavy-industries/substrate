@@ -4,10 +4,6 @@
 
 #include <catch.hpp>
 
-#include <iostream>
-#include <cerrno>
-#include <cstring>
-
 using substrate::mmap_t;
 using substrate::memfd_t;
 
