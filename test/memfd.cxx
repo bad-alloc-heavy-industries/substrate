@@ -179,3 +179,4 @@ TEST_CASE("memfd_t read", "[memfd_t]")
 	REQUIRE_FALSE(file.read(junk));
 	REQUIRE(file.isEOF());
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
