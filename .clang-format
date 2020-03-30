@@ -1,5 +1,5 @@
 ---
-AccessModifierOffset: 1
+AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
@@ -19,7 +19,7 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: true
+AlwaysBreakTemplateDeclarations: false
 BinPackArguments: true
 BinPackParameters: true
 BraceWrapping:
@@ -59,18 +59,12 @@ DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: true
 ForEachMacros: null
-IncludeBlocks: Merge
-IncludeCategories:
-- Priority: 2
-  Regex: ^"(llvm|llvm-c|clang|clang-c)/
-- Priority: 3
-  Regex: ^(<|"(gtest|gmock|isl|json)/)
-- Priority: 1
-  Regex: .*
+IncludeBlocks: Preserve
+IncludeCategories: null
 IncludeIsMainRegex: (Test)?$
 IndentCaseLabels: true
 IndentPPDirectives: AfterHash
-IndentWidth: 4
+IndentWidth: 2
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 Language: Cpp
@@ -78,14 +72,14 @@ MacroBlockBegin: ''
 MacroBlockEnd: ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
-PenaltyBreakAssignment: 2
-PenaltyBreakBeforeFirstCallParameter: 19
-PenaltyBreakComment: 300
-PenaltyBreakFirstLessLess: 120
+PenaltyBreakAssignment: 6
+PenaltyBreakBeforeFirstCallParameter: 13
+PenaltyBreakComment: 328
+PenaltyBreakFirstLessLess: 139
 PenaltyBreakString: 1000
-PenaltyBreakTemplateDeclaration: 58
-PenaltyExcessCharacter: 1143178
-PenaltyReturnTypeOnItsOwnLine: 203
+PenaltyBreakTemplateDeclaration: 0
+PenaltyExcessCharacter: 908012
+PenaltyReturnTypeOnItsOwnLine: 272
 PointerAlignment: Right
 ReflowComments: true
 SortIncludes: false
@@ -103,7 +97,7 @@ SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 1
 SpacesInAngles: false
 SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: true
+SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: Cpp11
