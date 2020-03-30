@@ -2,7 +2,7 @@
 #ifndef SUBSTRATE_MEMFD
 #define SUBSTRATE_MEMFD
 #ifdef _WINDOWS
-#error "memfd is a *nix only header"
+#	error "memfd is a *nix only header"
 #endif
 
 #include <cstdint>
@@ -16,7 +16,7 @@
 
 #include <substrate/internal/defs>
 #ifdef SUBSTRATE_MANAGED_PTR
-#include <substrate/utility>
+#	include <substrate/utility>
 #endif
 #include <substrate/mmap>
 

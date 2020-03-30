@@ -2,7 +2,7 @@
 #ifndef SUBSTRATE_MMAP
 #define SUBSTRATE_MMAP
 #ifdef _WINDOWS
-#error "mmap is a *nix only header"
+#	error "mmap is a *nix only header"
 #endif
 
 #include <cstdint>

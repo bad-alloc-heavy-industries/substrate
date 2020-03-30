@@ -4,7 +4,7 @@
 #include <random>
 
 #if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
-#define SUBSTRATE_CXX11_COMPAT
+#	define SUBSTRATE_CXX11_COMPAT
 #endif
 #include <substrate/utility>
 #include <catch.hpp>

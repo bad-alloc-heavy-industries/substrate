@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
 #ifndef _MSC_VER
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
+#	include <sys/socket.h>
+#	include <netdb.h>
+#	include <arpa/inet.h>
+#	include <netinet/in.h>
 #endif
 
 #include <substrate/utility>
 #include <substrate/socket>
 
 #ifndef _MSC_VER
-#include <unistd.h>
+#	include <unistd.h>
 inline int closesocket(const int s) { return close(s); }
 #else
-#include <Winsock2.h>
+#	include <Winsock2.h>
 #endif
 
 using namespace substrate;

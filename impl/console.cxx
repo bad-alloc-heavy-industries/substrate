@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cerrno>
 #ifndef _WINDOWS
-#include <unistd.h>
+#	include <unistd.h>
 #else
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <stringapiset.h>
-#include <fcntl.h>
-#include <io.h>
-#undef WIN32_LEAN_AND_MEAN
-#include <substrate/utility>
+#	define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
+#	include <stringapiset.h>
+#	include <fcntl.h>
+#	include <io.h>
+#	undef WIN32_LEAN_AND_MEAN
+#	include <substrate/utility>
 #endif
 #include <substrate/console>
 
