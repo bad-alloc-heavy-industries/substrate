@@ -1,5 +1,6 @@
-#ifndef CONSOLE__HXX
-#define CONSOLE__HXX
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_CONSOLE
+#define SUBSTRATE_CONSOLE
 
 #include <cstdio>
 #include <cstddef>
@@ -243,4 +244,5 @@ namespace substrate
 	SUBSTRATE_API console_t console;
 }
 
-#endif /*CONSOLE__HXX*/
+#endif /*SUBSTRATE_CONSOLE*/
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

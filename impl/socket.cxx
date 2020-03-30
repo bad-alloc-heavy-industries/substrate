@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
 #ifndef _MSC_VER
 #include <sys/socket.h>
@@ -121,3 +122,4 @@ sockaddr_storage prepare(const socketType_t family, const char *const where, con
 	return service;
 }
 #pragma GCC diagnostic pop
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

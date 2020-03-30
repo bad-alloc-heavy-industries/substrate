@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #include <cerrno>
 #ifndef _WINDOWS
 #include <unistd.h>
@@ -115,3 +116,4 @@ void console_t::_debug() const noexcept
 #else
 #endif
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
