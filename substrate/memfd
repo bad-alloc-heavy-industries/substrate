@@ -367,8 +367,8 @@ namespace substrate
 		memfd_t(const memfd_t &) = delete;
 		memfd_t &operator =(const memfd_t &) = delete;
 	};
-	template<size_t size>
-	inline void swap(memfd_t<size> &a, memfd_t<size> &b) noexcept { a.swap(b); }
+
+	template<size_t size> inline void swap(memfd_t<size> &a, memfd_t<size> &b) noexcept { a.swap(b); }
 }
 
 #endif /* SUBSTRATE_MEMFD */
