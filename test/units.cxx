@@ -15,8 +15,10 @@ using substrate::operator ""_GB;
 using substrate::operator ""_TB;
 using substrate::operator ""_PB;
 
-TEST_CASE( "Units", "[utility]") {
-	SECTION( "IEC Units" ) {
+TEST_CASE("Units", "[utility]")
+{
+	SECTION("IEC Units")
+	{
 		REQUIRE(128_KiB == 131072);
 		REQUIRE(1024_KiB == 1_MiB);
 
@@ -33,7 +35,8 @@ TEST_CASE( "Units", "[utility]") {
 
 	}
 
-	SECTION( "SI Units" ) {
+	SECTION("SI Units")
+	{
 		REQUIRE(128_KB == 128000);
 		REQUIRE(1000_KB == 1_MB);
 
