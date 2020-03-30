@@ -49,3 +49,4 @@ TEST_CASE( "Units", "[utility]") {
 		REQUIRE(76_PB == 76000000000000000);
 	}
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

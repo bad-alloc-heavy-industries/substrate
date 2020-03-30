@@ -58,3 +58,4 @@ TEST_CASE("bounded iterator decrement", "[boundedIterator_t]")
 	REQUIRE(iter == iter - 1);
 	REQUIRE(iter == iter - SIZE_MAX);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

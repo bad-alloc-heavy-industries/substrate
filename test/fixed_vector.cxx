@@ -106,3 +106,4 @@ TEST_CASE("fixed vector swap", "[fixedVector_t]")
 	REQUIRE(vecC.length() == 0);
 	REQUIRE(vecB.data() == dataA);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

@@ -13,3 +13,4 @@ TEST_CASE( "Anonymous map test", "[mmap_t]")
 	mmap_t map{mapfd, static_cast<off_t>(mapfd.length()), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS};
 	REQUIRE(map.valid());
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

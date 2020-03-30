@@ -20,3 +20,4 @@ int main(int argCount, char **argList)
 
 	return Catch::Session().run(argCount, argList);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

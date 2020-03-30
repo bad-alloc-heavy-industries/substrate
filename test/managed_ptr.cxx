@@ -109,3 +109,4 @@ TEST_CASE("managedPtr_t<T []>", "managedPtr_t")
 	value[0] = 32768;
 	REQUIRE(*value == 32768);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

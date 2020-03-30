@@ -53,3 +53,4 @@ TEST_CASE("string concat", "[stringConcat]")
 	REQUIRE(d);
 	REQUIRE(memcmp(d.get(), "Goodbye cruel world", 20) == 0);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

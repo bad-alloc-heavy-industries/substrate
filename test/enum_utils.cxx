@@ -173,3 +173,4 @@ TEST_CASE( "Enum and string mapping", "[enum_utils]")
 	REQUIRE(enum_name(flags_s, Flags::Quux) == std::string{"Quux"});
 	REQUIRE(enum_value(flags_s, "Quux") == Flags::Quux);
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

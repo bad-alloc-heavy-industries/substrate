@@ -2351,3 +2351,4 @@ TEST_CASE("leb128 tests", "[utility]")
 		}
 	}
 }
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
