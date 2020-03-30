@@ -28,8 +28,7 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()} { }
 
-		template<typename T>
-		T *index(const off_t idx) const
+		template<typename T> T *index(const off_t idx) const
 		{
 			if (idx < _len)
 				return reinterpret_cast<T *const>(long(_addr) + idx);
@@ -44,11 +43,16 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()} { }
 		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
-		~mmap_t() noexcept { if (_fd != -1 && _addr) ::close(_fd); ::munmap(_addr, _len); }
 		void operator =(mmap_t &&map) noexcept { swap(map); }
 
-		NO_DISCARD
-		bool valid() const noexcept WARN_UNUSED { return _addr; }
+		~mmap_t() noexcept
+		{
+			if (_fd != -1 && _addr)
+				::close(_fd);
+			::munmap(_addr, _len);
+		}
+
+		NO_DISCARD bool valid() const noexcept WARN_UNUSED { return _addr; }
 
 		void swap(mmap_t &map) noexcept
 		{
