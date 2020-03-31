@@ -61,9 +61,9 @@ ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
 
 char socket_t::peek() const noexcept
 {
-	char buffer;
+	char buffer{};
 	if (::recv(socket, &buffer, 1, MSG_PEEK) != 1)
-		return '\n';
+		return {};
 	return buffer;
 }
 
