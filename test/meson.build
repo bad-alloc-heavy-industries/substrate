@@ -1,6 +1,7 @@
 testSrcs = [
 	'test.cxx', 'fd.cxx', 'units.cxx', 'utility.cxx', 'enum_utils.cxx',
-	'bounded_iterator.cxx', 'fixed_vector.cxx', 'string.cxx', 'managed_ptr.cxx'
+	'bounded_iterator.cxx', 'fixed_vector.cxx', 'string.cxx', 'managed_ptr.cxx',
+	'socket.cxx'
 ]
 
 if target_machine.system() == 'linux'
