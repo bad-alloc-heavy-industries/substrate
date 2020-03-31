@@ -2,6 +2,8 @@
 #ifndef SUBSTRATE_SOCKET
 #define SUBSTRATE_SOCKET
 
+#include <cstdint>
+#include <cstdlib>
 #ifdef _MSC_VER
 #define WIN32_LEAN_AND_MEAN
 #include <ws2tcpip.h>
@@ -10,6 +12,7 @@
 
 using ssize_t = typename std::make_signed<size_t>::type;
 #endif
+#include <utility>
 
 #include <substrate/internal/defs>
 
