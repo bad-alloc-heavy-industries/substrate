@@ -72,6 +72,9 @@ namespace substrate
 		ipv6,
 		dontCare
 	};
+
+	SUBSTRATE_API sockaddr_storage prepare(const socketType_t family, const char *const where,
+		const uint16_t port) noexcept;
 }
 
 #endif /*SUBSTRATE_SOCKET*/

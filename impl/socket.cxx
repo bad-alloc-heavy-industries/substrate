@@ -90,7 +90,8 @@ inline uint16_t toBE(const uint16_t value) noexcept
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-sockaddr_storage prepare(const socketType_t family, const char *const where, const uint16_t port) noexcept
+sockaddr_storage substrate::prepare(const socketType_t family, const char *const where,
+	const uint16_t port) noexcept
 {
 	addrinfo *results = nullptr, hints{};
 	hints.ai_family = typeToFamily(family);
