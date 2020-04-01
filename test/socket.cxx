@@ -53,4 +53,12 @@ TEST_CASE("socket_t bad socket", "[socket_t]")
 	REQUIRE(socket.peek() == 0);
 }
 
+TEST_CASE("socket_t inheriting construction", "[socket_t]")
+{
+	const int32_t socketFD{::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)};
+	REQUIRE(socketFD != -1);
+	socket_t socket{socketFD};
+	REQUIRE(socket.valid());
+}
+
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
