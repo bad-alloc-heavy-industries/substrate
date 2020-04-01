@@ -12,7 +12,7 @@
 
 using substrate::socket_t;
 using substrate::socketType_t;
-using substrate::prepare;
+using substrate::socket::prepare;
 
 template<typename T, typename U> T as(const U &value) noexcept
 {
