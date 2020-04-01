@@ -51,12 +51,16 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 
 TEST_CASE("socket_t bad socket", "[socket_t]")
 {
+	const auto addr = prepare(socketType_t::dontCare, "localhost", 0);
 	socket_t socket{};
 	REQUIRE(socket == -1);
 	REQUIRE_FALSE(socket.valid());
 
 	REQUIRE(socket.read(nullptr, 0) == -1);
 	REQUIRE(socket.write(nullptr, 0) == -1);
+	REQUIRE_FALSE(socket.bind(addr));
+	REQUIRE_FALSE(socket.connect(addr));
+	REQUIRE_FALSE(socket.listen(1));
 	REQUIRE(socket.peek() == 0);
 }
 
