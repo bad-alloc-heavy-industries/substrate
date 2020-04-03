@@ -14,6 +14,7 @@ headers = [
 
 advanced_headers = [
 	'advanced/io',
+	'advanced/fd'
 ]
 
 internal_headers = [

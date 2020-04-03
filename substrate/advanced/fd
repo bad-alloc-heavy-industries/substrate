@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_ADVANCED_FD
+#define SUBSTRATE_ADVANCED_FD
+
+#include <substrate/fd>
+#include <substrate/advanced/io>
+
+namespace substrate
+{
+	namespace advanced
+	{
+		struct fd_t final : io_t
+		{
+		private:
+			substrate::fd_t fd;
+
+		public:
+			constexpr fd_t() noexcept = default;
+			constexpr fd_t(const int32_t fd_) noexcept : fd{fd_} { }
+			fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
+				fd{file, flags, mode} { }
+			fd_t(const std::string& file, const int flags, const mode_t mode = 0) noexcept :
+				fd{file.c_str(), flags, mode} { }
+			fd_t(fd_t &&fd_) noexcept : fd_t{std::move(fd_)} { }
+			~fd() noexcept final = default;
+
+			virtual ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t)
+				const noexcept WARN_UNUSED final { return fd.read(bufferPtr, len, nullptr); }
+			virtual ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t)
+				const noexcept WARN_UNUSED final { return fd.write(bufferPtr, len, nullptr); }
+		};
+	}
+}
+
+#endif /* SUBSTRATE_ADVANCED_FD */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
