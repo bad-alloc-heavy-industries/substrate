@@ -17,6 +17,7 @@ namespace substrate
 		struct readable_t
 		{
 		public:
+			virtual ~readable_t() noexcept = default;
 			virtual ssize_t read(void *const bufferPtr, const size_t len,
 				std::nullptr_t) const noexcept WARN_UNUSED = 0;
 
@@ -148,6 +149,7 @@ namespace substrate
 		struct writeable_t
 		{
 		public:
+			virtual ~writeable_t() noexcept = default;
 			virtual ssize_t write(const void *const bufferPtr, const size_t valueLen,
 				std::nullptr_t) const noexcept WARN_UNUSED = 0;
 

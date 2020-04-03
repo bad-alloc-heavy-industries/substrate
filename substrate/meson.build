@@ -12,6 +12,10 @@ headers = [
 	'console'
 ]
 
+advanced_headers = [
+	'advanced/io',
+]
+
 internal_headers = [
 	'internal/defs',
 	'internal/cxx11_compat'
@@ -20,6 +24,11 @@ internal_headers = [
 install_headers(
 	headers,
 	subdir: 'substrate'
+)
+
+install_headers(
+	advanced_headers,
+	subdir: 'substrate/advanced'
 )
 
 install_headers(
