@@ -22,6 +22,12 @@ template<typename T, typename U> T as(const U &value) noexcept
 	return result;
 }
 
+void assertErrno(int expected)
+{
+	REQUIRE(errno == expected);
+	errno = 0;
+}
+
 TEST_CASE("sockaddr prepare", "[socket_t]")
 {
 	const auto ipv4Addr = prepare(socketType_t::ipv4, "127.0.0.1", 0);
@@ -52,16 +58,24 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 TEST_CASE("socket_t bad socket", "[socket_t]")
 {
 	const auto addr = prepare(socketType_t::dontCare, "localhost", 0);
+	errno = 0;
 	socket_t socket{};
 	REQUIRE(socket == -1);
 	REQUIRE_FALSE(socket.valid());
 
+	assertErrno(0);
 	REQUIRE(socket.read(nullptr, 0) == -1);
+	assertErrno(EBADF);
 	REQUIRE(socket.write(nullptr, 0) == -1);
+	assertErrno(EBADF);
 	REQUIRE_FALSE(socket.bind(addr));
+	assertErrno(EBADF);
 	REQUIRE_FALSE(socket.connect(addr));
+	assertErrno(EBADF);
 	REQUIRE_FALSE(socket.listen(1));
+	assertErrno(EBADF);
 	REQUIRE(socket.peek() == 0);
+	assertErrno(EBADF);
 }
 
 TEST_CASE("socket_t inheriting construction", "[socket_t]")
