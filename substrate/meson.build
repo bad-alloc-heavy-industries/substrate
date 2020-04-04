@@ -9,7 +9,8 @@ headers = [
 	'string',
 	'managed_ptr',
 	'socket',
-	'console'
+	'console',
+	'pty'
 ]
 
 advanced_headers = [
