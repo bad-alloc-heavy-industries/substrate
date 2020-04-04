@@ -16,7 +16,7 @@
 using namespace substrate;
 using charTraits = std::char_traits<char>;
 
-console_t console;
+console_t substrate::console;
 static const std::string errorPrefix = "[ERR]"_s;
 static const std::string infoPrefix = "[INF]"_s;
 static const std::string debugPrefix = "[DBG]"_s;
