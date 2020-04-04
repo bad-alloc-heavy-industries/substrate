@@ -9,13 +9,8 @@ using substrate::pty_t;
 pty_t::pty_t() noexcept : ptyMaster{[]() noexcept -> fd_t
 	{
 		fd_t result = posix_openpt(O_RDWR | O_NOCTTY);
-		if (result.valid())
-		{
-			if (grantpt(result))
-				return {};
-			else if (unlockpt(result))
-				return {};
-		}
+		if (result.valid() && (grantpt(result) || unlockpt(result)))
+			return {};
 		return result;
 	}()},
 	ptySlave{[this]() noexcept -> fd_t
