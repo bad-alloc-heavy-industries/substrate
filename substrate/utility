@@ -633,7 +633,7 @@ namespace substrate
 			enc |= U(byte & 0x7F) << shift;
 			shift += 7;
 		}
-		if (shift < sizeof(T) * 8)
+		if (shift && shift < sizeof(T) * 8)
 		{
 			--shift;
 			for (size_t i{1}; i < (sizeof(T) * 8) - shift; ++i)
