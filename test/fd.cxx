@@ -102,9 +102,12 @@ TEST_CASE("fd_t seek", "[fd_t]")
 	const off_t length = file.length();
 	REQUIRE(length == 78);
 	REQUIRE(file.tail());
+	REQUIRE(file.isEOF());
 	REQUIRE(file.tell() == length);
 	REQUIRE(file.seek(-(length / 2), SEEK_CUR) == length / 2);
+	REQUIRE_FALSE(file.isEOF());
 	REQUIRE(file.seek(0, SEEK_END) == length);
+	REQUIRE(file.isEOF());
 	REQUIRE(file.head());
 	REQUIRE_FALSE(file.isEOF());
 }
