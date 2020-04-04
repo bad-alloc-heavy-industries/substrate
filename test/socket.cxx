@@ -85,5 +85,4 @@ TEST_CASE("socket_t inheriting construction", "[socket_t]")
 	socket_t socket{socketFD};
 	REQUIRE(socket.valid());
 }
-
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
