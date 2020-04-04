@@ -96,29 +96,6 @@ namespace substrate
 			std::swap(_length, desc._length);
 		}
 
-		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
-		{
-			const ssize_t result = read(value, valueLen, nullptr);
-			if (result < 0)
-				return false;
-			resultLen = size_t(result);
-			return resultLen == valueLen;
-		}
-
-		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
-		{
-			size_t resultLen = 0;
-			return read(value, valueLen, resultLen);
-		}
-
-		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
-		{
-			const ssize_t result = write(value, valueLen, nullptr);
-			if (result < 0)
-				return false;
-			return size_t(result) == valueLen;
-		}
-
 		ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
 		{
 			const auto result = internal::fdread(fd, bufferPtr, bufferLen);
@@ -165,6 +142,29 @@ namespace substrate
 			const int result = internal::fstat(fd, &fileStat);
 			_length = result ? -1 : fileStat.st_size;
 			return _length;
+		}
+
+		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
+		{
+			const ssize_t result = read(value, valueLen, nullptr);
+			if (result < 0)
+				return false;
+			resultLen = size_t(result);
+			return resultLen == valueLen;
+		}
+
+		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			size_t resultLen = 0;
+			return read(value, valueLen, resultLen);
+		}
+
+		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			const ssize_t result = write(value, valueLen, nullptr);
+			if (result < 0)
+				return false;
+			return size_t(result) == valueLen;
 		}
 
 		template<typename T> bool read(T &value) const noexcept
