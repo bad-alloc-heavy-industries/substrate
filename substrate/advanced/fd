@@ -21,13 +21,16 @@ namespace substrate
 				fd{file, flags, mode} { }
 			fd_t(const std::string& file, const int flags, const mode_t mode = 0) noexcept :
 				fd{file.c_str(), flags, mode} { }
-			fd_t(fd_t &&fd_) noexcept : fd_t{std::move(fd_)} { }
-			~fd() noexcept final = default;
+			fd_t(fd_t &&fd_) noexcept : fd{std::move(fd_.fd)} { }
+			~fd_t() noexcept final = default;
+			bool valid() const noexcept final WARN_UNUSED { return fd.valid(); }
+			bool isEOF() const noexcept WARN_UNUSED { return fd.isEOF(); }
+			void invalidate() noexcept { fd.invalidate(); }
 
-			virtual ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t)
-				const noexcept WARN_UNUSED final { return fd.read(bufferPtr, len, nullptr); }
-			virtual ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t)
-				const noexcept WARN_UNUSED final { return fd.write(bufferPtr, len, nullptr); }
+			virtual ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+				const noexcept final WARN_UNUSED { return fd.read(bufferPtr, bufferLen, nullptr); }
+			virtual ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+				const noexcept final WARN_UNUSED { return fd.write(bufferPtr, bufferLen, nullptr); }
 		};
 	}
 }
