@@ -71,14 +71,15 @@ namespace substrate
 	private:
 		int32_t fd;
 		mutable bool eof;
+		mutable off_t _length;
 
 	public:
-		constexpr fd_t() noexcept : fd{-1}, eof{false} { }
-		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
+		constexpr fd_t() noexcept : fd{-1}, eof{false}, _length{-1} { }
+		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false}, _length{-1} { }
 		fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(file, flags, mode)}, eof{false} { }
+			fd{::open(file, flags, mode)}, eof{false}, _length{-1} { }
 		fd_t(const std::string& file, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(file.c_str(), flags, mode)}, eof{false} { }
+			fd{::open(file.c_str(), flags, mode)}, eof{false}, _length{-1} { }
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
 		~fd_t() noexcept { if (fd != -1) close(fd); }
 		void operator =(fd_t &&fd_) noexcept { swap(fd_); }
@@ -92,6 +93,7 @@ namespace substrate
 		{
 			std::swap(fd, desc.fd);
 			std::swap(eof, desc.eof);
+			std::swap(_length, desc._length);
 		}
 
 		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
@@ -152,9 +154,12 @@ namespace substrate
 
 		off_t length() const noexcept WARN_UNUSED
 		{
+			if (_length != -1)
+				return _length;
 			internal::stat_t fileStat{};
 			const int result = internal::fstat(fd, &fileStat);
-			return result ? -1 : fileStat.st_size;
+			_length = result ? -1 : fileStat.st_size;
+			return _length;
 		}
 
 		template<typename T> bool read(T &value) const noexcept
