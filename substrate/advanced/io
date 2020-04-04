@@ -295,6 +295,38 @@ namespace substrate
 			}
 		};
 
+		struct seekable_t
+		{
+		public:
+			seekable_t() noexcept = default;
+			seekable_t(const seekable_t &) noexcept = delete;
+			seekable_t(seekable_t &&) noexcept = delete;
+			seekable_t &operator =(const seekable_t &) noexcept = delete;
+			seekable_t &operator =(seekable_t &&) noexcept = delete;
+			virtual ~seekable_t() noexcept = default;
+			virtual off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED = 0;
+			virtual off_t tell() const noexcept WARN_UNUSED = 0;
+			virtual off_t length() const noexcept WARN_UNUSED = 0;
+
+			bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
+			bool tail() const noexcept WARN_UNUSED
+			{
+				const auto offset = length();
+				if (offset < 0)
+					return false;
+				return seek(offset, SEEK_SET) == offset;
+			}
+
+			bool seekRel(const off_t offset) const noexcept WARN_UNUSED
+			{
+				const off_t currentPos = tell();
+				if (currentPos == -1 || currentPos + offset < 0)
+					return false;
+				return seek(offset, SEEK_CUR) == currentPos + offset;
+			}
+		};
+
+		struct io_t : readable_t, writeable_t
 		{
 			virtual bool valid() const noexcept WARN_UNUSED = 0;
 		};
