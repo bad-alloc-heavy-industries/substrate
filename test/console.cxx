@@ -21,6 +21,8 @@ using substrate::fixedVector_t;
 
 const std::string testString{"test"_s};
 const std::string colourInfoTest{" \033[36m[INF]\033[0m test\r\n"_s};
+const std::string colourDebugTest{" \033[1;34m[DBG]\033[0m test\r\n"_s};
+const std::string colourErrorTest{" \033[1;31m[ERR]\033[0m test\r\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -51,6 +53,10 @@ TEST_CASE("console_t PTY write", "[console_t]")
 
 	console.info(testString);
 	assertConsoleRead(pty.ptmx(), colourInfoTest);
+	console.debug(testString);
+	assertConsoleRead(pty.ptmx(), colourDebugTest);
+	console.error(testString);
+	assertConsoleRead(pty.ptmx(), colourErrorTest);
 }
 #endif
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
