@@ -18,6 +18,7 @@ using charTraits = std::char_traits<char>;
 
 console_t substrate::console;
 static const std::string errorPrefix = "[ERR]"_s;
+static const std::string warningPrefix = "[WRN]"_s;
 static const std::string infoPrefix = "[INF]"_s;
 static const std::string debugPrefix = "[DBG]"_s;
 
@@ -83,6 +84,21 @@ void console_t::_error() const noexcept
 	if (tty)
 		errorStream.write("\033[0m"_s);
 	errorStream.write(' ');
+#else
+#endif
+}
+
+void console_t::_warning() const noexcept
+{
+#ifndef _WINDOWS
+	const bool tty = outputStream.isTTY();
+	outputStream.write(' ');
+	if (tty)
+		outputStream.write("\033[1;33m"_s);
+	outputStream.write(warningPrefix);
+	if (tty)
+		outputStream.write("\033[0m"_s);
+	outputStream.write(' ');
 #else
 #endif
 }

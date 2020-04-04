@@ -73,6 +73,7 @@ namespace substrate
 		}
 
 		void _error() const noexcept;
+		void _warning() const noexcept;
 		void _info() const noexcept;
 		void _debug() const noexcept;
 
@@ -84,6 +85,12 @@ namespace substrate
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void error(T &&...values) const noexcept
 			{ _error(); write(errorStream, std::forward<T>(values)...); }
+
+		template<typename... T> SUBSTRATE_CLS_MAYBE_API void warning(T &&...values) const noexcept
+			{ _warning(); write(outputStream, std::forward<T>(values)...); }
+
+		template<typename... T> SUBSTRATE_CLS_MAYBE_API void warn(T &&...values) const noexcept
+			{ _warning(); write(outputStream, std::forward<T>(values)...); }
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void info(T &&...values) const noexcept
 			{ _info(); write(outputStream, std::forward<T>(values)...); }

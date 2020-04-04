@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <thread>
+#include <chrono>
 #include <substrate/console>
 #include <substrate/fixed_vector>
 #include <substrate/fd>
@@ -19,9 +21,13 @@ using substrate::fd_t;
 using substrate::pty_t;
 using substrate::fixedVector_t;
 
+const std::chrono::microseconds operator ""_us(unsigned long long us) noexcept
+	{ return std::chrono::microseconds{us}; }
+
 const std::string testString{"test"_s};
-const std::string colourInfoTest{" \033[36m[INF]\033[0m test\r\n"_s};
 const std::string colourDebugTest{" \033[1;34m[DBG]\033[0m test\r\n"_s};
+const std::string colourInfoTest{" \033[36m[INF]\033[0m test\r\n"_s};
+const std::string colourWarningTest{" \033[1;33m[WRN]\033[0m test\r\n"_s};
 const std::string colourErrorTest{" \033[1;31m[ERR]\033[0m test\r\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
@@ -39,6 +45,7 @@ void assertConsoleRead(const fd_t &fd, const std::string &expected)
 {
 	fixedVector_t<char> result{expected.length()};
 	REQUIRE(result.valid());
+	std::this_thread::sleep_for(1_us);
 	REQUIRE(fd.read(result.data(), result.size()));
 	REQUIRE(memcmp(result.data(), expected.data(), expected.length()) == 0);
 }
@@ -51,10 +58,14 @@ TEST_CASE("console_t PTY write", "[console_t]")
 	// set to our new PTY's "slave" side
 	console = {pty.pts(), pty.pts()};
 
-	console.info(testString);
-	assertConsoleRead(pty.ptmx(), colourInfoTest);
 	console.debug(testString);
 	assertConsoleRead(pty.ptmx(), colourDebugTest);
+	console.info(testString);
+	assertConsoleRead(pty.ptmx(), colourInfoTest);
+	console.warning(testString);
+	assertConsoleRead(pty.ptmx(), colourWarningTest);
+	console.warn(testString);
+	assertConsoleRead(pty.ptmx(), colourWarningTest);
 	console.error(testString);
 	assertConsoleRead(pty.ptmx(), colourErrorTest);
 }
