@@ -330,6 +330,8 @@ namespace substrate
 		{
 			virtual bool valid() const noexcept WARN_UNUSED = 0;
 		};
+
+		struct seekableIO_t : io_t, seekable_t { };
 	}
 }
 

@@ -9,7 +9,7 @@ namespace substrate
 {
 	namespace advanced
 	{
-		struct fd_t final : io_t
+		struct fd_t final : seekableIO_t
 		{
 		private:
 			substrate::fd_t fd;
@@ -27,10 +27,14 @@ namespace substrate
 			bool isEOF() const noexcept WARN_UNUSED { return fd.isEOF(); }
 			void invalidate() noexcept { fd.invalidate(); }
 
-			virtual ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+			ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
 				const noexcept final WARN_UNUSED { return fd.read(bufferPtr, bufferLen, nullptr); }
-			virtual ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+			ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
 				const noexcept final WARN_UNUSED { return fd.write(bufferPtr, bufferLen, nullptr); }
+			off_t seek(const off_t offset, const int32_t whence) const noexcept final WARN_UNUSED
+				{ return fd.seek(offset, whence); }
+			off_t tell() const noexcept final WARN_UNUSED { return fd.tell(); }
+			off_t length() const noexcept final WARN_UNUSED { return fd.length(); }
 		};
 	}
 }
