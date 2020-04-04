@@ -79,6 +79,8 @@ namespace substrate
 	public:
 		constexpr console_t() noexcept : outputStream{}, errorStream{}, valid{false} { }
 		SUBSTRATE_CLS_MAYBE_API console_t(FILE *const outStream, FILE *const errStream) noexcept;
+		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
+			outputStream{outStream}, errorStream{errStream}, valid{outputStream.valid() && errorStream.valid()} { }
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void error(T &&...values) const noexcept
 			{ _error(); write(errorStream, std::forward<T>(values)...); }
@@ -227,7 +229,6 @@ namespace substrate
 	};
 
 	SUBSTRATE_API console_t console;
-}
-
+} // namespace substrate
 #endif /*SUBSTRATE_CONSOLE*/
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
