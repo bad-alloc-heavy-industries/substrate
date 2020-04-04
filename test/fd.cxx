@@ -25,12 +25,15 @@ constexpr static auto i64{int64_t(INT64_C(0x123456789ABCDEA5))};
 TEST_CASE("fd_t bad fd", "[fd_t]")
 {
 	fd_t file{};
+	size_t result{};
 	REQUIRE(file == -1);
 	REQUIRE_FALSE(file.valid());
 	REQUIRE_FALSE(file.isEOF());
 
 	REQUIRE(file.read(nullptr, 0, nullptr) == -1);
+	REQUIRE_FALSE(file.read(nullptr, 0, result));
 	REQUIRE(file.write(nullptr, 0, nullptr) == -1);
+	REQUIRE_FALSE(file.write(nullptr, 0));
 	REQUIRE_FALSE(file.tail());
 }
 
