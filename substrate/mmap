@@ -47,9 +47,10 @@ namespace substrate
 
 		~mmap_t() noexcept
 		{
-			if (_fd != -1 && _addr)
+			if (_fd != -1)
 				::close(_fd);
-			::munmap(_addr, _len);
+			if (_addr)
+				::munmap(_addr, _len);
 		}
 
 		NO_DISCARD bool valid() const noexcept WARN_UNUSED { return _addr; }
