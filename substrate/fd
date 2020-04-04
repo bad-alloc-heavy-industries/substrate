@@ -96,12 +96,8 @@ namespace substrate
 
 		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
 		{
-			if (eof)
-				return false;
 			const ssize_t result = read(value, valueLen, nullptr);
-			if (!result && valueLen)
-				eof = true;
-			else if (result < 0)
+			if (result < 0)
 				return false;
 			resultLen = size_t(result);
 			return resultLen == valueLen;
@@ -121,10 +117,16 @@ namespace substrate
 			return size_t(result) == valueLen;
 		}
 
-		ssize_t read(void *const bufferPtr, const size_t len, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return internal::fdread(fd, bufferPtr, len); }
-		ssize_t write(const void *const bufferPtr, const size_t valueLen, std::nullptr_t) const noexcept WARN_UNUSED
-			{ return internal::fdwrite(fd, bufferPtr, valueLen); }
+		ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+		{
+			const auto result = internal::fdread(fd, bufferPtr, bufferLen);
+			if (!result && bufferLen)
+				eof = true;
+			return result;
+		}
+
+		ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
 		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
 			{ return internal::fdseek(fd, offset, whence); }
 		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
