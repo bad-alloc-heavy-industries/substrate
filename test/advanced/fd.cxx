@@ -177,11 +177,11 @@ TEST_CASE("advanced::advanced::fd_t read", "[advanced::fd_t]")
 	readBE(file, u64);
 	readBE(file, i64);
 
-	/*char junk{};
+	char junk{};
 	REQUIRE_FALSE(file.read(junk));
 	REQUIRE(file.isEOF());
 	REQUIRE_FALSE(file.read(junk));
-	REQUIRE(file.isEOF());*/
+	REQUIRE(file.isEOF());
 }
 
 ANON_TEST_CASE()
