@@ -23,9 +23,12 @@ namespace substrate
 				fd{file.c_str(), flags, mode} { }
 			fd_t(fd_t &&fd_) noexcept : fd{std::move(fd_.fd)} { }
 			~fd_t() noexcept final = default;
+			operator int32_t() const noexcept WARN_UNUSED { return fd; }
+			bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
 			bool valid() const noexcept final WARN_UNUSED { return fd.valid(); }
 			bool isEOF() const noexcept WARN_UNUSED { return fd.isEOF(); }
 			void invalidate() noexcept { fd.invalidate(); }
+			void swap(fd_t &desc) noexcept { std::swap(fd, desc.fd); }
 
 			ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
 				const noexcept final WARN_UNUSED { return fd.read(bufferPtr, bufferLen, nullptr); }
@@ -35,7 +38,11 @@ namespace substrate
 				{ return fd.seek(offset, whence); }
 			off_t tell() const noexcept final WARN_UNUSED { return fd.tell(); }
 			off_t length() const noexcept final WARN_UNUSED { return fd.length(); }
+			substrate::internal::stat_t stat() const noexcept WARN_UNUSED
+				{ return fd.stat(); }
 		};
+
+		inline void swap(fd_t &a, fd_t &b) noexcept { a.swap(b); }
 	}
 }
 
