@@ -17,6 +17,11 @@ namespace substrate
 		struct readable_t
 		{
 		public:
+			readable_t() noexcept = default;
+			readable_t(const readable_t &) noexcept = delete;
+			readable_t(readable_t &&) noexcept = delete;
+			readable_t &operator =(const readable_t &) noexcept = delete;
+			readable_t &operator =(readable_t &&) noexcept = delete;
 			virtual ~readable_t() noexcept = default;
 			virtual ssize_t read(void *const bufferPtr, const size_t len,
 				std::nullptr_t) const noexcept WARN_UNUSED = 0;
@@ -149,6 +154,11 @@ namespace substrate
 		struct writeable_t
 		{
 		public:
+			writeable_t() noexcept = default;
+			writeable_t(const writeable_t &) noexcept = delete;
+			writeable_t(writeable_t &&) noexcept = delete;
+			writeable_t &operator =(const writeable_t &) noexcept = delete;
+			writeable_t &operator =(writeable_t &&) noexcept = delete;
 			virtual ~writeable_t() noexcept = default;
 			virtual ssize_t write(const void *const bufferPtr, const size_t valueLen,
 				std::nullptr_t) const noexcept WARN_UNUSED = 0;
@@ -285,7 +295,9 @@ namespace substrate
 			}
 		};
 
-		struct io_t : readable_t, writeable_t { };
+		{
+			virtual bool valid() const noexcept WARN_UNUSED = 0;
+		};
 	}
 }
 
