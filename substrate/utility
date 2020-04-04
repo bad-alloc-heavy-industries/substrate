@@ -521,7 +521,8 @@ namespace substrate
 	template<typename T> enable_if_t<std::is_integral<T>::value ,T>
 		constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept
 	{
-		return (((v | 0x00U) << ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2)) | ((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~((shift & ((sizeof(T) << 1) + ~0x00U)) << 2))));
+		return (((v | 0x00U) << ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2)) |
+			((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~((shift & ((sizeof(T) << 1) + ~0x00U)) << 2))));
 	}
 
 	/* typename decoding */
