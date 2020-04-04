@@ -328,6 +328,12 @@ namespace substrate
 
 		struct io_t : readable_t, writeable_t
 		{
+			io_t() noexcept = default;
+			io_t(const io_t &) noexcept = delete;
+			io_t(io_t &&) noexcept = delete;
+			io_t &operator =(const io_t &) noexcept = delete;
+			io_t &operator =(io_t &&) noexcept = delete;
+			~io_t() noexcept override = default;
 			virtual bool valid() const noexcept WARN_UNUSED = 0;
 		};
 
