@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_PTS
+#define SUBSTRATE_PTS
+#ifdef _WINDOWS
+#	error "pty is a *nix only header"
+#endif
+
+#include <substrate/fd>
+
+namespace substrate
+{
+	struct SUBSTRATE_CLS_API pty_t final
+	{
+	private:
+		fd_t ptyMaster;
+		fd_t ptySlave;
+
+	public:
+		pty_t() noexcept;
+		bool valid() const noexcept { return ptyMaster.valid() && ptySlave.valid(); }
+
+		const fd_t &ptmx() const noexcept { return ptyMaster; }
+		const fd_t &pts() const noexcept { return ptySlave; }
+
+		pty_t(const pty_t &) = delete;
+		pty_t &operator =(const pty_t &) = delete;
+	};
+} // namespace substrate
+
+#endif /*SUBSTRATE_PTS*/
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
