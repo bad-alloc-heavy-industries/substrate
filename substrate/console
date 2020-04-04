@@ -16,21 +16,6 @@
 namespace substrate
 {
 	inline std::string operator ""_s(const char *str, const size_t len) noexcept { return {str, len}; }
-
-	template<typename T> using isIntegral = std::is_integral<T>;
-	template<typename base_t, typename derived_t> using isBaseOf = std::is_base_of<base_t, derived_t>;
-
-	template<typename> struct isChar : std::false_type { };
-	template<> struct isChar<char> : std::true_type { };
-
-	template<typename> struct __isBoolean : public std::false_type { };
-	template<> struct __isBoolean<bool> : public std::true_type { };
-	template<typename T> struct isBoolean : public std::integral_constant<bool,
-		__isBoolean<typename std::remove_cv<T>::type>::value> { };
-
-	template<typename T> struct isScalar : public std::integral_constant<bool,
-		isIntegral<T>::value && !isBoolean<T>::value && !isChar<T>::value> { };
-
 	struct consoleStream_t;
 
 	struct SUBSTRATE_CLS_API printable_t
@@ -61,9 +46,9 @@ namespace substrate
 		template<typename T> void write(const std::unique_ptr<T []> &value) const noexcept { write(value.get()); }
 		void write(const std::string &value) const noexcept
 			{ write(value.data(), value.length()); }
-		template<typename T, typename = enable_if_t<isBaseOf<printable_t, T>::value>>
+		template<typename T, typename = enable_if_t<std::is_base_of<printable_t, T>::value>>
 			void write(T &&printable) const noexcept { printable(*this); }
-		template<typename T, typename = enable_if_t<isScalar<T>::value>>
+		template<typename T, typename = enable_if_t<is_numeric<T>::value>>
 			void write(const T value) const noexcept;
 		template<typename T> void write(const T *const ptr) const noexcept;
 		void write(const bool value) const noexcept;
@@ -126,11 +111,11 @@ namespace substrate
 		}
 
 		template<typename T> enable_if_t<std::is_same<T, int_t>::value &&
-			isIntegral<T>::value && !isBoolean<T>::value && std::is_unsigned<T>::value>
+			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value>
 			printTo(const consoleStream_t &stream) const noexcept { format(stream, _value); }
 
 		template<typename T> [[gnu::noinline]] enable_if_t<std::is_same<T, int_t>::value &&
-			isIntegral<T>::value && !isBoolean<T>::value && std::is_signed<T>::value>
+			std::is_integral<T>::value && !is_boolean<T>::value && std::is_signed<T>::value>
 			printTo(const consoleStream_t &stream) const noexcept
 		{
 			if (_value < 0)

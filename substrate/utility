@@ -499,6 +499,24 @@ namespace substrate
 #endif
 #endif
 
+	namespace internal
+	{
+		template<typename> struct is_char : std::false_type { };
+		template<> struct is_char<char> : std::true_type { };
+
+		template<typename> struct is_boolean : public std::false_type { };
+		template<> struct is_boolean<bool> : public std::true_type { };
+	}
+
+	template<typename T> struct is_char : public std::integral_constant<bool,
+		internal::is_char<remove_cv_t<T>>::value> { };
+
+	template<typename T> struct is_boolean : public std::integral_constant<bool,
+		internal::is_boolean<remove_cv_t<T>>::value> { };
+
+	template<typename T> struct is_numeric : public std::integral_constant<bool,
+		std::is_integral<T>::value && !is_boolean<T>::value && !is_char<T>::value> { };
+
 	/* Shift nibble */
 	template<typename T> enable_if_t<std::is_integral<T>::value ,T>
 		constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept
