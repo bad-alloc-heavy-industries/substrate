@@ -11,7 +11,8 @@ headers = [
 	'socket',
 	'console',
 	'pty',
-	'pipe'
+	'pipe',
+	'mmap'
 ]
 
 advanced_headers = [
