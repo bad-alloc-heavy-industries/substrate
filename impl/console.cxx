@@ -17,10 +17,18 @@ using namespace substrate;
 using charTraits = std::char_traits<char>;
 
 console_t substrate::console;
-static const std::string errorPrefix = "[ERR]"_s;
-static const std::string warningPrefix = "[WRN]"_s;
-static const std::string infoPrefix = "[INF]"_s;
-static const std::string debugPrefix = "[DBG]"_s;
+static const std::string errorPrefix{"[ERR]"_s};
+static const std::string warningPrefix{"[WRN]"_s};
+static const std::string infoPrefix{"[INF]"_s};
+static const std::string debugPrefix{"[DBG]"_s};
+
+#ifndef _WINDOWS
+static const std::string colourRed{"\033[1;31m"_s};
+static const std::string colourYellow{"\033[1;33m"_s};
+static const std::string colourCyan{"\033[36m"_s};
+static const std::string colourLightBlue{"\033[1;34m"_s};
+static const std::string colourDefaults{"\033[0m"_s};
+#endif
 
 void consoleStream_t::checkTTY() noexcept { _tty = isatty(fd); }
 
@@ -79,10 +87,10 @@ void console_t::_error() const noexcept
 	const bool tty = errorStream.isTTY();
 	errorStream.write(' ');
 	if (tty)
-		errorStream.write("\033[1;31m"_s);
+		errorStream.write(colourRed);
 	errorStream.write(errorPrefix);
 	if (tty)
-		errorStream.write("\033[0m"_s);
+		errorStream.write(colourDefaults);
 	errorStream.write(' ');
 #else
 #endif
@@ -94,10 +102,10 @@ void console_t::_warning() const noexcept
 	const bool tty = outputStream.isTTY();
 	outputStream.write(' ');
 	if (tty)
-		outputStream.write("\033[1;33m"_s);
+		outputStream.write(colourYellow);
 	outputStream.write(warningPrefix);
 	if (tty)
-		outputStream.write("\033[0m"_s);
+		outputStream.write(colourDefaults);
 	outputStream.write(' ');
 #else
 #endif
@@ -109,10 +117,10 @@ void console_t::_info() const noexcept
 	const bool tty = outputStream.isTTY();
 	outputStream.write(' ');
 	if (tty)
-		outputStream.write("\033[36m"_s);
+		outputStream.write(colourCyan);
 	outputStream.write(infoPrefix);
 	if (tty)
-		outputStream.write("\033[0m"_s);
+		outputStream.write(colourDefaults);
 	outputStream.write(' ');
 #else
 #endif
@@ -124,10 +132,10 @@ void console_t::_debug() const noexcept
 	const bool tty = outputStream.isTTY();
 	outputStream.write(' ');
 	if (tty)
-		outputStream.write("\033[1;34m"_s);
+		outputStream.write(colourLightBlue);
 	outputStream.write(debugPrefix);
 	if (tty)
-		outputStream.write("\033[0m"_s);
+		outputStream.write(colourDefaults);
 	outputStream.write(' ');
 #else
 #endif
