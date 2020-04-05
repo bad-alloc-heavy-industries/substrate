@@ -2,6 +2,7 @@
 #include <cstring>
 #include <memory>
 #include <array>
+#include <substrate/fixed_vector>
 #include <substrate/fd>
 #include <substrate/utility>
 #include <catch.hpp>
