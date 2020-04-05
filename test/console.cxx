@@ -40,6 +40,8 @@ const std::string plainErrorTest{" [ERR] test\n"_s};
 
 const std::string plainTrue{" [INF] true\n"_s};
 const std::string plainFalse{" [INF] false\n"_s};
+const std::string plainRawString{" [INF] raw string\n"_s};
+const std::string plainNullptr{" [INF] (null)"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -127,10 +129,17 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	console = {pipe.writeFD(), pipe.writeFD()};
 	REQUIRE(console.valid());
 
+	std::unique_ptr<char []> testPtr{};
+	REQUIRE(!testPtr);
+
 	console.info(true);
 	assertPipeRead(pipe, plainTrue);
 	console.info(false);
 	assertPipeRead(pipe, plainFalse);
+	console.info("raw string");
+	assertPipeRead(pipe, plainRawString);
+	console.info(testPtr);
+	assertPipeRead(pipe, plainNullptr);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
