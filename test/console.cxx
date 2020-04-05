@@ -40,8 +40,8 @@ const std::string plainErrorTest{" [ERR] test\n"_s};
 const std::string plainTrue{" [INF] true\n"_s};
 const std::string plainFalse{" [INF] false\n"_s};
 const std::string plainRawString{" [INF] raw string\n"_s};
-const std::string plainNullptr{" [INF] (null)"_s};
-const std::string plainChar{" [INF] 1"_s};
+const std::string plainNullptr{" [INF] (null)\n"_s};
+const std::string plainChar{" [INF] 1\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -129,8 +129,10 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	console = {pipe.writeFD(), pipe.writeFD()};
 	REQUIRE(console.valid());
 
-	std::unique_ptr<char []> testPtr{};
-	REQUIRE(!testPtr);
+	std::unique_ptr<char> testCharPtr{};
+	REQUIRE(!testCharPtr);
+	std::unique_ptr<char []> testArrayPtr{};
+	REQUIRE(!testArrayPtr);
 
 	console.info(true);
 	assertPipeRead(pipe, plainTrue);
@@ -138,7 +140,9 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainFalse);
 	console.info("raw string");
 	assertPipeRead(pipe, plainRawString);
-	console.info(testPtr);
+	console.info(testCharPtr);
+	assertPipeRead(pipe, plainNullptr);
+	console.info(testArrayPtr);
 	assertPipeRead(pipe, plainNullptr);
 	console.info('1');
 	assertPipeRead(pipe, plainChar);
