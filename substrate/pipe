@@ -1,0 +1,107 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_PIPE
+#define SUBSTRATE_PIPE
+
+#include <array>
+#include <substrate/internal/fd_compat>
+
+namespace substrate
+{
+	struct readPipe_t final
+	{
+	private:
+		int32_t fd;
+
+	public:
+		constexpr readPipe_t() noexcept : fd{-1} { }
+		constexpr readPipe_t(const int32_t fd_) noexcept : fd{fd_} { }
+		~readPipe_t() noexcept { if (fd != -1) close(fd); }
+		operator int32_t() const noexcept WARN_UNUSED { return fd; }
+		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
+		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
+
+		ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return internal::fdread(fd, bufferPtr, bufferLen); }
+
+		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
+		{
+			const ssize_t result = read(value, valueLen, nullptr);
+			if (result < 0)
+				return false;
+			resultLen = size_t(result);
+			return resultLen == valueLen;
+		}
+
+		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			size_t resultLen = 0;
+			return read(value, valueLen, resultLen);
+		}
+
+		readPipe_t(const readPipe_t &) = delete;
+		readPipe_t(readPipe_t &&) = delete;
+		readPipe_t &operator =(const readPipe_t &) = delete;
+		readPipe_t &operator =(readPipe_t &&) = delete;
+	};
+
+	struct writePipe_t final
+	{
+	private:
+		int32_t fd;
+
+	public:
+		constexpr writePipe_t() noexcept : fd{-1} { }
+		constexpr writePipe_t(const int32_t fd_) noexcept : fd{fd_} { }
+		~writePipe_t() noexcept { if (fd != -1) close(fd); }
+		operator int32_t() const noexcept WARN_UNUSED { return fd; }
+		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
+		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
+
+		ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
+
+		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		{
+			const ssize_t result = write(value, valueLen, nullptr);
+			if (result < 0)
+				return false;
+			return size_t(result) == valueLen;
+		}
+
+		writePipe_t(const writePipe_t &) = delete;
+		writePipe_t(writePipe_t &&) = delete;
+		writePipe_t &operator =(const writePipe_t &) = delete;
+		writePipe_t &operator =(writePipe_t &&) = delete;
+	};
+
+	struct pipe_t final
+	{
+	private:
+		readPipe_t readFD_;
+		writePipe_t writeFD_;
+
+		pipe_t(std::array<int32_t, 2> fds) noexcept : readFD_{fds[0]}, writeFD_{fds[1]} { }
+
+	public:
+		pipe_t() noexcept : pipe_t{[]() noexcept -> std::array<int32_t, 2>
+			{
+				std::array<int32_t, 2> fds{};
+				if (pipe(fds.data()))
+					return {-1, -1};
+				return fds;
+			}()} { }
+		~pipe_t() noexcept = default;
+		bool valid() const noexcept WARN_UNUSED { return readFD_.valid() && writeFD_.valid(); }
+
+		const readPipe_t &readFD() const noexcept { return readFD_; }
+		const writePipe_t &writeFD() const noexcept { return writeFD_; }
+
+		pipe_t(const pipe_t &) = delete;
+		pipe_t(pipe_t &&) = delete;
+		pipe_t &operator =(const pipe_t &) = delete;
+		pipe_t &operator =(pipe_t &&) = delete;
+	};
+} // namespace substrate
+
+#endif /* SUBSTRATE_PIPE */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
