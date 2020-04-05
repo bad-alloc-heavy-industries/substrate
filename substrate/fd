@@ -2,16 +2,7 @@
 #ifndef SUBSTRATE_FD
 #define SUBSTRATE_FD
 
-#include <cstdint>
-#include <cstddef>
 #include <type_traits>
-#ifndef _WINDOWS
-#	include <unistd.h>
-#else
-#	include <io.h>
-#endif
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <utility>
 #include <memory>
@@ -19,6 +10,7 @@
 #include <string>
 
 #include <substrate/internal/defs>
+#include <substrate/internal/fd_compat>
 #ifdef SUBSTRATE_MANAGED_PTR
 #	include <substrate/utility>
 #endif
@@ -29,38 +21,6 @@
 
 namespace substrate
 {
-	namespace internal
-	{
-#ifndef _WINDOWS
-		using stat_t = struct stat;
-		using ::fstat;
-
-		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return read(fd, bufferPtr, bufferLen); }
-		inline ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return write(fd, bufferPtr, bufferLen); }
-		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
-			{ return lseek(fd, offset, whence); }
-		inline off_t fdtell(const int32_t fd) noexcept
-			{ return lseek(fd, 0, SEEK_CUR); }
-#else
-#	define O_NOCTTY _O_BINARY
-		using mode_t = int32_t;
-		using ssize_t = typename std::make_signed<std::size_t>::type;
-		using stat_t = struct _stat64;
-
-		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }
-		inline ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return write(fd, bufferPtr, uint32_t(bufferLen)); }
-		inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
-		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
-			{ return _lseeki64(fd, offset, whence); }
-		inline off_t fdtell(const int32_t fd) noexcept
-			{ return _telli64(fd); }
-#endif
-	}
-
 	/*!
 	* While this is supposed to be a very thin, RAII-only layer,
 	* between a file descriptor and the code that uses it, due to the need to know
