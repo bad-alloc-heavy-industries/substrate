@@ -121,7 +121,7 @@ TEST_CASE("[C++ 17] is_union_v helper", "[utility]")
 {
 	class A {};
 	enum B : int {};
-	typedef union { int a; float b; } C;
+	union C { int a; float b; };
 	struct D { C c; };
 
 	REQUIRE_FALSE(is_union_v<A>);
@@ -138,7 +138,7 @@ TEST_CASE("[C++ 17] is_class_v helper", "[utility]")
 {
 	class A {};
 	enum B : int {};
-	typedef union { int a; float b; } C;
+	union C { int a; float b; };
 	struct D { C c; };
 	class E : A {};
 	enum class F {};
@@ -1125,7 +1125,7 @@ TEST_CASE("[C++ 17] is_union_v helper", "[utility]")
 {
 	class A {};
 	enum B : int {};
-	typedef union { int a; float b; } C;
+	union C { int a; float b; };
 	struct D { C c; };
 
 	REQUIRE_FALSE(is_union_v<A>());
@@ -1142,7 +1142,7 @@ TEST_CASE("[C++ 17] is_class_v helper", "[utility]")
 {
 	class A {};
 	enum B : int {};
-	typedef union { int a; float b; } C;
+	union C { int a; float b; };
 	struct D { C c; };
 	class E : A {};
 	enum class F {};
@@ -1975,7 +1975,7 @@ using substrate::is_trivially_copyable_v;
 TEST_CASE("[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { B(B const &) {} };
+	struct B { std::string a; };
 	struct C { virtual void baz(); virtual ~C() = default; };
 	struct D
 	{
@@ -1995,7 +1995,7 @@ using substrate::is_trivial_v;
 TEST_CASE("[C++ 17] is_trivial_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { B() { } };
+	struct B { std::string a; };
 
 	REQUIRE_FALSE(is_trivial_v<B>());
 
@@ -2032,7 +2032,7 @@ using substrate::is_literal_type_v;
 TEST_CASE("[C++ 17] is_literal_type_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual ~B(); };
+	struct B { virtual ~B() noexcept = default; };
 
 	REQUIRE_FALSE(is_literal_type_v<B>());
 
