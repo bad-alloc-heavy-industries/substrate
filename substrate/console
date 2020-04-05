@@ -108,7 +108,7 @@ namespace substrate
 	{
 	private:
 		using uint_t = typename std::make_unsigned<int_t>::type;
-		int_t _value;
+		int_t value_;
 
 		[[gnu::noinline]] uint_t format(const consoleStream_t &stream, const uint_t number) const noexcept
 		{
@@ -124,23 +124,23 @@ namespace substrate
 
 		template<typename T> enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value>
-			printTo(const consoleStream_t &stream) const noexcept { format(stream, _value); }
+			printTo(const consoleStream_t &stream) const noexcept { format(stream, value_); }
 
 		template<typename T> [[gnu::noinline]] enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_signed<T>::value>
 			printTo(const consoleStream_t &stream) const noexcept
 		{
-			if (_value < 0)
+			if (value_ < 0)
 			{
 				stream.write('-');
-				format(stream, ~uint_t(_value) - 1);
+				format(stream, ~uint_t(value_) - 1U);
 			}
 			else
-				format(stream, uint_t(_value));
+				format(stream, uint_t(value_));
 		}
 
 	public:
-		constexpr asInt_t(const int_t value) noexcept : _value{value} { }
+		constexpr asInt_t(const int_t value) noexcept : value_{value} { }
 		void operator()(const consoleStream_t &stream) const noexcept final
 			{ printTo<int_t>(stream); }
 	};
