@@ -61,7 +61,7 @@ namespace substrate
 	private:
 		consoleStream_t outputStream;
 		consoleStream_t errorStream;
-		bool valid;
+		bool valid_;
 
 		void write(const consoleStream_t &stream) const noexcept { stream.write('\n'); }
 		void write(const consoleStream_t &, std::nullptr_t) const noexcept { }
@@ -78,10 +78,11 @@ namespace substrate
 		void _debug() const noexcept;
 
 	public:
-		constexpr console_t() noexcept : outputStream{}, errorStream{}, valid{false} { }
+		constexpr console_t() noexcept : outputStream{}, errorStream{}, valid_{false} { }
 		SUBSTRATE_CLS_MAYBE_API console_t(FILE *const outStream, FILE *const errStream) noexcept;
 		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
-			outputStream{outStream}, errorStream{errStream}, valid{outputStream.valid() && errorStream.valid()} { }
+			outputStream{outStream}, errorStream{errStream}, valid_{outputStream.valid() && errorStream.valid()} { }
+		constexpr bool valid() const noexcept { return valid_; }
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void error(T &&...values) const noexcept
 			{ _error(); write(errorStream, std::forward<T>(values)...); }

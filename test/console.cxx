@@ -65,6 +65,7 @@ TEST_CASE("console_t PTY write", "[console_t]")
 	// Initialise console_t with a fresh outputStream + errorStream
 	// set to our new PTY's "slave" side
 	console = {pty.pts(), pty.pts()};
+	REQUIRE(console.valid());
 
 	console.debug(testString);
 	assertConsoleRead(pty.ptmx(), colourDebugTest);
@@ -76,6 +77,9 @@ TEST_CASE("console_t PTY write", "[console_t]")
 	assertConsoleRead(pty.ptmx(), colourWarningTest);
 	console.error(testString);
 	assertConsoleRead(pty.ptmx(), colourErrorTest);
+
+	console = {};
+	REQUIRE_FALSE(console.valid());
 }
 #endif
 
@@ -92,8 +96,9 @@ TEST_CASE("console_t pipe write", "[console_t]")
 	pipe_t pipe{};
 	REQUIRE(pipe.valid());
 	// Initialise console_t with a fresh outputStream + errorStream
-	// set to our new PTY's "slave" side
+	// set to our pipe's write side
 	console = {pipe.writeFD(), pipe.writeFD()};
+	REQUIRE(console.valid());
 
 	console.debug(testString);
 	assertPipeRead(pipe.readFD(), plainDebugTest);
@@ -105,5 +110,8 @@ TEST_CASE("console_t pipe write", "[console_t]")
 	assertPipeRead(pipe.readFD(), plainWarningTest);
 	console.error(testString);
 	assertPipeRead(pipe.readFD(), plainErrorTest);
+
+	console = {};
+	REQUIRE_FALSE(console.valid());
 }
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

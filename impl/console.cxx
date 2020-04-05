@@ -71,7 +71,7 @@ void consoleStream_t::write(const bool value) const noexcept
 
 console_t::console_t(FILE *const outStream, FILE *const errStream) noexcept :
 	outputStream{fileno(outStream)}, errorStream{fileno(errStream)},
-	valid{outputStream.valid() && errorStream.valid()} { }
+	valid_{outputStream.valid() && errorStream.valid()} { }
 
 void console_t::_error() const noexcept
 {
