@@ -102,12 +102,13 @@ inline uint16_t toBE(const uint16_t value) noexcept
 sockaddr_storage substrate::socket::prepare(const socketType_t family, const char *const where,
 	const uint16_t port) noexcept
 {
-	addrinfo *results = nullptr, hints{};
+	addrinfo hints{};
 	hints.ai_family = typeToFamily(family);
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
 	hints.ai_flags = AI_PASSIVE; // This may not be right/complete..
 
+	addrinfo *results = nullptr;
 	if (getaddrinfo(where, nullptr, &hints, &results) || !results)
 		return {AF_UNSPEC};
 
