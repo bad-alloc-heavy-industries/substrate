@@ -97,6 +97,15 @@ inline uint16_t toBE(const uint16_t value) noexcept
 	return result;
 }
 
+template<size_t offset> inline void *offsetPtr(void *ptr)
+{
+	const auto addr = reinterpret_cast<std::uintptr_t>(ptr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm[cpp/reinterpret-cast]
+	return reinterpret_cast<void *>(addr + offset); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm[cpp/reinterpret-cast]
+}
+
+template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest, const U value)
+	{ memcpy(offsetPtr<offset>(&dest), &value, sizeof(U)); }
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 sockaddr_storage substrate::socket::prepare(const socketType_t family, const char *const where,
@@ -116,18 +125,11 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 	memcpy(&service, results->ai_addr, familyToSize(results->ai_addr->sa_family));
 	freeaddrinfo(results);
 
-	const auto servicePtr = static_cast<void *>(&service);
 	const auto portBE = toBE(port);
 	if (service.ss_family == AF_INET)
-	{
-		const auto addr = static_cast<char *>(servicePtr) + offsetof(sockaddr_in, sin_port);
-		memcpy(addr, &portBE, sizeof(portBE));
-	}
+		copyToOffset<offsetof(sockaddr_in, sin_port)>(service, portBE);
 	else if (service.ss_family == AF_INET6)
-	{
-		const auto addr = static_cast<char *>(servicePtr) + offsetof(sockaddr_in6, sin6_port);
-		memcpy(addr, &portBE, sizeof(portBE));
-	}
+		copyToOffset<offsetof(sockaddr_in6, sin6_port)>(service, portBE);
 	else
 		return {AF_UNSPEC};
 	return service;
