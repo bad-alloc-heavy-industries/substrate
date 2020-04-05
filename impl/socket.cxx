@@ -76,6 +76,15 @@ inline int typeToFamily(const socketType_t type) noexcept
 	return AF_UNSPEC;
 }
 
+inline size_t familyToSize(const sa_family_t family) noexcept
+{
+	if (family == AF_INET)
+		return sizeof(sockaddr_in);
+	else if (family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	return sizeof(sockaddr_storage);
+}
+
 inline uint16_t toBE(const uint16_t value) noexcept
 {
 	const std::array<uint8_t, 2> resultBytes
@@ -103,7 +112,7 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 		return {AF_UNSPEC};
 
 	sockaddr_storage service{};
-	memcpy(&service, results->ai_addr, sizeof(sockaddr_storage));
+	memcpy(&service, results->ai_addr, familyToSize(results->ai_addr->sa_family));
 	freeaddrinfo(results);
 
 	const auto servicePtr = static_cast<void *>(&service);
