@@ -55,6 +55,7 @@ const std::string plainIntegerUnsigned8{" [INF] 255\n"_s};
 const std::string plainIntegerUnsigned32{" [INF] 65536\n"_s};
 const std::string plainIntegerHex{" [INF] F00DFACE\n"_s};
 const std::string plainIntegerPaddedHex{" [INF] 01A5\n"_s};
+const std::string plainIntegerZeroHex{" [INF] ___0\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -175,6 +176,8 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainIntegerHex);
 	console.info(asHex_t<4, '0'>{0x1A5U});
 	assertPipeRead(pipe, plainIntegerPaddedHex);
+	console.info(asHex_t<4, '_'>{0U});
+	assertPipeRead(pipe, plainIntegerZeroHex);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
