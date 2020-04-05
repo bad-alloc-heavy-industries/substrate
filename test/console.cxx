@@ -143,7 +143,7 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	pipe_t pipe{};
 	REQUIRE(pipe.valid());
 	std::unique_ptr<FILE, fileFree_t> file{fdopen(dup(pipe.writeFD()), "wb")};
-	REQUIRE(bool{file});
+	REQUIRE(file);
 	// Initialise console_t with a fresh outputStream + errorStream
 	// set to our pipe's write side
 	console = {file.get(), file.get()};
