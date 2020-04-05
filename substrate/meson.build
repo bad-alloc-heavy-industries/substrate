@@ -12,7 +12,9 @@ headers = [
 	'console',
 	'pty',
 	'pipe',
-	'mmap'
+	'mmap',
+	'span'
+
 ]
 
 advanced_headers = [
