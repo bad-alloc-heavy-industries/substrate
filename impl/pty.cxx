@@ -21,7 +21,7 @@ pty_t::pty_t() noexcept : ptyMaster{[]() noexcept -> fd_t
 		const auto pty = ioctl(ptyMaster, TIOCGPTPEER, O_RDWR | O_NOCTTY);
 		if (pty >= 0)
 			return {pty};
-#endif
+#else
 		try
 		{
 			std::array<char, 512> ptsName;
@@ -30,6 +30,7 @@ pty_t::pty_t() noexcept : ptyMaster{[]() noexcept -> fd_t
 		}
 		catch (std::exception &)
 			{ return {}; }
+#endif
 		ptyMaster = {};
 		return {};
 	}()} { }
