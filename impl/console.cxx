@@ -30,6 +30,10 @@ static const std::string colourLightBlue{"\033[1;34m"_s};
 static const std::string colourDefaults{"\033[0m"_s};
 #endif
 
+static const std::string nullString{"(null)"_s};
+static const std::string trueString{"true"_s};
+static const std::string falseString{"false"_s};
+
 void consoleStream_t::checkTTY() noexcept { _tty = isatty(fd); }
 
 void consoleStream_t::write(const void *const buffer, const size_t bufferLen) const noexcept
@@ -66,16 +70,11 @@ void consoleStream_t::write(const char *const value) const noexcept
 #endif
 	}
 	else
-		write("(null)"_s);
+		write(nullString);
 }
 
 void consoleStream_t::write(const bool value) const noexcept
-{
-	if (value)
-		write("true"_s);
-	else
-		write("false"_s);
-}
+	{ write(value ? trueString : falseString); }
 
 console_t::console_t(FILE *const outStream, FILE *const errStream) noexcept :
 	outputStream{fileno(outStream)}, errorStream{fileno(errStream)},
