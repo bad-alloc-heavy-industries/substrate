@@ -78,7 +78,7 @@ void assertConsoleRead(const fd_t &fd, const std::string &expected)
 {
 	fixedVector_t<char> result{expected.length()};
 	REQUIRE(result.valid());
-	std::this_thread::sleep_for(1_us);
+	std::this_thread::sleep_for(10_us);
 	REQUIRE(fd.read(result.data(), result.size()));
 	REQUIRE(memcmp(result.data(), expected.data(), expected.length()) == 0);
 }
