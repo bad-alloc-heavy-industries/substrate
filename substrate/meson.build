@@ -10,7 +10,8 @@ headers = [
 	'managed_ptr',
 	'socket',
 	'console',
-	'pty'
+	'pty',
+	'pipe'
 ]
 
 advanced_headers = [
@@ -20,7 +21,8 @@ advanced_headers = [
 
 internal_headers = [
 	'internal/defs',
-	'internal/cxx11_compat'
+	'internal/cxx11_compat',
+	'internal/fd_compat'
 ]
 
 install_headers(
