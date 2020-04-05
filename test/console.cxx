@@ -10,7 +10,6 @@
 
 #ifndef _WINDOWS
 constexpr static const char *defaultTTY = "/dev/ptmx";
-#	define NIX_ONLY ""
 #else
 constexpr static const char *defaultTTY = "CON";
 #endif
@@ -24,7 +23,7 @@ using substrate::pipe_t;
 using substrate::readPipe_t;
 using substrate::fixedVector_t;
 
-const std::chrono::microseconds operator ""_us(unsigned long long us) noexcept
+std::chrono::microseconds operator ""_us(unsigned long long us) noexcept
 	{ return std::chrono::microseconds{us}; }
 
 const std::string testString{"test"_s};
