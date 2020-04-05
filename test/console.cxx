@@ -42,6 +42,11 @@ const std::string plainFalse{" [INF] false\n"_s};
 const std::string plainRawString{" [INF] raw string\n"_s};
 const std::string plainNullptr{" [INF] (null)\n"_s};
 const std::string plainChar{" [INF] 1\n"_s};
+const std::string plainIntegerSigned8Min{" [INF] -128\n"_s};
+const std::string plainIntegerSigned8{" [INF] -127\n"_s};
+const std::string plainIntegerSigned8Max{" [INF] 127\n"_s};
+const std::string plainIntegerUnsigned8{" [INF] 255\n"_s};
+const std::string plainIntegerUnsigned32{" [INF] 65536\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -146,6 +151,16 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainNullptr);
 	console.info('1');
 	assertPipeRead(pipe, plainChar);
+	console.info(int8_t{-127});
+	assertPipeRead(pipe, plainIntegerSigned8);
+	console.info(int8_t{-128});
+	assertPipeRead(pipe, plainIntegerSigned8Min);
+	console.info(int8_t{127});
+	assertPipeRead(pipe, plainIntegerSigned8Max);
+	console.info(uint8_t{255});
+	assertPipeRead(pipe, plainIntegerUnsigned8);
+	console.info(uint32_t{65536});
+	assertPipeRead(pipe, plainIntegerUnsigned32);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
