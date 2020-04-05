@@ -219,31 +219,43 @@ namespace substrate
 		}
 
 		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v == dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+			subspan() const noexcept -> substrate::enable_if_t<extent_v == dynamic_extent && count != dynamic_extent, span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= size(), "offset must be less than or equal to the size of the span");
 			static_assert(count <= size(), "count must be less than or equal to the size of the span");
 			static_assert(count <= size() - offset, "count must be less than or equal to the size of the span minus the offset");
-
-			if constexpr (count == dynamic_extent)
-				return {data() + offset, size() - offset};
 			return {data() + offset, count};
 		}
 
 
 		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v != dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+			subspan() const noexcept -> substrate::enable_if_t<extent_v != dynamic_extent && count == dynamic_extent, span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= extent, "offset must be less than or equal to the extent of the span");
 
-			if constexpr (count == dynamic_extent)
-				return {data() + offset, size() - offset};
+			return {data() + offset, size() - offset};
+		}
 
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto
+			subspan() const noexcept -> substrate::enable_if_t<extent_v == dynamic_extent && count == dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		{
+			static_assert(offset <= size(), "offset must be less than or equal to the size of the span");
+			static_assert(count <= size(), "count must be less than or equal to the size of the span");
+			static_assert(count <= size() - offset, "count must be less than or equal to the size of the span minus the offset");
+			return {data() + offset, size() - offset};
+		}
+
+
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto
+			subspan() const noexcept -> substrate::enable_if_t<extent_v != dynamic_extent && count != dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		{
+			static_assert(offset <= extent, "offset must be less than or equal to the extent of the span");
 			static_assert(count <= extent, "count must be less than or equal to the extent of the span");
 			static_assert(count <= extent - offset, "count must be less than or equal to the extent of the span minus the offset");
 
 			return {data() + offset, count};
 		}
+
 
 		const span<T, dynamic_extent> subspan(size_t offset, size_t count = dynamic_extent) const noexcept
 		{
