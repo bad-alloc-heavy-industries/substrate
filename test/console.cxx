@@ -27,6 +27,11 @@ using substrate::fixedVector_t;
 std::chrono::microseconds operator ""_us(unsigned long long us) noexcept
 	{ return std::chrono::microseconds{us}; }
 
+struct fileFree_t
+{
+	void operator()(FILE *const file) const noexcept { fclose(file); } // NOLINT(cppcoreguidelines-owning-memory)
+};
+
 const std::string testString{"test"_s};
 const std::string colourDebugTest{" \033[1;34m[DBG]\033[0m test\r\n"_s};
 const std::string colourInfoTest{" \033[36m[INF]\033[0m test\r\n"_s};
@@ -131,9 +136,11 @@ TEST_CASE("console_t write conversions", "[console_t]")
 {
 	pipe_t pipe{};
 	REQUIRE(pipe.valid());
+	std::unique_ptr<FILE, fileFree_t> file{fdopen(dup(pipe.writeFD()), "wb")};
+	REQUIRE(bool{file});
 	// Initialise console_t with a fresh outputStream + errorStream
 	// set to our pipe's write side
-	console = {pipe.writeFD(), pipe.writeFD()};
+	console = {file.get(), file.get()};
 	REQUIRE(console.valid());
 
 	std::unique_ptr<char> testCharPtr{};
