@@ -41,6 +41,7 @@ const std::string plainTrue{" [INF] true\n"_s};
 const std::string plainFalse{" [INF] false\n"_s};
 const std::string plainRawString{" [INF] raw string\n"_s};
 const std::string plainNullptr{" [INF] (null)"_s};
+const std::string plainChar{" [INF] 1"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -139,6 +140,8 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainRawString);
 	console.info(testPtr);
 	assertPipeRead(pipe, plainNullptr);
+	console.info('1');
+	assertPipeRead(pipe, plainChar);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
