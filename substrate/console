@@ -133,7 +133,7 @@ namespace substrate
 			if (value_ < 0)
 			{
 				stream.write('-');
-				format(stream, ~uint_t(value_) - 1U);
+				format(stream, ~uint_t(value_) + 1U);
 			}
 			else
 				format(stream, uint_t(value_));
