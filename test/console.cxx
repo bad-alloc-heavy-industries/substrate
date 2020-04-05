@@ -101,15 +101,15 @@ TEST_CASE("console_t pipe write", "[console_t]")
 	REQUIRE(console.valid());
 
 	console.debug(testString);
-	assertPipeRead(pipe.readFD(), plainDebugTest);
+	assertPipeRead(pipe, plainDebugTest);
 	console.info(testString);
-	assertPipeRead(pipe.readFD(), plainInfoTest);
+	assertPipeRead(pipe, plainInfoTest);
 	console.warning(testString);
-	assertPipeRead(pipe.readFD(), plainWarningTest);
+	assertPipeRead(pipe, plainWarningTest);
 	console.warn(testString);
-	assertPipeRead(pipe.readFD(), plainWarningTest);
+	assertPipeRead(pipe, plainWarningTest);
 	console.error(testString);
-	assertPipeRead(pipe.readFD(), plainErrorTest);
+	assertPipeRead(pipe, plainErrorTest);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());

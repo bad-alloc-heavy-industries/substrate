@@ -96,6 +96,9 @@ namespace substrate
 		const readPipe_t &readFD() const noexcept { return readFD_; }
 		const writePipe_t &writeFD() const noexcept { return writeFD_; }
 
+		operator const readPipe_t &() const noexcept { return readFD_; }
+		operator const writePipe_t &() const noexcept { return writeFD_; }
+
 		pipe_t(const pipe_t &) = delete;
 		pipe_t(pipe_t &&) = delete;
 		pipe_t &operator =(const pipe_t &) = delete;
