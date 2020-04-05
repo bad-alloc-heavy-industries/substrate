@@ -58,8 +58,10 @@ const std::string plainIntegerPaddedHex{" [INF] 01A5\n"_s};
 const std::string plainIntegerZeroHex{" [INF] ___0\n"_s};
 const std::string plainIntegerOverMaxPaddedHex{" [INF] __F0\n"_s};
 const std::string plainCharArray{" [INF] testing\n"_s};
+const std::string plainIntegerArray{" [INF] F00D, DEAD\n"_s};
 
 const std::array<char, 7> testCharArray{'t', 'e', 's', 't', 'i', 'n', 'g'};
+const std::array<uint16_t, 2> testIntegerArray{0xF00DU, 0xDEADU};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -186,6 +188,8 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainIntegerOverMaxPaddedHex);
 	console.info(testCharArray);
 	assertPipeRead(pipe, plainCharArray);
+	console.info(testIntegerArray);
+	assertPipeRead(pipe, plainIntegerArray);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());

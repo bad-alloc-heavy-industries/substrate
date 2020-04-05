@@ -217,8 +217,14 @@ namespace substrate
 
 	template<typename T, size_t N> void consoleStream_t::write(const std::array<T, N> &value) const noexcept
 	{
+		bool comma{false};
 		for (const auto &elem : value)
+		{
+			if (comma)
+				write(", "_s);
+			comma = true;
 			write(asHex_t<sizeof(T) * 2, '0'>{elem});
+		}
 	}
 
 	struct SUBSTRATE_CLS_API asTime_t final : public printable_t
