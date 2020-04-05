@@ -5,6 +5,7 @@
 #include <substrate/fixed_vector>
 #include <substrate/fd>
 #include <substrate/pty>
+#include <substrate/pipe>
 #include <catch.hpp>
 
 #ifndef _WINDOWS
@@ -19,6 +20,8 @@ using substrate::consoleStream_t;
 using substrate::operator ""_s;
 using substrate::fd_t;
 using substrate::pty_t;
+using substrate::pipe_t;
+using substrate::readPipe_t;
 using substrate::fixedVector_t;
 
 const std::chrono::microseconds operator ""_us(unsigned long long us) noexcept
@@ -29,6 +32,11 @@ const std::string colourDebugTest{" \033[1;34m[DBG]\033[0m test\r\n"_s};
 const std::string colourInfoTest{" \033[36m[INF]\033[0m test\r\n"_s};
 const std::string colourWarningTest{" \033[1;33m[WRN]\033[0m test\r\n"_s};
 const std::string colourErrorTest{" \033[1;31m[ERR]\033[0m test\r\n"_s};
+
+const std::string plainDebugTest{" [DBG] test\n"_s};
+const std::string plainInfoTest{" [INF] test\n"_s};
+const std::string plainWarningTest{" [WRN] test\n"_s};
+const std::string plainErrorTest{" [ERR] test\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -70,4 +78,32 @@ TEST_CASE("console_t PTY write", "[console_t]")
 	assertConsoleRead(pty.ptmx(), colourErrorTest);
 }
 #endif
+
+void assertPipeRead(const readPipe_t &fd, const std::string &expected)
+{
+	fixedVector_t<char> result{expected.length()};
+	REQUIRE(result.valid());
+	REQUIRE(fd.read(result.data(), result.size()));
+	REQUIRE(memcmp(result.data(), expected.data(), expected.length()) == 0);
+}
+
+TEST_CASE("console_t pipe write", "[console_t]")
+{
+	pipe_t pipe{};
+	REQUIRE(pipe.valid());
+	// Initialise console_t with a fresh outputStream + errorStream
+	// set to our new PTY's "slave" side
+	console = {pipe.writeFD(), pipe.writeFD()};
+
+	console.debug(testString);
+	assertPipeRead(pipe.readFD(), plainDebugTest);
+	console.info(testString);
+	assertPipeRead(pipe.readFD(), plainInfoTest);
+	console.warning(testString);
+	assertPipeRead(pipe.readFD(), plainWarningTest);
+	console.warn(testString);
+	assertPipeRead(pipe.readFD(), plainWarningTest);
+	console.error(testString);
+	assertPipeRead(pipe.readFD(), plainErrorTest);
+}
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
