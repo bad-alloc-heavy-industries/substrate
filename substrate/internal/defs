@@ -17,9 +17,9 @@
 #if __has_cpp_attribute(nodiscard) || __cplusplus >= 201402L
 #	define SUBSTRATE_NO_DISCARD(x) [[nodiscard]] x
 #elif defined(__GNUC__)
-#	define SUBSTRATE_SUBSTRATE_NO_DISCARD(x) x __attribute__((warn_unused_result))
+#	define SUBSTRATE_NO_DISCARD(x) x __attribute__((warn_unused_result))
 #else
-#	define SUBSTRATE_SUBSTRATE_NO_DISCARD(x) x
+#	define SUBSTRATE_NO_DISCARD(x) x
 #endif
 
 #if __cplusplus >= 201103L
