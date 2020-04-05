@@ -40,9 +40,9 @@ void consoleStream_t::write(const void *const buffer, const size_t bufferLen) co
 {
 	// We don't actually care if this succeeds. We just try if at all possible.
 #ifndef _WINDOWS
-	[[maybe_unused]] const auto result = ::write(fd, buffer, bufferLen);
+	SUBSTRATE_NOWARN_UNUSED(const auto result = ::write(fd, buffer, bufferLen));
 #else
-	[[maybe_unused]] const auto result = ::write(fd, buffer, uint32_t(bufferLen));
+	SUBSTRATE_NOWARN_UNUSED(const auto result = ::write(fd, buffer, uint32_t(bufferLen)));
 #endif
 	errno = 0; // extra insurance.
 }

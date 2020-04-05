@@ -6,18 +6,28 @@
 #	define __has_cpp_attribute(x) 0
 #endif
 
-#if __has_cpp_attribute(nodiscard)
-#	define NO_DISCARD [[nodiscard]]
+#if __has_cpp_attribute(maybe_unused) || __cplusplus >= 201703L
+#	define SUBSTRATE_NOWARN_UNUSED(x) [[maybe_unused]] x
+#elif defined(__GNUC__)
+#	define SUBSTRATE_NOWARN_UNUSED(x) x __attribute__((unused))
 #else
-#	define NO_DISCARD
+#	define SUBSTRATE_NOWARN_UNUSED(x) x
 #endif
 
-#ifdef __GNUC__
-#	define ALIGN(X)        __attribute__ ((aligned (X)))
-#	define WARN_UNUSED		__attribute__((warn_unused_result))
+#if __has_cpp_attribute(nodiscard) || __cplusplus >= 201402L
+#	define SUBSTRATE_NO_DISCARD(x) [[nodiscard]] x
+#elif defined(__GNUC__)
+#	define SUBSTRATE_SUBSTRATE_NO_DISCARD(x) x __attribute__((warn_unused_result))
 #else
-#	define ALIGN(X)
-#	define WARN_UNUSED
+#	define SUBSTRATE_SUBSTRATE_NO_DISCARD(x) x
+#endif
+
+#if __cplusplus >= 201103L
+#	define ALIGN(X) alignas(x)
+#elif defined(__GNUC__)
+#	define SUBSTRATE_ALIGN(X) __attribute__ ((aligned (X)))
+#else
+#	define SUBSTRATE_ALIGN(X)
 #endif
 
 #ifdef _WINDOWS

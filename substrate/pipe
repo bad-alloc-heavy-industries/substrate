@@ -16,14 +16,14 @@ namespace substrate
 		constexpr readPipe_t() noexcept : fd{-1} { }
 		constexpr readPipe_t(const int32_t fd_) noexcept : fd{fd_} { }
 		~readPipe_t() noexcept { if (fd != -1) close(fd); }
-		operator int32_t() const noexcept WARN_UNUSED { return fd; }
-		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
-		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
+		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
+		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
 
-		ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 			{ return internal::fdread(fd, bufferPtr, bufferLen); }
 
-		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 		{
 			const ssize_t result = read(value, valueLen, nullptr);
 			if (result < 0)
@@ -32,7 +32,7 @@ namespace substrate
 			return resultLen == valueLen;
 		}
 
-		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen) const noexcept)
 		{
 			size_t resultLen = 0;
 			return read(value, valueLen, resultLen);
@@ -53,14 +53,14 @@ namespace substrate
 		constexpr writePipe_t() noexcept : fd{-1} { }
 		constexpr writePipe_t(const int32_t fd_) noexcept : fd{fd_} { }
 		~writePipe_t() noexcept { if (fd != -1) close(fd); }
-		operator int32_t() const noexcept WARN_UNUSED { return fd; }
-		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
-		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
+		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
+		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
 
-		ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
 
-		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
 		{
 			const ssize_t result = write(value, valueLen, nullptr);
 			if (result < 0)
@@ -91,7 +91,7 @@ namespace substrate
 				return fds;
 			}()} { }
 		~pipe_t() noexcept = default;
-		bool valid() const noexcept WARN_UNUSED { return readFD_.valid() && writeFD_.valid(); }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return readFD_.valid() && writeFD_.valid(); }
 
 		const readPipe_t &readFD() const noexcept { return readFD_; }
 		const writePipe_t &writeFD() const noexcept { return writeFD_; }

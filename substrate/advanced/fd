@@ -23,22 +23,22 @@ namespace substrate
 				fd{file.c_str(), flags, mode} { }
 			fd_t(fd_t &&fd_) noexcept : fd{std::move(fd_.fd)} { }
 			~fd_t() noexcept final = default;
-			operator int32_t() const noexcept WARN_UNUSED { return fd; }
-			bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
-			bool valid() const noexcept final WARN_UNUSED { return fd.valid(); }
-			bool isEOF() const noexcept WARN_UNUSED { return fd.isEOF(); }
+			SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
+			SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
+			SUBSTRATE_NO_DISCARD(bool valid() const noexcept final) { return fd.valid(); }
+			SUBSTRATE_NO_DISCARD(bool isEOF() const noexcept) { return fd.isEOF(); }
 			void invalidate() noexcept { fd.invalidate(); }
 			void swap(fd_t &desc) noexcept { std::swap(fd, desc.fd); }
 
-			ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
-				const noexcept final WARN_UNUSED { return fd.read(bufferPtr, bufferLen, nullptr); }
-			ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
-				const noexcept final WARN_UNUSED { return fd.write(bufferPtr, bufferLen, nullptr); }
-			off_t seek(const off_t offset, const int32_t whence) const noexcept final WARN_UNUSED
+			SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+				const noexcept final) { return fd.read(bufferPtr, bufferLen, nullptr); }
+			SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t)
+				const noexcept final) { return fd.write(bufferPtr, bufferLen, nullptr); }
+			SUBSTRATE_NO_DISCARD(off_t seek(const off_t offset, const int32_t whence) const noexcept final)
 				{ return fd.seek(offset, whence); }
-			off_t tell() const noexcept final WARN_UNUSED { return fd.tell(); }
-			off_t length() const noexcept final WARN_UNUSED { return fd.length(); }
-			substrate::internal::stat_t stat() const noexcept WARN_UNUSED
+			SUBSTRATE_NO_DISCARD(off_t tell() const noexcept final) { return fd.tell(); }
+			SUBSTRATE_NO_DISCARD(off_t length() const noexcept final) { return fd.length(); }
+			SUBSTRATE_NO_DISCARD(substrate::internal::stat_t stat() const noexcept)
 				{ return fd.stat(); }
 
 			using readable_t::read;

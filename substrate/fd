@@ -43,10 +43,10 @@ namespace substrate
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
 		~fd_t() noexcept { if (fd != -1) close(fd); }
 		void operator =(fd_t &&fd_) noexcept { swap(fd_); }
-		operator int32_t() const noexcept WARN_UNUSED { return fd; }
-		bool operator ==(const int32_t desc) const noexcept WARN_UNUSED { return fd == desc; }
-		bool valid() const noexcept WARN_UNUSED { return fd != -1; }
-		bool isEOF() const noexcept WARN_UNUSED { return eof; }
+		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
+		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
+		SUBSTRATE_NO_DISCARD(bool isEOF() const noexcept) { return eof; }
 		void invalidate() noexcept { fd = -1; }
 
 		void swap(fd_t &desc) noexcept
@@ -56,7 +56,7 @@ namespace substrate
 			std::swap(_length, desc._length);
 		}
 
-		ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 		{
 			const auto result = internal::fdread(fd, bufferPtr, bufferLen);
 			if (!result && bufferLen)
@@ -64,21 +64,21 @@ namespace substrate
 			return result;
 		}
 
-		off_t seek(const off_t offset, const int32_t whence) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(off_t seek(const off_t offset, const int32_t whence) const noexcept)
 		{
 			const auto result = internal::fdseek(fd, offset, whence);
 			eof = result == length();
 			return result;
 		}
 
-		ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
-		off_t tell() const noexcept WARN_UNUSED { return internal::fdtell(fd); }
+		SUBSTRATE_NO_DISCARD(off_t tell() const noexcept) { return internal::fdtell(fd); }
 
-		bool head() const noexcept WARN_UNUSED { return seek(0, SEEK_SET) == 0; }
-		fd_t dup() const noexcept WARN_UNUSED { return ::dup(fd); }
+		SUBSTRATE_NO_DISCARD(bool head() const noexcept) { return seek(0, SEEK_SET) == 0; }
+		SUBSTRATE_NO_DISCARD(fd_t dup() const noexcept) { return ::dup(fd); }
 
-		bool tail() const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool tail() const noexcept)
 		{
 			const auto offset = length();
 			if (offset < 0)
@@ -86,7 +86,7 @@ namespace substrate
 			return seek(offset, SEEK_SET) == offset;
 		}
 
-		internal::stat_t stat() const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(internal::stat_t stat() const noexcept)
 		{
 			internal::stat_t fileStat{};
 			if (!internal::fstat(fd, &fileStat))
@@ -94,7 +94,7 @@ namespace substrate
 			return {};
 		}
 
-		off_t length() const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(off_t length() const noexcept)
 		{
 			if (_length != -1)
 				return _length;
@@ -104,7 +104,7 @@ namespace substrate
 			return _length;
 		}
 
-		bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 		{
 			const ssize_t result = read(value, valueLen, nullptr);
 			if (result < 0)
@@ -113,13 +113,13 @@ namespace substrate
 			return resultLen == valueLen;
 		}
 
-		bool read(void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen) const noexcept)
 		{
 			size_t resultLen = 0;
 			return read(value, valueLen, resultLen);
 		}
 
-		bool write(const void *const value, const size_t valueLen) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
 		{
 			const ssize_t result = write(value, valueLen, nullptr);
 			if (result < 0)
@@ -176,7 +176,7 @@ namespace substrate
 			return write(value.data(), sizeof(T) * length);
 		}
 
-		bool readLE(uint16_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readLE(uint16_t &value) const noexcept)
 		{
 			std::array<uint8_t, 2> data{};
 			const bool result = read(data);
@@ -184,7 +184,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeLE(const uint16_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeLE(const uint16_t value) const noexcept)
 		{
 			const std::array<uint8_t, 2> data
 			{
@@ -194,7 +194,7 @@ namespace substrate
 			return write(data);
 		}
 
-		bool readLE(uint32_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readLE(uint32_t &value) const noexcept)
 		{
 			std::array<uint8_t, 4> data{};
 			const bool result = read(data);
@@ -203,7 +203,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeLE(const uint32_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeLE(const uint32_t value) const noexcept)
 		{
 			const std::array<uint8_t, 4> data
 			{
@@ -215,7 +215,7 @@ namespace substrate
 			return write(data);
 		}
 
-		bool readLE(uint64_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readLE(uint64_t &value) const noexcept)
 		{
 			std::array<uint8_t, 8> data{};
 			const bool result = read(data);
@@ -226,7 +226,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeLE(const uint64_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeLE(const uint64_t value) const noexcept)
 		{
 			const std::array<uint8_t, 8> data
 			{
@@ -264,7 +264,7 @@ namespace substrate
 			return writeLE(data);
 		}
 
-		bool readBE(uint16_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readBE(uint16_t &value) const noexcept)
 		{
 			std::array<uint8_t, 2> data{};
 			const bool result = read(data);
@@ -272,7 +272,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeBE(const uint16_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeBE(const uint16_t value) const noexcept)
 		{
 			const std::array<uint8_t, 2> data
 			{
@@ -282,7 +282,7 @@ namespace substrate
 			return write(data);
 		}
 
-		bool readBE(uint32_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readBE(uint32_t &value) const noexcept)
 		{
 			std::array<uint8_t, 4> data{};
 			const bool result = read(data);
@@ -291,7 +291,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeBE(const uint32_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeBE(const uint32_t value) const noexcept)
 		{
 			const std::array<uint8_t, 4> data
 			{
@@ -303,7 +303,7 @@ namespace substrate
 			return write(data);
 		}
 
-		bool readBE(uint64_t &value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool readBE(uint64_t &value) const noexcept)
 		{
 			std::array<uint8_t, 8> data{};
 			const bool result = read(data);
@@ -314,7 +314,7 @@ namespace substrate
 			return result;
 		}
 
-		bool writeBE(const uint64_t value) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool writeBE(const uint64_t value) const noexcept)
 		{
 			const std::array<uint8_t, 8> data
 			{
@@ -352,7 +352,7 @@ namespace substrate
 			return writeBE(data);
 		}
 
-		bool seekRel(const off_t offset) const noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(bool seekRel(const off_t offset) const noexcept)
 		{
 			const off_t currentPos = tell();
 			if (currentPos == -1 || currentPos + offset < 0)
@@ -361,10 +361,10 @@ namespace substrate
 		}
 
 #ifndef _WINDOWS
-		mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept)
 			{ return map(prot, length(), flags); }
 
-		mmap_t map(const int32_t prot, const off_t len, const int flags, void* map_addr = nullptr) noexcept WARN_UNUSED
+		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const off_t len, const int flags, void* map_addr = nullptr) noexcept)
 		{
 			if (!valid())
 				return {};

@@ -30,10 +30,10 @@ namespace substrate
 		constexpr enumPair_t(T value, const char* name) noexcept : _value{value}, _name{name} { }
 
 		void value(const T value) noexcept { _value = value; }
-		NO_DISCARD T value() const noexcept WARN_UNUSED { return _value; }
+		SUBSTRATE_NO_DISCARD(T value() const noexcept) { return _value; }
 
 		void name(const char* name) noexcept { _name = name; }
-		NO_DISCARD const char* name() const noexcept WARN_UNUSED { return _name; }
+		SUBSTRATE_NO_DISCARD(const char* name() const noexcept) { return _name; }
 	};
 
 	/* Extract a collection of flags set in a field */
