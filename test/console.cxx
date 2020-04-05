@@ -38,6 +38,9 @@ const std::string plainInfoTest{" [INF] test\n"_s};
 const std::string plainWarningTest{" [WRN] test\n"_s};
 const std::string plainErrorTest{" [ERR] test\n"_s};
 
+const std::string plainTrue{" [INF] true\n"_s};
+const std::string plainFalse{" [INF] false\n"_s};
+
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
 	fd_t tty{defaultTTY, O_WRONLY | O_NOCTTY};
@@ -110,6 +113,24 @@ TEST_CASE("console_t pipe write", "[console_t]")
 	assertPipeRead(pipe, plainWarningTest);
 	console.error(testString);
 	assertPipeRead(pipe, plainErrorTest);
+
+	console = {};
+	REQUIRE_FALSE(console.valid());
+}
+
+TEST_CASE("console_t write conversions", "[console_t]")
+{
+	pipe_t pipe{};
+	REQUIRE(pipe.valid());
+	// Initialise console_t with a fresh outputStream + errorStream
+	// set to our pipe's write side
+	console = {pipe.writeFD(), pipe.writeFD()};
+	REQUIRE(console.valid());
+
+	console.info(true);
+	assertPipeRead(pipe, plainTrue);
+	console.info(false);
+	assertPipeRead(pipe, plainFalse);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
