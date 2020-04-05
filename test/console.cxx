@@ -16,6 +16,7 @@ constexpr static const char *defaultTTY = "CON";
 
 using substrate::console;
 using substrate::consoleStream_t;
+using substrate::asHex_t;
 using substrate::operator ""_s;
 using substrate::fd_t;
 using substrate::pty_t;
@@ -47,6 +48,7 @@ const std::string plainIntegerSigned8{" [INF] -127\n"_s};
 const std::string plainIntegerSigned8Max{" [INF] 127\n"_s};
 const std::string plainIntegerUnsigned8{" [INF] 255\n"_s};
 const std::string plainIntegerUnsigned32{" [INF] 65536\n"_s};
+const std::string plainIntegerHex{" [INF] F00DFACE\n"_s};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
@@ -161,6 +163,8 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainIntegerUnsigned8);
 	console.info(uint32_t{65536});
 	assertPipeRead(pipe, plainIntegerUnsigned32);
+	console.info(asHex_t<>{0xF00DFACEU});
+	assertPipeRead(pipe, plainIntegerHex);
 
 	console = {};
 	REQUIRE_FALSE(console.valid());
