@@ -86,8 +86,8 @@ namespace test
 		R(const R &) = default;
 		R(R &&) = default;
 		~R() noexcept = default;
-		R &operator =(const R &) { return *this; }
-		R &operator =(R &&) { return *this; }
+		R &operator =(const R &) { return *this; } // NOLINT(cert-oop54-cpp,modernize-use-equals-default)
+		R &operator =(R &&) { return *this; } // NOLINT(performance-noexcept-move-constructor)
 	};
 
 	struct S { int foo; };
@@ -503,6 +503,7 @@ TEST_CASE("[C++ 17] is_copy_assignable_v helper", "[utility]")
 	REQUIRE_FALSE(is_copy_assignable_v<int [4]>);
 
 	REQUIRE(is_copy_assignable_v<test::A>);
+	REQUIRE(is_copy_assignable_v<test::R>);
 	REQUIRE(is_copy_assignable_v<test::S>);
 	REQUIRE(is_copy_assignable_v<int>);
 }
@@ -510,6 +511,7 @@ TEST_CASE("[C++ 17] is_copy_assignable_v helper", "[utility]")
 using substrate::is_trivially_copy_assignable_v;
 TEST_CASE("[C++ 17] is_trivially_copy_assignable_v helper", "[utility]")
 {
+	REQUIRE_FALSE(is_trivially_copy_assignable_v<test::R>);
 	REQUIRE_FALSE(is_trivially_copy_assignable_v<int []>);
 	REQUIRE_FALSE(is_trivially_copy_assignable_v<int [4]>);
 
@@ -521,6 +523,7 @@ TEST_CASE("[C++ 17] is_trivially_copy_assignable_v helper", "[utility]")
 using substrate::is_nothrow_copy_assignable_v;
 TEST_CASE("[C++ 17] is_nothrow_copy_assignable_v helper", "[utility]")
 {
+	REQUIRE_FALSE(is_nothrow_copy_assignable_v<test::R>);
 	REQUIRE_FALSE(is_nothrow_copy_assignable_v<int []>);
 	REQUIRE_FALSE(is_nothrow_copy_assignable_v<int [4]>);
 
