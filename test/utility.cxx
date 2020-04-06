@@ -128,11 +128,59 @@ namespace test
 		Y(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
 	};
 
+	struct Z
+	{
+		int bar;
+	private:
+		int baz; // NOLINT(clang-diagnostic-unused-private-field)
+	};
+
+	struct AA
+	{
+		int foo;
+
+		AA() = default;
+		AA(const AA &) = default;
+		AA(AA &&) = delete;
+		~AA() = default;
+		AA &operator =(const AA &) = default;
+		AA &operator =(AA &&) = delete;
+	};
+
+	struct AB
+	{
+		AB() = default;
+		AB(const AB &) = delete;
+		AB(AB &&) = delete;
+		virtual ~AB() = default;
+		AB &operator =(const AB &) = delete;
+		AB &operator =(AB &&) = delete;
+
+		virtual void baz() = 0;
+	};
+
+	struct AC : AB {};
+	struct AD : O {};
+	struct AE {};
+	union AF {};
+
+	struct AG
+	{
+		AG() = default;
+		AG(const AG &) = delete;
+		AG(AG &&) = delete;
+		virtual ~AG();
+		AG &operator =(const AG &) = delete;
+		AG &operator =(AG &&) = delete;
+	};
+
 	int bar();
 
 	template<typename> struct SU_traits {};
 	template<class T, class U> struct SU_traits<U T::*>
 		{ using member_type = U; };
+
+	struct SU_is_empty_v { static int bar; };
 }
 
 /* C++ 17 helpers */
@@ -716,14 +764,12 @@ TEST_CASE("[C++ 17] is_nothrow_constructible_v helper", "[utility]")
 using substrate::is_unsigned_v;
 TEST_CASE("[C++ 17] is_unsigned_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
 	enum struct C : int {};
 	enum D : unsigned int {};
 	enum struct E : unsigned int {};
 
-	REQUIRE_FALSE(is_unsigned_v<A>);
-	REQUIRE_FALSE(is_unsigned_v<B>);
+	REQUIRE_FALSE(is_unsigned_v<test::A>);
+	REQUIRE_FALSE(is_unsigned_v<test::B>);
 	REQUIRE_FALSE(is_unsigned_v<C>);
 	REQUIRE_FALSE(is_unsigned_v<D>);
 	REQUIRE_FALSE(is_unsigned_v<E>);
@@ -736,14 +782,12 @@ TEST_CASE("[C++ 17] is_unsigned_v helper", "[utility]")
 using substrate::is_signed_v;
 TEST_CASE("[C++ 17] is_signed_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
 	enum struct C : int {};
 	enum D : unsigned int {};
 	enum struct E : unsigned int {};
 
-	REQUIRE_FALSE(is_signed_v<A>);
-	REQUIRE_FALSE(is_signed_v<B>);
+	REQUIRE_FALSE(is_signed_v<test::A>);
+	REQUIRE_FALSE(is_signed_v<test::B>);
 	REQUIRE_FALSE(is_signed_v<C>);
 	REQUIRE_FALSE(is_signed_v<D>);
 	REQUIRE_FALSE(is_signed_v<E>);
@@ -756,85 +800,51 @@ TEST_CASE("[C++ 17] is_signed_v helper", "[utility]")
 using substrate::is_abstract_v;
 TEST_CASE("[C++ 17] is_abstract_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { virtual void bar(); virtual ~B() = default; };
-	struct C { virtual void baz() = 0; virtual ~C() = default; };
-	struct D : C {};
+	REQUIRE_FALSE(is_abstract_v<test::O>);
+	REQUIRE_FALSE(is_abstract_v<test::S>);
 
-	REQUIRE_FALSE(is_abstract_v<A>);
-	REQUIRE_FALSE(is_abstract_v<B>);
-
-	REQUIRE(is_abstract_v<C>);
-	REQUIRE(is_abstract_v<D>);
+	REQUIRE(is_abstract_v<test::AB>);
+	REQUIRE(is_abstract_v<test::AC>);
 }
 
 using substrate::is_polymorphic_v;
 TEST_CASE("[C++ 17] is_polymorphic_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { virtual void bar(); virtual ~B() = default; };
-	struct C : B {};
+	REQUIRE_FALSE(is_polymorphic_v<test::S>);
 
-	REQUIRE_FALSE(is_polymorphic_v<A>);
-
-	REQUIRE(is_polymorphic_v<B>);
-	REQUIRE(is_polymorphic_v<C>);
+	REQUIRE(is_polymorphic_v<test::O>);
+	REQUIRE(is_polymorphic_v<test::AD>);
 }
 
-struct SU_is_empty_v_C { static int bar; };
 using substrate::is_empty_v;
 TEST_CASE("[C++ 17] is_empty_v helper", "[utility]")
 {
-	struct A {};
-	struct B { int foo; };
-	struct D { virtual ~D(); };
+	REQUIRE_FALSE(is_empty_v<test::S>);
+	REQUIRE_FALSE(is_empty_v<test::B>);
+	REQUIRE_FALSE(is_empty_v<test::AF>);
+	REQUIRE_FALSE(is_empty_v<test::AG>);
 
-	enum E : int {};
-	union F {};
-
-	REQUIRE_FALSE(is_empty_v<B>);
-	REQUIRE_FALSE(is_empty_v<D>);
-	REQUIRE_FALSE(is_empty_v<E>);
-	REQUIRE_FALSE(is_empty_v<F>);
-
-	REQUIRE(is_empty_v<A>);
-	REQUIRE(is_empty_v<SU_is_empty_v_C>);
+	REQUIRE(is_empty_v<test::A>);
+	REQUIRE(is_empty_v<test::AE>);
+	REQUIRE(is_empty_v<test::SU_is_empty_v>);
 }
 
 using substrate::is_pod_v;
 TEST_CASE("[C++ 17] is_pod_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B
-	{
-		int bar;
-	private:
-		int baz;
-	};
-	struct C { virtual void qux(); virtual ~C() = default; };
+	REQUIRE_FALSE(is_pod_v<test::O>);
+	REQUIRE_FALSE(is_pod_v<test::Z>);
 
-	REQUIRE_FALSE(is_pod_v<B>);
-	REQUIRE_FALSE(is_pod_v<C>);
-
-	REQUIRE(is_pod_v<A>);
+	REQUIRE(is_pod_v<test::S>);
 }
 
 using substrate::is_standard_layout_v;
 TEST_CASE("[C++ 17] is_standard_layout_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B
-	{
-		int bar;
-	private:
-		int baz;
-	};
-	struct C { virtual void qux(); virtual ~C() = default; };
+	REQUIRE_FALSE(is_standard_layout_v<test::O>);
+	REQUIRE_FALSE(is_standard_layout_v<test::Z>);
 
-	REQUIRE_FALSE(is_standard_layout_v<B>);
-	REQUIRE_FALSE(is_standard_layout_v<C>);
-
-	REQUIRE(is_standard_layout_v<A>);
+	REQUIRE(is_standard_layout_v<test::S>);
 }
 
 using substrate::is_trivially_copyable_v;
@@ -1821,84 +1831,43 @@ TEST_CASE("[C++ 17] is_empty_v helper", "[utility]")
 using substrate::is_pod_v;
 TEST_CASE("[C++ 17] is_pod_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B
-	{
-		int bar;
-	private:
-		int baz;
-	};
-	struct C
-	{
-		virtual void qux();
-		virtual ~C() = default;
-	};
+	REQUIRE_FALSE(is_pod_v<test::O>());
+	REQUIRE_FALSE(is_pod_v<test::Z>());
 
-	REQUIRE_FALSE(is_pod_v<B>());
-	REQUIRE_FALSE(is_pod_v<C>());
-
-	REQUIRE(is_pod_v<A>());
+	REQUIRE(is_pod_v<test::S>());
 }
 
 using substrate::is_standard_layout_v;
 TEST_CASE("[C++ 17] is_standard_layout_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B
-	{
-		int bar;
-	private:
-		int baz;
-	};
-	struct C
-	{
-		virtual void qux();
-		virtual ~C() = default;
-	};
+	REQUIRE_FALSE(is_standard_layout_v<test::O>());
+	REQUIRE_FALSE(is_standard_layout_v<test::Z>());
 
-	REQUIRE_FALSE(is_standard_layout_v<B>());
-	REQUIRE_FALSE(is_standard_layout_v<C>());
-
-	REQUIRE(is_standard_layout_v<A>());
+	REQUIRE(is_standard_layout_v<test::S>());
 }
 
 using substrate::is_trivially_copyable_v;
 TEST_CASE("[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { std::string a; };
-	struct C { virtual void baz(); virtual ~C() = default; };
-	struct D
-	{
-		int foo;
-		D(D const &) = default;
-		D(int qux) : foo{qux + 1} { }
-	};
+	REQUIRE_FALSE(is_trivially_copyable_v<test::O>());
+	REQUIRE_FALSE(is_trivially_copyable_v<test::T>());
 
-	REQUIRE_FALSE(is_trivially_copyable_v<B>());
-	REQUIRE_FALSE(is_trivially_copyable_v<C>());
-
-	REQUIRE(is_trivially_copyable_v<A>());
-	REQUIRE(is_trivially_copyable_v<D>());
+	REQUIRE(is_trivially_copyable_v<test::S>());
+	REQUIRE(is_trivially_copyable_v<test::AA>());
 }
 
 using substrate::is_trivial_v;
 TEST_CASE("[C++ 17] is_trivial_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { std::string a; };
+	REQUIRE_FALSE(is_trivial_v<test::T>());
 
-	REQUIRE_FALSE(is_trivial_v<B>());
-
-	REQUIRE(is_trivial_v<A>());
+	REQUIRE(is_trivial_v<test::S>());
 }
 
 using substrate::is_volatile_v;
 TEST_CASE("[C++ 17] is_volatile_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_volatile_v<A>());
+	REQUIRE_FALSE(is_volatile_v<test::A>());
 	REQUIRE_FALSE(is_volatile_v<int>());
 
 	REQUIRE(is_volatile_v<volatile int>());
@@ -1907,9 +1876,7 @@ TEST_CASE("[C++ 17] is_volatile_v helper", "[utility]")
 using substrate::is_const_v;
 TEST_CASE("[C++ 17] is_const_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_const_v<A>());
+	REQUIRE_FALSE(is_const_v<test::A>());
 	REQUIRE_FALSE(is_const_v<int>());
 	REQUIRE_FALSE(is_const_v<const int *>());
 	REQUIRE_FALSE(is_const_v<const int &>());
@@ -1922,12 +1889,9 @@ TEST_CASE("[C++ 17] is_const_v helper", "[utility]")
 using substrate::is_literal_type_v;
 TEST_CASE("[C++ 17] is_literal_type_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { virtual ~B() noexcept = default; };
+	REQUIRE_FALSE(is_literal_type_v<test::T>());
 
-	REQUIRE_FALSE(is_literal_type_v<B>());
-
-	REQUIRE(is_literal_type_v<A>());
+	REQUIRE(is_literal_type_v<test::S>());
 }
 
 #endif
