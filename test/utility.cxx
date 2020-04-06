@@ -118,6 +118,16 @@ namespace test
 
 	struct X { W qux; };
 
+	class Y
+	{
+		int foo;
+		double bar;
+
+	public:
+		Y(int baz) : foo{baz}, bar{} { }
+		Y(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
+	};
+
 	int bar();
 
 	template<typename> struct SU_traits {};
@@ -681,53 +691,26 @@ TEST_CASE("[C++ 17] is_nothrow_default_constructible_v helper", "[utility]")
 using substrate::is_constructible_v;
 TEST_CASE("[C++ 17] is_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_constructible_v<test::Y, test::A>);
 
-	REQUIRE_FALSE(is_constructible_v<A, test::A>);
-
-	REQUIRE(is_constructible_v<A, int>);
-	REQUIRE(is_constructible_v<A, int, double>);
+	REQUIRE(is_constructible_v<test::Y, int>);
+	REQUIRE(is_constructible_v<test::Y, int, double>);
 }
 
 using substrate::is_trivially_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_trivially_constructible_v<test::Y, int>);
 
-	REQUIRE_FALSE(is_trivially_constructible_v<A, int>);
-
-	REQUIRE(is_trivially_constructible_v<A, const A&>);
+	REQUIRE(is_trivially_constructible_v<test::Y, const test::Y &>);
 }
 
 using substrate::is_nothrow_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_nothrow_constructible_v<test::Y, int>);
 
-	REQUIRE_FALSE(is_nothrow_constructible_v<A, int>);
-
-	REQUIRE(is_nothrow_constructible_v<A, int, double>);
+	REQUIRE(is_nothrow_constructible_v<test::Y, int, double>);
 }
 
 using substrate::is_unsigned_v;
