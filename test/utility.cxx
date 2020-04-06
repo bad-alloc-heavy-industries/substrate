@@ -16,6 +16,19 @@ namespace test
 	enum struct C : char {};
 	union D { int a; float b; };
 	struct E { D c; };
+	class F : A {};
+	enum class G {};
+
+	struct H
+	{
+		int foo() const &;
+	};
+
+	int bar();
+
+	template<typename> struct SU_traits {};
+	template<class T, class U> struct SU_traits<U T::*>
+		{ using member_type = U; };
 }
 
 /* C++ 17 helpers */
@@ -113,7 +126,6 @@ TEST_CASE("[C++ 17] is_enum_v helper", "[utility]")
 using substrate::is_union_v;
 TEST_CASE("[C++ 17] is_union_v helper", "[utility]")
 {
-
 	REQUIRE_FALSE(is_union_v<test::A>);
 	REQUIRE_FALSE(is_union_v<test::B>);
 	REQUIRE_FALSE(is_union_v<test::E>);
@@ -126,106 +138,78 @@ TEST_CASE("[C++ 17] is_union_v helper", "[utility]")
 using substrate::is_class_v;
 TEST_CASE("[C++ 17] is_class_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	union C { int a; float b; };
-	struct D { C c; };
-	class E : A {};
-	enum class F {};
-
-	REQUIRE_FALSE(is_class_v<B>);
-	REQUIRE_FALSE(is_class_v<C>);
-	REQUIRE_FALSE(is_class_v<F>);
+	REQUIRE_FALSE(is_class_v<test::B>);
+	REQUIRE_FALSE(is_class_v<test::D>);
+	REQUIRE_FALSE(is_class_v<test::G>);
 	REQUIRE_FALSE(is_class_v<int>);
 	REQUIRE_FALSE(is_class_v<void>);
 
-	REQUIRE(is_class_v<A>);
-	REQUIRE(is_class_v<D>);
-	REQUIRE(is_class_v<E>);
+	REQUIRE(is_class_v<test::A>);
+	REQUIRE(is_class_v<test::E>);
+	REQUIRE(is_class_v<test::F>);
 }
-
-template<typename> struct SU_traits {};
-
-template<class T, class U> struct SU_traits<U T::*>
-{
-	using member_type = U;
-};
 
 using substrate::is_function_v;
 TEST_CASE("[C++ 17] is_function_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	struct C { int foo() const&; };
-	int bar();
-
-	REQUIRE_FALSE(is_function_v<A>);
-	REQUIRE_FALSE(is_function_v<B>);
-	REQUIRE_FALSE(is_function_v<C>);
+	REQUIRE_FALSE(is_function_v<test::A>);
+	REQUIRE_FALSE(is_function_v<test::B>);
+	REQUIRE_FALSE(is_function_v<test::H>);
 	REQUIRE_FALSE(is_function_v<int>);
 	REQUIRE_FALSE(is_function_v<void>);
 
 	REQUIRE(is_function_v<int(void)>);
 	REQUIRE(is_function_v<void(int)>);
-	REQUIRE(is_function_v<decltype(bar)>);
-	REQUIRE(is_function_v<SU_traits<decltype(&C::foo)>::member_type>);
+	REQUIRE(is_function_v<decltype(test::bar)>);
+	REQUIRE(is_function_v<test::SU_traits<decltype(&test::H::foo)>::member_type>);
 }
 
 using substrate::is_pointer_v;
 TEST_CASE("[C++ 17] is_pointer_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-
-	REQUIRE_FALSE(is_pointer_v<A>);
-	REQUIRE_FALSE(is_pointer_v<B&>);
+	REQUIRE_FALSE(is_pointer_v<test::A>);
+	REQUIRE_FALSE(is_pointer_v<test::B &>);
 	REQUIRE_FALSE(is_pointer_v<int>);
 	REQUIRE_FALSE(is_pointer_v<void>);
 	REQUIRE_FALSE(is_pointer_v<char []>);
 	REQUIRE_FALSE(is_pointer_v<bool [1]>);
 	REQUIRE_FALSE(is_pointer_v<std::nullptr_t>);
 
-	REQUIRE(is_pointer_v<A*>);
-	REQUIRE(is_pointer_v<int*>);
-	REQUIRE(is_pointer_v<void**>);
+	REQUIRE(is_pointer_v<test::A *>);
+	REQUIRE(is_pointer_v<int *>);
+	REQUIRE(is_pointer_v<void **>);
 }
 
 using substrate::is_lvalue_reference_v;
 TEST_CASE("[C++ 17] is_lvalue_reference_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_lvalue_reference_v<A>);
-	REQUIRE_FALSE(is_lvalue_reference_v<A&&>);
+	REQUIRE_FALSE(is_lvalue_reference_v<test::A>);
+	REQUIRE_FALSE(is_lvalue_reference_v<test::A &&>);
 	REQUIRE_FALSE(is_lvalue_reference_v<int>);
-	REQUIRE_FALSE(is_lvalue_reference_v<int&&>);
+	REQUIRE_FALSE(is_lvalue_reference_v<int &&>);
 
-	REQUIRE(is_lvalue_reference_v<A&>);
-	REQUIRE(is_lvalue_reference_v<int&>);
+	REQUIRE(is_lvalue_reference_v<test::A &>);
+	REQUIRE(is_lvalue_reference_v<int &>);
 }
 
 using substrate::is_rvalue_reference_v;
 TEST_CASE("[C++ 17] is_rvalue_reference_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_rvalue_reference_v<A>);
-	REQUIRE_FALSE(is_rvalue_reference_v<A&>);
+	REQUIRE_FALSE(is_rvalue_reference_v<test::A>);
+	REQUIRE_FALSE(is_rvalue_reference_v<test::A &>);
 	REQUIRE_FALSE(is_rvalue_reference_v<int>);
-	REQUIRE_FALSE(is_rvalue_reference_v<int&>);
+	REQUIRE_FALSE(is_rvalue_reference_v<int &>);
 
-	REQUIRE(is_rvalue_reference_v<A&&>);
-	REQUIRE(is_rvalue_reference_v<int&&>);
+	REQUIRE(is_rvalue_reference_v<test::A &&>);
+	REQUIRE(is_rvalue_reference_v<int &&>);
 }
 
 using substrate::is_member_object_pointer_v;
 TEST_CASE("[C++ 17] is_member_object_pointer_v helper", "[utility]")
 {
-	class A {};
+	REQUIRE_FALSE(is_member_object_pointer_v<int(test::A::*)()>);
 
-	REQUIRE_FALSE(is_member_object_pointer_v<int(A::*)()>);
-
-	REQUIRE(is_member_object_pointer_v<int(A::*)>);
+	REQUIRE(is_member_object_pointer_v<int(test::A::*)>);
 }
 
 using substrate::is_member_function_pointer_v;
@@ -239,17 +223,14 @@ TEST_CASE("[C++ 17] is_member_function_pointer_v helper", "[utility]")
 using substrate::is_fundamental_v;
 TEST_CASE("[C++ 17] is_fundamental_v helper", "[utility]")
 {
-	class A {};
-	int bar();
-
-	REQUIRE_FALSE(is_fundamental_v<A>);
-	REQUIRE_FALSE(is_fundamental_v<A*>);
-	REQUIRE_FALSE(is_fundamental_v<A&>);
-	REQUIRE_FALSE(is_fundamental_v<A&&>);
-	REQUIRE_FALSE(is_fundamental_v<int*>);
-	REQUIRE_FALSE(is_fundamental_v<int&>);
-	REQUIRE_FALSE(is_fundamental_v<int&&>);
-	REQUIRE_FALSE(is_fundamental_v<decltype(bar)>);
+	REQUIRE_FALSE(is_fundamental_v<test::A>);
+	REQUIRE_FALSE(is_fundamental_v<test::A *>);
+	REQUIRE_FALSE(is_fundamental_v<test::A &>);
+	REQUIRE_FALSE(is_fundamental_v<test::A &&>);
+	REQUIRE_FALSE(is_fundamental_v<int *>);
+	REQUIRE_FALSE(is_fundamental_v<int &>);
+	REQUIRE_FALSE(is_fundamental_v<int &&>);
+	REQUIRE_FALSE(is_fundamental_v<decltype(test::bar)>);
 
 	REQUIRE(is_fundamental_v<int>);
 	REQUIRE(is_fundamental_v<float>);
@@ -259,15 +240,12 @@ TEST_CASE("[C++ 17] is_fundamental_v helper", "[utility]")
 using substrate::is_arithmetic_v;
 TEST_CASE("[C++ 17] is_arithmetic_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-
-	REQUIRE_FALSE(is_arithmetic_v<A>);
-	REQUIRE_FALSE(is_arithmetic_v<B>);
-	REQUIRE_FALSE(is_arithmetic_v<int*>);
-	REQUIRE_FALSE(is_arithmetic_v<int&>);
-	REQUIRE_FALSE(is_arithmetic_v<float*>);
-	REQUIRE_FALSE(is_arithmetic_v<float&>);
+	REQUIRE_FALSE(is_arithmetic_v<test::A>);
+	REQUIRE_FALSE(is_arithmetic_v<test::B>);
+	REQUIRE_FALSE(is_arithmetic_v<int *>);
+	REQUIRE_FALSE(is_arithmetic_v<int &>);
+	REQUIRE_FALSE(is_arithmetic_v<float *>);
+	REQUIRE_FALSE(is_arithmetic_v<float &>);
 
 	REQUIRE(is_arithmetic_v<int>);
 	REQUIRE(is_arithmetic_v<int const>);
@@ -282,18 +260,15 @@ TEST_CASE("[C++ 17] is_arithmetic_v helper", "[utility]")
 using substrate::is_object_v;
 TEST_CASE("[C++ 17] is_object_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
+	REQUIRE_FALSE(is_object_v<test::A &>);
+	REQUIRE_FALSE(is_object_v<test::A &&>);
+	REQUIRE_FALSE(is_object_v<test::B &>);
+	REQUIRE_FALSE(is_object_v<test::B &&>);
+	REQUIRE_FALSE(is_object_v<int &>);
+	REQUIRE_FALSE(is_object_v<int &&>);
 
-	REQUIRE_FALSE(is_object_v<A&>);
-	REQUIRE_FALSE(is_object_v<A&&>);
-	REQUIRE_FALSE(is_object_v<B&>);
-	REQUIRE_FALSE(is_object_v<B&&>);
-	REQUIRE_FALSE(is_object_v<int&>);
-	REQUIRE_FALSE(is_object_v<int&&>);
-
-	REQUIRE(is_object_v<A>);
-	REQUIRE(is_object_v<B>);
+	REQUIRE(is_object_v<test::A>);
+	REQUIRE(is_object_v<test::B>);
 	REQUIRE(is_object_v<int>);
 	REQUIRE(is_object_v<float>);
 }
@@ -301,46 +276,37 @@ TEST_CASE("[C++ 17] is_object_v helper", "[utility]")
 using substrate::is_compound_v;
 TEST_CASE("[C++ 17] is_compound_v helper", "[utility]")
 {
-	class A {};
-
 	REQUIRE_FALSE(is_compound_v<int>);
 
-	REQUIRE(is_compound_v<A>);
+	REQUIRE(is_compound_v<test::A>);
 }
 
 using substrate::is_reference_v;
 TEST_CASE("[C++ 17] is_reference_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_reference_v<A>);
+	REQUIRE_FALSE(is_reference_v<test::A>);
 	REQUIRE_FALSE(is_reference_v<int>);
 
-	REQUIRE(is_reference_v<A&>);
-	REQUIRE(is_reference_v<A&&>);
-	REQUIRE(is_reference_v<int&>);
-	REQUIRE(is_reference_v<int&&>);
+	REQUIRE(is_reference_v<test::A &>);
+	REQUIRE(is_reference_v<test::A &&>);
+	REQUIRE(is_reference_v<int &>);
+	REQUIRE(is_reference_v<int &&>);
 }
 
 using substrate::is_member_pointer_v;
 TEST_CASE("[C++ 17] is_member_pointer_v helper", "[utility]")
 {
-	class A {};
-
 	REQUIRE_FALSE(is_member_pointer_v<int>);
 
-	REQUIRE(is_member_pointer_v<int(A::*)>);
+	REQUIRE(is_member_pointer_v<int(test::A::*)>);
 }
 
 using substrate::is_scalar_v;
 TEST_CASE("[C++ 17] is_scalar_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
+	REQUIRE_FALSE(is_scalar_v<test::A>);
 
-	REQUIRE_FALSE(is_scalar_v<A>);
-
-	REQUIRE(is_scalar_v<B>);
+	REQUIRE(is_scalar_v<test::B>);
 	REQUIRE(is_scalar_v<int>);
 	REQUIRE(is_scalar_v<float>);
 	REQUIRE(is_scalar_v<bool>);
