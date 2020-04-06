@@ -124,190 +124,190 @@ namespace substrate
 /* C++ 17 helpers */
 #if __cplusplus >= 201703L
 	template<class T, class U>
-	using is_same_v = typename std::is_same_v<T, U>;
+	constexpr inline bool is_same_v = std::is_same_v<T, U>;
 
 	template<class T>
-	using is_null_pointer_v = typename std::is_null_pointer_v<T>;
+	constexpr inline bool is_null_pointer_v = std::is_null_pointer_v<T>;
 
 	template<class T>
-	using is_void_v = typename std::is_void_v<T>;
+	constexpr inline bool is_void_v = std::is_void_v<T>;
 
 	template<class T>
-	using is_integral_v = typename std::is_integral_v<T>;
+	constexpr inline bool is_integral_v = std::is_integral_v<T>;
 
 	template<class T>
-	using is_floating_point_v = typename std::is_floating_point_v<T>;
+	constexpr inline bool is_floating_point_v = std::is_floating_point_v<T>;
 
 	template<class T>
-	using is_array_v = typename std::is_array_v<T>;
+	constexpr inline bool is_array_v = std::is_array_v<T>;
 
 	template<class T>
-	using is_enum_v = typename std::is_enum_v<T>;
+	constexpr inline bool is_enum_v = std::is_enum_v<T>;
 
 	template<class T>
-	using is_union_v = typename std::is_union_v<T>;
+	constexpr inline bool is_union_v = std::is_union_v<T>;
 
 	template<class T>
-	using is_class_v = typename std::is_class_v<T>;
+	constexpr inline bool is_class_v = std::is_class_v<T>;
 
 	template<class T>
-	using is_function_v = typename std::is_function_v<T>;
+	constexpr inline bool is_function_v = std::is_function_v<T>;
 
 	template<class T>
-	using is_pointer_v = typename std::is_pointer_v<T>;
+	constexpr inline bool is_pointer_v = std::is_pointer_v<T>;
 
 	template<class T>
-	using is_lvalue_reference_v = typename std::is_lvalue_reference_v<T>;
+	constexpr inline bool is_lvalue_reference_v = std::is_lvalue_reference_v<T>;
 
 	template<class T>
-	using is_rvalue_reference_v = typename std::is_rvalue_reference_v<T>;
+	constexpr inline bool is_rvalue_reference_v = std::is_rvalue_reference_v<T>;
 
 	template<class T>
-	using is_member_object_pointer_v = typename std::is_member_object_pointer_v<T>;
+	constexpr inline bool is_member_object_pointer_v = std::is_member_object_pointer_v<T>;
 
 	template<class T>
-	using is_member_function_pointer_v = typename std::is_member_function_pointer_v<T>;
+	constexpr inline bool is_member_function_pointer_v = std::is_member_function_pointer_v<T>;
 
 	template<class T>
-	using is_fundamental_v = typename std::is_fundamental_v<T>;
+	constexpr inline bool is_fundamental_v = std::is_fundamental_v<T>;
 
 	template<class T>
-	using is_arithmetic_v = typename std::is_arithmetic_v<T>;
+	constexpr inline bool is_arithmetic_v = std::is_arithmetic_v<T>;
 
 	template<class T>
-	using is_object_v = typename std::is_object_v<T>;
+	constexpr inline bool is_object_v = std::is_object_v<T>;
 
 	template<class T>
-	using is_compound_v = typename std::is_compound_v<T>;
+	constexpr inline bool is_compound_v = std::is_compound_v<T>;
 
 	template<class T>
-	using is_reference_v = typename std::is_reference_v<T>;
+	constexpr inline bool is_reference_v = std::is_reference_v<T>;
 
 	template<class T>
-	using is_member_pointer_v = typename std::is_member_pointer_v<T>;
+	constexpr inline bool is_member_pointer_v = std::is_member_pointer_v<T>;
 
 	template<class T>
-	using is_scalar_v = typename std::is_scalar_v<T>;
+	constexpr inline bool is_scalar_v = std::is_scalar_v<T>;
 
 	template<class T, class U>
-	using is_base_of_v = typename std::is_base_of_v<T, U>;
+	constexpr inline bool is_base_of_v = std::is_base_of_v<T, U>;
 
 	template<class T, class U>
-	using is_convertible_v = typename std::is_convertible_v<T, U>;
+	constexpr inline bool is_convertible_v = std::is_convertible_v<T, U>;
 
 	template<class T>
-	using has_virtual_destructor_v = typename std::has_virtual_destructor_v<T>;
+	constexpr inline bool has_virtual_destructor_v = std::has_virtual_destructor_v<T>;
 
 	template<class T>
-	using is_destructible_v = typename std::is_destructible_v<T>;
+	constexpr inline bool is_destructible_v = std::is_destructible_v<T>;
 
 	template<class T>
-	using is_trivially_destructible_v = typename std::is_trivially_destructible_v<T>;
+	constexpr inline bool is_trivially_destructible_v = std::is_trivially_destructible_v<T>;
 
 	template<class T>
-	using is_nothrow_destructible_v = typename std::is_nothrow_destructible_v<T>;
+	constexpr inline bool is_nothrow_destructible_v = std::is_nothrow_destructible_v<T>;
 
 	template<class T>
-	using is_move_assignable_v = typename std::is_move_assignable<T>;
+	constexpr inline bool is_move_assignable_v = std::is_move_assignable_v<T>;
 
 	template<class T>
-	using is_trivially_move_assignable_v = typename std::is_trivially_move_assignable_v<T>;
+	constexpr inline bool is_trivially_move_assignable_v = std::is_trivially_move_assignable_v<T>;
 
 	template<class T>
-	using is_nothrow_move_assignable_v = typename std::is_nothrow_move_assignable_v<T>;
+	constexpr inline bool is_nothrow_move_assignable_v = std::is_nothrow_move_assignable_v<T>;
 
 	template<class T>
-	using is_copy_assignable_v = typename std::is_copy_assignable_v<T>;
+	constexpr inline bool is_copy_assignable_v = std::is_copy_assignable_v<T>;
 
 	template<class T>
-	using is_trivially_copy_assignable_v = typename std::is_trivially_copy_assignable_v<T>;
+	constexpr inline bool is_trivially_copy_assignable_v = std::is_trivially_copy_assignable_v<T>;
 
 	template<class T>
-	using is_nothrow_copy_assignable_v = typename std::is_nothrow_copy_assignable_v<T>;
+	constexpr inline bool is_nothrow_copy_assignable_v = std::is_nothrow_copy_assignable_v<T>;
 
 	template<class T, class U>
-	using is_assignable_v = typename std::is_assignable_v<T, U>;
+	constexpr inline bool is_assignable_v = std::is_assignable_v<T, U>;
 
 	template<class T, class U>
-	using is_trivially_assignable_v = typename std::is_trivially_assignable_c<T, U>;
+	constexpr inline bool is_trivially_assignable_v = std::is_trivially_assignable_v<T, U>;
 
 	template<class T, class U>
-	using is_nothrow_assignable_v = typename std::is_nothrow_assignable_v<T, U>;
+	constexpr inline bool is_nothrow_assignable_v = std::is_nothrow_assignable_v<T, U>;
 
 	template<class T>
-	using is_move_constructible_v = typename std::is_move_constructible_v<T>;
+	constexpr inline bool is_move_constructible_v = std::is_move_constructible_v<T>;
 
 	template<class T>
-	using is_trivially_move_constructible_v = typename std::is_trivially_move_constructible_v<T>;
+	constexpr inline bool is_trivially_move_constructible_v = std::is_trivially_move_constructible_v<T>;
 
 	template<class T>
-	using is_nothrow_move_constructible_v = typename std::is_nothrow_move_constructible_v<T>;
+	constexpr inline bool is_nothrow_move_constructible_v = std::is_nothrow_move_constructible_v<T>;
 
 	template<class T>
-	using is_copy_constructible_v = typename std::is_copy_constructible_v<T>;
+	constexpr inline bool is_copy_constructible_v = std::is_copy_constructible_v<T>;
 
 	template<class T>
-	using is_trivially_copy_constructible_v = typename std::is_trivially_copy_constructible_v<T>;
+	constexpr inline bool is_trivially_copy_constructible_v = std::is_trivially_copy_constructible_v<T>;
 
 	template<class T>
-	using is_nothrow_copy_constructible_v = typename std::is_nothrow_copy_constructible_v<T>;
+	constexpr inline bool is_nothrow_copy_constructible_v = std::is_nothrow_copy_constructible_v<T>;
 
 	template<class T>
-	using is_default_constructible_v = typename std::is_default_constructible_v<T>;
+	constexpr inline bool is_default_constructible_v = std::is_default_constructible_v<T>;
 
 	template<class T>
-	using is_trivially_default_constructible_v = typename std::is_trivially_default_constructible_v<T>;
+	constexpr inline bool is_trivially_default_constructible_v = std::is_trivially_default_constructible_v<T>;
 
 	template<class T>
-	using is_nothrow_default_constructible_v = typename std::is_nothrow_default_constructible_v<T>;
+	constexpr inline bool is_nothrow_default_constructible_v = std::is_nothrow_default_constructible_v<T>;
 
 	template<class T, class... Args>
-	using is_constructible_v = typename std::is_constructible_v<T, Args...>;
+	constexpr inline bool is_constructible_v = std::is_constructible_v<T, Args...>;
 
 	template<class T, class... Args>
-	using is_trivially_constructible_v = typename std::is_trivially_constructible_v<T, Args...>;
+	constexpr inline bool is_trivially_constructible_v = std::is_trivially_constructible_v<T, Args...>;
 
 	template<class T, class... Args>
-	using is_nothrow_constructible_v = typename std::is_nothrow_constructible_v<T, Args...>;
+	constexpr inline bool is_nothrow_constructible_v = std::is_nothrow_constructible_v<T, Args...>;
 
 	template<class T>
-	using is_unsigned_v = typename std::is_unsigned_v<T>;
+	constexpr inline bool is_unsigned_v = std::is_unsigned_v<T>;
 
 	template<class T>
-	using is_signed_v = typename std::is_signed_v<T>;
+	constexpr inline bool is_signed_v = std::is_signed_v<T>;
 
 	template<class T>
-	using is_abstract_v = typename std::is_abstract_v<T>;
+	constexpr inline bool is_abstract_v = std::is_abstract_v<T>;
 
 	template<class T>
-	using is_polymorphic_v = typename std::is_polymorphic_v<T>;
+	constexpr inline bool is_polymorphic_v = std::is_polymorphic_v<T>;
 
 	template<class T>
-	using is_empty_v = typename std::is_empty_v<T>;
+	constexpr inline bool is_empty_v = std::is_empty_v<T>;
 
 	template<class T>
-	using is_pod_v = typename std::is_pod_v<T>;
+	constexpr inline bool is_pod_v = std::is_pod_v<T>;
 
 	template<class T>
-	using is_standard_layout_v = typename std::is_standard_layout_v<T>;
+	constexpr inline bool is_standard_layout_v = std::is_standard_layout_v<T>;
 
 	template<class T>
-	using is_trivially_copyable_v = typename std::is_trivially_copyable_v<T>;
+	constexpr inline bool is_trivially_copyable_v = std::is_trivially_copyable_v<T>;
 
 	template<class T>
-	using is_trivial_v = typename std::is_trivial_v<T>;
+	constexpr inline bool is_trivial_v = std::is_trivial_v<T>;
 
 	template<class T>
-	using is_volatile_v = typename std::is_volatile_v<T>;
+	constexpr inline bool is_volatile_v = std::is_volatile_v<T>;
 
 	template<class T>
-	using is_const_v = typename std::is_const_v<T>;
+	constexpr inline bool is_const_v = std::is_const_v<T>;
 
 	template<class T>
-	using is_literal_type_v = typename std::is_literal_type_v<T>;
+	constexpr inline bool is_literal_type_v = std::is_literal_type_v<T>;
 
 	template<class T>
-	using is_final_v = typename std::is_final_v<T>;
+	constexpr inline bool is_final_v = std::is_final_v<T>;
 #else
 	/* Due to the fact these use variable templates, they are only supported in C++ 14 */
 #if __cplusplus >= 201402L
