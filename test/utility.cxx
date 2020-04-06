@@ -588,7 +588,7 @@ TEST_CASE("[C++ 17] is_nothrow_assignable_v helper", "[utility]")
 	REQUIRE_FALSE(is_nothrow_assignable_v<int, int &>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<int, float>);
 
-	REQUIRE(is_nothrow_assignable_v<A　&, A &>);
+	REQUIRE(is_nothrow_assignable_v<A &, A &>);
 	REQUIRE(is_nothrow_assignable_v<int &, int>);
 	REQUIRE(is_nothrow_assignable_v<int &, int &>);
 	REQUIRE(is_nothrow_assignable_v<int &, float>);
@@ -599,9 +599,9 @@ TEST_CASE("[C++ 17] is_move_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
 	struct B { int bar; B(B&&) = default; };
-	struct C { C(C　&&) { throw this; } };
+	struct C { C(C &&) { throw this; } };
 	struct D { C qux; };
-	struct E { E(E　&&) = delete; };
+	struct E { E(E &&) = delete; };
 
 	REQUIRE_FALSE(is_move_constructible_v<E>);
 
@@ -615,10 +615,10 @@ using substrate::is_trivially_move_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_move_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
-	struct B { int bar; B(B　&&) = default; };
-	struct C { C(C　&&) { throw this; } };
+	struct B { int bar; B(B &&) = default; };
+	struct C { C(C &&) { throw this; } };
 	struct D { C qux; };
-	struct E { E(E　&&) = delete; };
+	struct E { E(E &&) = delete; };
 
 	REQUIRE_FALSE(is_trivially_move_constructible_v<A>);
 	REQUIRE_FALSE(is_trivially_move_constructible_v<C>);
@@ -632,10 +632,10 @@ using substrate::is_nothrow_move_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_move_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
-	struct B { int bar; B(B　&&) = default; };
-	struct C { C(C　&&) { throw this; } };
+	struct B { int bar; B(B &&) = default; };
+	struct C { C(C &&) { throw this; } };
 	struct D { C qux; };
-	struct E { E(E　&&) = delete; };
+	struct E { E(E &&) = delete; };
 
 	REQUIRE_FALSE(is_nothrow_move_constructible_v<C>);
 	REQUIRE_FALSE(is_nothrow_move_constructible_v<D>);
@@ -649,10 +649,10 @@ using substrate::is_copy_constructible_v;
 TEST_CASE("[C++ 17] is_copy_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
-	struct B { int bar; B(const B　&) = default; };
-	struct C { C(const C　&) { throw this; } };
+	struct B { int bar; B(const B &) = default; };
+	struct C { C(const C &) { throw this; } };
 	struct D { C qux; };
-	struct E { E(const E　&) = delete; };
+	struct E { E(const E &) = delete; };
 
 	REQUIRE_FALSE(is_copy_constructible_v<E>);
 
@@ -666,10 +666,10 @@ using substrate::is_trivially_copy_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_copy_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
-	struct B { int bar; B(const B　&) = default; };
-	struct C { C(const C　&) { throw this; } };
+	struct B { int bar; B(const B &) = default; };
+	struct C { C(const C &) { throw this; } };
 	struct D { C qux; };
-	struct E { E(const E　&) = delete; };
+	struct E { E(const E &) = delete; };
 
 	REQUIRE_FALSE(is_trivially_copy_constructible_v<A>);
 	REQUIRE_FALSE(is_trivially_copy_constructible_v<C>);
@@ -683,10 +683,10 @@ using substrate::is_nothrow_copy_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_copy_constructible_v helper", "[utility]")
 {
 	struct A { std::string foo; };
-	struct B { int bar; B(const B　&) = default; };
-	struct C { C(const C　&) { throw this; } };
+	struct B { int bar; B(const B &) = default; };
+	struct C { C(const C &) { throw this; } };
 	struct D { C qux; };
-	struct E { E(const E　&) = delete; };
+	struct E { E(const E &) = delete; };
 
 	REQUIRE_FALSE(is_nothrow_copy_constructible_v<E>);
 	REQUIRE_FALSE(is_nothrow_copy_constructible_v<A>);
