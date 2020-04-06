@@ -9,23 +9,30 @@
 #include <substrate/utility>
 #include <catch.hpp>
 
+namespace test
+{
+	class A {};
+	enum B : int {};
+	enum struct C : char {};
+	union D { int a; float b; };
+	struct E { D c; };
+}
+
 /* C++ 17 helpers */
 #if __cplusplus < 201703L && __cplusplus >= 201402L
 
 using substrate::is_same_v;
 TEST_CASE("[C++ 17] is_same_v helper", "[utility]")
 {
-	class A {};
-
 	using uint = unsigned int;
 	using sint = signed int;
 
 	REQUIRE_FALSE(is_same_v<int, bool>);
 	REQUIRE_FALSE(is_same_v<float, int>);
-	REQUIRE_FALSE(is_same_v<A, int>);
+	REQUIRE_FALSE(is_same_v<test::A, int>);
 	REQUIRE_FALSE(is_same_v<uint, sint>);
 
-	REQUIRE(is_same_v<A, A>);
+	REQUIRE(is_same_v<test::A, test::A>);
 	REQUIRE(is_same_v<uint, unsigned int>);
 	REQUIRE(is_same_v<sint, signed int>);
 }
@@ -47,11 +54,8 @@ TEST_CASE("[C++ 17] is_void_v helper", "[utility]")
 using substrate::is_integral_v;
 TEST_CASE("[C++ 17] is_integral_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-
-	REQUIRE_FALSE(is_integral_v<A>);
-	REQUIRE_FALSE(is_integral_v<B>);
+	REQUIRE_FALSE(is_integral_v<test::A>);
+	REQUIRE_FALSE(is_integral_v<test::B>);
 	REQUIRE_FALSE(is_integral_v<float>);
 	REQUIRE_FALSE(is_integral_v<double>);
 
@@ -65,11 +69,8 @@ TEST_CASE("[C++ 17] is_integral_v helper", "[utility]")
 using substrate::is_floating_point_v;
 TEST_CASE("[C++ 17] is_floating_point_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-
-	REQUIRE_FALSE(is_floating_point_v<A>);
-	REQUIRE_FALSE(is_floating_point_v<B>);
+	REQUIRE_FALSE(is_floating_point_v<test::A>);
+	REQUIRE_FALSE(is_floating_point_v<test::B>);
 	REQUIRE_FALSE(is_floating_point_v<int>);
 	REQUIRE_FALSE(is_floating_point_v<bool>);
 	REQUIRE_FALSE(is_floating_point_v<unsigned int>);
@@ -82,18 +83,15 @@ TEST_CASE("[C++ 17] is_floating_point_v helper", "[utility]")
 using substrate::is_array_v;
 TEST_CASE("[C++ 17] is_array_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-
-	REQUIRE_FALSE(is_array_v<A>);
-	REQUIRE_FALSE(is_array_v<B>);
+	REQUIRE_FALSE(is_array_v<test::A>);
+	REQUIRE_FALSE(is_array_v<test::B>);
 	REQUIRE_FALSE(is_array_v<int>);
 	REQUIRE_FALSE(is_array_v<bool>);
 
-	REQUIRE(is_array_v<A []>);
-	REQUIRE(is_array_v<A [2]>);
-	REQUIRE(is_array_v<B []>);
-	REQUIRE(is_array_v<B [4]>);
+	REQUIRE(is_array_v<test::A []>);
+	REQUIRE(is_array_v<test::A [2]>);
+	REQUIRE(is_array_v<test::B []>);
+	REQUIRE(is_array_v<test::B [4]>);
 	REQUIRE(is_array_v<int []>);
 	REQUIRE(is_array_v<int [8]>);
 	REQUIRE(is_array_v<bool []>);
@@ -103,34 +101,26 @@ TEST_CASE("[C++ 17] is_array_v helper", "[utility]")
 using substrate::is_enum_v;
 TEST_CASE("[C++ 17] is_enum_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	enum struct C : char {};
-
-	REQUIRE_FALSE(is_enum_v<A>);
+	REQUIRE_FALSE(is_enum_v<test::A>);
 	REQUIRE_FALSE(is_enum_v<int>);
 	REQUIRE_FALSE(is_enum_v<bool>);
 
-	REQUIRE(is_enum_v<B>);
-	REQUIRE(is_enum_v<C>);
+	REQUIRE(is_enum_v<test::B>);
+	REQUIRE(is_enum_v<test::C>);
 
 }
 
 using substrate::is_union_v;
 TEST_CASE("[C++ 17] is_union_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	union C { int a; float b; };
-	struct D { C c; };
 
-	REQUIRE_FALSE(is_union_v<A>);
-	REQUIRE_FALSE(is_union_v<B>);
-	REQUIRE_FALSE(is_union_v<D>);
+	REQUIRE_FALSE(is_union_v<test::A>);
+	REQUIRE_FALSE(is_union_v<test::B>);
+	REQUIRE_FALSE(is_union_v<test::E>);
 	REQUIRE_FALSE(is_union_v<int>);
 	REQUIRE_FALSE(is_union_v<void>);
 
-	REQUIRE(is_union_v<C>);
+	REQUIRE(is_union_v<test::D>);
 }
 
 using substrate::is_class_v;
