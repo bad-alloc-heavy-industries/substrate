@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <string>
 #include <random>
+#include <exception>
 
 #if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
 #	define SUBSTRATE_CXX11_COMPAT
@@ -28,7 +29,12 @@ namespace test
 	class J : I {};
 	class K {};
 	class L : public A {};
-	struct M { A a; operator A() { return a; } };
+
+	struct M
+	{
+		A a;
+		operator A() { return a; }
+	};
 
 	struct N
 	{
@@ -42,13 +48,14 @@ namespace test
 
 	struct O
 	{
-		virtual void baz();
 		O() = default;
 		O(const O &) = delete;
 		O(O &&) = delete;
 		virtual ~O() = default;
 		O &operator =(const O &) = delete;
 		O &operator =(O &&) = delete;
+
+		virtual void baz();
 	};
 
 	struct P
@@ -98,6 +105,18 @@ namespace test
 	};
 
 	struct V { U qux; };
+
+	struct W
+	{
+		W() { throw std::exception{}; }
+		W(const W &) { throw std::exception{}; } // NOLINT(cert-err09-cpp)
+		W(W &&) { throw std::exception{}; } // NOLINT(cert-err09-cpp,bugprone-exception-escape,performance-noexcept-move-constructor)
+		~W() noexcept = default;
+		W &operator =(const W &) = default;
+		W &operator =(W &&) = default;
+	};
+
+	struct X { W qux; };
 
 	int bar();
 
@@ -422,8 +441,8 @@ TEST_CASE("[C++ 17] has_virtual_destructor_v helper", "[utility]")
 using substrate::is_destructible_v;
 TEST_CASE("[C++ 17] is_destructible_v helper", "[utility]")
 {
-	REQUIRE(is_destructible_v<test::Q>);
 	REQUIRE(is_destructible_v<test::P>);
+	REQUIRE(is_destructible_v<test::Q>);
 }
 
 using substrate::is_trivially_destructible_v;
@@ -437,8 +456,8 @@ TEST_CASE("[C++ 17] is_trivially_destructible_v helper", "[utility]")
 using substrate::is_nothrow_destructible_v;
 TEST_CASE("[C++ 17] is_nothrow_destructible_v helper", "[utility]")
 {
-	REQUIRE(is_nothrow_destructible_v<test::Q>);
 	REQUIRE(is_nothrow_destructible_v<test::P>);
+	REQUIRE(is_nothrow_destructible_v<test::Q>);
 }
 
 using substrate::is_move_assignable_v;
@@ -448,8 +467,8 @@ TEST_CASE("[C++ 17] is_move_assignable_v helper", "[utility]")
 	REQUIRE_FALSE(is_move_assignable_v<int [4]>);
 
 	REQUIRE(is_move_assignable_v<test::A>);
-	REQUIRE(is_move_assignable_v<test::S>);
 	REQUIRE(is_move_assignable_v<test::R>);
+	REQUIRE(is_move_assignable_v<test::S>);
 	REQUIRE(is_move_assignable_v<int>);
 }
 
@@ -512,8 +531,8 @@ TEST_CASE("[C++ 17] is_nothrow_copy_assignable_v helper", "[utility]")
 using substrate::is_assignable_v;
 TEST_CASE("[C++ 17] is_assignable_v helper", "[utility]")
 {
-	REQUIRE_FALSE(is_assignable_v<test::V, int>);
 	REQUIRE_FALSE(is_assignable_v<test::S, int>);
+	REQUIRE_FALSE(is_assignable_v<test::V, int>);
 	REQUIRE_FALSE(is_assignable_v<int, int>);
 	REQUIRE_FALSE(is_assignable_v<int, int &>);
 	REQUIRE_FALSE(is_assignable_v<int, float>);
@@ -528,9 +547,9 @@ TEST_CASE("[C++ 17] is_assignable_v helper", "[utility]")
 using substrate::is_trivially_assignable_v;
 TEST_CASE("[C++ 17] is_trivially_assignable_v helper", "[utility]")
 {
+	REQUIRE_FALSE(is_trivially_assignable_v<test::S, int>);
 	REQUIRE_FALSE(is_trivially_assignable_v<test::U, int>);
 	REQUIRE_FALSE(is_trivially_assignable_v<test::V, int>);
-	REQUIRE_FALSE(is_trivially_assignable_v<test::S, int>);
 	REQUIRE_FALSE(is_trivially_assignable_v<int, int>);
 	REQUIRE_FALSE(is_trivially_assignable_v<int, int&>);
 	REQUIRE_FALSE(is_trivially_assignable_v<int, float>);
@@ -544,9 +563,9 @@ TEST_CASE("[C++ 17] is_trivially_assignable_v helper", "[utility]")
 using substrate::is_nothrow_assignable_v;
 TEST_CASE("[C++ 17] is_nothrow_assignable_v helper", "[utility]")
 {
+	REQUIRE_FALSE(is_nothrow_assignable_v<test::S, int>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<test::U, int>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<test::V, int>);
-	REQUIRE_FALSE(is_nothrow_assignable_v<test::S, int>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<int, int>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<int, int &>);
 	REQUIRE_FALSE(is_nothrow_assignable_v<int, float>);
