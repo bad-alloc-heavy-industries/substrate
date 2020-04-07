@@ -850,8 +850,6 @@ TEST_CASE("[C++ 17] is_standard_layout_v helper", "[utility]")
 using substrate::is_trivially_copyable_v;
 TEST_CASE("[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { B(B const &) { } };
 	struct C { virtual void baz(); virtual ~C() = default; };
 	struct D
 	{
@@ -860,30 +858,25 @@ TEST_CASE("[C++ 17] is_trivially_copyable_v helper", "[utility]")
 		D(int qux) : foo{qux + 1} { }
 	};
 
-	REQUIRE_FALSE(is_trivially_copyable_v<B>);
+	REQUIRE_FALSE(is_trivially_copyable_v<test::Q>);
 	REQUIRE_FALSE(is_trivially_copyable_v<C>);
 
-	REQUIRE(is_trivially_copyable_v<A>);
+	REQUIRE(is_trivially_copyable_v<test::S>);
 	REQUIRE(is_trivially_copyable_v<D>);
 }
 
 using substrate::is_trivial_v;
 TEST_CASE("[C++ 17] is_trivial_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { B() { } };
+	REQUIRE_FALSE(is_trivial_v<test::Q>);
 
-	REQUIRE_FALSE(is_trivial_v<B>);
-
-	REQUIRE(is_trivial_v<A>);
+	REQUIRE(is_trivial_v<test::S>);
 }
 
 using substrate::is_volatile_v;
 TEST_CASE("[C++ 17] is_volatile_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_volatile_v<A>);
+	REQUIRE_FALSE(is_volatile_v<test::A>);
 	REQUIRE_FALSE(is_volatile_v<int>);
 
 	REQUIRE(is_volatile_v<volatile int>);
@@ -892,9 +885,7 @@ TEST_CASE("[C++ 17] is_volatile_v helper", "[utility]")
 using substrate::is_const_v;
 TEST_CASE("[C++ 17] is_const_v helper", "[utility]")
 {
-	class A {};
-
-	REQUIRE_FALSE(is_const_v<A>);
+	REQUIRE_FALSE(is_const_v<test::A>);
 	REQUIRE_FALSE(is_const_v<int>);
 	REQUIRE_FALSE(is_const_v<const int *>);
 	REQUIRE_FALSE(is_const_v<const int &>);
