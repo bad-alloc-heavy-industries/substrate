@@ -169,9 +169,22 @@ namespace test
 		AG() = default;
 		AG(const AG &) = delete;
 		AG(AG &&) = delete;
-		virtual ~AG();
+		virtual ~AG() = default;
 		AG &operator =(const AG &) = delete;
 		AG &operator =(AG &&) = delete;
+	};
+
+	struct AH
+	{
+		int foo;
+
+		AH() = default;
+		AH(int qux) : foo{qux + 1} { }
+		AH(const AH &) = default;
+		AH(AH &&) = default;
+		~AH() = default;
+		AH &operator =(const AH &) = default;
+		AH &operator =(AH &&) = default;
 	};
 
 	int bar();
@@ -850,19 +863,11 @@ TEST_CASE("[C++ 17] is_standard_layout_v helper", "[utility]")
 using substrate::is_trivially_copyable_v;
 TEST_CASE("[C++ 17] is_trivially_copyable_v helper", "[utility]")
 {
-	struct C { virtual void baz(); virtual ~C() = default; };
-	struct D
-	{
-		int foo;
-		D(D const &) = default;
-		D(int qux) : foo{qux + 1} { }
-	};
-
+	REQUIRE_FALSE(is_trivially_copyable_v<test::O>);
 	REQUIRE_FALSE(is_trivially_copyable_v<test::Q>);
-	REQUIRE_FALSE(is_trivially_copyable_v<C>);
 
 	REQUIRE(is_trivially_copyable_v<test::S>);
-	REQUIRE(is_trivially_copyable_v<D>);
+	REQUIRE(is_trivially_copyable_v<test::AH>);
 }
 
 using substrate::is_trivial_v;
@@ -898,12 +903,9 @@ TEST_CASE("[C++ 17] is_const_v helper", "[utility]")
 using substrate::is_literal_type_v;
 TEST_CASE("[C++ 17] is_literal_type_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { virtual ~B(); };
+	REQUIRE_FALSE(is_literal_type_v<test::AG>);
 
-	REQUIRE_FALSE(is_literal_type_v<B>);
-
-	REQUIRE(is_literal_type_v<A>);
+	REQUIRE(is_literal_type_v<test::S>);
 }
 
 #elif defined(SUBSTRATE_CXX11_COMPAT)
