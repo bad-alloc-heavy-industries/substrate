@@ -1037,7 +1037,7 @@ TEST_CASE("[C++ 17] is_function_v helper", "[utility]")
 	REQUIRE(is_function_v<int(void)>());
 	REQUIRE(is_function_v<void(int)>());
 	REQUIRE(is_function_v<decltype(test::bar)>());
-	REQUIRE(is_function_v<test::SU_traits<decltype(&C::foo)>::member_type>());
+	REQUIRE(is_function_v<test::SU_traits<decltype(&test::H::foo)>::member_type>());
 }
 
 using substrate::is_pointer_v;
@@ -1083,9 +1083,9 @@ TEST_CASE("[C++ 17] is_rvalue_reference_v helper", "[utility]")
 using substrate::is_member_object_pointer_v;
 TEST_CASE("[C++ 17] is_member_object_pointer_v helper", "[utility]")
 {
-	REQUIRE_FALSE(is_member_object_pointer_v<int(test::test::A::*)()>());
+	REQUIRE_FALSE(is_member_object_pointer_v<int(test::A::*)()>());
 
-	REQUIRE(is_member_object_pointer_v<int(A::*)>());
+	REQUIRE(is_member_object_pointer_v<int(test::A::*)>());
 }
 
 using substrate::is_member_function_pointer_v;
