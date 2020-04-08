@@ -1216,55 +1216,32 @@ TEST_CASE("[C++ 17] is_convertible_v helper", "[utility]")
 using substrate::has_virtual_destructor_v;
 TEST_CASE("[C++ 17] has_virtual_destructor_v helper", "[utility]")
 {
-	class A { ~A() { } };
-	class B { virtual ~B() = 0; };
+	REQUIRE_FALSE(has_virtual_destructor_v<test::P>());
 
-	REQUIRE_FALSE(has_virtual_destructor_v<A>());
-
-	REQUIRE(has_virtual_destructor_v<B>());
+	REQUIRE(has_virtual_destructor_v<test::N>());
+	REQUIRE(has_virtual_destructor_v<test::O>());
 }
 
 using substrate::is_destructible_v;
 TEST_CASE("[C++ 17] is_destructible_v helper", "[utility]")
 {
-	struct A
-	{
-		std::string foo;
-		~A() noexcept { }
-	};
-	struct B { ~B() = default; };
-
-	REQUIRE(is_destructible_v<A>());
-	REQUIRE(is_destructible_v<B>());
+	REQUIRE(is_destructible_v<test::P>());
+	REQUIRE(is_destructible_v<test::Q>());
 }
 
 using substrate::is_trivially_destructible_v;
 TEST_CASE("[C++ 17] is_trivially_destructible_v helper", "[utility]")
 {
-	struct A
-	{
-		std::string foo;
-		~A() noexcept { }
-	};
-	struct B { ~B() = default; };
+	REQUIRE_FALSE(is_trivially_destructible_v<test::Q>());
 
-	REQUIRE_FALSE(is_trivially_destructible_v<A>());
-
-	REQUIRE(is_trivially_destructible_v<B>());
+	REQUIRE(is_trivially_destructible_v<test::P>());
 }
 
 using substrate::is_nothrow_destructible_v;
 TEST_CASE("[C++ 17] is_nothrow_destructible_v helper", "[utility]")
 {
-	struct A
-	{
-		std::string foo;
-		~A() noexcept { }
-	};
-	struct B { ~B() = default; };
-
-	REQUIRE(is_nothrow_destructible_v<A>());
-	REQUIRE(is_nothrow_destructible_v<B>());
+	REQUIRE(is_nothrow_destructible_v<test::P>());
+	REQUIRE(is_nothrow_destructible_v<test::Q>());
 }
 
 using substrate::is_move_assignable_v;
