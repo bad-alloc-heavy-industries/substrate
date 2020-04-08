@@ -187,6 +187,8 @@ namespace test
 		AH &operator =(AH &&) = default;
 	};
 
+	struct AI { void foo() { } };
+
 	int bar();
 
 	template<typename> struct SU_traits {};
@@ -380,9 +382,9 @@ TEST_CASE("[C++ 17] is_member_object_pointer_v helper", "[utility]")
 using substrate::is_member_function_pointer_v;
 TEST_CASE("[C++ 17] is_member_function_pointer_v helper", "[utility]")
 {
-	struct A { void foo() { } };
+	REQUIRE_FALSE(is_member_function_pointer_v<decltype(test::bar)>);
 
-	REQUIRE(is_member_function_pointer_v<decltype(&A::foo)>);
+	REQUIRE(is_member_function_pointer_v<decltype(&test::AI::foo)>);
 }
 
 using substrate::is_fundamental_v;
@@ -1091,9 +1093,9 @@ TEST_CASE("[C++ 17] is_member_object_pointer_v helper", "[utility]")
 using substrate::is_member_function_pointer_v;
 TEST_CASE("[C++ 17] is_member_function_pointer_v helper", "[utility]")
 {
-	struct A { void foo() { } };
+	REQUIRE_FALSE(is_member_function_pointer_v<decltype(test::bar)>());
 
-	REQUIRE(is_member_function_pointer_v<decltype(&A::foo)>());
+	REQUIRE(is_member_function_pointer_v<decltype(&test::AI::foo)>());
 }
 
 using substrate::is_fundamental_v;
