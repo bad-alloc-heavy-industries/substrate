@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INTERNAL_TLS_DUMMY
+#define SUBSTRATE_INTERNAL_TLS_DUMMY
+
+#include <string>
+#include <cstdint>
+
+#include <substrate/internal/tls_wrapper>
+
+namespace substrate {
+	namespace internal {
+		struct tlsDummy final : public tlsWrapper {
+			tlsDummy() noexcept { }
+			~tlsDummy() noexcept { }
+
+			bool valid() const noexcept { return true; }
+			bool connect(int32_t, std::string) noexcept { return true; }
+			const std::string getError() noexcept { return "no error"; }
+		};
+	}
+}
+
+#endif /* SUBSTRATE_INTERNAL_TLS_DUMMY */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

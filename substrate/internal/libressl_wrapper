@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INTERNAL_LIBRESSL_WRAPPER
+#define SUBSTRATE_INTERNAL_LIBRESSL_WRAPPER
+#ifndef SUBSTRATE_SOCKET_TLS
+#	error "SUBSTRATE_SOCKET_TLS is not defined, no TLS support for sockets has been enabled"
+#endif
+#ifndef SUBSTRATE_SOCKET_TLS_LIBRESSL
+#	error "LibreSSL support for substrate sockets was not enabled"
+#endif
+
+#include <string>
+#include <cstdint>
+
+#include <substrate/internal/tls_wrapper>
+
+#include <libressl/tls.h>
+
+namespace substrate {
+	namespace internal {
+		struct libresslWrapper final : public tlsWrapper {
+		private:
+			bool isValid;
+			struct tls *_tls;
+			struct tls_config *_tlsCfg;
+		public:
+			libresslWrapper() noexcept :
+				isValid{!!tls_init()}, _tls{}, _tlsCfg{}
+			{
+				if(isValid)
+				{
+					_tls = tls_client();
+					_tlsCfg = tls_config_new();
+					tls_configure(_tls, _tlsCfg);
+				}
+			}
+
+			~libresslWrapper()  noexcept override {
+				tls_close(_tls);
+				tls_free(_tls);
+				tls_config_free(_tlsCfg);
+			}
+
+			bool valid() const noexcept { return isValid; }
+
+			bool connect(int32_t fd, std::string name) noexcept {
+				return (tls_connect_socket(_tls, fd, name.c_str()) < 0);
+			}
+
+			const std::string getError() noexcept { return {tls_error(_tls)}; }
+		};
+	}
+}
+
+#endif /* SUBSTRATE_INTERNAL_LIBRESSLWRAPPER */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

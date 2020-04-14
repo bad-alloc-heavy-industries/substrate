@@ -25,8 +25,17 @@ advanced_headers = [
 internal_headers = [
 	'internal/defs',
 	'internal/cxx11_compat',
-	'internal/fd_compat'
+	'internal/fd_compat',
+	'internal/tls_wrapper',
+	'internal/tls_dummy'
 ]
+
+if get_option('socket_t_tls')
+	tls_library = get_option('tls_library')
+	if tls_library == 'libressl'
+		internal_headers += 'internal/libressl_wrapper'
+	endif
+endif
 
 install_headers(
 	headers,

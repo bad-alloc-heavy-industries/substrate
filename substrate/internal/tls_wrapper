@@ -1,0 +1,27 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INTERNAL_TLS_WRAPPER
+#define SUBSTRATE_INTERNAL_TLS_WRAPPER
+
+#include <string>
+#include <cstdint>
+
+#include <substrate/internal/defs>
+
+namespace substrate {
+	namespace internal {
+		struct tlsWrapper {
+			tlsWrapper() noexcept = default;
+			tlsWrapper(const tlsWrapper &) noexcept = default;
+			tlsWrapper(tlsWrapper &&) noexcept = default;
+			tlsWrapper &operator =(const tlsWrapper &) noexcept = delete;
+			tlsWrapper &operator =(tlsWrapper &&) noexcept = delete;
+			virtual ~tlsWrapper() noexcept = 0;
+			SUBSTRATE_NO_DISCARD(virtual bool valid() const noexcept) = 0;
+			SUBSTRATE_NO_DISCARD(virtual bool connect(int32_t fd, std::string name) noexcept) = 0;
+			SUBSTRATE_NO_DISCARD(virtual const std::string getError() noexcept) = 0;
+		};
+	}
+}
+
+#endif /* SUBSTRATE_INTERNAL_TLS_WRAPPER */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

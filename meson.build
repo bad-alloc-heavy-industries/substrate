@@ -20,7 +20,11 @@ pkgconfig.generate(
 	subdirs: '.',
 	name: 'substrate',
 	filebase: 'substrate',
-	libraries: [libSubstrate],
+	libraries: [ libSubstrate, libSubstrate_deps ],
 	version: meson.project_version(),
-	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
+	description: 'A collection of headers containing useful tools and gadgets for building C++ programs',
+	variables: [
+		'tls_support=@0@'.format(get_option('socket_t_tls')),
+		'tls_library=@0@'.format(get_option('tls_library'))
+	]
 )

@@ -17,6 +17,15 @@ inline int closesocket(const int s) { return close(s); }
 #	include <Winsock2.h>
 #endif
 
+#include <substrate/internal/tls_wrapper>
+#ifdef SUBSTRATE_SOCKET_TLS
+#	ifdef SUBSTRATE_SOCKET_TLS_LIBRESSL
+#		include <substrate/internal/libressl_wrapper>
+#	endif
+#else
+#	include <substrate/internal/tls_dummy>
+#endif
+
 using namespace substrate;
 
 size_t sockaddrLen(const sockaddr_storage &addr) noexcept

@@ -1,1 +1,4 @@
 option('valgrind_checks', type: 'boolean', value: false, description: 'Enables the valgrind run targets')
+option('socket_t_tls', type: 'boolean', value: false, description: 'Enables socket_t to speak TLS')
+option('tls_library', type: 'combo', choices: ['libressl'], value: 'libressl', description: 'The TLS library to use for socket_t')
+option('libressl_prefix', type: 'string', value: '/usr/lib/libressl', description: 'The prefix for the LibreSSL libs')
