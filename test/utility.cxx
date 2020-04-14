@@ -120,8 +120,8 @@ namespace test
 
 	class Y
 	{
-		int foo;
-		double bar;
+		int foo; // NOLINT(clang-diagnostic-unused-private-field)
+		double bar; // NOLINT(clang-diagnostic-unused-private-field)
 
 	public:
 		Y(int baz) : foo{baz}, bar{} { }
@@ -188,6 +188,16 @@ namespace test
 	};
 
 	struct AI { void foo() { } };
+
+	struct AJ
+	{
+		AJ() = delete;
+		AJ(const AJ &) = default;
+		AJ(AJ &&) = default;
+		~AJ() = default;
+		AJ &operator =(const AJ &) = default;
+		AJ &operator =(AJ &&) = default;
+	};
 
 	int bar();
 
@@ -724,6 +734,7 @@ TEST_CASE("[C++ 17] is_default_constructible_v helper", "[utility]")
 	REQUIRE_FALSE(is_default_constructible_v<test::N>);
 	REQUIRE_FALSE(is_default_constructible_v<test::U>);
 	REQUIRE_FALSE(is_default_constructible_v<test::V>);
+	REQUIRE_FALSE(is_default_constructible_v<test::AJ>);
 
 	REQUIRE(is_default_constructible_v<test::T>);
 	REQUIRE(is_default_constructible_v<test::S>);
@@ -736,6 +747,7 @@ TEST_CASE("[C++ 17] is_trivially_default_constructible_v helper", "[utility]")
 	REQUIRE_FALSE(is_trivially_default_constructible_v<test::T>);
 	REQUIRE_FALSE(is_trivially_default_constructible_v<test::U>);
 	REQUIRE_FALSE(is_trivially_default_constructible_v<test::V>);
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::AJ>);
 
 	REQUIRE(is_trivially_default_constructible_v<test::S>);
 }
@@ -746,6 +758,7 @@ TEST_CASE("[C++ 17] is_nothrow_default_constructible_v helper", "[utility]")
 	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::N>);
 	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::U>);
 	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::V>);
+	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::AJ>);
 
 	REQUIRE(is_nothrow_default_constructible_v<test::T>);
 	REQUIRE(is_nothrow_default_constructible_v<test::S>);
@@ -1247,22 +1260,18 @@ TEST_CASE("[C++ 17] is_nothrow_destructible_v helper", "[utility]")
 using substrate::is_move_assignable_v;
 TEST_CASE("[C++ 17] is_move_assignable_v helper", "[utility]")
 {
-	struct B { B &operator =(const B &) { return *this; } };
-
 	REQUIRE_FALSE(is_move_assignable_v<int []>());
 	REQUIRE_FALSE(is_move_assignable_v<int [4]>());
 
 	REQUIRE(is_move_assignable_v<test::S>());
-	REQUIRE(is_move_assignable_v<B>());
+	REQUIRE(is_move_assignable_v<test::R>());
 	REQUIRE(is_move_assignable_v<int>());
 }
 
 using substrate::is_trivially_move_assignable_v;
 TEST_CASE("[C++ 17] is_trivially_move_assignable_v helper", "[utility]")
 {
-	struct B { B &operator =(const B &) { return *this; } };
-
-	REQUIRE_FALSE(is_trivially_move_assignable_v<B>());
+	REQUIRE_FALSE(is_trivially_move_assignable_v<test::R>());
 	REQUIRE_FALSE(is_trivially_move_assignable_v<int []>());
 	REQUIRE_FALSE(is_trivially_move_assignable_v<int [4]>());
 
@@ -1273,9 +1282,7 @@ TEST_CASE("[C++ 17] is_trivially_move_assignable_v helper", "[utility]")
 using substrate::is_nothrow_move_assignable_v;
 TEST_CASE("[C++ 17] is_nothrow_move_assignable_v helper", "[utility]")
 {
-	struct B { B &operator =(const B &) { return *this; } };
-
-	REQUIRE_FALSE(is_nothrow_move_assignable_v<B>());
+	REQUIRE_FALSE(is_nothrow_move_assignable_v<test::R>());
 	REQUIRE_FALSE(is_nothrow_move_assignable_v<int []>());
 	REQUIRE_FALSE(is_nothrow_move_assignable_v<int [4]>());
 
@@ -1364,244 +1371,139 @@ TEST_CASE("[C++ 17] is_nothrow_assignable_v helper", "[utility]")
 using substrate::is_move_constructible_v;
 TEST_CASE("[C++ 17] is_move_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(B &&) = default; };
-	struct C { C(C &&) { throw this; } };
-	struct D { C qux; };
-	struct E { E(E &&) = delete; };
+	REQUIRE_FALSE(is_move_constructible_v<test::N>());
 
-	REQUIRE_FALSE(is_move_constructible_v<E>());
-
-	REQUIRE(is_move_constructible_v<A>());
-	REQUIRE(is_move_constructible_v<C>());
-	REQUIRE(is_move_constructible_v<D>());
-	REQUIRE(is_move_constructible_v<B>());
+	REQUIRE(is_move_constructible_v<test::S>());
+	REQUIRE(is_move_constructible_v<test::T>());
+	REQUIRE(is_move_constructible_v<test::W>());
+	REQUIRE(is_move_constructible_v<test::X>());
 }
 
 using substrate::is_trivially_move_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_move_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(B &&) = default; };
-	struct C { C(C &&) { throw this; } };
-	struct D { C qux; };
-	struct E { E(E &&) = delete; };
+	REQUIRE_FALSE(is_trivially_move_constructible_v<test::N>());
+	REQUIRE_FALSE(is_trivially_move_constructible_v<test::T>());
+	REQUIRE_FALSE(is_trivially_move_constructible_v<test::W>());
+	REQUIRE_FALSE(is_trivially_move_constructible_v<test::X>());
 
-	REQUIRE_FALSE(is_trivially_move_constructible_v<A>());
-	REQUIRE_FALSE(is_trivially_move_constructible_v<C>());
-	REQUIRE_FALSE(is_trivially_move_constructible_v<D>());
-	REQUIRE_FALSE(is_trivially_move_constructible_v<E>());
-
-	REQUIRE(is_trivially_move_constructible_v<B>());
+	REQUIRE(is_trivially_move_constructible_v<test::S>());
 }
 
 using substrate::is_nothrow_move_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_move_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(B &&) = default; };
-	struct C { C(C &&) { throw this; } };
-	struct D { C qux; };
-	struct E { E(E &&) = delete; };
+	REQUIRE_FALSE(is_nothrow_move_constructible_v<test::N>());
+	REQUIRE_FALSE(is_nothrow_move_constructible_v<test::W>());
+	REQUIRE_FALSE(is_nothrow_move_constructible_v<test::X>());
 
-	REQUIRE_FALSE(is_nothrow_move_constructible_v<C>());
-	REQUIRE_FALSE(is_nothrow_move_constructible_v<D>());
-	REQUIRE_FALSE(is_nothrow_move_constructible_v<E>());
-
-	REQUIRE(is_nothrow_move_constructible_v<A>());
-	REQUIRE(is_nothrow_move_constructible_v<B>());
+	REQUIRE(is_nothrow_move_constructible_v<test::S>());
+	REQUIRE(is_nothrow_move_constructible_v<test::T>());
 }
 
 using substrate::is_copy_constructible_v;
 TEST_CASE("[C++ 17] is_copy_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(const B &) = default; };
-	struct C { C(const C &) { throw this; } };
-	struct D { C qux; };
-	struct E { E(const E &) = delete; };
+	REQUIRE_FALSE(is_copy_constructible_v<test::N>());
 
-	REQUIRE_FALSE(is_copy_constructible_v<E>());
-
-	REQUIRE(is_copy_constructible_v<A>());
-	REQUIRE(is_copy_constructible_v<C>());
-	REQUIRE(is_copy_constructible_v<D>());
-	REQUIRE(is_copy_constructible_v<B>());
+	REQUIRE(is_copy_constructible_v<test::S>());
+	REQUIRE(is_copy_constructible_v<test::T>());
+	REQUIRE(is_copy_constructible_v<test::W>());
+	REQUIRE(is_copy_constructible_v<test::X>());
 }
 
 using substrate::is_trivially_copy_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_copy_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(const B &) = default; };
-	struct C { C(const C &) { throw this; } };
-	struct D { C qux; };
-	struct E { E(const E &) = delete; };
+	REQUIRE_FALSE(is_trivially_copy_constructible_v<test::N>());
+	REQUIRE_FALSE(is_trivially_copy_constructible_v<test::T>());
+	REQUIRE_FALSE(is_trivially_copy_constructible_v<test::W>());
+	REQUIRE_FALSE(is_trivially_copy_constructible_v<test::X>());
 
-	REQUIRE_FALSE(is_trivially_copy_constructible_v<A>());
-	REQUIRE_FALSE(is_trivially_copy_constructible_v<C>());
-	REQUIRE_FALSE(is_trivially_copy_constructible_v<D>());
-	REQUIRE_FALSE(is_trivially_copy_constructible_v<E>());
-
-	REQUIRE(is_trivially_copy_constructible_v<B>());
+	REQUIRE(is_trivially_copy_constructible_v<test::S>());
 }
 
 using substrate::is_nothrow_copy_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_copy_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B(const B &) = default; };
-	struct C { C(const C &) { throw this; } };
-	struct D { C qux; };
-	struct E { E(const E &) = delete; };
+	REQUIRE_FALSE(is_nothrow_copy_constructible_v<test::N>());
+	REQUIRE_FALSE(is_nothrow_copy_constructible_v<test::T>());
+	REQUIRE_FALSE(is_nothrow_copy_constructible_v<test::W>());
+	REQUIRE_FALSE(is_nothrow_copy_constructible_v<test::X>());
 
-	REQUIRE_FALSE(is_nothrow_copy_constructible_v<E>());
-	REQUIRE_FALSE(is_nothrow_copy_constructible_v<A>());
-	REQUIRE_FALSE(is_nothrow_copy_constructible_v<C>());
-	REQUIRE_FALSE(is_nothrow_copy_constructible_v<D>());
-
-	REQUIRE(is_nothrow_copy_constructible_v<B>());
+	REQUIRE(is_nothrow_copy_constructible_v<test::S>());
 }
 
 using substrate::is_default_constructible_v;
 TEST_CASE("[C++ 17] is_default_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B() = default; };
-	struct C
-	{
-		C(int baz)
-		{
-			if (!baz)
-				throw baz;
-		}
-	};
-	struct D { C qux; };
-	struct E { E() = delete; };
+	REQUIRE_FALSE(is_default_constructible_v<test::N>());
+	REQUIRE_FALSE(is_default_constructible_v<test::U>());
+	REQUIRE_FALSE(is_default_constructible_v<test::V>());
+	REQUIRE_FALSE(is_default_constructible_v<test::AJ>());
 
-
-	REQUIRE_FALSE(is_default_constructible_v<C>());
-	REQUIRE_FALSE(is_default_constructible_v<D>());
-	REQUIRE_FALSE(is_default_constructible_v<E>());
-
-	REQUIRE(is_default_constructible_v<A>());
-	REQUIRE(is_default_constructible_v<B>());
+	REQUIRE(is_default_constructible_v<test::S>());
+	REQUIRE(is_default_constructible_v<test::T>());
 }
 
 using substrate::is_trivially_default_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_default_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B() = default; };
-	struct C
-	{
-		C(int baz)
-		{
-			if (!baz)
-				throw baz;
-		}
-	};
-	struct D { C qux; };
-	struct E { E() = delete; };
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::N>());
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::T>());
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::U>());
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::V>());
+	REQUIRE_FALSE(is_trivially_default_constructible_v<test::AJ>());
 
-	REQUIRE_FALSE(is_trivially_default_constructible_v<A>());
-	REQUIRE_FALSE(is_trivially_default_constructible_v<C>());
-	REQUIRE_FALSE(is_trivially_default_constructible_v<D>());
-	REQUIRE_FALSE(is_trivially_default_constructible_v<E>());
-
-	REQUIRE(is_trivially_default_constructible_v<B>());
+	REQUIRE(is_trivially_default_constructible_v<test::S>());
 }
 
 using substrate::is_nothrow_default_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_default_constructible_v helper", "[utility]")
 {
-	struct A { std::string foo; };
-	struct B { int bar; B() = default; };
-	struct C
-	{
-		C(int baz)
-		{
-			if (!baz)
-				throw baz;
-		}
-	};
-	struct D { C qux; };
-	struct E { E() = delete; };
+	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::N>());
+	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::U>());
+	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::V>());
+	REQUIRE_FALSE(is_nothrow_default_constructible_v<test::AJ>());
 
-	REQUIRE_FALSE(is_nothrow_default_constructible_v<C>());
-	REQUIRE_FALSE(is_nothrow_default_constructible_v<D>());
-	REQUIRE_FALSE(is_nothrow_default_constructible_v<E>());
-
-	REQUIRE(is_nothrow_default_constructible_v<A>());
-	REQUIRE(is_nothrow_default_constructible_v<B>());
+	REQUIRE(is_nothrow_default_constructible_v<test::S>());
+	REQUIRE(is_nothrow_default_constructible_v<test::T>());
 }
 
 using substrate::is_constructible_v;
 TEST_CASE("[C++ 17] is_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_constructible_v<test::Y, test::A>());
 
-	class B {};
-
-	REQUIRE_FALSE(is_constructible_v<A, B>());
-
-	REQUIRE(is_constructible_v<A, int>());
-	REQUIRE(is_constructible_v<A, int, double>());
+	REQUIRE(is_constructible_v<test::Y, int>());
+	REQUIRE(is_constructible_v<test::Y, int, double>());
 }
 
 using substrate::is_trivially_constructible_v;
 TEST_CASE("[C++ 17] is_trivially_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_trivially_constructible_v<test::Y, int>());
 
-	REQUIRE_FALSE(is_trivially_constructible_v<A, int>());
-
-	REQUIRE(is_trivially_constructible_v<A, const A&>());
+	REQUIRE(is_trivially_constructible_v<test::Y, const test::Y &>());
 }
 
 using substrate::is_nothrow_constructible_v;
 TEST_CASE("[C++ 17] is_nothrow_constructible_v helper", "[utility]")
 {
-	class A
-	{
-		int foo;
-		double bar;
-	public:
-		A(int baz) : foo{baz}, bar{} { }
-		A(int qux, double fwibble) noexcept : foo{qux}, bar{fwibble} { }
-	};
+	REQUIRE_FALSE(is_nothrow_constructible_v<test::Y, int>());
 
-	REQUIRE_FALSE(is_nothrow_constructible_v<A, int>());
-
-	REQUIRE(is_nothrow_constructible_v<A, int, double>());
+	REQUIRE(is_nothrow_constructible_v<test::Y, int, double>());
 }
 
 using substrate::is_unsigned_v;
 TEST_CASE("[C++ 17] is_unsigned_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	enum struct C : int {};
 	enum D : unsigned int {};
 	enum struct E : unsigned int {};
 
-	REQUIRE_FALSE(is_unsigned_v<A>());
-	REQUIRE_FALSE(is_unsigned_v<B>());
-	REQUIRE_FALSE(is_unsigned_v<C>());
+	REQUIRE_FALSE(is_unsigned_v<test::A>());
+	REQUIRE_FALSE(is_unsigned_v<test::B>());
+	REQUIRE_FALSE(is_unsigned_v<test::C>());
 	REQUIRE_FALSE(is_unsigned_v<D>());
 	REQUIRE_FALSE(is_unsigned_v<E>());
 	REQUIRE_FALSE(is_unsigned_v<int>());
@@ -1613,15 +1515,12 @@ TEST_CASE("[C++ 17] is_unsigned_v helper", "[utility]")
 using substrate::is_signed_v;
 TEST_CASE("[C++ 17] is_signed_v helper", "[utility]")
 {
-	class A {};
-	enum B : int {};
-	enum struct C : int {};
 	enum D : unsigned int {};
 	enum struct E : unsigned int {};
 
-	REQUIRE_FALSE(is_signed_v<A>());
-	REQUIRE_FALSE(is_signed_v<B>());
-	REQUIRE_FALSE(is_signed_v<C>());
+	REQUIRE_FALSE(is_signed_v<test::A>());
+	REQUIRE_FALSE(is_signed_v<test::B>());
+	REQUIRE_FALSE(is_signed_v<test::C>());
 	REQUIRE_FALSE(is_signed_v<D>());
 	REQUIRE_FALSE(is_signed_v<E>());
 	REQUIRE_FALSE(is_signed_v<unsigned int>());
@@ -1633,16 +1532,11 @@ TEST_CASE("[C++ 17] is_signed_v helper", "[utility]")
 using substrate::is_abstract_v;
 TEST_CASE("[C++ 17] is_abstract_v helper", "[utility]")
 {
-	struct A { int foo; };
-	struct B { virtual void bar(); virtual ~B() = default; };
-	struct C { virtual void baz() = 0; virtual ~C() = default; };
-	struct D : C {};
+	REQUIRE_FALSE(is_abstract_v<test::S>());
+	REQUIRE_FALSE(is_abstract_v<test::O>());
 
-	REQUIRE_FALSE(is_abstract_v<A>());
-	REQUIRE_FALSE(is_abstract_v<B>());
-
-	REQUIRE(is_abstract_v<C>());
-	REQUIRE(is_abstract_v<D>());
+	REQUIRE(is_abstract_v<test::AB>());
+	REQUIRE(is_abstract_v<test::AC>());
 }
 
 using substrate::is_polymorphic_v;
