@@ -31,9 +31,13 @@ namespace substrate
 		template<typename T> T *index(const off_t idx) const
 		{
 			if (idx < _len)
-				return reinterpret_cast<T *const>(long(_addr) + idx);
+			{
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
+				return reinterpret_cast<T *>(addr + idx);
+			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
+
 	public:
 		constexpr mmap_t() noexcept : _fd{-1}, _len{0}, _addr{nullptr} { }
 		mmap_t(const int32_t fd, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
