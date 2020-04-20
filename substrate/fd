@@ -104,6 +104,9 @@ namespace substrate
 			return _length;
 		}
 
+		SUBSTRATE_NO_DISCARD(bool resize(const off_t newSize) const noexcept)
+			{ return internal::fdtruncate(fd, newSize) == 0; }
+
 		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 		{
 			const ssize_t result = read(value, valueLen, nullptr);
