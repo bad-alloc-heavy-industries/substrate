@@ -600,10 +600,10 @@ namespace substrate
 		return std::unique_ptr<T>{new type_t[num]{{}}};
 	}
 
-	/* C++11 and newer, version independent nothrow std::unique_ptr<> helpers */
 	template<typename T, typename... args_t> inline typename makeUnique_t<T>::invalidType
 		make_unique(args_t &&...) noexcept = delete;
 
+	/* C++11 and newer, version independent nothrow std::unique_ptr<> helpers */
 	template<typename T, typename... Args> inline typename makeUnique_t<T>::uniqueType
 		make_unique_nothrow(Args &&...args) noexcept(noexcept(T{std::forward<Args>(args)...}))
 	{
