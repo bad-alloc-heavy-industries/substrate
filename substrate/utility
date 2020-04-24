@@ -621,12 +621,33 @@ namespace substrate
 	template<typename T, typename... Args> inline typename makeUnique_t<T>::invalidType
 		make_unique_nothrow(Args &&...) noexcept = delete;
 
-#if __cplusplus >= 201703L
 	/* std::array<> helper */
 	namespace internal
 	{
+#if ___cplusplus < 201402L
+		template<std::size_t... seq> struct indexSequence_t
+		{
+			static_assert(sizeof...(seq) > 0, "Cannot define a zero-length index sequence");
+			using value_type = std::size_t;
+			constexpr static std::size_t size() noexcept { return sizeof...(seq); }
+		};
+
+		template<std::size_t N> struct sequence_t
+		{
+			template<std::size_t... sequence> static auto expand(const indexSequence_t<sequence...> &) ->
+				indexSequence_t<N, sequence...>;
+			template<typename seq> static auto next() -> decltype(expand(typename seq::sequence{}));
+			using sequence = decltype(next<sequence_t<N - 1>>());
+		};
+
+		template<> struct sequence_t<0> { using sequence = indexSequence_t<0>; };
+		template<std::size_t N> using makeIndexSequence = typename sequence_t<N - 1>::sequence;
+#else
+		template<std::size_t... seq> using indexSequence_t = std::index_sequence<seq...>;
+		template<std::size_t N> using makeIndexSequence = std::make_index_sequence<N>;
+#endif
 		template<typename T, size_t N, size_t... index> constexpr std::array<T, N>
-			makeArray(T (&&elems)[N], std::index_sequence<index...>) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+			makeArray(T (&&elems)[N], indexSequence_t<index...>) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		{
 			return {elems[index]...};
 		}
@@ -635,9 +656,8 @@ namespace substrate
 	template<typename T, size_t N> constexpr std::array<T, N>
 		make_array(T (&&elems)[N]) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	{
-		return internal::makeArray(std::move(elems), std::make_index_sequence<N>{});
+		return internal::makeArray(std::move(elems), internal::makeIndexSequence<N>{});
 	}
-#endif
 
 	/* endian swapping facilities */
 	inline constexpr uint16_t bswap16(const uint16_t x) noexcept
