@@ -24,6 +24,10 @@ jobs:
           - 'gcc-8'
           - 'gcc-9'
         coverage: [false, true]
+        cpp_std:
+          - 'c++11'
+          - 'c++14'
+          - 'c++17'
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -89,7 +93,7 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
+        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: ninja -C build
       - name: Test
