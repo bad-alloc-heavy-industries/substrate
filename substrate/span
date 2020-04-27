@@ -19,6 +19,37 @@ namespace substrate
 #include <substrate/iterator>
 namespace substrate
 {
+
+	template<class...>
+	using void_t = void;
+
+	template <class C>
+	constexpr auto data(C& c) -> decltype(c.data());
+
+	template <class C>
+	constexpr auto data(const C& c) -> decltype(c.data());
+
+	template <class T, std::size_t N>
+	constexpr T* data(T (&array)[N]) noexcept;
+
+	template <class E>
+	constexpr const E* data(std::initializer_list<E> il) noexcept;
+
+	template <class C>
+	constexpr auto size(const C& c) -> decltype(c.size());
+
+
+	template <class T, std::size_t N>
+	constexpr std::size_t size(const T (&array)[N]) noexcept;
+
+	template <class T, std::ptrdiff_t N>
+	constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
+
+	template <bool B>
+	using bool_constant = std::integral_constant<bool, B>;
+
+	enum class byte : unsigned char {} ;
+
 	constexpr size_t dynamic_extent = std::numeric_limits<size_t>::max();
 	template<typename T, size_t extent> struct span;
 
