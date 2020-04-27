@@ -1,9 +1,165 @@
 # substrate
+[![GitHub Actions](https://github.com/bad-alloc-heavy-industries/substrate/workflows/GitHub%20Actions/badge.svg)](https://github.com/bad-alloc-heavy-industries/substrate/actions) [![codecov](https://codecov.io/gh/bad-alloc-heavy-industries/substrate/branch/master/graph/badge.svg)](https://codecov.io/gh/bad-alloc-heavy-industries/substrate) [![Total alerts](https://img.shields.io/lgtm/alerts/g/bad-alloc-heavy-industries/substrate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bad-alloc-heavy-industries/substrate/alerts/) [![Coverity Status](https://scan.coverity.com/projects/20662/badge.svg)](https://scan.coverity.com/projects/substrate)
 
-[![GitHub Actions](https://github.com/bad-alloc-heavy-industries/substrate/workflows/GitHub%20Actions/badge.svg)](https://github.com/bad-alloc-heavy-industries/substrate/actions)
-[![codecov](https://codecov.io/gh/bad-alloc-heavy-industries/substrate/branch/master/graph/badge.svg)](https://codecov.io/gh/bad-alloc-heavy-industries/substrate)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/bad-alloc-heavy-industries/substrate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bad-alloc-heavy-industries/substrate/alerts/)
-[![Coverity Status](https://scan.coverity.com/projects/20662/badge.svg)](https://scan.coverity.com/projects/substrate)
+## Supported platforms, language versions, and compilers
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Platform</th>
+            <th rowspan="3">C++ Standard</th>
+            <th colspan="11">Compiler</th>
+        </tr>
+        <tr>
+            <th colspan="5">G++</th>
+            <th colspan="5">Clang</th>
+            <th colspan="1">MSVC</th>
+        </tr>
+        <tr>
+            <th>5</th>
+            <th>6</th>
+            <th>7</th>
+            <th>8</th>
+            <th>9</th>
+            <th>5</th>
+            <th>6</th>
+            <th>7</th>
+            <th>8</th>
+            <th>9</th>
+            <th>14.11</th>
+        </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td rowspan="3">Linux</td>
+        <td>C++ 11</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+        <td>C++ 14</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+        <td>C++ 17</td>
+        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+        <td rowspan="3">NetBSD</td>
+        <td>C++ 11</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+        <td>C++ 14</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+        <td>C++ 17</td>
+        <td>:x:</td>
+        <td>:grey_question:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:grey_question:</td>
+        <td>:x:</td>
+      </tr>
+      <tr>
+       <td rowspan="3">Windows</td>
+        <td>C++ 11</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:grey_question:</td>
+      </tr>
+      <tr>
+        <td>C++ 14</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:grey_question:</td>
+      </tr>
+      <tr>
+        <td>C++ 17</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:grey_question:</td>
+      </tr>
+    </tbody>
+</table>
 
 ## Getting Started
 
