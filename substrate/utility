@@ -660,7 +660,7 @@ namespace substrate
 	}
 
 	/* endian swapping facilities */
-	inline constexpr uint16_t bswap16(const uint16_t x) noexcept
+	inline constexpr uint16_t swap16(const uint16_t x) noexcept
 	{
 		return (
 			((x & 0x00FFU) << 8U) |
@@ -668,7 +668,7 @@ namespace substrate
 		);
 	}
 
-	inline constexpr uint32_t bswap32(const uint32_t x) noexcept
+	inline constexpr uint32_t swap32(const uint32_t x) noexcept
 	{
 		return (
 			((x & 0x000000FFU) << 24U) |
@@ -678,7 +678,7 @@ namespace substrate
 		);
 	}
 
-	inline constexpr uint64_t bswap64(const uint64_t x) noexcept
+	inline constexpr uint64_t swap64(const uint64_t x) noexcept
 	{
 		return (
 			((x & 0x00000000000000FFU) << 56U) |
