@@ -11,6 +11,7 @@
 #include <stdexcept>
 
 #include <substrate/internal/defs>
+#include <substrate/utility>
 
 namespace substrate
 {
@@ -28,7 +29,8 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()} { }
 
-		template<typename T> T *index(const off_t idx) const
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, T *>
+			index(const off_t idx) const
 		{
 			if (idx < _len)
 			{
@@ -74,13 +76,20 @@ namespace substrate
 			return {*this, len, prot, flags, addr};
 		}
 
-		template<typename T> T *address() noexcept { return static_cast<T *>(_addr); }
-		template<typename T> const T *address() const noexcept { return static_cast<const T *>(_addr); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, T *>
+			address() noexcept { return static_cast<T *>(_addr); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, const T *>
+			address() const noexcept { return static_cast<const T *>(_addr); }
+
 		SUBSTRATE_NO_DISCARD(off_t length() const noexcept) { return _len; }
-		template<typename T> T *operator [](const off_t idx) { return index<T>(idx); }
-		template<typename T> const T *operator [](const off_t idx) const { return index<const T>(idx); }
-		template<typename T> T *at(const off_t idx) { return index<T>(idx); }
-		template<typename T> const T *at(const off_t idx) const { return index<const T>(idx); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, T *>
+			operator [](const off_t idx) { return index<T>(idx); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, const T *>
+			operator [](const off_t idx) const { return index<const T>(idx); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, T *>
+			at(const off_t idx) { return index<T>(idx); }
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, const T *>
+			at(const off_t idx) const { return index<const T>(idx); }
 
 		void *address(const off_t offset) noexcept { return index<void *>(offset); }
 		const void *address(const off_t offset) const noexcept { return index<const void *>(offset); }
