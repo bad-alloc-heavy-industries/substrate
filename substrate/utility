@@ -604,7 +604,7 @@ namespace substrate
 		template<std::size_t N> struct sequence_t
 		{
 			template<std::size_t... sequence> static auto expand(const indexSequence_t<sequence...> &) ->
-				indexSequence_t<N, sequence...>;
+				indexSequence_t<sequence..., N>;
 			template<typename seq> static auto next() -> decltype(expand(typename seq::sequence{}));
 			using sequence = decltype(next<sequence_t<N - 1>>());
 		};
