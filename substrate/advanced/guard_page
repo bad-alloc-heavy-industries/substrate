@@ -1,0 +1,59 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_ADVANCED_GUARD_PAGE
+#define SUBSTRATE_ADVANCED_GUARD_PAGE
+#ifdef _WINDOWS
+#	error "guard_page is a *nix only header"
+#endif
+
+#include <substrate/internal/defs>
+#include <substrate/utility>
+
+#include <substrate/mmap>
+
+#include <unistd.h>
+
+namespace substrate
+{
+	namespace advanced
+	{
+		struct guard_page final
+		{
+		private:
+			substrate::mmap_t _guard_map;
+
+			guard_page(void *addr) noexcept :
+				_guard_map{-1, getpagesize(), PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, addr}
+			{ }
+
+		public:
+			guard_page() noexcept :
+				_guard_map{-1, getpagesize(), PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS}
+			{ }
+			guard_page(guard_page &) = delete;
+			guard_page(const guard_page &) = delete;
+			guard_page(guard_page &&page) noexcept : guard_page{} { swap(page); }
+
+
+			SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return _guard_map.valid(); }
+
+			SUBSTRATE_NO_DISCARD(std::uintptr_t address() const noexcept) { return _guard_map.numeric_address(); }
+			SUBSTRATE_NO_DISCARD(std::uintptr_t next() const noexcept) { return address() + getpagesize(); }
+
+			SUBSTRATE_NO_DISCARD(guard_page bound() const) { return bound(getpagesize()); }
+			SUBSTRATE_NO_DISCARD(guard_page bound(size_t distance) const)
+			{
+				return {reinterpret_cast<void *>(address() + distance)};
+			}
+
+			void swap(guard_page &page) noexcept
+			{
+				std::swap(_guard_map, page._guard_map);
+			}
+		};
+
+		inline void swap(guard_page &a, guard_page &b) noexcept { a.swap(b); }
+	}
+}
+
+#endif /* SUBSTRATE_ADVANCED_GUARD_PAGE */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

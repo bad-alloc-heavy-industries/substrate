@@ -19,7 +19,8 @@ headers = [
 
 advanced_headers = [
 	'advanced/io',
-	'advanced/fd'
+	'advanced/fd',
+	'advanced/guard_page'
 ]
 
 internal_headers = [
