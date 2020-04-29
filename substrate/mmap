@@ -102,7 +102,7 @@ namespace substrate
 		void *address(const off_t offset) noexcept { return index<void *>(offset); }
 		const void *address(const off_t offset) const noexcept { return index<const void *>(offset); }
 
-		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept) { reinterpret_cast<std::uintptr_t>(_addr); }
+		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept) { return reinterpret_cast<std::uintptr_t>(_addr); }
 
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 		{
