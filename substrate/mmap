@@ -104,6 +104,27 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept) { return reinterpret_cast<std::uintptr_t>(_addr); }
 
+		SUBSTRATE_NO_DISCARD(bool lock() const noexcept) { return lock(_len); }
+		SUBSTRATE_NO_DISCARD(bool lock(const size_t length) const noexcept) { return mlock(_addr, length) == 0; }
+		SUBSTRATE_NO_DISCARD(bool lock_at(const off_t idx, const size_t length) const noexcept) {
+			return [&]() noexcept -> bool
+			{
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
+				return mlock(reinterpret_cast<void *>(addr + idx), length) == 0;
+			}();
+		}
+
+		SUBSTRATE_NO_DISCARD(bool unlock() const noexcept) { return unlock(_len); }
+		SUBSTRATE_NO_DISCARD(bool unlock(const size_t length) const noexcept) { return munlock(_addr, length) == 0; }
+		SUBSTRATE_NO_DISCARD(bool unlock_at(const off_t idx, const size_t length) const noexcept) {
+			return [&]() noexcept -> bool
+			{
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
+				return munlock(reinterpret_cast<void *>(addr + idx), length) == 0;
+			}();
+		}
+
+
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 		{
 			return sync(_len, flags);
