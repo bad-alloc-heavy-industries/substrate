@@ -199,6 +199,18 @@ namespace test
 		AJ &operator =(AJ &&) = default;
 	};
 
+
+	struct AK
+	{
+	private:
+		int foo;
+		int bar;
+	public:
+
+		constexpr AK(std::nullptr_t) noexcept :
+			foo{}, bar{} { }
+	};
+
 	int bar();
 
 	template<typename> struct SU_traits {};
@@ -2075,4 +2087,15 @@ TEST_CASE("leb128 tests", "[utility]")
 		}
 	}
 }
+
+using substrate::truthy_t;
+using substrate::falsy_t;
+using substrate::has_nullable_ctor;
+
+TEST_CASE("has_nullable_ctor", "[utility]")
+{
+	REQUIRE_FALSE(std::is_pod<test::AK>::value);
+	REQUIRE(has_nullable_ctor<test::AK>::value);
+}
+
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

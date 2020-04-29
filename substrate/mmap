@@ -29,13 +29,24 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()} { }
 
-		template<typename T> substrate::enable_if_t<std::is_pod<T>::value, T *>
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value, T *>
 			index(const off_t idx) const
 		{
 			if (idx < _len)
 			{
 				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
-				return reinterpret_cast<T *>(addr + idx);
+				return (new(reinterpret_cast<void *>(addr + idx)) T{});
+			}
+			throw std::out_of_range("mmap_t index out of range");
+		}
+
+		template<typename T> substrate::enable_if_t<has_nullable_ctor<T>::value, T *>
+			index(const off_t idx) const
+		{
+			if (idx < _len)
+			{
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
+				return (new(reinterpret_cast<void *>(addr + idx)) T{nullptr});
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
