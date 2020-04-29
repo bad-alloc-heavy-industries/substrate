@@ -19,15 +19,18 @@ namespace substrate
 		struct guard_page final
 		{
 		private:
+			int64_t _page_size;
 			substrate::mmap_t _guard_map;
 
 			guard_page(void *addr) noexcept :
-				_guard_map{-1, getpagesize(), PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, addr}
+				_page_size{sysconf(_SC_PAGESIZE)},
+				_guard_map{-1, _page_size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, addr}
 			{ }
 
 		public:
 			guard_page() noexcept :
-				_guard_map{-1, getpagesize(), PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS}
+				_page_size{sysconf(_SC_PAGESIZE)},
+				_guard_map{-1, _page_size, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS}
 			{ }
 			guard_page(guard_page &) = delete;
 			guard_page(const guard_page &) = delete;
@@ -35,11 +38,12 @@ namespace substrate
 
 
 			SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return _guard_map.valid(); }
+			SUBSTRATE_NO_DISCARD(int64_t length() const noexcept) { return _page_size; }
 
 			SUBSTRATE_NO_DISCARD(std::uintptr_t address() const noexcept) { return _guard_map.numeric_address(); }
-			SUBSTRATE_NO_DISCARD(std::uintptr_t next() const noexcept) { return address() + getpagesize(); }
+			SUBSTRATE_NO_DISCARD(std::uintptr_t next() const noexcept) { return address() + _page_size; }
 
-			SUBSTRATE_NO_DISCARD(guard_page bound() const) { return bound(getpagesize()); }
+			SUBSTRATE_NO_DISCARD(guard_page bound() const) { return bound(_page_size); }
 			SUBSTRATE_NO_DISCARD(guard_page bound(size_t distance) const)
 			{
 				return {reinterpret_cast<void *>(address() + distance)};
