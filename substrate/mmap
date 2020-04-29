@@ -35,7 +35,7 @@ namespace substrate
 			if (idx < _len)
 			{
 				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
-				return (new(reinterpret_cast<void *>(addr + idx)) T{});
+				return (new(reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{});
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
@@ -46,7 +46,7 @@ namespace substrate
 			if (idx < _len)
 			{
 				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
-				return (new(reinterpret_cast<void *>(addr + idx)) T{nullptr});
+				return (new(reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{nullptr});
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
