@@ -628,18 +628,14 @@ namespace substrate
 		return internal::makeArray(std::move(elems), internal::makeIndexSequence<N>{});
 	}
 
-	/* type tags for truthiness */
-	struct truthy_t final {};
-	struct falsy_t final{};
-
 	template<typename T> struct has_nullable_ctor final
 	{
 		template<typename U>
-		static truthy_t _ctor(decltype(U(std::nullptr_t()))*);
+		static std::true_type _ctor(decltype(U(std::nullptr_t()))*);
 		template<typename U>
-		static falsy_t _ctor(...);
+		static std::false_type _ctor(...);
 
-		static const bool value = std::is_same<decltype(_ctor<T>(nullptr)), truthy_t>::value;
+		static const bool value = std::is_same<decltype(_ctor<T>(nullptr)), std::true_type>::value;
 	};
 
 #if ___cplusplus >= 201402L

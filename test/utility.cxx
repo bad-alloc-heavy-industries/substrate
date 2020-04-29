@@ -2088,8 +2088,6 @@ TEST_CASE("leb128 tests", "[utility]")
 	}
 }
 
-using substrate::truthy_t;
-using substrate::falsy_t;
 using substrate::has_nullable_ctor;
 
 TEST_CASE("has_nullable_ctor", "[utility]")
