@@ -22,7 +22,7 @@ if doxygen.found()
 	custom_target(
 		'doc',
 		input: doxyfile,
-		output: [ 'html', 'latex' ],
+		output: [ 'html'],
 		command: [ doxygen, doxyfile ],
 		install: false,
 		build_by_default: true
