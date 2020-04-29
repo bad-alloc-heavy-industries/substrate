@@ -16,6 +16,12 @@ subdir('substrate')
 subdir('impl')
 subdir('test')
 
+if get_option('gen_docs')
+	message('Building documentation')
+	subdir('docs')
+endif
+
+
 pkgconfig.generate(
 	subdirs: '.',
 	name: 'substrate',
