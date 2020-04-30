@@ -218,7 +218,7 @@ namespace test
 		{ using member_type = U; };
 
 	struct SU_is_empty_v { static int bar; };
-}
+} // namespace test
 
 /* C++ 17 helpers */
 #if __cplusplus < 201703L && __cplusplus >= 201402L
