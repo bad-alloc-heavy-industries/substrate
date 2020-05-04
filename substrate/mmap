@@ -109,7 +109,8 @@ namespace substrate
 		const void *address(const off_t offset) const noexcept { return index<const void *>(offset); }
 
 		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept)
-			{ return reinterpret_cast<std::uintptr_t>(_addr); }
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			{ return reinterpret_cast<std::uintptr_t>(_addr); } // lgtm[cpp/reinterpret-cast]
 
 		SUBSTRATE_NO_DISCARD(bool lock() const noexcept) { return lock(_len); }
 		SUBSTRATE_NO_DISCARD(bool lock(const size_t length) const noexcept) { return mlock(_addr, length) == 0; }
