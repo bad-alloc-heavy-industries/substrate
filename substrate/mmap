@@ -34,8 +34,12 @@ namespace substrate
 		{
 			if (idx < _len)
 			{
-				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
-				return (new(reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{});
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+				// XXX: Do we actually want to be multiplying by sizeof(T) here?
+				// Seems unlikely with the current index check
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				return new (reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{}; // lgtm[cpp/reinterpret-cast]
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
@@ -45,8 +49,10 @@ namespace substrate
 		{
 			if (idx < _len)
 			{
-				const auto addr = reinterpret_cast<std::uintptr_t>(_addr);
-				return (new(reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{nullptr});
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				return new (reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{nullptr}; // lgtm[cpp/reinterpret-cast]
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
