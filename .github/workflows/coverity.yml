@@ -75,7 +75,7 @@ jobs:
             --form file=@substrate.tar.xz \
             --form version=$VERSION \
             --form description="A collection of headers containing useful tools and gadgets for building C++ programs" \
-            https://scan.coverity.com/builds?project=substrate
+            https://scan.coverity.com/builds?project=${COVERITY_PROJECT_NAME}
       - name: Debug
         if: failure()
         shell: bash

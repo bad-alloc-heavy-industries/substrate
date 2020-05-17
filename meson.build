@@ -21,7 +21,6 @@ if get_option('gen_docs')
 	subdir('docs')
 endif
 
-
 pkgconfig.generate(
 	subdirs: '.',
 	name: 'substrate',
