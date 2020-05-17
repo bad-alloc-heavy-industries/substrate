@@ -2,16 +2,18 @@
 #ifndef SUBSTRATE_BOUNDED_ITERATOR
 #define SUBSTRATE_BOUNDED_ITERATOR
 
+#include <cstdint>
+
 namespace substrate
 {
 	template<typename T> struct boundedIterator_t final
 	{
 	private:
 		T *const data;
-		size_t index;
-		const size_t max;
+		std::size_t index;
+		const std::size_t max;
 
-		constexpr boundedIterator_t(T *const ptr, const size_t _index, const size_t _max) noexcept :
+		constexpr boundedIterator_t(T *const ptr, const std::size_t _index, const std::size_t _max) noexcept :
 			data{ptr}, index{_index}, max{_max} { }
 
 	public:
@@ -19,7 +21,7 @@ namespace substrate
 		using pointer = T *;
 		using reference = T &;
 
-		constexpr boundedIterator_t(T *const ptr, const size_t _max) noexcept :
+		constexpr boundedIterator_t(T *const ptr, const std::size_t _max) noexcept :
 			data{ptr}, index{0}, max{_max} { }
 		boundedIterator_t(const boundedIterator_t &) noexcept = default;
 		boundedIterator_t(boundedIterator_t &&) noexcept = default;
@@ -29,9 +31,9 @@ namespace substrate
 
 		reference operator *() const noexcept { return data[index]; }
 		pointer operator ->() const noexcept { return data + index; }
-		reference operator [](const size_t n) const noexcept { return *(*this + n); }
-		boundedIterator_t operator +(const size_t n) const noexcept { return boundedIterator_t{*this} += n; }
-		boundedIterator_t operator -(const size_t n) const noexcept { return boundedIterator_t{*this} -= n; }
+		reference operator [](const std::size_t n) const noexcept { return *(*this + n); }
+		boundedIterator_t operator +(const std::size_t n) const noexcept { return boundedIterator_t{*this} += n; }
+		boundedIterator_t operator -(const std::size_t n) const noexcept { return boundedIterator_t{*this} -= n; }
 
 		boundedIterator_t &operator ++() noexcept
 		{
@@ -61,7 +63,7 @@ namespace substrate
 			return *this;
 		}
 
-		boundedIterator_t &operator +=(const size_t n) noexcept
+		boundedIterator_t &operator +=(const std::size_t n) noexcept
 		{
 			if (n < (max - index))
 				index += n;
@@ -70,7 +72,7 @@ namespace substrate
 			return *this;
 		}
 
-		boundedIterator_t &operator -=(const size_t n) noexcept
+		boundedIterator_t &operator -=(const std::size_t n) noexcept
 		{
 			if (n < index)
 				index -= n;

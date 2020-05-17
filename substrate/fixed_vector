@@ -5,6 +5,7 @@
 #include <memory>
 #include <new>
 #include <utility>
+#include <stdexcept>
 #include <substrate/bounded_iterator>
 
 namespace substrate
