@@ -133,13 +133,7 @@ namespace substrate
 		}
 
 
-		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
-			{ return sync(_len, flags); }
-
-		SUBSTRATE_NO_DISCARD(bool sync(const size_t length, const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
-			{ return msync(_addr, length, flags) == 0; }
-
-		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice) const noexcept) { return ::madvise(_addr, _len, advice); }
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice) const noexcept) { return advise(advice, _len); }
 		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice, const size_t length) const noexcept) { return ::madvise(_addr, length, advice) == 0; }
 		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t advice, const size_t length, const off_t idx) const noexcept)
 		{
@@ -148,6 +142,12 @@ namespace substrate
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 			return ::madvise(reinterpret_cast<void *>(addr + idx), length, advice) == 0; // lgtm[cpp/reinterpret-cast]
 		}
+
+		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
+			{ return sync(_len, flags); }
+
+		SUBSTRATE_NO_DISCARD(bool sync(const size_t length, const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
+			{ return msync(_addr, length, flags) == 0; }
 
 
 		template<typename T> void copyTo(const off_t idx, T &value) const
