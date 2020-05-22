@@ -143,6 +143,27 @@ namespace substrate
 			return ::madvise(reinterpret_cast<void *>(addr + idx), length, advice) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 
+
+		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const size_t new_length) noexcept)
+		{
+			const size_t old_len = _len;
+			_len = new_length;
+
+			return (_addr = ::mremap(_addr, old_len, _len, flags)) != MAP_FAILED;
+		}
+
+		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const size_t new_length, const uintptr_t new_addr) noexcept)
+		{
+			const size_t old_len = _len;
+			_len = new_length;
+
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			const void *wanted_addr = reinterpret_cast<void *>(new_addr); // lgtm[cpp/reinterpret-cast]
+
+			return (_addr = ::mremap(_addr, old_len, _len, flags, wanted_addr)) != MAP_FAILED;
+		}
+
+
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return sync(_len, flags); }
 
