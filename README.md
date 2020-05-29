@@ -1,5 +1,6 @@
 # substrate
 [![GitHub Actions](https://github.com/bad-alloc-heavy-industries/substrate/workflows/GitHub%20Actions/badge.svg)](https://github.com/bad-alloc-heavy-industries/substrate/actions) [![codecov](https://codecov.io/gh/bad-alloc-heavy-industries/substrate/branch/master/graph/badge.svg)](https://codecov.io/gh/bad-alloc-heavy-industries/substrate) [![Total alerts](https://img.shields.io/lgtm/alerts/g/bad-alloc-heavy-industries/substrate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bad-alloc-heavy-industries/substrate/alerts/) [![Coverity Status](https://scan.coverity.com/projects/20662/badge.svg)](https://scan.coverity.com/projects/substrate)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbad-alloc-heavy-industries%2Fsubstrate.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbad-alloc-heavy-industries%2Fsubstrate?ref=badge_shield)
 
 ## Supported platforms, language versions, and compilers
 <table>
@@ -185,3 +186,7 @@ If substrate is in your repo under deps/substrate, that looks like:
 `substrate = include_directories('deps/substrate')`
 
 To be included in your root meson.build. You would then specify `substrate` as part of any library or executable include_directories specification.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fbad-alloc-heavy-industries%2Fsubstrate.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fbad-alloc-heavy-industries%2Fsubstrate?ref=badge_large)
