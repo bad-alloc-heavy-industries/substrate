@@ -8,6 +8,9 @@
 #include <memory>
 #include <array>
 #include <string>
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
 
 #include <substrate/internal/defs>
 #include <substrate/internal/fd_compat>
@@ -167,6 +170,11 @@ namespace substrate
 			{ return read(value.data(), sizeof(T) * value.size()); }
 		template<typename T> bool write(const fixedVector_t<T> &value) const noexcept
 			{ return write(value.data(), sizeof(T) * value.size()); }
+#endif
+
+#if __cplusplus >= 201703L
+		bool write(const std::string_view &value) const noexcept
+			{ return write(value.data(), value.size()); }
 #endif
 
 		template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
