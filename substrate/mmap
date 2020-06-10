@@ -163,7 +163,6 @@ namespace substrate
 			return (_addr = ::mremap(_addr, old_len, _len, flags, wanted_addr)) != MAP_FAILED;
 		}
 
-
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return sync(_len, flags); }
 

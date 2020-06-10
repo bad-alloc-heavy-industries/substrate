@@ -140,8 +140,10 @@ namespace substrate
 			{ return read(value.get(), sizeof(T)); }
 		template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
 			{ return write(value.get(), sizeof(T)); }
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
 			{ return read(value.get(), sizeof(T) * valueCount); }
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
 			{ return write(value.get(), sizeof(T) * valueCount); }
 		template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
