@@ -42,7 +42,7 @@ public:
 	uint64_t quxx() const noexcept { return _quxx; }
 };
 
-TEST_CASE ("Structure serialization and loading", "[mmap_t]")
+TEST_CASE("Structure serialization and loading", "[mmap_t]")
 {
 	foo a{0, 2, 4};
 	foo b{8, 16, 32};
