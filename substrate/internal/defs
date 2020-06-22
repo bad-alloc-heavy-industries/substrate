@@ -57,5 +57,17 @@
 #	endif
 #endif
 
+#if __cplusplus >= 201402L
+#	define SUBSTRATE_CXX14_CONSTEXPR constexpr
+#else
+#	define SUBSTRATE_CXX14_CONSTEXPR
+#endif
+
+#if __cplusplus >= 201703L
+#	define SUBSTRATE_CXX17_CONSTEXPR constexpr
+#else
+#	define SUBSTRATE_CXX17_CONSTEXPR
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
