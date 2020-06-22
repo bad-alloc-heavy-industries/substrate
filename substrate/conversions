@@ -1,0 +1,237 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_CONVERSIONS
+#define SUBSTRATE_CONVERSIONS
+
+#include <type_traits>
+#include <utility>
+#include <string>
+#include <substrate/utility>
+#include <substrate/internal/defs>
+
+namespace substrate
+{
+	// Type aliases for some type_traits utilities to make them easier to type and read below
+	template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
+	template<typename A, typename B> using isSame = std::is_same<A, B>;
+	template<typename A> using isIntegral = std::is_integral<A>;
+	template<typename A> using isUnsigned = std::is_unsigned<A>;
+
+	template<typename int_t, typename valueType_t> struct fromInt_t
+	{
+	private:
+		using uint_t = make_unsigned_t<int_t>;
+		const valueType_t &_value;
+
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t calcDigits(const uint_t number) const noexcept)
+			{ return 1 + (number < 10 ? 0 : calcDigits(number / 10)); }
+
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits(const int_t number) const noexcept)
+			{ return std::is_signed<int_t>::value && number < 0 ? 1 + calcDigits(-number) : calcDigits(number); }
+
+		SUBSTRATE_NO_DISCARD(constexpr size_t power10(const size_t power) const noexcept)
+			{ return power ? power10(power - 1) * 10 : 1; }
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t zeros(const int_t number) const noexcept)
+		{
+			const int_t num{number / 10};
+			return (num * 10 == number ? 1 + zeros(num) : 0);
+		}
+
+		[[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR uint_t process(const uint_t number, char *const buffer,
+			const uint8_t digits, const size_t index) const noexcept
+		{
+			if (number < 10)
+			{
+				buffer[digits - index] = number + '0';
+				buffer[digits + 1] = 0;
+			}
+			else
+			{
+				const uint_t num = number - (process(number / 10, buffer, digits, index + 1) * 10);
+				buffer[digits - index] = num + '0';
+			}
+			return number;
+		}
+
+		SUBSTRATE_CXX14_CONSTEXPR void process(const uint_t number, char *const buffer) const noexcept
+			{ process(number, buffer, digits(_value) - 1, 0); }
+		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
+			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value>
+			format(char *const buffer) const noexcept { process(_value, buffer); }
+		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
+			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
+			std::is_signed<T>::value> format(char *const buffer) const noexcept
+		{
+			int_t number = _value;
+			if (number < 0)
+			{
+				buffer[0] = '-';
+				process(uint_t(-number), buffer);
+			}
+			else
+				process(uint_t(number), buffer);
+		}
+
+		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
+		{
+			const uint8_t digits_ = digits();
+			if (digits_ > maxDigits)
+				process(_value - ((_value / power10(maxDigits)) * power10(maxDigits)), buffer, maxDigits - 1, 0);
+			else
+			{
+				const uint8_t trailingZeros_ = trailingZeros();
+				const uint8_t leadingZeros = maxDigits - digits_;
+				for (uint8_t i{0}; i < leadingZeros; ++i)
+					buffer[i] = '0';
+				process(_value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
+			}
+		}
+
+	public:
+		constexpr fromInt_t(const valueType_t &value) noexcept : _value(value) { }
+
+		SUBSTRATE_NO_DISCARD(operator std::unique_ptr<char []>() const noexcept)
+		{
+			auto number{make_unique_nothrow<char []>(digits(_value) + 1)};
+			if (!number.valid())
+				return nullptr;
+			format(number.get());
+			return number;
+		}
+
+		SUBSTRATE_NO_DISCARD(operator const char *() const noexcept)
+		{
+			std::unique_ptr<char []> number{*this};
+			return number.release();
+		}
+
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t length() const noexcept) { return digits() + 1; }
+		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
+
+		SUBSTRATE_NO_DISCARD(std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept)
+		{
+			auto number{make_unique_nothrow<char []>(fractionLength(maxDigits))};
+			if (!number)
+				return nullptr;
+			formatFraction(maxDigits, number.get());
+			return number;
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionDigits(const uint8_t maxDigits) const noexcept)
+		{
+			const uint8_t digits_ = digits();
+			if (digits_ > maxDigits)
+				return maxDigits;
+			return (maxDigits - digits_) + (digits_ - trailingZeros());
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t trailingZeros() const noexcept)
+			{ return _value ? zeros(_value) : 0; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionLength(const uint8_t maxDigits) const noexcept)
+			{ return fractionDigits(maxDigits) + 1; }
+		void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept
+			{ formatFraction(maxDigits, buffer); }
+	};
+
+	template<typename int_t> struct toInt_t
+	{
+	private:
+		using uint_t = make_unsigned_t<int_t>;
+		const char *const _value{nullptr};
+		const size_t _length{};
+		constexpr static const bool _isSigned = std::is_signed<int_t>::value;
+
+		SUBSTRATE_NO_DISCARD(constexpr static bool isNumber(const char x) noexcept) { return x >= '0' && x <= '9'; }
+		SUBSTRATE_NO_DISCARD(constexpr static bool isHex(const char x) noexcept)
+			{ return isNumber(x) || (x >= 'a' && x <= 'f') || (x >= 'A' && x <= 'F'); }
+		SUBSTRATE_NO_DISCARD(constexpr static bool isOct(const char x) noexcept) { return x >= '0' && x <= '7'; }
+
+		template<bool isFunc(const char)>
+			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool checkValue() const noexcept)
+		{
+			for (size_t i{}; i < _length; ++i)
+			{
+				if (!isFunc(_value[i]))
+					return false;
+			}
+			return true;
+		}
+
+	public:
+		SUBSTRATE_CXX17_CONSTEXPR toInt_t(const char *const value) noexcept :
+			_value{value}, _length{std::char_traits<char>::length(value)} { }
+		constexpr toInt_t(const char *const value, const size_t subLength) noexcept :
+			_value{value}, _length{subLength} { }
+		constexpr size_t length() const noexcept { return _length; }
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isInt() const noexcept)
+		{
+			if (_isSigned && _length > 0 && _value[0] == '-' && length() == 1)
+				return false;
+			for (size_t i{}; i < _length; ++i)
+			{
+				if (_isSigned && i == 0 && _value[i] == '-')
+					continue;
+				else if (!isNumber(_value[i]))
+					return false;
+			}
+			return true;
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isHex() const noexcept) { return checkValue<isHex>(); }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isOct() const noexcept) { return checkValue<isOct>(); }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR int_t fromInt() const noexcept) { return *this; }
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR operator int_t() const noexcept)
+		{
+			if (!isInt())
+				return {};
+			uint_t result{};
+			for (size_t i{}; i < _length; ++i)
+			{
+				if (_isSigned && i == 0 && _value[i] == '-')
+					continue;
+				result *= 10;
+				result += _value[i] - '0';
+			}
+			if (_isSigned && _length > 0 && _value[0] == '-')
+				return -static_cast<int_t>(result);
+			return static_cast<int_t>(result);
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR int_t fromHex() const noexcept)
+		{
+			if (!isHex())
+				return {};
+			int_t value{};
+			for (size_t i{}; i < _length; ++i)
+			{
+				uint8_t hex{_value[i]};
+				if (hex >= 'a' && hex <= 'f')
+					hex -= 0x20;
+				value <<= 4;
+				hex -= 0x30;
+				if (hex > 9)
+					hex -= 0x07;
+				value += hex;
+			}
+			return value;
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR int_t fromOct() const noexcept)
+		{
+			if (!isOct())
+				return {};
+			int_t result{};
+			for (size_t i{}; i < _length; ++i)
+			{
+				result <<= 3;
+				result += _value[i] - 0x30;
+			}
+			return result;
+		}
+	};
+}
+
+#endif /*SUBSTRATE_CONVERSIONS*/

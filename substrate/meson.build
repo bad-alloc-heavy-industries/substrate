@@ -13,8 +13,8 @@ headers = [
 	'pty',
 	'pipe',
 	'mmap',
-	'span'
-
+	'span',
+	'conversions'
 ]
 
 advanced_headers = [
