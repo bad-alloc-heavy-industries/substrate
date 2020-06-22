@@ -93,7 +93,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(operator std::unique_ptr<char []>() const noexcept)
 		{
 			auto number{make_unique_nothrow<char []>(digits(_value) + 1)};
-			if (!number.valid())
+			if (!number)
 				return nullptr;
 			format(number.get());
 			return number;
@@ -165,7 +165,7 @@ namespace substrate
 			_value{value}, _length{subLength} { }
 		constexpr size_t length() const noexcept { return _length; }
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isInt() const noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isDec() const noexcept)
 		{
 			if (_isSigned && _length > 0 && _value[0] == '-' && length() == 1)
 				return false;
@@ -181,11 +181,11 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isHex() const noexcept) { return checkValue<isHex>(); }
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isOct() const noexcept) { return checkValue<isOct>(); }
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR int_t fromInt() const noexcept) { return *this; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR int_t fromDec() const noexcept) { return *this; }
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR operator int_t() const noexcept)
 		{
-			if (!isInt())
+			if (!isDec())
 				return {};
 			uint_t result{};
 			for (size_t i{}; i < _length; ++i)
@@ -207,7 +207,7 @@ namespace substrate
 			int_t value{};
 			for (size_t i{}; i < _length; ++i)
 			{
-				uint8_t hex{_value[i]};
+				uint8_t hex = _value[i];
 				if (hex >= 'a' && hex <= 'f')
 					hex -= 0x20;
 				value <<= 4;
