@@ -10,12 +10,6 @@
 
 namespace substrate
 {
-	// Type aliases for some type_traits utilities to make them easier to type and read below
-	template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
-	template<typename A, typename B> using isSame = std::is_same<A, B>;
-	template<typename A> using isIntegral = std::is_integral<A>;
-	template<typename A> using isUnsigned = std::is_unsigned<A>;
-
 	template<typename int_t, typename valueType_t> struct fromInt_t
 	{
 	private:
