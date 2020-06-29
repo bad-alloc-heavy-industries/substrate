@@ -147,8 +147,7 @@ namespace substrate
 			{ return isNumber(x) || (x >= 'a' && x <= 'f') || (x >= 'A' && x <= 'F'); }
 		SUBSTRATE_NO_DISCARD(constexpr static bool isOct(const char x) noexcept) { return x >= '0' && x <= '7'; }
 
-		template<bool isFunc(const char)>
-			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool checkValue() const noexcept)
+		template<bool isFunc(const char)> SUBSTRATE_CXX14_CONSTEXPR bool checkValue() const noexcept
 		{
 			for (size_t i{}; i < _length; ++i)
 			{
