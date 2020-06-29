@@ -86,17 +86,28 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(operator std::unique_ptr<char []>() const noexcept)
 		{
-			auto number{make_unique_nothrow<char []>(digits(_value) + 1)};
+			auto number{make_unique_nothrow<char []>(length())};
 			if (!number)
 				return nullptr;
 			format(number.get());
 			return number;
 		}
 
-		SUBSTRATE_NO_DISCARD(operator const char *() const noexcept)
+		SUBSTRATE_NO_DISCARD(explicit operator const char *() const noexcept)
 		{
 			std::unique_ptr<char []> number{*this};
 			return number.release();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator std::string() const)
+		{
+			std::string number(std::size_t{length()}, '\0');
+#if __cplusplus >= 201703L
+			format(number.data());
+#else
+			format(&number.front());
+#endif
+			return number;
 		}
 
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }

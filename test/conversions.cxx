@@ -32,6 +32,11 @@ public:
 			const std::unique_ptr<char []> value{fromInt{test.first}};
 			REQUIRE(value.get());
 			REQUIRE(memcmp(value.get(), test.second, str_t::length(test.second)) == 0);
+			REQUIRE_NOTHROW([&]()
+			{
+				const std::string valueStr{fromInt{test.first}};
+				REQUIRE(memcmp(valueStr.data(), test.second, str_t::length(test.second)) == 0);
+			}());
 		}
 	}
 };
