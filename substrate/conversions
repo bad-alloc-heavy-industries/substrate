@@ -139,6 +139,11 @@ namespace substrate
 			{ formatFraction(maxDigits, buffer); }
 	};
 
+#if __cplusplus >= 201703L
+	template<typename int_t, typename value_t> fromInt_t(value_t) -> fromInt_t<int_t, value_t>;
+	template<typename value_t> fromInt_t(value_t) -> fromInt_t<value_t, value_t>;
+#endif
+
 	template<typename int_t> struct toInt_t
 	{
 	private:
