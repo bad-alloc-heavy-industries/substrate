@@ -140,7 +140,6 @@ namespace substrate
 	};
 
 #if __cplusplus >= 201703L
-	//template<typename int_t, typename value_t> fromInt_t(value_t) -> fromInt_t<int_t, value_t>;
 	template<typename value_t> fromInt_t(value_t) -> fromInt_t<value_t, value_t>;
 #endif
 
