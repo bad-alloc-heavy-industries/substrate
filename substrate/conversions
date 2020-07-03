@@ -143,6 +143,11 @@ namespace substrate
 	template<typename value_t> fromInt_t(value_t) -> fromInt_t<value_t, value_t>;
 #endif
 
+	template<typename value_t>
+		constexpr inline fromInt_t<value_t, value_t> fromInt(const value_t &value) { return {value}; }
+	template<typename int_t, typename value_t>
+		constexpr inline fromInt_t<int_t, value_t> fromInt(const value_t &value) { return {value}; }
+
 	template<typename int_t> struct toInt_t
 	{
 	private:
