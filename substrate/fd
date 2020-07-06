@@ -37,6 +37,12 @@ namespace substrate
 		mutable off_t _length;
 
 	public:
+#ifndef _WINDOWS
+		using mode_t = ::mode_t;
+#else
+		using mode_t = internal::mode_t;
+#endif
+
 		constexpr fd_t() noexcept : fd{-1}, eof{false}, _length{-1} { }
 		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false}, _length{-1} { }
 		fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
