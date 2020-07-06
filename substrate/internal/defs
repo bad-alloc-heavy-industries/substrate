@@ -73,5 +73,16 @@
 #	define SUBSTRATE_CXX17_CONSTEXPR
 #endif
 
+#ifdef _WINDOWS
+namespace substrate
+{
+#ifdef _WIN64
+	using ssize_t = __int64;
+#else
+	using ssize_t = int;
+#endif
+}
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
