@@ -11,7 +11,7 @@
         <tr>
             <th rowspan="3">Platform</th>
             <th rowspan="3">C++ Standard</th>
-            <th colspan="11">Compiler</th>
+            <th colspan="13">Compiler</th>
         </tr>
         <tr>
             <th colspan="6" style="border-right: 1px solid !important;">G++</th>
