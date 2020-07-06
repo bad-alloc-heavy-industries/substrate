@@ -12,6 +12,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if defined(_MSC_VER) && !defined(_WINDOWS)
+#define _WINDOWS 1
+#endif
+
 namespace substrate
 {
 	namespace internal
