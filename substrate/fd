@@ -32,9 +32,9 @@ namespace substrate
 	struct fd_t final
 	{
 	private:
-		int32_t fd;
-		mutable bool eof;
-		mutable off_t _length;
+		int32_t fd{-1};
+		mutable bool eof{false};
+		mutable off_t _length{-1};
 
 	public:
 #ifndef _WINDOWS
@@ -43,12 +43,12 @@ namespace substrate
 		using mode_t = internal::mode_t;
 #endif
 
-		constexpr fd_t() noexcept : fd{-1}, eof{false}, _length{-1} { }
-		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false}, _length{-1} { }
+		constexpr fd_t() noexcept = default;
+		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_} { }
 		fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(file, flags, mode)}, eof{false}, _length{-1} { }
+			fd{::open(file, flags, mode)} { }
 		fd_t(const std::string& file, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(file.c_str(), flags, mode)}, eof{false}, _length{-1} { }
+			fd{::open(file.c_str(), flags, mode)} { }
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
 		~fd_t() noexcept { if (fd != -1) close(fd); }
 		void operator =(fd_t &&fd_) noexcept { swap(fd_); }
