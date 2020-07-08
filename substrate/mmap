@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #ifndef SUBSTRATE_MMAP
 #define SUBSTRATE_MMAP
+
+#include <substrate/internal/defs>
 #ifdef _WINDOWS
 #	error "mmap is a *nix only header"
 #endif
@@ -10,7 +12,6 @@
 #include <sys/mman.h>
 #include <stdexcept>
 
-#include <substrate/internal/defs>
 #include <substrate/utility>
 
 namespace substrate
