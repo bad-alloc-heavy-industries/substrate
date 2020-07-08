@@ -18,6 +18,14 @@
 
 namespace substrate
 {
+#ifndef _WINDOWS
+	using mode_t = ::mode_t;
+	using ssize_t = ::ssize_t;
+#else
+	using mode_t = int32_t;
+	using ssize_t = typename std::make_signed<std::size_t>::type;
+#endif
+
 	namespace internal
 	{
 #ifndef _WINDOWS
@@ -36,8 +44,6 @@ namespace substrate
 			{ return ftruncate(fd, size); }
 #else
 #	define O_NOCTTY _O_BINARY
-		using mode_t = int32_t;
-		using ssize_t = typename std::make_signed<std::size_t>::type;
 		using stat_t = struct ::_stat64;
 
 		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
