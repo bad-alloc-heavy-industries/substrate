@@ -29,3 +29,9 @@ pkgconfig.generate(
 	version: meson.project_version(),
 	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 )
+
+runClangTidy = find_program('runClangTidy.py')
+run_target(
+	'clang-tidy',
+	command: [runClangTidy, '-s', meson.current_source_dir(), '-p', meson.current_build_dir()]
+)
