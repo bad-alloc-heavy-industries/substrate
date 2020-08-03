@@ -36,11 +36,11 @@
 
 #ifdef _WINDOWS
 #	ifdef SUBSTRATE_BUILD_INTERNAL
-#		define SUBSTRATE_API __declspec(dllexport)
+#		define SUBSTRATE_CLS_API __declspec(dllexport)
 #	else
-#		define SUBSTRATE_API __declspec(dllimport)
+#		define SUBSTRATE_CLS_API __declspec(dllimport)
 #	endif
-#	define SUBSTRATE_CLS_API SUBSTRATE_API
+#	define SUBSTRATE_API extern SUBSTRATE_CLS_API
 #	define SUBSTRATE_CLS_MAYBE_API
 #else
 #	define SUBSTRATE_CLS_API __attribute__ ((visibility("default")))
