@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cerrno>
+#if defined(_MSC_VER) && !defined(_WINDOWS)
+#	define _WINDOWS 1
+#endif
 #ifndef _WINDOWS
 #	include <unistd.h>
 #else
