@@ -4,6 +4,7 @@
 
 #include <type_traits>
 #include <typeinfo>
+#include <array>
 #include <memory>
 #include <string>
 #include <limits>
@@ -532,7 +533,7 @@ namespace substrate
 	{
 		using _type_ref = typename substrate::remove_reference_t<T>;
 #ifndef _MSC_VER
-		const auto demangler = abi::__cxa_demangle(typeid(_type_ref).name(), nullptr, nullptr, nullptr);
+		auto * const demangler = abi::__cxa_demangle(typeid(_type_ref).name(), nullptr, nullptr, nullptr);
 #else
 		const auto demangler = nullptr;
 #endif
