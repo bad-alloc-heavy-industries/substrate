@@ -21,9 +21,11 @@ namespace substrate
 #ifndef _WINDOWS
 	using mode_t = ::mode_t;
 	using ssize_t = ::ssize_t;
+	using off_t = ::off_t;
 #else
 	using mode_t = int32_t;
 	using ssize_t = typename std::make_signed<std::size_t>::type;
+	using off_t = int64_t;
 #endif
 
 	namespace internal
