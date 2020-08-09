@@ -172,6 +172,8 @@ namespace substrate
 			{ return write(value.data(), sizeof(T) * value.size()); }
 #endif
 
+		bool write(const std::string &value) const noexcept
+			{ return write(value.data(), value.size()); }
 #if __cplusplus >= 201703L
 		bool write(const std::string_view &value) const noexcept
 			{ return write(value.data(), value.size()); }
