@@ -10,10 +10,10 @@ namespace substrate
 	struct readPipe_t final
 	{
 	private:
-		int32_t fd;
+		int32_t fd{-1};
 
 	public:
-		constexpr readPipe_t() noexcept : fd{-1} { }
+		constexpr readPipe_t() noexcept = default;
 		constexpr readPipe_t(const int32_t fd_) noexcept : fd{fd_} { }
 		~readPipe_t() noexcept { if (fd != -1) close(fd); }
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
@@ -25,7 +25,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 		{
-			const ssize_t result = read(value, valueLen, nullptr);
+			const auto result{read(value, valueLen, nullptr)};
 			if (result < 0)
 				return false;
 			resultLen = size_t(result);
@@ -47,10 +47,10 @@ namespace substrate
 	struct writePipe_t final
 	{
 	private:
-		int32_t fd;
+		int32_t fd{-1};
 
 	public:
-		constexpr writePipe_t() noexcept : fd{-1} { }
+		constexpr writePipe_t() noexcept = default;
 		constexpr writePipe_t(const int32_t fd_) noexcept : fd{fd_} { }
 		~writePipe_t() noexcept { if (fd != -1) close(fd); }
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
@@ -62,7 +62,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
 		{
-			const ssize_t result = write(value, valueLen, nullptr);
+			const auto result{write(value, valueLen, nullptr)};
 			if (result < 0)
 				return false;
 			return size_t(result) == valueLen;
