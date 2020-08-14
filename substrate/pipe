@@ -4,6 +4,9 @@
 
 #include <array>
 #include <substrate/internal/fd_compat>
+#ifdef _WINDOWS
+#include <io.h>
+#endif
 
 namespace substrate
 {
@@ -81,6 +84,10 @@ namespace substrate
 		writePipe_t writeFD_;
 
 		pipe_t(std::array<int32_t, 2> fds) noexcept : readFD_{fds[0]}, writeFD_{fds[1]} { }
+
+#ifdef _WINDOWS
+		static bool pipe(int32_t *const fds) noexcept { return _pipe(fds, 0, _O_BINARY); }
+#endif
 
 	public:
 		pipe_t() noexcept : pipe_t{[]() noexcept -> std::array<int32_t, 2>
