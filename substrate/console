@@ -71,6 +71,7 @@ namespace substrate
 		consoleStream_t outputStream;
 		consoleStream_t errorStream;
 		bool valid_{false};
+		bool showDebug_{true};
 
 		void write(const consoleStream_t &stream) const noexcept { stream.write('\n'); }
 		void write(const consoleStream_t &, std::nullptr_t) const noexcept { }
@@ -106,11 +107,19 @@ namespace substrate
 			{ _info(); write(outputStream, std::forward<T>(values)...); }
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void debug(T &&...values) const noexcept
-			{ _debug(); write(outputStream, std::forward<T>(values)...); }
+		{
+			if (showDebug_)
+			{
+				_debug();
+				write(outputStream, std::forward<T>(values)...);
+			}
+		}
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void writeln(T &&...values) const noexcept
 			{ write(outputStream, std::forward<T>(values)...); }
 
+		void showDebug(const bool show) noexcept
+			{ showDebug_ = show; }
 		void dumpBuffer();
 	};
 
