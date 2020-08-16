@@ -30,19 +30,19 @@ namespace substrate
 	struct SUBSTRATE_CLS_API consoleStream_t final
 	{
 	private:
-		int32_t fd;
-		bool _tty;
+		int32_t fd{-1};
+		bool _tty{false};
 
 		void checkTTY() noexcept;
 
 	public:
-		constexpr consoleStream_t() noexcept : fd{-1}, _tty{false} { }
+		constexpr consoleStream_t() noexcept = default;
 		consoleStream_t(const int32_t desc) noexcept : fd{desc} { checkTTY(); }
 		bool valid() const noexcept { return fd != -1; }
 		bool isTTY() const noexcept { return _tty; }
 
-		void write(const void *const buffer, const size_t bufferLen) const noexcept;
-		void write(const char *const value) const noexcept;
+		void write(const void *buffer, size_t bufferLen) const noexcept;
+		void write(const char *value) const noexcept;
 		void write(const char value) const noexcept { write(&value, 1); }
 		template<typename T> enable_if_t<!std::is_array<T>::value>
 			write(const std::unique_ptr<T> &value) const noexcept
@@ -70,7 +70,7 @@ namespace substrate
 	private:
 		consoleStream_t outputStream;
 		consoleStream_t errorStream;
-		bool valid_;
+		bool valid_{false};
 
 		void write(const consoleStream_t &stream) const noexcept { stream.write('\n'); }
 		void write(const consoleStream_t &, std::nullptr_t) const noexcept { }
@@ -87,8 +87,8 @@ namespace substrate
 		void _debug() const noexcept;
 
 	public:
-		constexpr console_t() noexcept : outputStream{}, errorStream{}, valid_{false} { }
-		SUBSTRATE_CLS_MAYBE_API console_t(FILE *const outStream, FILE *const errStream) noexcept;
+		constexpr console_t() noexcept : outputStream{}, errorStream{} { }
+		SUBSTRATE_CLS_MAYBE_API console_t(FILE *outStream, FILE *errStream) noexcept;
 		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
 			outputStream{outStream}, errorStream{errStream}, valid_{outputStream.valid() && errorStream.valid()} { }
 		constexpr bool valid() const noexcept { return valid_; }
@@ -180,7 +180,7 @@ namespace substrate
 			// For up to the maximum number of digits, pad as needed
 			for (; digits > 1; --digits)
 			{
-				const uint8_t nibble = uint8_t((value >> msbShift) & 0x0FU);
+				const uint8_t nibble((value >> msbShift) & 0x0FU);
 				if (nibble == 0)
 					value <<= 4;
 				if (digits > padding && nibble == 0)
@@ -194,7 +194,7 @@ namespace substrate
 
 			for (; digits > 0; --digits)
 			{
-				const uint8_t nibble = uint8_t((value >> msbShift) & 0x0FU);
+				const uint8_t nibble((value >> msbShift) & 0x0FU);
 				const char digit = nibble + '0';
 				if (digit > '9')
 					stream.write(char(digit + 7));
