@@ -108,6 +108,9 @@ namespace substrate
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void debug(T &&...values) const noexcept
 			{ _debug(); write(outputStream, std::forward<T>(values)...); }
 
+		template<typename... T> SUBSTRATE_CLS_MAYBE_API void writeln(T &&...values) const noexcept
+			{ write(outputStream, std::forward<T>(values)...); }
+
 		void dumpBuffer();
 	};
 
