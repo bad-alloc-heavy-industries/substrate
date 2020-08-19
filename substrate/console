@@ -53,6 +53,7 @@ namespace substrate
 		template<typename T> enable_if_t<!std::is_array<T>::value>
 			write(const std::unique_ptr<T> &value) const noexcept
 			{ value ? write(*value) : write("(null)"_s); }
+		// NOLINTNEXTLINE(modernize-avoid-c-arrays, cppcoreguidelines-avoid-c-arrays)
 		template<typename T> void write(const std::unique_ptr<T []> &value) const noexcept
 			{ write(value.get()); }
 		void write(const std::string &value) const noexcept
@@ -64,9 +65,9 @@ namespace substrate
 		template<typename T, typename = enable_if_t<std::is_base_of<printable_t, T>::value>>
 			void write(T &&printable) const noexcept { printable(*this); }
 		template<typename T, typename = enable_if_t<is_numeric<T>::value>>
-			void write(const T value) const noexcept;
-		template<typename T> void write(const T *const ptr) const noexcept;
-		void write(const bool value) const noexcept;
+			void write(T value) const noexcept;
+		template<typename T> void write(const T *ptr) const noexcept;
+		void write(bool value) const noexcept;
 		template<size_t N> void write(const std::array<char, N> &value) const noexcept;
 		template<typename T, size_t N> void write(const std::array<T, N> &value) const noexcept;
 	};
@@ -79,7 +80,7 @@ namespace substrate
 		bool valid_{false};
 		bool showDebug_{true};
 
-		void write(const consoleStream_t &stream) const noexcept { stream.write('\n'); }
+		static void write(const consoleStream_t &stream) noexcept { stream.write('\n'); }
 		void write(const consoleStream_t &, std::nullptr_t) const noexcept { }
 		template<typename T, typename... U> void write(const consoleStream_t &stream,
 			T &&value, U &&...values) const noexcept
