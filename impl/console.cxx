@@ -86,76 +86,71 @@ namespace substrate
 		outputStream{fileno(outStream)}, errorStream{fileno(errStream)},
 		valid_{outputStream.valid() && errorStream.valid()} { }
 
+#ifndef _WINDOWS
+	inline void red(const consoleStream_t &stream) noexcept
+		{ stream.write(colourRed); }
+	inline void yellow(const consoleStream_t &stream) noexcept
+		{ stream.write(colourYellow); }
+	inline void cyan(const consoleStream_t &stream) noexcept
+		{ stream.write(colourCyan); }
+	inline void lightBlue(const consoleStream_t &stream) noexcept
+		{ stream.write(colourLightBlue); }
+	inline void defaults(const consoleStream_t &stream) noexcept
+		{ stream.write(colourDefaults); }
+#else
+	inline void red(const consoleStream_t &stream) noexcept { }
+	inline void yellow(const consoleStream_t &stream) noexcept { }
+	inline void cyan(const consoleStream_t &stream) noexcept { }
+	inline void lightBlue(const consoleStream_t &stream) noexcept { }
+	inline void defaults(const consoleStream_t &stream) noexcept { }
+#endif
+
 	void console_t::_error() const noexcept
 	{
-#ifndef _WINDOWS
 		const bool tty = errorStream.isTTY();
 		errorStream.write(' ');
 		if (tty)
-			errorStream.write(colourRed);
+			red(errorStream);
 		errorStream.write(errorPrefix);
 		if (tty)
-			errorStream.write(colourDefaults);
+			defaults(errorStream);
 		errorStream.write(' ');
-#else
-		errorStream.write(' ');
-		errorStream.write(errorPrefix);
-		errorStream.write(' ');
-#endif
 	}
 
 	void console_t::_warning() const noexcept
 	{
-#ifndef _WINDOWS
 		const bool tty = outputStream.isTTY();
 		outputStream.write(' ');
 		if (tty)
-			outputStream.write(colourYellow);
+			yellow(outputStream);
 		outputStream.write(warningPrefix);
 		if (tty)
-			outputStream.write(colourDefaults);
+			defaults(outputStream);
 		outputStream.write(' ');
-#else
-		outputStream.write(' ');
-		outputStream.write(warningPrefix);
-		outputStream.write(' ');
-#endif
 	}
 
 	void console_t::_info() const noexcept
 	{
-#ifndef _WINDOWS
 		const bool tty = outputStream.isTTY();
 		outputStream.write(' ');
 		if (tty)
-			outputStream.write(colourCyan);
+			cyan(outputStream);
 		outputStream.write(infoPrefix);
 		if (tty)
-			outputStream.write(colourDefaults);
+			defaults(outputStream);
 		outputStream.write(' ');
-#else
-		outputStream.write(' ');
-		outputStream.write(infoPrefix);
-		outputStream.write(' ');
-#endif
 	}
 
 	void console_t::_debug() const noexcept
 	{
-#ifndef _WINDOWS
 		const bool tty = outputStream.isTTY();
 		outputStream.write(' ');
 		if (tty)
-			outputStream.write(colourLightBlue);
+			lightBlue(outputStream);
 		outputStream.write(debugPrefix);
 		if (tty)
-			outputStream.write(colourDefaults);
+			defaults(outputStream);
 		outputStream.write(' ');
-#else
-		outputStream.write(' ');
-		outputStream.write(debugPrefix);
-		outputStream.write(' ');
-#endif
 	}
 } // namespace substrate
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
