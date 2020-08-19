@@ -98,6 +98,9 @@ namespace substrate
 			errorStream.write(colourDefaults);
 		errorStream.write(' ');
 #else
+		errorStream.write(' ');
+		errorStream.write(errorPrefix);
+		errorStream.write(' ');
 #endif
 	}
 
@@ -113,6 +116,9 @@ namespace substrate
 			outputStream.write(colourDefaults);
 		outputStream.write(' ');
 #else
+		outputStream.write(' ');
+		outputStream.write(warningPrefix);
+		outputStream.write(' ');
 #endif
 	}
 
@@ -128,6 +134,9 @@ namespace substrate
 			outputStream.write(colourDefaults);
 		outputStream.write(' ');
 #else
+		outputStream.write(' ');
+		outputStream.write(infoPrefix);
+		outputStream.write(' ');
 #endif
 	}
 
@@ -143,6 +152,9 @@ namespace substrate
 			outputStream.write(colourDefaults);
 		outputStream.write(' ');
 #else
+		outputStream.write(' ');
+		outputStream.write(debugPrefix);
+		outputStream.write(' ');
 #endif
 	}
 } // namespace substrate
