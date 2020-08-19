@@ -23,8 +23,14 @@ namespace substrate
 
 	struct SUBSTRATE_CLS_API printable_t
 	{
+		printable_t() = default;
 		virtual void operator()(const consoleStream_t &) const noexcept = 0;
 		virtual ~printable_t() noexcept = default;
+
+		printable_t(const printable_t &) = delete;
+		printable_t(printable_t &&) = delete;
+		printable_t &operator =(const printable_t &) = delete;
+		printable_t &operator =(printable_t &&) = delete;
 	};
 
 	struct SUBSTRATE_CLS_API consoleStream_t final
