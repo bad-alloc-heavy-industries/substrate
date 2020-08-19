@@ -237,7 +237,8 @@ namespace substrate
 	{
 		write("0x"_s);
 		write(asHex_t<8, '0'>{
-			reinterpret_cast<uintptr_t>(ptr) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm[cpp/reinterpret-cast]
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			reinterpret_cast<uintptr_t>(ptr) // lgtm[cpp/reinterpret-cast]
 		});
 	}
 
