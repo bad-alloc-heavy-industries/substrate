@@ -8,10 +8,13 @@
 #include <type_traits>
 #include <string>
 #if __cplusplus >= 201703L
-#include <string_view>
+#	include <string_view>
 #endif
 #include <memory>
 #include <cstring>
+#ifdef _WINDOWS
+#	include <io.h>
+#endif
 
 #include <substrate/internal/defs>
 #include <substrate/utility>
@@ -46,6 +49,9 @@ namespace substrate
 		consoleStream_t(const int32_t desc) noexcept : fd{desc} { checkTTY(); }
 		bool valid() const noexcept { return fd != -1; }
 		bool isTTY() const noexcept { return _tty; }
+#ifdef _WINDOWS
+		auto handle() const noexcept { return reinterpret_cast<void *>(_get_osfhandle(fd)); }
+#endif
 
 		void write(const void *buffer, size_t bufferLen) const noexcept;
 		void write(const char *value) const noexcept;

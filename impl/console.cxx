@@ -98,11 +98,16 @@ namespace substrate
 	inline void defaults(const consoleStream_t &stream) noexcept
 		{ stream.write(colourDefaults); }
 #else
-	inline void red(const consoleStream_t &stream) noexcept { }
-	inline void yellow(const consoleStream_t &stream) noexcept { }
-	inline void cyan(const consoleStream_t &stream) noexcept { }
-	inline void lightBlue(const consoleStream_t &stream) noexcept { }
-	inline void defaults(const consoleStream_t &stream) noexcept { }
+	inline void red(const consoleStream_t &stream) noexcept
+		{ SetConsoleTextAttribute(stream.handle(), FOREGROUND_RED | FOREGROUND_INTENSITY); }
+	inline void yellow(const consoleStream_t &stream) noexcept
+		{ SetConsoleTextAttribute(stream.handle(), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY); }
+	inline void cyan(const consoleStream_t &stream) noexcept
+		{ SetConsoleTextAttribute(stream.handle(), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY); }
+	inline void lightBlue(const consoleStream_t &stream) noexcept
+		{ SetConsoleTextAttribute(stream.handle(), FOREGROUND_BLUE | FOREGROUND_INTENSITY); }
+	inline void defaults(const consoleStream_t &stream) noexcept
+		{ SetConsoleTextAttribute(stream.handle(), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE); }
 #endif
 
 	void console_t::_error() const noexcept
