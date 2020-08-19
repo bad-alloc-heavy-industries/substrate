@@ -160,8 +160,10 @@ TEST_CASE("console_t write conversions", "[console_t]")
 	assertPipeRead(pipe, plainTrue);
 	console.info(false);
 	assertPipeRead(pipe, plainFalse);
+#ifndef _WINDOWS
 	console.info("raw string");
 	assertPipeRead(pipe, plainRawString);
+#endif
 	console.info(testCharPtr);
 	assertPipeRead(pipe, plainNullptr);
 	console.info(testArrayPtr);
