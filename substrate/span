@@ -17,42 +17,28 @@ namespace substrate
 #else
 #include <substrate/utility>
 #include <substrate/iterator>
+#include <substrate/internal/defs>
+
 namespace substrate
 {
+	template<typename...> using void_t = void;
 
-	template<class...> using void_t = void;
-
-	template <class C>
-	constexpr auto data(C& c) -> decltype(c.data());
-
-	template <class C>
-	constexpr auto data(const C& c) -> decltype(c.data());
-
-	template <class T, std::size_t N>
-	constexpr T* data(T (&array)[N]) noexcept;
-
-	template <class E>
-	constexpr const E* data(std::initializer_list<E> il) noexcept;
-
-	template <class C>
-	constexpr auto size(const C& c) -> decltype(c.size());
-
-
-	template <class T, std::size_t N>
-	constexpr std::size_t size(const T (&array)[N]) noexcept;
-
-	template <class T, std::ptrdiff_t N>
-	constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
-
-	template <bool B>
-	using bool_constant = std::integral_constant<bool, B>;
+	template<typename C> constexpr auto data(C &c) -> decltype(c.data());
+	template<typename C> constexpr auto data(const C &c) -> decltype(c.data());
+	template<typename T, std::size_t N> constexpr T *data(T (&array)[N]) noexcept;
+	template<typename E> constexpr const E *data(std::initializer_list<E> il) noexcept;
+	template<typename C> constexpr auto size(const C &c) -> decltype(c.size());
+	template<typename T, std::size_t N> constexpr std::size_t size(const T (&array)[N]) noexcept;
+	template<typename T, std::ptrdiff_t N> constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
+	template<bool B> using bool_constant = std::integral_constant<bool, B>;
 
 	enum class byte : unsigned char { };
 
-	constexpr size_t dynamic_extent = std::numeric_limits<size_t>::max();
+	constexpr inline size_t dynamic_extent = std::numeric_limits<size_t>::max();
 	template<typename T, size_t extent> struct span;
 
-	namespace internal {
+	namespace internal
+	{
 		using std::false_type;
 		using std::true_type;
 
@@ -99,31 +85,26 @@ namespace substrate
 			constexpr extentStorage_t(const size_t extent) noexcept : _extent{extent} { }
 			constexpr size_t extent() const noexcept { return _extent; }
 		};
-
-	}
+	} // namespace internal
 
 	template<typename T, size_t extent_v = dynamic_extent> struct span
 	{
-		template<size_t offset, size_t count> static constexpr substrate::enable_if_t<count != dynamic_extent, size_t>
-		 	_subspanExtent() noexcept
-		{
-			return count;
-		}
+		template<size_t offset, size_t count> static constexpr
+			substrate::enable_if_t<count != dynamic_extent, size_t>
+			_subspanExtent() noexcept { return count; }
 
-		template<size_t offset, size_t count> static constexpr substrate::enable_if_t<extent_v != dynamic_extent && count == dynamic_extent, size_t>
-			_subspanExtent() noexcept
-		{
-			return extent_v - offset;
-		}
+		template<size_t offset, size_t count> static constexpr
+			substrate::enable_if_t<extent_v != dynamic_extent && count == dynamic_extent, size_t>
+			_subspanExtent() noexcept { return extent_v - offset; }
 
-		template<size_t offset, size_t count> static constexpr substrate::enable_if_t<extent_v != dynamic_extent && count != dynamic_extent, size_t>
-			 _subspanExtent() noexcept
-		{
-			return dynamic_extent;
-		}
+		template<size_t offset, size_t count> static constexpr
+			substrate::enable_if_t<extent_v == dynamic_extent && count == dynamic_extent, size_t>
+			_subspanExtent() noexcept { return dynamic_extent; }
+
 		template<typename type_t, size_t N> using isCompatArray_t = internal::and_t<substrate::bool_constant<
 			extent_v == dynamic_extent || extent_v == N>, internal::isArrayConvertible<T, type_t>>;
-		template<typename type_t, size_t N> constexpr static bool isCompatArray () { return isCompatArray_t<type_t, N>::value; }
+		template<typename type_t, size_t N> constexpr static bool isCompatArray ()
+			{ return isCompatArray_t<type_t, N>::value; }
 
 	public:
 		using value_type = substrate::remove_cv_t<T>;
@@ -142,12 +123,13 @@ namespace substrate
 		constexpr static size_t extent = extent_v;
 
 	private:
-		[[no_unique_address]] internal::extentStorage_t<extent> _extent;
-		pointer _ptr;
+		[[no_unique_address]] internal::extentStorage_t<extent> _extent{0};
+		pointer _ptr{nullptr};
 
 	public:
-		constexpr span() noexcept : _extent(0), _ptr{nullptr} { }
+		constexpr span() noexcept = default;
 		constexpr span(const span &) noexcept = default;
+		constexpr span(span &&) noexcept = default;
 		constexpr span(pointer ptr, size_t count) noexcept : _extent{count}, _ptr{ptr} { }
 		constexpr span(pointer first, pointer last) noexcept : span(first, last - first) { }
 
@@ -170,7 +152,9 @@ namespace substrate
 		constexpr span(const container_t &container) noexcept(noexcept(substrate::data(container)) &&
 			noexcept(substrate::size(container))) : span(substrate::data(container), substrate::size(container)) { }
 
-		constexpr span &operator =(const span &) noexcept = default;
+		SUBSTRATE_CXX17_CONSTEXPR ~span() noexcept = default;
+		SUBSTRATE_CXX17_CONSTEXPR span &operator =(const span &) noexcept = default;
+		SUBSTRATE_CXX17_CONSTEXPR span &operator =(span &&) noexcept = default;
 		constexpr size_t size() const noexcept { return _extent.extent(); }
 		constexpr size_t size_bytes() const noexcept { return size() * sizeof(T); }
 		[[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
@@ -248,8 +232,9 @@ namespace substrate
 			return {data() + (size() - count), count};
 		}
 
-		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v == dynamic_extent && count != dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto subspan() const noexcept ->
+			substrate::enable_if_t<extent_v == dynamic_extent && count != dynamic_extent,
+				span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= size(), "offset must be less than or equal to the size of the span");
 			static_assert(count <= size(), "count must be less than or equal to the size of the span");
@@ -258,16 +243,18 @@ namespace substrate
 		}
 
 
-		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v != dynamic_extent && count == dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto subspan() const noexcept ->
+			substrate::enable_if_t<extent_v != dynamic_extent && count == dynamic_extent,
+				span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= extent, "offset must be less than or equal to the extent of the span");
 
 			return {data() + offset, size() - offset};
 		}
 
-		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v == dynamic_extent && count == dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto subspan() const noexcept ->
+			substrate::enable_if_t<extent_v == dynamic_extent && count == dynamic_extent,
+				span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= size(), "offset must be less than or equal to the size of the span");
 			static_assert(count <= size(), "count must be less than or equal to the size of the span");
@@ -276,18 +263,18 @@ namespace substrate
 		}
 
 
-		template<size_t offset, size_t count = dynamic_extent> constexpr auto
-			subspan() const noexcept -> substrate::enable_if_t<extent_v != dynamic_extent && count != dynamic_extent, span<T, _subspanExtent<offset, count>()>>
+		template<size_t offset, size_t count = dynamic_extent> constexpr auto subspan() const noexcept ->
+			substrate::enable_if_t<extent_v != dynamic_extent && count != dynamic_extent,
+				span<T, _subspanExtent<offset, count>()>>
 		{
 			static_assert(offset <= extent, "offset must be less than or equal to the extent of the span");
 			static_assert(count <= extent, "count must be less than or equal to the extent of the span");
 			static_assert(count <= extent - offset, "count must be less than or equal to the extent of the span minus the offset");
-
 			return {data() + offset, count};
 		}
 
-
-		const span<T, dynamic_extent> subspan(size_t offset, size_t count = dynamic_extent) const noexcept
+		SUBSTRATE_CXX14_CONSTEXPR span<T, dynamic_extent>
+			subspan(size_t offset, size_t count = dynamic_extent) const noexcept
 		{
 			static_assert(offset <= size(), "Offset must be less than or equal to the size of the span");
 			if (count == dynamic_extent)
@@ -311,12 +298,14 @@ namespace substrate
 	template<typename container_t> span(container_t &) -> span<typename container_t::value_type>;
 	template<typename container_t> span(const container_t &) -> span<const typename container_t::value_type>;
 #endif
+
 	template<typename T, size_t extent> inline span<const substrate::byte,
 		extent == dynamic_extent ? dynamic_extent : extent * sizeof(T)>
 		as_bytes(span<T, extent> span) noexcept
 	{
 		return {
-			reinterpret_cast<const substrate::byte *>(span.data()), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			reinterpret_cast<const substrate::byte *>(span.data()),
 			span.size_bytes()
 		};
 	}
@@ -326,14 +315,14 @@ namespace substrate
 		as_writeable_bytes(span<T, extent> span) noexcept
 	{
 		return {
-			reinterpret_cast<substrate::byte *>(span.data()), // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast)
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			reinterpret_cast<substrate::byte *>(span.data()),
 			span.size_bytes()
 		};
 	}
+} // namespace substrate
 
-}
-
-namespace std
+namespace std // NOLINT(cert-dcl58-cpp)
 {
 	using substrate::dynamic_extent;
 	using substrate::span;
@@ -362,8 +351,7 @@ namespace std
 		static_assert(index < extent, "index is less than extent");
 		using type = T;
 	};
-}
-
+} // namespace std
 
 #endif
 #endif /* SUBSTRATE_SPAN */
