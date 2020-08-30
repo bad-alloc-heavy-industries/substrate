@@ -11,8 +11,8 @@
 #include <span>
 namespace substrate
 {
-	template<typname T, size_t E = dynamic_extent>
-	using span = std::span<T. E>;
+	template<typename T, size_t E = std::dynamic_extent>
+		using span = std::span<T. E>;
 }
 #else
 #include <substrate/utility>
@@ -20,8 +20,7 @@ namespace substrate
 namespace substrate
 {
 
-	template<class...>
-	using void_t = void;
+	template<class...> using void_t = void;
 
 	template <class C>
 	constexpr auto data(C& c) -> decltype(c.data());
@@ -48,7 +47,7 @@ namespace substrate
 	template <bool B>
 	using bool_constant = std::integral_constant<bool, B>;
 
-	enum class byte : unsigned char {} ;
+	enum class byte : unsigned char { };
 
 	constexpr size_t dynamic_extent = std::numeric_limits<size_t>::max();
 	template<typename T, size_t extent> struct span;
