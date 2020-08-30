@@ -12,6 +12,10 @@ project(
 cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 
+if cxx.get_id() == 'gcc' and cxx.version() < '7.0.0' and cxx.has_argument('-Wno-attributes')
+	add_project_arguments('-Wno-attributes', language: 'cpp')
+endif
+
 subdir('substrate')
 subdir('impl')
 subdir('test')
