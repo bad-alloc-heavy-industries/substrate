@@ -152,7 +152,7 @@ namespace substrate
 		constexpr span(const container_t &container) noexcept(noexcept(substrate::data(container)) &&
 			noexcept(substrate::size(container))) : span(substrate::data(container), substrate::size(container)) { }
 
-		SUBSTRATE_CXX17_CONSTEXPR ~span() noexcept = default;
+		~span() noexcept = default;
 		SUBSTRATE_CXX17_CONSTEXPR span &operator =(const span &) noexcept = default;
 		SUBSTRATE_CXX17_CONSTEXPR span &operator =(span &&) noexcept = default;
 		constexpr size_t size() const noexcept { return _extent.extent(); }
