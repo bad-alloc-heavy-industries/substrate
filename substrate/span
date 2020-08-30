@@ -12,7 +12,7 @@
 namespace substrate
 {
 	template<typename T, size_t E = std::dynamic_extent>
-		using span = std::span<T. E>;
+		using span = std::span<T, E>;
 }
 #else
 #include <substrate/utility>
