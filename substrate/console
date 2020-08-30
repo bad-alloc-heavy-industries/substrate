@@ -107,7 +107,10 @@ namespace substrate
 		SUBSTRATE_CLS_MAYBE_API console_t(FILE *outStream, FILE *errStream) noexcept;
 		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
 			outputStream{outStream}, errorStream{errStream}, valid_{outputStream.valid() && errorStream.valid()} { }
+		console_t(const console_t &) noexcept = delete;
 		SUBSTRATE_CLS_MAYBE_API console_t(console_t &&other) noexcept : console_t{} { swap(other); }
+		~console_t() noexcept = default;
+		console_t operator =(const console_t &) noexcept = delete;
 		constexpr bool valid() const noexcept { return valid_; }
 
 		SUBSTRATE_CLS_MAYBE_API console_t &operator =(console_t &&other) noexcept
