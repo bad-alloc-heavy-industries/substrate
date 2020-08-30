@@ -135,7 +135,7 @@ namespace substrate
 
 		template<typename... T> SUBSTRATE_CLS_MAYBE_API void warn(T &&...values) const noexcept
 		{
-			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock{consoleMutex});
+			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			_warning();
 			write(outputStream, std::forward<T>(values)...);
 		}
@@ -169,8 +169,8 @@ namespace substrate
 
 		void swap(console_t &other) noexcept
 		{
-			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> ourLock{consoleMutex});
-			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> theirLock{other.consoleMutex});
+			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> ourLock){consoleMutex};
+			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> theirLock){other.consoleMutex};
 
 			std::swap(outputStream, other.outputStream);
 			std::swap(errorStream, other.errorStream);
