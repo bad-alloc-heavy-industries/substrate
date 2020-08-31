@@ -43,7 +43,7 @@ private:
 	using fromIntFixed = fromInt_t<int_t, int_t, typeToLength<int_t>()>;
 
 public:
-	static void testConversions(const testOk_t<int_t> &tests)
+	static void testDecConversions(const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -83,7 +83,7 @@ public:
 
 TEST_CASE("Decimal conversion from uint8_t", "[conversions]")
 {
-	testFromInt_t<uint8_t>::testConversions(
+	testFromInt_t<uint8_t>::testDecConversions(
 	{
 		{0, "0", "0000"},
 		{127, "127", "0127"},
@@ -94,7 +94,7 @@ TEST_CASE("Decimal conversion from uint8_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from int8_t", "[conversions]")
 {
-	testFromInt_t<int8_t>::testConversions(
+	testFromInt_t<int8_t>::testDecConversions(
 	{
 		{0, "0", "00000"},
 		{127, "127", "00127"},
@@ -106,7 +106,7 @@ TEST_CASE("Decimal conversion from int8_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from uint16_t", "[conversions]")
 {
-	testFromInt_t<uint16_t>::testConversions(
+	testFromInt_t<uint16_t>::testDecConversions(
 	{
 		{0, "0", "000000"},
 		{127, "127", "000127"},
@@ -121,7 +121,7 @@ TEST_CASE("Decimal conversion from uint16_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from int16_t", "[conversions]")
 {
-	testFromInt_t<int16_t>::testConversions(
+	testFromInt_t<int16_t>::testDecConversions(
 	{
 		{0, "0", "0000000"},
 		{127, "127", "0000127"},
@@ -141,7 +141,7 @@ TEST_CASE("Decimal conversion from int16_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from uint32_t", "[conversions]")
 {
-	testFromInt_t<uint32_t>::testConversions(
+	testFromInt_t<uint32_t>::testDecConversions(
 	{
 		{0, "0", "00000000000"},
 		{127, "127", "00000000127"},
@@ -160,7 +160,7 @@ TEST_CASE("Decimal conversion from uint32_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from int32_t", "[conversions]")
 {
-	testFromInt_t<int32_t>::testConversions(
+	testFromInt_t<int32_t>::testDecConversions(
 	{
 		{0, "0", "000000000000"},
 		{127, "127", "000000000127"},
@@ -190,7 +190,7 @@ TEST_CASE("Decimal conversion from int32_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from uint64_t", "[conversions]")
 {
-	testFromInt_t<uint64_t>::testConversions(
+	testFromInt_t<uint64_t>::testDecConversions(
 	{
 		{0, "0", "000000000000000000000"},
 		{127, "127", "000000000000000000127"},
@@ -215,7 +215,7 @@ TEST_CASE("Decimal conversion from uint64_t", "[conversions]")
 
 TEST_CASE("Decimal conversion from int64_t", "[conversions]")
 {
-	testFromInt_t<int64_t>::testConversions(
+	testFromInt_t<int64_t>::testDecConversions(
 	{
 		{0, "0", "000000000000000000000"},
 		{127, "127", "000000000000000000127"},
