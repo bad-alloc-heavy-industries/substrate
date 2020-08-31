@@ -34,7 +34,7 @@ namespace substrate
 
 	enum class byte : unsigned char { };
 
-	constexpr inline size_t dynamic_extent = std::numeric_limits<size_t>::max();
+	constexpr SUBSTRATE_CXX17_INLINE auto dynamic_extent{std::numeric_limits<size_t>::max()};
 	template<typename T, size_t extent> struct span;
 
 	namespace internal

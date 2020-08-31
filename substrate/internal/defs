@@ -69,8 +69,10 @@
 
 #if __cplusplus >= 201703L
 #	define SUBSTRATE_CXX17_CONSTEXPR constexpr
+#	define SUBSTRATE_CXX17_INLINE inline
 #else
 #	define SUBSTRATE_CXX17_CONSTEXPR
+#	define SUBSTRATE_CXX17_INLINE
 #endif
 
 #ifdef _WINDOWS
