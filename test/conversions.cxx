@@ -26,21 +26,21 @@ using str_t = std::char_traits<char>;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define i64(n)		INT64_C(n)
 
-template<typename> constexpr static size_t typeToLength() noexcept;
-template<> constexpr inline size_t typeToLength<uint8_t>() noexcept { return 4; }
-template<> constexpr inline size_t typeToLength<uint16_t>() noexcept { return 6; }
-template<> constexpr inline size_t typeToLength<uint32_t>() noexcept { return 11; }
-template<> constexpr inline size_t typeToLength<uint64_t>() noexcept { return 21; }
-template<> constexpr inline size_t typeToLength<int8_t>() noexcept { return 5; }
-template<> constexpr inline size_t typeToLength<int16_t>() noexcept { return 7; }
-template<> constexpr inline size_t typeToLength<int32_t>() noexcept { return 12; }
-template<> constexpr inline size_t typeToLength<int64_t>() noexcept { return 21; }
+template<typename> constexpr static size_t typeToDecLength() noexcept;
+template<> constexpr inline size_t typeToDecLength<uint8_t>() noexcept { return 4; }
+template<> constexpr inline size_t typeToDecLength<uint16_t>() noexcept { return 6; }
+template<> constexpr inline size_t typeToDecLength<uint32_t>() noexcept { return 11; }
+template<> constexpr inline size_t typeToDecLength<uint64_t>() noexcept { return 21; }
+template<> constexpr inline size_t typeToDecLength<int8_t>() noexcept { return 5; }
+template<> constexpr inline size_t typeToDecLength<int16_t>() noexcept { return 7; }
+template<> constexpr inline size_t typeToDecLength<int32_t>() noexcept { return 12; }
+template<> constexpr inline size_t typeToDecLength<int64_t>() noexcept { return 21; }
 
 template<typename int_t> struct testFromInt_t final
 {
 private:
 	using fromIntVariable = fromInt_t<int_t, int_t>;
-	using fromIntFixed = fromInt_t<int_t, int_t, typeToLength<int_t>()>;
+	using fromIntFixed = fromInt_t<int_t, int_t, typeToDecLength<int_t>()>;
 
 public:
 	static void testDecConversions(const testOk_t<int_t> &tests)
