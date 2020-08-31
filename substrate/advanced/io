@@ -203,29 +203,29 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool writeLE(const uint16_t value) const noexcept)
 			{
 				const std::array<uint8_t, 2> data
-				{
+				{{
 					uint8_t(value),
 					uint8_t(value >> 8U)
-				};
+				}};
 				return write(data);
 			}
 
 			SUBSTRATE_NO_DISCARD(bool writeLE(const uint32_t value) const noexcept)
 			{
 				const std::array<uint8_t, 4> data
-				{
+				{{
 					uint8_t(value),
 					uint8_t(value >> 8U),
 					uint8_t(value >> 16U),
 					uint8_t(value >> 24U)
-				};
+				}};
 				return write(data);
 			}
 
 			SUBSTRATE_NO_DISCARD(bool writeLE(const uint64_t value) const noexcept)
 			{
 				const std::array<uint8_t, 8> data
-				{
+				{{
 					uint8_t(value),
 					uint8_t(value >> 8U),
 					uint8_t(value >> 16U),
@@ -234,7 +234,7 @@ namespace substrate
 					uint8_t(value >> 40U),
 					uint8_t(value >> 48U),
 					uint8_t(value >> 56U)
-				};
+				}};
 				return write(data);
 			}
 
@@ -251,29 +251,29 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool writeBE(const uint16_t value) const noexcept)
 			{
 				const std::array<uint8_t, 2> data
-				{
+				{{
 					uint8_t(value >> 8U),
 					uint8_t(value)
-				};
+				}};
 				return write(data);
 			}
 
 			SUBSTRATE_NO_DISCARD(bool writeBE(const uint32_t value) const noexcept)
 			{
 				const std::array<uint8_t, 4> data
-				{
+				{{
 					uint8_t(value >> 24U),
 					uint8_t(value >> 16U),
 					uint8_t(value >> 8U),
 					uint8_t(value)
-				};
+				}};
 				return write(data);
 			}
 
 			SUBSTRATE_NO_DISCARD(bool writeBE(const uint64_t value) const noexcept)
 			{
 				const std::array<uint8_t, 8> data
-				{
+				{{
 					uint8_t(value >> 56U),
 					uint8_t(value >> 48U),
 					uint8_t(value >> 40U),
@@ -282,7 +282,7 @@ namespace substrate
 					uint8_t(value >> 16U),
 					uint8_t(value >> 8U),
 					uint8_t(value)
-				};
+				}};
 				return write(data);
 			}
 
