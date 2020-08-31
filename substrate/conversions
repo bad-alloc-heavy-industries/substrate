@@ -174,7 +174,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR operator std::string() const)
 		{
-			std::string number(std::size_t{length()}, '\0');
+			std::string number{length(), '\0'};
 #if __cplusplus >= 201703L
 			format(number.data());
 #else
@@ -183,9 +183,10 @@ namespace substrate
 			return number;
 		}
 
+		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t length() const noexcept)
-			{ return _length == npos ? digits() + 1 : _length; }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
+			{ return _length == npos ? digits() + 1 : _length + 1; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
