@@ -36,12 +36,15 @@ namespace substrate
 		{
 			if (number < 10)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[digits - index] = number + '0';
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[digits + 1] = 0;
 			}
 			else
 			{
 				const uint_t num = number - (process(number / 10, buffer, digits, index + 1) * 10);
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[digits - index] = num + '0';
 			}
 			return number;
@@ -59,6 +62,7 @@ namespace substrate
 			int_t number = _value;
 			if (number < 0)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[0] = '-';
 				process(uint_t(-number), buffer);
 			}
@@ -76,7 +80,9 @@ namespace substrate
 				const uint8_t trailingZeros_ = trailingZeros();
 				const uint8_t leadingZeros = maxDigits - digits_;
 				for (uint8_t i{0}; i < leadingZeros; ++i)
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				process(_value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
 			}
 		}
@@ -165,6 +171,7 @@ namespace substrate
 		{
 			for (size_t i{}; i < _length; ++i)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				if (!isFunc(_value[i]))
 					return false;
 			}
@@ -180,12 +187,15 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isDec() const noexcept)
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			if (_isSigned && _length > 0 && _value[0] == '-' && length() == 1)
 				return false;
 			for (size_t i{}; i < _length; ++i)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				if (_isSigned && i == 0 && _value[i] == '-')
 					continue;
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				else if (!isNumber(_value[i]))
 					return false;
 			}
@@ -203,11 +213,14 @@ namespace substrate
 			uint_t result{};
 			for (size_t i{}; i < _length; ++i)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				if (_isSigned && i == 0 && _value[i] == '-')
 					continue;
 				result *= 10;
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				result += _value[i] - '0';
 			}
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			if (_isSigned && _length > 0 && _value[0] == '-')
 				return -static_cast<int_t>(result);
 			return static_cast<int_t>(result);
@@ -220,6 +233,7 @@ namespace substrate
 			int_t value{};
 			for (size_t i{}; i < _length; ++i)
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				uint8_t hex = _value[i];
 				if (hex >= 'a' && hex <= 'f')
 					hex -= 0x20;
@@ -240,6 +254,7 @@ namespace substrate
 			for (size_t i{}; i < _length; ++i)
 			{
 				result <<= 3;
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				result += _value[i] - 0x30;
 			}
 			return result;
