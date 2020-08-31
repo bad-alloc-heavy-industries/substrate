@@ -35,6 +35,9 @@ namespace substrate
 			return (num * 10 == number ? 1 + zeros(num) : 0);
 		}
 
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t hexDigits(const uint_t number) const noexcept)
+			{ return 1 + (number < 16 ? 0 : hexDigits(number >> 4)); }
+
 		[[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR uint_t process(const uint_t number, char *const buffer,
 			const uint8_t digits, const size_t index) const noexcept
 		{
@@ -116,7 +119,7 @@ namespace substrate
 		SUBSTRATE_CXX14_CONSTEXPR void formatHex(std::string &result, const bool upperCase) const noexcept
 		{
 			int_t value{_value};
-			auto digit = result.rbegin();
+			auto digit = result.rbegin() + 1;
 			while (digit != result.rend())
 			{
 				auto hex{uint8_t(value & 0x0FU)};
@@ -174,7 +177,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR operator std::string() const)
 		{
-			std::string number{length(), '\0'};
+			std::string number(length(), '\0');
 #if __cplusplus >= 201703L
 			format(number.data());
 #else
@@ -183,10 +186,21 @@ namespace substrate
 			return number;
 		}
 
+		template<typename T = int_t> SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR
+			enable_if_t<std::is_same<T, int_t>::value && std::is_unsigned<T>::value, std::string>
+			toHex(const bool upper = true) const noexcept)
+		{
+			std::string number(hexLength(), '\0');
+			formatHex(number, upper);
+			return number;
+		}
+
 		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
 			{ return _length == npos ? digits() + 1 : _length + 1; }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t hexLength() const noexcept)
+			{ return _length == npos ? hexDigits(_value) + 1 : _length + 1; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
