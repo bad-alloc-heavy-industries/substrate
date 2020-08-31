@@ -63,30 +63,54 @@ namespace substrate
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
 			std::is_signed<T>::value && _length == npos> format(char *const buffer) const noexcept
 		{
-			int_t number = _value;
-			if (number < 0)
+			if (_value < 0)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[0] = '-';
-				process(uint_t(-number), buffer);
+				process(uint_t(-_value), buffer);
 			}
 			else
-				process(uint_t(number), buffer);
+				process(uint_t(_value), buffer);
+		}
+
+		SUBSTRATE_CXX14_CONSTEXPR void formatFixed(char *const buffer, const uint_t value) const noexcept
+		{
+			const auto length{calcDigits(value)};
+			if (length <=  _length)
+			{
+				const auto offset{_length - length};
+				const auto _buffer{std::fill_n(buffer, offset, padding)};
+				process(value, _buffer, length - 1, 0);
+			}
+			else
+				std::fill_n(buffer, _length, padding);
 		}
 
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length != npos>
-			format(char *const buffer) const noexcept
+			format(char *const buffer) const noexcept { formatFixed(buffer, _value); }
+
+		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
+			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
+			std::is_signed<T>::value && _length != npos> format(char *const buffer) const noexcept
 		{
-			const auto digits{calcDigits(_value)};
-			if (digits <=  _length)
+			if (_value < 0)
 			{
-				const auto offset{_length - digits};
-				const auto _buffer{std::fill_n(buffer, offset, padding)};
-				process(_value, _buffer, digits - 1, 0);
+				const auto length{digits(_value)};
+				if (length <= _length)
+				{
+					const auto offset{_length - length};
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+					const auto _buffer{std::fill_n(buffer + 1, offset, padding)};
+					process(uint_t(-_value), _buffer, length - 2, 0);
+				}
+				else
+					std::fill_n(buffer, _length, padding);
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+				buffer[0] = '-';
 			}
 			else
-				std::fill_n(buffer, _length, padding);
+				formatFixed(buffer, uint8_t(_value));
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
