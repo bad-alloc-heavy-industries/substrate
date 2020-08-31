@@ -165,14 +165,14 @@ namespace substrate
 			return number;
 		}
 
-		SUBSTRATE_NO_DISCARD(explicit operator const char *() const noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR explicit operator const char *() const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			std::unique_ptr<char []> number{*this};
 			return number.release();
 		}
 
-		SUBSTRATE_NO_DISCARD(operator std::string() const)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR operator std::string() const)
 		{
 			std::string number(std::size_t{length()}, '\0');
 #if __cplusplus >= 201703L
