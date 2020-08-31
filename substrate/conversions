@@ -116,10 +116,10 @@ namespace substrate
 				formatFixed(buffer, uint_t(_value));
 		}
 
-		SUBSTRATE_CXX14_CONSTEXPR void formatHex(std::string &result, const bool upperCase) const noexcept
+		void formatHex(std::string &result, const bool upperCase) const noexcept
 		{
 			int_t value{_value};
-			auto digit = result.rbegin() + 1;
+			auto digit{result.rbegin() + 1};
 			while (digit != result.rend())
 			{
 				auto hex{uint8_t(value & 0x0FU)};
@@ -186,9 +186,8 @@ namespace substrate
 			return number;
 		}
 
-		template<typename T = int_t> SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR
-			enable_if_t<std::is_same<T, int_t>::value && std::is_unsigned<T>::value, std::string>
-			toHex(const bool upper = true) const noexcept)
+		template<typename T = int_t> SUBSTRATE_NO_DISCARD(enable_if_t<std::is_same<T, int_t>::value &&
+			std::is_unsigned<T>::value, std::string> toHex(const bool upper = true) const noexcept)
 		{
 			std::string number(hexLength(), '\0');
 			formatHex(number, upper);
