@@ -26,7 +26,7 @@ using str_t = std::char_traits<char>;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define i64(n)		INT64_C(n)
 
-template<typename> constexpr static size_t typeToDecLength() noexcept;
+template<typename> constexpr inline size_t typeToDecLength() noexcept;
 template<> constexpr inline size_t typeToDecLength<uint8_t>() noexcept { return 4; }
 template<> constexpr inline size_t typeToDecLength<uint16_t>() noexcept { return 6; }
 template<> constexpr inline size_t typeToDecLength<uint32_t>() noexcept { return 11; }
@@ -39,8 +39,8 @@ template<> constexpr inline size_t typeToDecLength<int64_t>() noexcept { return 
 template<typename int_t> struct testFromInt_t final
 {
 private:
-	using fromIntVariable = fromInt_t<int_t, int_t>;
-	using fromIntFixed = fromInt_t<int_t, int_t, typeToDecLength<int_t>()>;
+	using fromInt = fromInt_t<int_t, int_t>;
+	using toDecFixed = fromInt_t<int_t, int_t, typeToDecLength<int_t>()>;
 
 public:
 	static void testDecConversions(const testOk_t<int_t> &tests)
@@ -49,15 +49,15 @@ public:
 		{
 			const auto inputNumber{test.inputNumber};
 			const auto *const result{test.variableResult};
-			const std::unique_ptr<char []> value{fromIntVariable{inputNumber}};
+			const std::unique_ptr<char []> value{fromInt{inputNumber}};
 			REQUIRE(value.get());
 			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
-			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromIntVariable{inputNumber})};
+			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromInt{inputNumber})};
 			REQUIRE(valuePtr.get());
 			REQUIRE(memcmp(valuePtr.get(), result, str_t::length(result)) == 0);
 			REQUIRE_NOTHROW([&]()
 			{
-				const std::string valueStr{fromIntVariable{inputNumber}};
+				const std::string valueStr{fromInt{inputNumber}};
 				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
 			}());
 		}
@@ -66,15 +66,15 @@ public:
 		{
 			const auto inputNumber{test.inputNumber};
 			const auto *const result{test.fixedResult};
-			const std::unique_ptr<char []> value{fromIntFixed{inputNumber}};
+			const std::unique_ptr<char []> value{toDecFixed{inputNumber}};
 			REQUIRE(value.get());
 			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
-			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromIntFixed{inputNumber})};
+			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(toDecFixed{inputNumber})};
 			REQUIRE(valuePtr.get());
 			REQUIRE(memcmp(valuePtr.get(), result, str_t::length(result)) == 0);
 			REQUIRE_NOTHROW([&]()
 			{
-				const std::string valueStr{fromIntFixed{inputNumber}};
+				const std::string valueStr{toDecFixed{inputNumber}};
 				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
 			}());
 		}
