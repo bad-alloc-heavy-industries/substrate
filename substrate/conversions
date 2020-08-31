@@ -113,6 +113,27 @@ namespace substrate
 				formatFixed(buffer, uint_t(_value));
 		}
 
+		SUBSTRATE_CXX14_CONSTEXPR void formatHex(std::string &result, const bool upperCase) const noexcept
+		{
+			int_t value{_value};
+			auto digit = result.rbegin();
+			while (digit != result.rend())
+			{
+				auto hex{uint8_t(value & 0x0FU)};
+				value >>= 4U;
+				if (hex > 9U)
+				{
+					hex += 0x07U;
+					if (!upperCase)
+						hex += 0x20U;
+				}
+				*digit++ = char(hex + 0x30U);
+				if (!value)
+					break;
+			}
+			std::fill_n(result.begin(), result.rend() - digit, padding);
+		}
+
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
 		{
 			const uint8_t digits_ = digits();
