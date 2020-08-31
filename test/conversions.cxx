@@ -8,7 +8,12 @@
 using substrate::fromInt_t;
 using substrate::toInt_t;
 
-template<typename int_t> using testOkValue_t = std::tuple<int_t, const char *const, const char *const>;
+template<typename int_t> struct testOkValue_t
+{
+	int_t inputNumber;
+	const char *const variableResult;
+	const char *const fixedResult;
+};
 template<typename int_t> using testOkPair_t = std::pair<int_t, const char *const>;
 template<typename int_t> using testOk_t = std::vector<testOkValue_t<int_t>>;
 template<typename int_t> using testPairOk_t = std::vector<testOkPair_t<int_t>>;
@@ -34,7 +39,7 @@ template<> constexpr inline size_t typeToLength<int64_t>() noexcept { return 21;
 template<typename int_t> struct testFromInt_t final
 {
 private:
-	using fromInt = fromInt_t<int_t, int_t>;
+	using fromIntVariable = fromInt_t<int_t, int_t>;
 	using fromIntFixed = fromInt_t<int_t, int_t, typeToLength<int_t>()>;
 
 public:
@@ -42,25 +47,25 @@ public:
 	{
 		for (const auto &test : tests)
 		{
-			const auto inputNumber{std::get<0>(test)};
-			const auto *const result{std::get<1>(test)};
-			const std::unique_ptr<char []> value{fromInt{inputNumber}};
+			const auto inputNumber{test.inputNumber};
+			const auto *const result{test.variableResult};
+			const std::unique_ptr<char []> value{fromIntVariable{inputNumber}};
 			REQUIRE(value.get());
 			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
-			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromInt{inputNumber})};
+			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromIntVariable{inputNumber})};
 			REQUIRE(valuePtr.get());
 			REQUIRE(memcmp(valuePtr.get(), result, str_t::length(result)) == 0);
 			REQUIRE_NOTHROW([&]()
 			{
-				const std::string valueStr{fromInt{inputNumber}};
+				const std::string valueStr{fromIntVariable{inputNumber}};
 				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
 			}());
 		}
 
 		for (const auto &test : tests)
 		{
-			const auto inputNumber{std::get<0>(test)};
-			const auto *const result{std::get<2>(test)};
+			const auto inputNumber{test.inputNumber};
+			const auto *const result{test.fixedResult};
 			const std::unique_ptr<char []> value{fromIntFixed{inputNumber}};
 			REQUIRE(value.get());
 			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
