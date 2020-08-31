@@ -19,11 +19,11 @@
 #endif
 
 #if __has_cpp_attribute(nodiscard) || __cplusplus >= 201402L
-#	define SUBSTRATE_NO_DISCARD(x) [[nodiscard]] x
+#	define SUBSTRATE_NO_DISCARD(...) [[nodiscard]] __VA_ARGS__
 #elif defined(__GNUC__)
-#	define SUBSTRATE_NO_DISCARD(x) x __attribute__((warn_unused_result))
+#	define SUBSTRATE_NO_DISCARD(...) __VA_ARGS__ __attribute__((warn_unused_result))
 #else
-#	define SUBSTRATE_NO_DISCARD(x) x
+#	define SUBSTRATE_NO_DISCARD(...) __VA_ARGS__
 #endif
 
 #if __cplusplus >= 201103L
