@@ -10,8 +10,12 @@
 
 namespace substrate
 {
-	template<typename int_t, typename valueType_t> struct fromInt_t
+	template<typename int_t, typename valueType_t, size_t _length = static_cast<std::size_t>(-1), char padding = '0'>
+		struct fromInt_t
 	{
+	public:
+		constexpr static const auto npos{static_cast<std::size_t>(-1)};
+
 	private:
 		using uint_t = make_unsigned_t<int_t>;
 		const valueType_t &_value;
@@ -53,11 +57,11 @@ namespace substrate
 		SUBSTRATE_CXX14_CONSTEXPR void process(const uint_t number, char *const buffer) const noexcept
 			{ process(number, buffer, digits(_value) - 1, 0); }
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
-			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value>
+			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length == npos>
 			format(char *const buffer) const noexcept { process(_value, buffer); }
 		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
-			std::is_signed<T>::value> format(char *const buffer) const noexcept
+			std::is_signed<T>::value && _length == npos> format(char *const buffer) const noexcept
 		{
 			int_t number = _value;
 			if (number < 0)
@@ -68,6 +72,21 @@ namespace substrate
 			}
 			else
 				process(uint_t(number), buffer);
+		}
+
+		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
+			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length != npos>
+			format(char *const buffer) const noexcept
+		{
+			const auto digits{calcDigits(_value)};
+			if (digits <=  _length)
+			{
+				const auto offset{_length - digits};
+				const auto _buffer{std::fill_n(buffer, offset, padding)};
+				process(_value, _buffer, digits - 1, 0);
+			}
+			else
+				std::fill_n(buffer, _length, padding);
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
