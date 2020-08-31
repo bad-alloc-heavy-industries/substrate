@@ -23,8 +23,8 @@ namespace substrate
 			readable_t &operator =(const readable_t &) noexcept = delete;
 			readable_t &operator =(readable_t &&) noexcept = delete;
 			virtual ~readable_t() noexcept = default;
-			SUBSTRATE_NO_DISCARD(virtual ssize_t read(void *const bufferPtr,
-				const size_t bufferLen, std::nullptr_t) const noexcept) = 0;
+			SUBSTRATE_NO_DISCARD(virtual ssize_t read(void *bufferPtr,
+				size_t bufferLen, std::nullptr_t) const noexcept) = 0;
 
 			SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 			{
@@ -47,6 +47,7 @@ namespace substrate
 				{ return read(value.get(), sizeof(T)); }
 			template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
 				{ return read(value.get(), sizeof(T)); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
 				{ return read(value.get(), sizeof(T) * valueCount); }
 			template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
@@ -160,8 +161,8 @@ namespace substrate
 			writeable_t &operator =(const writeable_t &) noexcept = delete;
 			writeable_t &operator =(writeable_t &&) noexcept = delete;
 			virtual ~writeable_t() noexcept = default;
-			SUBSTRATE_NO_DISCARD(virtual ssize_t write(const void *const bufferPtr,
-				const size_t bufferLen, std::nullptr_t) const noexcept) = 0;
+			SUBSTRATE_NO_DISCARD(virtual ssize_t write(const void *bufferPtr,
+				size_t bufferLen, std::nullptr_t) const noexcept) = 0;
 
 			SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
 			{
@@ -175,6 +176,7 @@ namespace substrate
 				{ return write(&value, sizeof(T)); }
 			template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
 				{ return write(value.get(), sizeof(T)); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
 				{ return write(value.get(), sizeof(T) * valueCount); }
 			template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
@@ -304,7 +306,7 @@ namespace substrate
 			seekable_t &operator =(const seekable_t &) noexcept = delete;
 			seekable_t &operator =(seekable_t &&) noexcept = delete;
 			virtual ~seekable_t() noexcept = default;
-			SUBSTRATE_NO_DISCARD(virtual off_t seek(const off_t offset, const int32_t whence) const noexcept) = 0;
+			SUBSTRATE_NO_DISCARD(virtual off_t seek(off_t offset, int32_t whence) const noexcept) = 0;
 			SUBSTRATE_NO_DISCARD(virtual off_t tell() const noexcept) = 0;
 			SUBSTRATE_NO_DISCARD(virtual off_t length() const noexcept) = 0;
 
