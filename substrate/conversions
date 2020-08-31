@@ -186,8 +186,8 @@ namespace substrate
 			return number;
 		}
 
-		template<typename T = int_t> SUBSTRATE_NO_DISCARD(enable_if_t<std::is_same<T, int_t>::value &&
-			std::is_unsigned<T>::value, std::string> toHex(const bool upper = true) const noexcept)
+		template<typename T = int_t> enable_if_t<std::is_same<T, int_t>::value && std::is_unsigned<T>::value,
+			std::string> toHex(const bool upper = true) const noexcept
 		{
 			std::string number(hexLength(), '\0');
 			formatHex(number, upper);
