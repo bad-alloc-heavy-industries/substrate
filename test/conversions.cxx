@@ -14,8 +14,16 @@ template<typename int_t> struct testOkValue_t
 	const char *const variableResult;
 	const char *const fixedResult;
 };
+
+template<typename int_t> struct testOkHexValue_t
+{
+	testOkValue_t<int_t> data;
+	const bool upperCase;
+};
+
 template<typename int_t> using testOkPair_t = std::pair<int_t, const char *const>;
 template<typename int_t> using testOk_t = std::vector<testOkValue_t<int_t>>;
+template<typename int_t> using testOkHex_t = std::vector<testOkHexValue_t<int_t>>;
 template<typename int_t> using testPairOk_t = std::vector<testOkPair_t<int_t>>;
 template<typename int_t> using testFailInt_t = std::vector<int_t>;
 using testFailStr_t = std::vector<const char *>;
@@ -36,11 +44,15 @@ template<> constexpr inline size_t typeToDecLength<int16_t>() noexcept { return 
 template<> constexpr inline size_t typeToDecLength<int32_t>() noexcept { return 12; }
 template<> constexpr inline size_t typeToDecLength<int64_t>() noexcept { return 21; }
 
+template<typename> constexpr inline size_t typeToHexLength() noexcept { return static_cast<std::size_t>(-1); }
+template<> constexpr inline size_t typeToHexLength<uint8_t>() noexcept { return 3; }
+
 template<typename int_t> struct testFromInt_t final
 {
 private:
 	using fromInt = fromInt_t<int_t, int_t>;
 	using toDecFixed = fromInt_t<int_t, int_t, typeToDecLength<int_t>()>;
+	using toHexFixed = fromInt_t<int_t, int_t, typeToHexLength<int_t>()>;
 
 public:
 	static void testDecConversions(const testOk_t<int_t> &tests)
@@ -76,6 +88,33 @@ public:
 			{
 				const std::string valueStr{toDecFixed{inputNumber}};
 				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
+			}());
+		}
+	}
+
+	static void testHexConversions(const testOkHex_t<int_t> &tests)
+	{
+		for (const auto &test : tests)
+		{
+			const auto inputNumber{test.data.inputNumber};
+			const auto *const result{test.data.variableResult};
+			REQUIRE_NOTHROW([&]()
+			{
+				const auto value{fromInt{inputNumber}.toHex(test.upperCase)};
+				REQUIRE(!value.empty());
+				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
+			}());
+		}
+
+		for (const auto &test : tests)
+		{
+			const auto inputNumber{test.data.inputNumber};
+			const auto *const result{test.data.fixedResult};
+			REQUIRE_NOTHROW([&]()
+			{
+				const auto value{toHexFixed{inputNumber}.toHex(test.upperCase)};
+				REQUIRE(!value.empty());
+				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
 			}());
 		}
 	}
@@ -252,6 +291,20 @@ TEST_CASE("Decimal conversion from int64_t", "[conversions]")
 #if __GNUC__ > 5
 		{i64(-9223372036854775807) - 1, "-9223372036854775808", "-09223372036854775808"}
 #endif
+	});
+}
+
+TEST_CASE("Hexadecimal conversion from uint8_t", "[conversions]")
+{
+	testFromInt_t<uint8_t>::testHexConversions(
+	{
+		{{0, "0", "000"}, true},
+		{{127, "7F", "07F"}, true},
+		{{128, "80", "080"}, true},
+		{{255, "FF", "0FF"}, true},
+		{{127, "7f", "07f"}, false},
+		{{170, "aa", "0aa"}, false},
+		{{255, "ff", "0ff"}, false}
 	});
 }
 
