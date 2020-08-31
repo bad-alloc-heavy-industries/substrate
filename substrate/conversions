@@ -90,8 +90,10 @@ namespace substrate
 	public:
 		constexpr fromInt_t(const valueType_t &value) noexcept : _value(value) { }
 
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		SUBSTRATE_NO_DISCARD(operator std::unique_ptr<char []>() const noexcept)
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			auto number{make_unique_nothrow<char []>(length())};
 			if (!number)
 				return nullptr;
@@ -101,6 +103,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(explicit operator const char *() const noexcept)
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			std::unique_ptr<char []> number{*this};
 			return number.release();
 		}
@@ -120,8 +123,10 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t length() const noexcept) { return digits() + 1; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		SUBSTRATE_NO_DISCARD(std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept)
 		{
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			auto number{make_unique_nothrow<char []>(fractionLength(maxDigits))};
 			if (!number)
 				return nullptr;
