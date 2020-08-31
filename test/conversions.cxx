@@ -8,8 +8,10 @@
 using substrate::fromInt_t;
 using substrate::toInt_t;
 
+template<typename int_t> using testOkValue_t = std::tuple<int_t, const char *const, const char *const>;
 template<typename int_t> using testOkPair_t = std::pair<int_t, const char *const>;
-template<typename int_t> using testOk_t = std::vector<testOkPair_t<int_t>>;
+template<typename int_t> using testOk_t = std::vector<testOkValue_t<int_t>>;
+template<typename int_t> using testPairOk_t = std::vector<testOkPair_t<int_t>>;
 template<typename int_t> using testFailInt_t = std::vector<int_t>;
 using testFailStr_t = std::vector<const char *>;
 using str_t = std::char_traits<char>;
@@ -19,26 +21,56 @@ using str_t = std::char_traits<char>;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define i64(n)		INT64_C(n)
 
+template<typename> constexpr static size_t typeToLength() noexcept;
+template<> constexpr inline size_t typeToLength<uint8_t>() noexcept { return 4; }
+template<> constexpr inline size_t typeToLength<uint16_t>() noexcept { return 6; }
+template<> constexpr inline size_t typeToLength<uint32_t>() noexcept { return 11; }
+template<> constexpr inline size_t typeToLength<uint64_t>() noexcept { return 21; }
+template<> constexpr inline size_t typeToLength<int8_t>() noexcept { return 5; }
+template<> constexpr inline size_t typeToLength<int16_t>() noexcept { return 7; }
+template<> constexpr inline size_t typeToLength<int32_t>() noexcept { return 12; }
+template<> constexpr inline size_t typeToLength<int64_t>() noexcept { return 21; }
+
 template<typename int_t> struct testFromInt_t final
 {
 private:
 	using fromInt = fromInt_t<int_t, int_t>;
+	using fromIntFixed = fromInt_t<int_t, int_t, typeToLength<int_t>()>;
 
 public:
 	static void testConversions(const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
-			const std::unique_ptr<char []> value{fromInt{test.first}};
+			const auto inputNumber{std::get<0>(test)};
+			const auto *const result{std::get<1>(test)};
+			const std::unique_ptr<char []> value{fromInt{inputNumber}};
 			REQUIRE(value.get());
-			REQUIRE(memcmp(value.get(), test.second, str_t::length(test.second)) == 0);
-			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromInt{test.first})};
+			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
+			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromInt{inputNumber})};
 			REQUIRE(valuePtr.get());
-			REQUIRE(memcmp(valuePtr.get(), test.second, str_t::length(test.second)) == 0);
+			REQUIRE(memcmp(valuePtr.get(), result, str_t::length(result)) == 0);
 			REQUIRE_NOTHROW([&]()
 			{
-				const std::string valueStr{fromInt{test.first}};
-				REQUIRE(memcmp(valueStr.data(), test.second, str_t::length(test.second)) == 0);
+				const std::string valueStr{fromInt{inputNumber}};
+				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
+			}());
+		}
+
+		for (const auto &test : tests)
+		{
+			const auto inputNumber{std::get<0>(test)};
+			const auto *const result{std::get<2>(test)};
+			const std::unique_ptr<char []> value{fromIntFixed{inputNumber}};
+			REQUIRE(value.get());
+			REQUIRE(memcmp(value.get(), result, str_t::length(result)) == 0);
+			const std::unique_ptr<const char []> valuePtr{static_cast<const char *>(fromIntFixed{inputNumber})};
+			REQUIRE(valuePtr.get());
+			REQUIRE(memcmp(valuePtr.get(), result, str_t::length(result)) == 0);
+			REQUIRE_NOTHROW([&]()
+			{
+				const std::string valueStr{fromIntFixed{inputNumber}};
+				REQUIRE(memcmp(valueStr.data(), result, str_t::length(result)) == 0);
 			}());
 		}
 	}
@@ -48,10 +80,10 @@ TEST_CASE("Decimal conversion from uint8_t", "[conversions]")
 {
 	testFromInt_t<uint8_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"}
+		{0, "0", "0000"},
+		{127, "127", "0127"},
+		{128, "128", "0128"},
+		{255, "255", "0255"}
 	});
 }
 
@@ -59,11 +91,11 @@ TEST_CASE("Decimal conversion from int8_t", "[conversions]")
 {
 	testFromInt_t<int8_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{-1, "-1"},
-		{-127, "-127"},
-		{-128, "-128"}
+		{0, "0", "00000"},
+		{127, "127", "00127"},
+		{-1, "-1", "-0001"},
+		{-127, "-127", "-0127"},
+		{-128, "-128", "-0128"}
 	});
 }
 
@@ -71,14 +103,14 @@ TEST_CASE("Decimal conversion from uint16_t", "[conversions]")
 {
 	testFromInt_t<uint16_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{32768, "32768"},
-		{65535, "65535"}
+		{0, "0", "000000"},
+		{127, "127", "000127"},
+		{128, "128", "000128"},
+		{255, "255", "000255"},
+		{256, "256", "000256"},
+		{32767, "32767", "032767"},
+		{32768, "32768", "032768"},
+		{65535, "65535", "065535"}
 	});
 }
 
@@ -86,19 +118,19 @@ TEST_CASE("Decimal conversion from int16_t", "[conversions]")
 {
 	testFromInt_t<int16_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{-1, "-1"},
-		{-127, "-127"},
-		{-128, "-128"},
-		{-255, "-255"},
-		{-256, "-256"},
-		{-32767, "-32767"},
-		{-32768, "-32768"}
+		{0, "0", "0000000"},
+		{127, "127", "0000127"},
+		{128, "128", "0000128"},
+		{255, "255", "0000255"},
+		{256, "256", "0000256"},
+		{32767, "32767", "0032767"},
+		{-1, "-1", "-000001"},
+		{-127, "-127", "-000127"},
+		{-128, "-128", "-000128"},
+		{-255, "-255", "-000255"},
+		{-256, "-256", "-000256"},
+		{-32767, "-32767", "-032767"},
+		{-32768, "-32768", "-032768"}
 	});
 }
 
@@ -106,18 +138,18 @@ TEST_CASE("Decimal conversion from uint32_t", "[conversions]")
 {
 	testFromInt_t<uint32_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{32768, "32768"},
-		{65535, "65535"},
-		{65536, "65536"},
-		{2147483647, "2147483647"},
-		{2147483648, "2147483648"},
-		{4294967295, "4294967295"}
+		{0, "0", "00000000000"},
+		{127, "127", "00000000127"},
+		{128, "128", "00000000128"},
+		{255, "255", "00000000255"},
+		{256, "256", "00000000256"},
+		{32767, "32767", "00000032767"},
+		{32768, "32768", "00000032768"},
+		{65535, "65535", "00000065535"},
+		{65536, "65536", "00000065536"},
+		{2147483647, "2147483647", "02147483647"},
+		{2147483648, "2147483648", "02147483648"},
+		{4294967295, "4294967295", "04294967295"}
 	});
 }
 
@@ -125,28 +157,28 @@ TEST_CASE("Decimal conversion from int32_t", "[conversions]")
 {
 	testFromInt_t<int32_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{32768, "32768"},
-		{65535, "65535"},
-		{65536, "65536"},
-		{2147483647, "2147483647"},
-		{-1, "-1"},
-		{-127, "-127"},
-		{-128, "-128"},
-		{-255, "-255"},
-		{-256, "-256"},
-		{-32767, "-32767"},
-		{-32768, "-32768"},
-		{-65535, "-65535"},
-		{-65536, "-65536"},
-		{-2147483647, "-2147483647"},
+		{0, "0", "000000000000"},
+		{127, "127", "000000000127"},
+		{128, "128", "000000000128"},
+		{255, "255", "000000000255"},
+		{256, "256", "000000000256"},
+		{32767, "32767", "000000032767"},
+		{32768, "32768", "000000032768"},
+		{65535, "65535", "000000065535"},
+		{65536, "65536", "000000065536"},
+		{2147483647, "2147483647", "002147483647"},
+		{-1, "-1", "-00000000001"},
+		{-127, "-127", "-00000000127"},
+		{-128, "-128", "-00000000128"},
+		{-255, "-255", "-00000000255"},
+		{-256, "-256", "-00000000256"},
+		{-32767, "-32767", "-00000032767"},
+		{-32768, "-32768", "-00000032768"},
+		{-65535, "-65535", "-00000065535"},
+		{-65536, "-65536", "-00000065536"},
+		{-2147483647, "-2147483647", "-02147483647"},
 #if __GNUC__ > 5
-		{-2147483648, "-2147483648"}
+		{-2147483648, "-2147483648", "-02147483648"}
 #endif
 	});
 }
@@ -155,24 +187,24 @@ TEST_CASE("Decimal conversion from uint64_t", "[conversions]")
 {
 	testFromInt_t<uint64_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{32768, "32768"},
-		{65535, "65535"},
-		{65536, "65536"},
-		{2147483647, "2147483647"},
-		{2147483648, "2147483648"},
-		{4294967295, "4294967295"},
-		{4294967296, "4294967296"},
-		{140737488355327, "140737488355327"},
-		{140737488355328, "140737488355328"},
-		{9223372036854775807, "9223372036854775807"},
-		{UINT64_C(9223372036854775808), "9223372036854775808"},
-		{u64(18446744073709551615), "18446744073709551615"}
+		{0, "0", "000000000000000000000"},
+		{127, "127", "000000000000000000127"},
+		{128, "128", "000000000000000000128"},
+		{255, "255", "000000000000000000255"},
+		{256, "256", "000000000000000000256"},
+		{32767, "32767", "000000000000000032767"},
+		{32768, "32768", "000000000000000032768"},
+		{65535, "65535", "000000000000000065535"},
+		{65536, "65536", "000000000000000065536"},
+		{2147483647, "2147483647", "000000000002147483647"},
+		{2147483648, "2147483648", "000000000002147483648"},
+		{4294967295, "4294967295", "000000000004294967295"},
+		{4294967296, "4294967296", "000000000004294967296"},
+		{140737488355327, "140737488355327", "000000140737488355327"},
+		{140737488355328, "140737488355328", "000000140737488355328"},
+		{9223372036854775807, "9223372036854775807", "009223372036854775807"},
+		{u64(9223372036854775808), "9223372036854775808", "009223372036854775808"},
+		{u64(18446744073709551615), "18446744073709551615", "018446744073709551615"}
 	});
 }
 
@@ -180,40 +212,40 @@ TEST_CASE("Decimal conversion from int64_t", "[conversions]")
 {
 	testFromInt_t<int64_t>::testConversions(
 	{
-		{0, "0"},
-		{127, "127"},
-		{128, "128"},
-		{255, "255"},
-		{256, "256"},
-		{32767, "32767"},
-		{32768, "32768"},
-		{65535, "65535"},
-		{65536, "65536"},
-		{2147483647, "2147483647"},
-		{2147483648, "2147483648"},
-		{4294967295, "4294967295"},
-		{4294967296, "4294967296"},
-		{140737488355327, "140737488355327"},
-		{140737488355328, "140737488355328"},
-		{9223372036854775807, "9223372036854775807"},
-		{-1, "-1"},
-		{-127, "-127"},
-		{-128, "-128"},
-		{-255, "-255"},
-		{-256, "-256"},
-		{-32767, "-32767"},
-		{-32768, "-32768"},
-		{-65535, "-65535"},
-		{-65536, "-65536"},
-		{-2147483647, "-2147483647"},
-		{-2147483648, "-2147483648"},
-		{-4294967295, "-4294967295"},
-		{-4294967296, "-4294967296"},
-		{-140737488355327, "-140737488355327"},
-		{-140737488355328, "-140737488355328"},
-		{-9223372036854775807, "-9223372036854775807"},
+		{0, "0", "000000000000000000000"},
+		{127, "127", "000000000000000000127"},
+		{128, "128", "000000000000000000128"},
+		{255, "255", "000000000000000000255"},
+		{256, "256", "000000000000000000256"},
+		{32767, "32767", "000000000000000032767"},
+		{32768, "32768", "000000000000000032768"},
+		{65535, "65535", "000000000000000065535"},
+		{65536, "65536", "000000000000000065536"},
+		{2147483647, "2147483647", "000000000002147483647"},
+		{2147483648, "2147483648", "000000000002147483648"},
+		{4294967295, "4294967295", "000000000004294967295"},
+		{4294967296, "4294967296", "000000000004294967296"},
+		{140737488355327, "140737488355327", "000000140737488355327"},
+		{140737488355328, "140737488355328", "000000140737488355328"},
+		{9223372036854775807, "9223372036854775807", "009223372036854775807"},
+		{-1, "-1", "-00000000000000000001"},
+		{-127, "-127", "-00000000000000000127"},
+		{-128, "-128", "-00000000000000000128"},
+		{-255, "-255", "-00000000000000000255"},
+		{-256, "-256", "-00000000000000000256"},
+		{-32767, "-32767", "-00000000000000032767"},
+		{-32768, "-32768", "-00000000000000032768"},
+		{-65535, "-65535", "-00000000000000065535"},
+		{-65536, "-65536", "-00000000000000065536"},
+		{-2147483647, "-2147483647", "-00000000002147483647"},
+		{-2147483648, "-2147483648", "-00000000002147483648"},
+		{-4294967295, "-4294967295", "-00000000004294967295"},
+		{-4294967296, "-4294967296", "-00000000004294967296"},
+		{-140737488355327, "-140737488355327", "-00000140737488355327"},
+		{-140737488355328, "-140737488355328", "-00000140737488355328"},
+		{-9223372036854775807, "-9223372036854775807", "-09223372036854775807"},
 #if __GNUC__ > 5
-		{i64(-9223372036854775807) - 1, "-9223372036854775808"}
+		{i64(-9223372036854775807) - 1, "-9223372036854775808", "-09223372036854775808"}
 #endif
 	});
 }
@@ -224,7 +256,7 @@ private:
 	using toInt = toInt_t<int_t>;
 
 public:
-	static void testOctConversions(const testOk_t<int_t> &tests)
+	static void testOctConversions(const testPairOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -235,7 +267,7 @@ public:
 		}
 	}
 
-	static void testDecConversions(const testOk_t<int_t> &tests)
+	static void testDecConversions(const testPairOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -247,7 +279,7 @@ public:
 		}
 	}
 
-	static void testHexConversions(const testOk_t<int_t> &tests)
+	static void testHexConversions(const testPairOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
