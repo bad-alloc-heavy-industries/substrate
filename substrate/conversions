@@ -163,7 +163,8 @@ namespace substrate
 		}
 
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t length() const noexcept) { return digits() + 1; }
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t length() const noexcept)
+			{ return _length == npos ? digits() + 1 : _length; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
