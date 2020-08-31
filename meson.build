@@ -12,8 +12,16 @@ project(
 cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 
-if cxx.get_id() == 'gcc' and cxx.version() < '7.0.0' and cxx.has_argument('-Wno-attributes')
-	add_project_arguments('-Wno-attributes', language: 'cpp')
+if cxx.get_id() == 'gcc' and cxx.version() < '7.0.0'
+	add_project_arguments(
+		cxx.get_supported_arguments(['-Wno-attributes']),
+		language: 'cpp'
+	)
+elif cxx.get_id() == 'clang'
+	add_project_arguments(
+		cxx.get_supported_arguments(['-Wno-c++17-extensions']),
+		language: 'cpp'
+	)
 endif
 
 subdir('substrate')
