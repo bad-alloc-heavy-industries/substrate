@@ -110,7 +110,7 @@ namespace substrate
 				buffer[0] = '-';
 			}
 			else
-				formatFixed(buffer, uint8_t(_value));
+				formatFixed(buffer, uint_t(_value));
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
