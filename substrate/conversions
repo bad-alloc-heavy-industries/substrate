@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <utility>
 #include <string>
+#include <chrono>
 #include <substrate/utility>
 #include <substrate/internal/defs>
 
@@ -35,8 +36,19 @@ namespace substrate
 			return (num * 10 == number ? 1 + zeros(num) : 0);
 		}
 
+		template<typename R, typename P> SUBSTRATE_CXX14_CONSTEXPR uint8_t
+			zeros(const std::chrono::duration<R, P> &number) const noexcept
+				{ return zeros(number.count()); }
+
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t hexDigits(const uint_t number) const noexcept)
 			{ return 1 + (number < 16 ? 0 : hexDigits(number >> 4)); }
+
+		template<typename value_t> constexpr enable_if_t<!is_duration<value_t>::value, int_t>
+			valueAsInt(const value_t &number) const noexcept { return number; }
+
+		template<typename R, typename P> constexpr int_t
+			valueAsInt(const std::chrono::duration<R, P> &number) const noexcept
+				{ return number.count(); }
 
 		[[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR uint_t process(const uint_t number, char *const buffer,
 			const uint8_t digits, const size_t index) const noexcept
@@ -58,22 +70,23 @@ namespace substrate
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void process(const uint_t number, char *const buffer) const noexcept
-			{ process(number, buffer, digits(_value) - 1, 0); }
+			{ process(number, buffer, digits() - 1, 0); }
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length == npos>
-			format(char *const buffer) const noexcept { process(_value, buffer); }
+			format(char *const buffer) const noexcept { process(valueAsInt(_value), buffer); }
 		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
 			std::is_signed<T>::value && _length == npos> format(char *const buffer) const noexcept
 		{
-			if (_value < 0)
+			const auto value{valueAsInt(_value)};
+			if (value < 0)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[0] = '-';
-				process(uint_t(-_value), buffer);
+				process(uint_t(-value), buffer);
 			}
 			else
-				process(uint_t(_value), buffer);
+				process(uint_t(value), buffer);
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFixed(char *const buffer, const uint_t value) const noexcept
@@ -91,21 +104,22 @@ namespace substrate
 
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length != npos>
-			format(char *const buffer) const noexcept { formatFixed(buffer, _value); }
+			format(char *const buffer) const noexcept { formatFixed(buffer, valueAsInt(_value)); }
 
 		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
 			std::is_signed<T>::value && _length != npos> format(char *const buffer) const noexcept
 		{
-			if (_value < 0)
+			const auto value{valueAsInt(_value)};
+			if (value < 0)
 			{
-				const auto length{digits(_value)};
+				const auto length{digits(value)};
 				if (length <= _length)
 				{
 					const auto offset{_length - length};
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					const auto _buffer{std::fill_n(buffer + 1, offset, padding)};
-					process(uint_t(-_value), _buffer, length - 2, 0);
+					process(uint_t(-value), _buffer, length - 2, 0);
 				}
 				else
 					std::fill_n(buffer, _length, padding);
@@ -113,12 +127,12 @@ namespace substrate
 				buffer[0] = '-';
 			}
 			else
-				formatFixed(buffer, uint_t(_value));
+				formatFixed(buffer, uint_t(value));
 		}
 
 		void formatHex(std::string &result, const bool upperCase) const noexcept
 		{
-			int_t value{_value};
+			auto value{valueAsInt(_value)};
 			auto digit{result.rbegin() + 1};
 			while (digit != result.rend())
 			{
@@ -139,9 +153,10 @@ namespace substrate
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
 		{
-			const uint8_t digits_ = digits();
+			const auto value{valueAsInt(_value)};
+			const auto digits_{digits(value)};
 			if (digits_ > maxDigits)
-				process(_value - ((_value / power10(maxDigits)) * power10(maxDigits)), buffer, maxDigits - 1, 0);
+				process(value - ((value / power10(maxDigits)) * power10(maxDigits)), buffer, maxDigits - 1, 0);
 			else
 			{
 				const uint8_t trailingZeros_ = trailingZeros();
@@ -150,7 +165,7 @@ namespace substrate
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				process(_value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
+				process(value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
 			}
 		}
 
@@ -195,11 +210,11 @@ namespace substrate
 		}
 
 		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(_value); }
+		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(valueAsInt(_value)); }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
 			{ return _length == npos ? digits() + 1 : _length + 1; }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t hexLength() const noexcept)
-			{ return _length == npos ? hexDigits(_value) + 1 : _length + 1; }
+			{ return _length == npos ? hexDigits(valueAsInt(_value)) + 1 : _length + 1; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
@@ -222,7 +237,7 @@ namespace substrate
 		}
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t trailingZeros() const noexcept)
-			{ return _value ? zeros(_value) : 0; }
+			{ return valueAsInt(_value) ? zeros(_value) : 0; }
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionLength(const uint8_t maxDigits) const noexcept)
 			{ return fractionDigits(maxDigits) + 1; }
 		void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept
