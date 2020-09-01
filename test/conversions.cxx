@@ -47,6 +47,7 @@ template<> constexpr inline size_t typeToDecLength<int64_t>() noexcept { return 
 template<typename> constexpr inline size_t typeToHexLength() noexcept { return static_cast<std::size_t>(-1); }
 template<> constexpr inline size_t typeToHexLength<uint8_t>() noexcept { return 3; }
 template<> constexpr inline size_t typeToHexLength<uint16_t>() noexcept { return 5; }
+template<> constexpr inline size_t typeToHexLength<uint32_t>() noexcept { return 9; }
 
 template<typename int_t> struct testFromInt_t final
 {
@@ -324,20 +325,22 @@ TEST_CASE("Hexadecimal conversion from uint16_t", "[conversions]")
 	});
 }
 
-/*TEST_CASE("Hexadecimal conversion from uint32_t", "[conversions]")
+TEST_CASE("Hexadecimal conversion from uint32_t", "[conversions]")
 {
 	testFromInt_t<uint32_t>::testHexConversions(
 	{
-		{0, ""},
-		{0, "00"},
-		{65536, "00010000"},
-		{2147483647, "7FFFFFFF"},
-		{2147483648, "80000000"},
-		{4294967295, "FFFFFFFF"}
+		{{0, "0", "000000000"}, true},
+		{{65536, "10000", "000010000"}, true},
+		{{2147483647, "7FFFFFFF", "07FFFFFFF"}, true},
+		{{2147483648, "80000000", "080000000"}, true},
+		{{4294967295, "FFFFFFFF", "0FFFFFFFF"}, true},
+		{{2147483647, "7fffffff", "07fffffff"}, false},
+		{{2863311530, "aaaaaaaa", "0aaaaaaaa"}, false},
+		{{4294967295, "ffffffff", "0ffffffff"}, false}
 	});
 }
 
-TEST_CASE("Hexadecimal conversion from uint64_t", "[conversions]")
+/*TEST_CASE("Hexadecimal conversion from uint64_t", "[conversions]")
 {
 	testFromInt_t<uint64_t>::testHexConversions(
 	{
