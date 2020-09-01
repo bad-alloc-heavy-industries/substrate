@@ -2,6 +2,7 @@
 #ifndef SUBSTRATE_UTILITIES
 #define SUBSTRATE_UTILITIES
 
+#include <cstdint>
 #include <type_traits>
 #include <typeinfo>
 #include <array>
@@ -10,8 +11,8 @@
 #include <limits>
 #include <vector>
 #include <array>
+#include <chrono>
 #include <utility>
-#include <cstdint>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>
@@ -519,6 +520,9 @@ namespace substrate
 
 	template<typename T> struct is_numeric : public std::integral_constant<bool,
 		std::is_integral<T>::value && !is_boolean<T>::value && !is_char<T>::value> { };
+
+	template<typename T> struct is_duration : public std::false_type { };
+	template<typename R, typename P> struct is_duration<std::chrono::duration<R, P>> : public std::true_type { };
 
 	/* Shift nibble */
 	template<typename T> enable_if_t<std::is_integral<T>::value ,T>
