@@ -48,6 +48,7 @@ template<typename> constexpr inline size_t typeToHexLength() noexcept { return s
 template<> constexpr inline size_t typeToHexLength<uint8_t>() noexcept { return 3; }
 template<> constexpr inline size_t typeToHexLength<uint16_t>() noexcept { return 5; }
 template<> constexpr inline size_t typeToHexLength<uint32_t>() noexcept { return 9; }
+template<> constexpr inline size_t typeToHexLength<uint64_t>() noexcept { return 17; }
 
 template<typename int_t> struct testFromInt_t final
 {
@@ -340,20 +341,26 @@ TEST_CASE("Hexadecimal conversion from uint32_t", "[conversions]")
 	});
 }
 
-/*TEST_CASE("Hexadecimal conversion from uint64_t", "[conversions]")
+TEST_CASE("Hexadecimal conversion from uint64_t", "[conversions]")
 {
 	testFromInt_t<uint64_t>::testHexConversions(
 	{
-		{0, ""},
-		{0, "00"},
-		{4294967296, "0000000100000000"},
-		{140737488355327, "00007FFFFFFFFFFF"},
-		{140737488355328, "0000800000000000"},
-		{9223372036854775807, "7FFFFFFFFFFFFFFF"},
-		{u64(9223372036854775808), "8000000000000000"},
-		{u64(18446744073709551615), "FFFFFFFFFFFFFFFF"}
+		{{0, "0", "00000000000000000"}, true},
+		{{4294967296, "100000000", "00000000100000000"}, true},
+		{{140737488355327, "7FFFFFFFFFFF", "000007FFFFFFFFFFF"}, true},
+		{{140737488355328, "800000000000", "00000800000000000"}, true},
+		{{281474976710655, "FFFFFFFFFFFF", "00000FFFFFFFFFFFF"}, true},
+		{{9223372036854775807, "7FFFFFFFFFFFFFFF", "07FFFFFFFFFFFFFFF"}, true},
+		{{u64(9223372036854775808), "8000000000000000", "08000000000000000"}, true},
+		{{u64(18446744073709551615), "FFFFFFFFFFFFFFFF", "0FFFFFFFFFFFFFFFF"}, true},
+		{{140737488355327, "7fffffffffff", "000007fffffffffff"}, false},
+		{{187649984473770, "aaaaaaaaaaaa", "00000aaaaaaaaaaaa"}, false},
+		{{281474976710655, "ffffffffffff", "00000ffffffffffff"}, false},
+		{{9223372036854775807, "7fffffffffffffff", "07fffffffffffffff"}, false},
+		{{u64(12297829382473034410), "aaaaaaaaaaaaaaaa", "0aaaaaaaaaaaaaaaa"}, false},
+		{{u64(18446744073709551615), "ffffffffffffffff", "0ffffffffffffffff"}, false}
 	});
-}*/
+}
 
 template<typename int_t> struct testToInt_t final
 {
