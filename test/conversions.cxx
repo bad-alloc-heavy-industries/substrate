@@ -1,6 +1,7 @@
+#include <cstring>
 #include <utility>
 #include <vector>
-#include <cstring>
+#include <chrono>
 #include <substrate/conversions>
 
 #include <catch.hpp>
@@ -922,4 +923,30 @@ TEST_CASE("Invalid hexadecimal conversions", "[conversions]")
 		"/", "\x01", " ", "\t",
 		"\n", "\r", "^", "&"
 	});
+}
+
+constexpr std::chrono::nanoseconds operator ""_ns(const unsigned long long value) noexcept
+	{ return std::chrono::nanoseconds{value}; }
+
+TEST_CASE("Fractional component conversions", "[conversions]")
+{
+	using nanoseconds = std::chrono::nanoseconds;
+	using fromIntVariable = fromInt_t<typename nanoseconds::rep, nanoseconds>;
+	using fromIntFixed = fromInt_t<typename nanoseconds::rep, nanoseconds, 9>;
+
+	const auto testConversion
+	{
+		[](const nanoseconds value, const char *const variableExpected, const char *const fixedExpected)
+		{
+			const auto variableResult{fromIntVariable{value}.formatFraction(21)};
+			REQUIRE(variableResult.get());
+			REQUIRE(memcmp(variableResult.get(), variableExpected, str_t::length(variableExpected)) == 0);
+
+			const auto fixedResult{fromIntFixed{value}.formatFraction(9)};
+			REQUIRE(fixedResult.get());
+			REQUIRE(memcmp(fixedResult.get(), fixedExpected, str_t::length(fixedExpected)) == 0);
+		}
+	};
+
+	testConversion(0_ns, "0", "0");
 }
