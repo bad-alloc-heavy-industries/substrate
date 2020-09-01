@@ -913,7 +913,7 @@ void testHexShouldFail(const testFailStr_t tests)
 	}
 }
 
-void testShouldFail()
+TEST_CASE("Invalid hexadecimal conversions", "[conversions]")
 {
 	testHexShouldFail(
 	{
