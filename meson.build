@@ -42,6 +42,13 @@ pkgconfig.generate(
 	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 )
 
+substrate_dep = declare_dependency(
+	dependencies: deps,
+	include_directories: include_directories('.'),
+	link_with: libSubstrate,
+	version: meson.project_version()
+)
+
 runClangTidy = find_program('runClangTidy.py')
 run_target(
 	'clang-tidy',
