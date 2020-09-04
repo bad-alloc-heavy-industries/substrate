@@ -3,6 +3,7 @@
 #define SUBSTRATE_STRING
 
 #include <cstring>
+#include <vector>
 #include <substrate/utility>
 
 namespace substrate
@@ -51,6 +52,23 @@ namespace substrate
 		return stringsConcat(make_unique_nothrow<char []>(
 			stringsLength(part, args...) + 1), 0, part, args...);
 	}
+
+
+	template<uint8_t ch = '\n'>
+	std::vector<std::string> stringSplit(const char *buffer) {
+		constexpr const auto npos{std::string::npos};
+		std::string data{buffer, std::strlen(buffer)};
+		size_t begin{};
+		std::vector<std::string> lines{};
+		while (begin != npos)  {
+			const auto end = data.find(ch, begin);
+			const auto len = (end == std::string::npos ? data.length() : end) - begin;
+			lines.emplace_back(data.substr(begin, len));
+			begin = end == npos ? npos : end + 1;
+		}
+		return lines;
+	}
+
 }
 
 #endif /*SUBSTRATE_STRING*/
