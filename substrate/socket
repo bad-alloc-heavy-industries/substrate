@@ -62,6 +62,8 @@ namespace substrate
 		SUBSTRATE_CLS_API socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
 		SUBSTRATE_CLS_API ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
 		SUBSTRATE_CLS_API ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
+		SUBSTRATE_CLS_API ssize_t writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept;
+		SUBSTRATE_CLS_API ssize_t readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept;
 		SUBSTRATE_CLS_API char peek() const noexcept;
 	};
 
@@ -76,10 +78,17 @@ namespace substrate
 		dontCare
 	};
 
+	enum class socketProtocol_t : uint8_t
+	{
+		tcp,
+		udp,
+		raw
+	};
+
 	namespace socket
 	{
 		SUBSTRATE_API sockaddr_storage prepare(const socketType_t family, const char *const where,
-			const uint16_t port) noexcept;
+			const uint16_t port, const socketProtocol_t protocol = socketProtocol_t::tcp) noexcept;
 	}
 }
 

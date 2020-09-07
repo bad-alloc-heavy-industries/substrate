@@ -5,6 +5,7 @@
 #	include <netdb.h>
 #	include <arpa/inet.h>
 #	include <netinet/in.h>
+#	include <netinet/udp.h>
 #endif
 
 #include <substrate/utility>
@@ -59,6 +60,13 @@ ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
 	{ return ::recv(socket, static_cast<char *const>(bufferPtr), int32_t(len), 0); }
 #endif
 
+ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept
+	{ return ::sendto(socket, static_cast<char *const>(bufferPtr), len, 0, reinterpret_cast<const sockaddr *>(&addr), sockaddrLen(addr)); }
+ssize_t socket_t::readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept
+{
+	socklen_t size = sizeof(sockaddr_storage);
+	return ::recvfrom(socket, static_cast<char *const>(bufferPtr), len, 0, reinterpret_cast<sockaddr *>(&addr), &size); }
+
 char socket_t::peek() const noexcept
 {
 	char buffer{};
@@ -74,6 +82,34 @@ inline int typeToFamily(const socketType_t type) noexcept
 	else if (type == socketType_t::ipv6)
 		return AF_INET6;
 	return AF_UNSPEC;
+}
+
+inline int protocolToHints(const socketProtocol_t protocol) noexcept
+{
+	switch (protocol)
+	{
+		case socketProtocol_t::udp:
+			return IPPROTO_UDP;
+		case socketProtocol_t::raw:
+			return IPPROTO_RAW;
+		case socketProtocol_t::tcp:
+		default:
+			return IPPROTO_TCP;
+	}
+}
+
+inline int protocolToType(const socketProtocol_t protocol) noexcept
+{
+	switch (protocol)
+	{
+		case socketProtocol_t::udp:
+			return SOCK_DGRAM;
+		case socketProtocol_t::raw:
+			return SOCK_RAW;
+		case socketProtocol_t::tcp:
+		default:
+			return SOCK_STREAM;
+	}
 }
 
 inline size_t familyToSize(const sa_family_t family) noexcept
@@ -109,12 +145,12 @@ template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 sockaddr_storage substrate::socket::prepare(const socketType_t family, const char *const where,
-	const uint16_t port) noexcept
+	const uint16_t port, const socketProtocol_t protocol) noexcept
 {
 	addrinfo hints{};
 	hints.ai_family = typeToFamily(family);
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_socktype = protocolToType(protocol);
+	hints.ai_protocol = protocolToHints(protocol);
 	hints.ai_flags = AI_PASSIVE; // This may not be right/complete..
 
 	addrinfo *results = nullptr;
