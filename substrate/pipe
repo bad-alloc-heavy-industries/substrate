@@ -6,6 +6,7 @@
 #include <substrate/internal/fd_compat>
 #ifdef _WINDOWS
 #include <io.h>
+#include <fcntl.h>
 #endif
 #include <substrate/internal/defs>
 
