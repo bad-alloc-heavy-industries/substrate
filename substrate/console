@@ -236,7 +236,7 @@ namespace substrate
 	template<char paddingChar> struct writePadding_t<0, paddingChar> final
 		{ void operator ()(const consoleStream_t &, const uint8_t) const noexcept { } };
 
-	template<uint8_t padding = 0, char paddingChar = ' '> struct asHex_t final : public printable_t
+	template<uint8_t paddedWidth = 0, char paddingChar = ' '> struct asHex_t final : public printable_t
 	{
 	private:
 		uint8_t maxDigits;
@@ -253,7 +253,7 @@ namespace substrate
 		{
 			uintmax_t value{_value};
 			// If we've been asked to pad by more than the maximum possible length of the number
-			writePadding_t<padding, paddingChar>{}(stream, maxDigits);
+			writePadding_t<paddedWidth, paddingChar>{}(stream, maxDigits);
 
 			uint8_t digits{maxDigits};
 			// For up to the maximum number of digits, pad as needed
@@ -262,13 +262,13 @@ namespace substrate
 				const uint8_t nibble((value >> msbShift) & 0x0FU);
 				if (nibble == 0)
 					value <<= 4;
-				if (digits > padding && nibble == 0)
+				if (digits > paddedWidth && nibble == 0)
 					continue;
-				else if (digits <= padding && nibble == 0)
+				else if (digits <= paddedWidth && nibble == 0)
 					stream.write(paddingChar);
 				else
 					break;
-				// if 0 and padding == 0, we don't output anything here.
+				// if 0 and paddedWidth == 0, we don't output anything here.
 			}
 
 			for (; digits > 0; --digits)
