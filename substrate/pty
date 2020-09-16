@@ -16,6 +16,9 @@ namespace substrate
 
 	public:
 		pty_t() noexcept;
+		pty_t(pty_t &&) noexcept = default;
+		~pty_t() noexcept = default;
+		pty_t &operator =(pty_t &&) noexcept = default;
 		bool valid() const noexcept { return ptyMaster.valid() && ptySlave.valid(); }
 
 		const fd_t &ptmx() const noexcept { return ptyMaster; }
