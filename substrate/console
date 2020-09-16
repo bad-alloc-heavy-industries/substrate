@@ -220,6 +220,22 @@ namespace substrate
 			{ printTo<int_t>(stream); }
 	};
 
+	template<uint8_t paddedWidth, char paddingChar> struct writePadding_t final
+	{
+		void operator ()(const consoleStream_t &stream, const uint8_t maxDigits) const noexcept
+		{
+			if (maxDigits < paddedWidth)
+			{
+				// Put out the excess padding early to keep the logic simple.
+				for (uint8_t i{0}; i < paddedWidth - maxDigits; ++i)
+					stream.write(paddingChar);
+			}
+		}
+	};
+
+	template<char paddingChar> struct writePadding_t<0, paddingChar> final
+		{ void operator ()(const consoleStream_t &, const uint8_t) const noexcept { } };
+
 	template<uint8_t padding = 0, char paddingChar = ' '> struct asHex_t final : public printable_t
 	{
 	private:
@@ -237,12 +253,7 @@ namespace substrate
 		{
 			uintmax_t value{_value};
 			// If we've been asked to pad by more than the maximum possible length of the number
-			if (maxDigits < padding)
-			{
-				// Put out the excess padding early to keep the logic simple.
-				for (uint8_t i{0}; i < padding - maxDigits; ++i)
-					stream.write(paddingChar);
-			}
+			writePadding_t<padding, paddingChar>{}(stream, maxDigits);
 
 			uint8_t digits{maxDigits};
 			// For up to the maximum number of digits, pad as needed
