@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
-#ifndef SUBSTRATE_PTS
-#define SUBSTRATE_PTS
-#ifdef _WINDOWS
-#	error "pty is a *nix only header"
-#endif
+#ifndef SUBSTRATE_PTY
+#define SUBSTRATE_PTY
 
+#include <substrate/internal/defs>
+#ifndef _WINDOWS
 #include <substrate/fd>
 
 namespace substrate
@@ -26,6 +25,56 @@ namespace substrate
 		pty_t &operator =(const pty_t &) = delete;
 	};
 } // namespace substrate
+#else
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#undef WIN32_LEAN_AND_MEAN
+#undef min
+#undef max
+#include <fcntl.h>
+#include <io.h>
 
-#endif /*SUBSTRATE_PTS*/
+namespace substrate
+{
+	struct pty_t final
+	{
+	private:
+		HANDLE ptyOutputRead{INVALID_HANDLE_VALUE};
+		HANDLE ptyOutputWrite{INVALID_HANDLE_VALUE};
+		HPCON console{INVALID_HANDLE_VALUE};
+		fd_t ptyPrimary{};
+		fd_t ptySecondary{};
+
+	public:
+		pty_t() noexcept
+		{
+			constexpr static COORD size{80, 25};
+			if (!CreatePipe(&ptyOutputRead, &ptyOutputWrite, NULL, 0) ||
+				CreatePseudoConsole(size, INVALID_HANDLE_VALUE, ptyOutputWrite, 0, &console) != S_OK)
+				return;
+			ptyPrimary = {_open_osfhandle(reinterpret_cast<intptr_t>(ptyOutputRead), O_RDONLY | O_BINARY)};
+			ptySecondary = {_open_osfhandle(reinterpret_cast<intptr_t>(ptyOutputWrite), O_WRONLY | O_BINARY)};
+		}
+
+		~pty_t() noexcept { ClosePseudoConsole(console); }
+
+		bool valid() const noexcept
+		{
+			return console != INVALID_HANDLE_VALUE &&
+				ptyOutputRead != INVALID_HANDLE_VALUE &&
+				ptyOutputWrite != INVALID_HANDLE_VALUE &&
+				ptyPrimary.valid() && ptySecondary.valid();
+		}
+
+		const fd_t &ptmx() const noexcept { return ptyPrimary; }
+		const fd_t &pts() const noexcept { return ptySecondary; }
+
+		pty_t(const pty_t &) = delete;
+		pty_t &operator =(const pty_t &) = delete;
+	};
+} // namespace substrate
+
+#endif /*!_WINDOWS*/
+
+#endif /*SUBSTRATE_PTY*/
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
