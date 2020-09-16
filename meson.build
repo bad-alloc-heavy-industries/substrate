@@ -33,14 +33,16 @@ if get_option('gen_docs')
 	subdir('docs')
 endif
 
-pkgconfig.generate(
-	subdirs: '.',
-	name: 'substrate',
-	filebase: 'substrate',
-	libraries: [libSubstrate],
-	version: meson.project_version(),
-	description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
-)
+if not meson.is_subproject()
+	pkgconfig.generate(
+		subdirs: '.',
+		name: 'substrate',
+		filebase: 'substrate',
+		libraries: [libSubstrate],
+		version: meson.project_version(),
+		description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
+	)
+endif
 
 substrate_dep = declare_dependency(
 	dependencies: deps,

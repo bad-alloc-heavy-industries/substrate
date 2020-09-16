@@ -29,17 +29,19 @@ internal_headers = [
 	'internal/fd_compat'
 ]
 
-install_headers(
-	headers,
-	subdir: 'substrate'
-)
+if not meson.is_subproject()
+	install_headers(
+		headers,
+		subdir: 'substrate'
+	)
 
-install_headers(
-	advanced_headers,
-	subdir: 'substrate/advanced'
-)
+	install_headers(
+		advanced_headers,
+		subdir: 'substrate/advanced'
+	)
 
-install_headers(
-	internal_headers,
-	subdir: 'substrate/internal'
-)
+	install_headers(
+		internal_headers,
+		subdir: 'substrate/internal'
+	)
+endif

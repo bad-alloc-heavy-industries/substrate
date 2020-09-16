@@ -16,5 +16,5 @@ libSubstrate = library(
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
 	pic: true,
-	install: true
+	install: (not meson.is_subproject())
 )
