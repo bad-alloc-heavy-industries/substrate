@@ -63,6 +63,9 @@ jobs:
         if: startsWith(matrix.compiler, 'clang')
         shell: bash
         run: |
+          wget https://apt.llvm.org/llvm-snapshot.gpg.key
+          sudo apt-key add llvm-snapshot.gpg.key
+          rm llvm-snapshot.gpg.key
           sudo apt-add-repository "deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic${CC/#clang/} main"
           sudo apt-get update
           CXX=${CC/#clang/clang++}
@@ -72,6 +75,7 @@ jobs:
           [ $COVERAGE -ne 0 ] && echo ::set-env name=GCOV::"/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" || true
         env:
           CC: ${{ matrix.compiler }}
+        working-directory: ${{ runner.temp }}
       - name: Checkout substrate
         uses: actions/checkout@v2
         with:
