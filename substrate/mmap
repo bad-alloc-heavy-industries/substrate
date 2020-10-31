@@ -30,7 +30,7 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()} { }
 
-		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value, T *>
+		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
 			index(const off_t idx) const
 		{
 			if (idx < _len)
@@ -45,7 +45,7 @@ namespace substrate
 			throw std::out_of_range("mmap_t index out of range");
 		}
 
-		template<typename T> substrate::enable_if_t<has_nullable_ctor<T>::value, T *>
+		template<typename T> substrate::enable_if_t<has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
 			index(const off_t idx) const
 		{
 			if (idx < _len)
@@ -54,6 +54,18 @@ namespace substrate
 				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 				return new (reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{nullptr}; // lgtm[cpp/reinterpret-cast]
+			}
+			throw std::out_of_range("mmap_t index out of range");
+		}
+
+		template<typename T> substrate::enable_if_t<std::is_same<T, void*>::value, void*>
+			index(const off_t idx) const
+		{
+			if (idx < _len) {
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+				return reinterpret_cast<void *>(addr + idx); // lgtm[cpp/reinterpret-cast]
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
