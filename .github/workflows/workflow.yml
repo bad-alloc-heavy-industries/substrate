@@ -44,8 +44,10 @@ jobs:
           COVERAGE: ${{ matrix.coverage }}
         run: |
           echo "Coverage enabled for build? ${{ matrix.coverage }}"
-          echo "COVERAGE=$([ $COVERAGE == \"true\" ] && echo -n 1 || echo -n 0)" >> $GITHUB_ENV
-          echo "BUILD_OPTS=$([ $COVERAGE == \"true\" ] && echo '--buildtype=debug' || echo '')" >> $GITHUB_ENV
+          echo -n "COVERAGE=" >> $GITHUB_ENV
+          ([ $COVERAGE == "true" ] && echo 1 || echo 0) >> $GITHUB_ENV
+          echo -n "BUILD_OPTS=" >> $GITHUB_ENV
+          ([ $COVERAGE == "true" ] && echo "--buildtype=debug" || echo "") >> $GITHUB_ENV
       - name: Setup GCC
         if: startsWith(matrix.compiler, 'gcc')
         shell: bash
