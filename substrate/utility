@@ -599,7 +599,7 @@ namespace substrate
 	/* std::array<> helper */
 	namespace internal
 	{
-#if ___cplusplus < 201402L
+#if __cplusplus < 201402L
 		template<std::size_t... seq> struct indexSequence_t
 		{
 			static_assert(sizeof...(seq) > 0, "Cannot define a zero-length index sequence");
