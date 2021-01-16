@@ -26,7 +26,10 @@ endif
 
 subdir('substrate')
 subdir('impl')
-subdir('test')
+
+if get_option('build_tests')
+	subdir('test')
+endif
 
 if get_option('gen_docs')
 	message('Building documentation')
