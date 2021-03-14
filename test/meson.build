@@ -20,7 +20,8 @@ tests = executable(
 	link_with: libSubstrate,
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
-	install: false
+	install: false,
+	native: true,
 )
 
 test(
