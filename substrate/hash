@@ -1,0 +1,197 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_HASH
+#define SUBSTRATE_HASH
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <limits>
+#include <type_traits>
+#include <utility>
+
+#include <substrate/internal/defs>
+#include <substrate/bits>
+
+namespace substrate
+{
+	using substrate::rotl;
+	namespace {
+		inline std::uint64_t fmix(std::uint64_t k) {
+			k ^= k >> 33;
+			k *= 0xFF51AFD7ED558CCDULL;
+			k ^= k >> 33;
+			k *= 0xC4CEB9FE1A85EC53ULL;
+			k ^= k >> 33;
+			return k;
+		}
+
+
+	}
+
+	template<typename T, size_t N>
+	std::pair<std::uint64_t, std::uint64_t> murmur128(const std::array<T, N>& input, const uint32_t seed)
+	{
+		constexpr std::uint64_t len{sizeof(T) * N};
+		constexpr size_t blk_count{len / 16};
+		constexpr std::uint64_t c1 = 0x87C37B91114253D5ULL;
+		constexpr std::uint64_t c2 = 0x4CF5AD432745937FULL;
+		const auto data{static_cast<const uint8_t*>(static_cast<const void*>(input.data()))};
+
+		std::uint64_t h1 = seed;
+		std::uint64_t h2 = seed;
+
+		for (size_t idx{}; idx < blk_count; ++idx)
+		{
+			std::uint64_t k1{};
+			std::uint64_t k2{};
+
+			::memcpy(&k1, data + (idx * sizeof(std::uint64_t) * 2), sizeof(std::uint64_t));
+			::memcpy(&k2, data + (idx * sizeof(std::uint64_t) * 2 + 1), sizeof(std::uint64_t));
+
+			k1 *= c1;
+			k1 = rotl(k1, 31);
+			k1 *= c2;
+			h1 ^= k1;
+
+			h1 = rotl(h1, 27);
+			h1 += h2;
+			h1 = h1 * 5 + 0x52DCE729;
+
+			k2 *= c2;
+			k2 = rotl(k2, 33);
+			k2 *= c1;
+			h2 ^= k2;
+
+			h2 = rotl(h2, 31);
+			h2 += h1;
+			h2 = h2 * 5 + 0x38495AB5;
+		}
+
+		const uint8_t* tail = data + blk_count * 16;
+
+		std::uint64_t k1{};
+		std::uint64_t k2{};
+
+		switch (len & 15)
+		{
+				case 15: {
+				k2 ^= std::uint64_t(tail[14]) << 48;
+				SUBSTRATE_FALLTHROUGH();
+			} case 14: {
+				k2 ^= std::uint64_t(tail[13]) << 40;
+				SUBSTRATE_FALLTHROUGH();
+			} case 13: {
+				k2 ^= std::uint64_t(tail[12]) << 32;
+				SUBSTRATE_FALLTHROUGH();
+			} case 12: {
+				k2 ^= std::uint64_t(tail[11]) << 24;
+				SUBSTRATE_FALLTHROUGH();
+			} case 11: {
+				k2 ^= std::uint64_t(tail[10]) << 16;
+				SUBSTRATE_FALLTHROUGH();
+			} case 10: {
+				k2 ^= std::uint64_t(tail[9]) << 8;
+				SUBSTRATE_FALLTHROUGH();
+			} case 9: {
+				k2 ^= std::uint64_t(tail[8]);
+				k2 *= c2;
+				k2 = rotl(k2, 33);
+				k2 *= c1;
+				h2 ^= k2;
+				SUBSTRATE_FALLTHROUGH();
+			} case 8: {
+				k1 ^= std::uint64_t(tail[7]) << 56;
+				SUBSTRATE_FALLTHROUGH();
+			} case 7: {
+				k1 ^= std::uint64_t(tail[6]) << 48;
+				SUBSTRATE_FALLTHROUGH();
+			} case 6: {
+				k1 ^= std::uint64_t(tail[5]) << 40;
+				SUBSTRATE_FALLTHROUGH();
+			} case 5: {
+				k1 ^= std::uint64_t(tail[4]) << 32;
+				SUBSTRATE_FALLTHROUGH();
+			} case 4: {
+				k1 ^= std::uint64_t(tail[3]) << 24;
+				SUBSTRATE_FALLTHROUGH();
+			} case 3: {
+				k1 ^= std::uint64_t(tail[2]) << 16;
+				SUBSTRATE_FALLTHROUGH();
+			} case 2: {
+				k1 ^= std::uint64_t(tail[1]) << 8;
+				SUBSTRATE_FALLTHROUGH();
+			} case 1: {
+				k1 ^= std::uint64_t(tail[0]);
+				k1 *= c1;
+				k1 = rotl(k1, 31);
+				k1 *= c2;
+				h1 ^= k1;
+			}
+		}
+
+		h1 ^= len;
+		h2 ^= len;
+
+		h1 += h2;
+		h2 += h1;
+
+		h1 = fmix(h1);
+		h2 = fmix(h2);
+
+		h1 += h2;
+		h2 += h1;
+
+		return { h1, h2 };
+	}
+
+	/* Checksums */
+	std::uint16_t sysv_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
+	{
+		constexpr auto m32 = std::numeric_limits<std::uint32_t>::max();
+		constexpr auto m16 = std::numeric_limits<std::uint16_t>::max();
+		if (!bytes)
+			return {};
+
+		std::uint32_t sum{};
+		for (std::size_t i{}; i < len; ++i)
+		{
+			sum += *(bytes + i);
+		}
+		std::uint32_t res = sum % m16 + (sum % m32) / m16;
+
+		return (res % m16) + res / m16;
+	}
+
+	template<std::size_t N>
+	std::uint16_t sysv_checksum(std::array<std::uint8_t, N> bytes) noexcept
+	{
+		return sysv_checksum(bytes.data(), N);
+	}
+
+	std::uint16_t bsd_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
+	{
+
+		if (!bytes)
+			return {};
+
+		std::uint32_t chksum{};
+		for (std::size_t i{}; i < len; ++i)
+		{
+			chksum = (chksum >> 1) + ((chksum & 1) << 15);
+			chksum += *(bytes + i);
+			chksum &= 0xFFFFU;
+		}
+
+		return chksum;
+	}
+
+	template<std::size_t N>
+	std::uint16_t bsd_checksum(std::array<std::uint8_t, N> bytes) noexcept
+	{
+		return bsd_checksum(bytes.data(), N);
+	}
+}
+
+#endif /* SUBSTRATE_HASH */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

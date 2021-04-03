@@ -2,7 +2,7 @@ testSrcs = [
 	'test.cxx', 'fd.cxx', 'units.cxx', 'utility.cxx', 'enum_utils.cxx',
 	'bounded_iterator.cxx', 'fixed_vector.cxx', 'string.cxx', 'managed_ptr.cxx',
 	'socket.cxx', 'console.cxx', 'advanced/fd.cxx', 'span.cxx', 'conversions.cxx',
-	'bits.cxx', 'prng.cxx'
+	'bits.cxx', 'prng.cxx', 'hash.cxx'
 ]
 
 if target_machine.system() == 'linux'
