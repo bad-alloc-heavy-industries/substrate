@@ -26,6 +26,14 @@
 #	define SUBSTRATE_NO_DISCARD(...) __VA_ARGS__
 #endif
 
+#if __has_cpp_attribute(fallthrough) ||  __cplusplus >= 201402L
+#	define SUBSTRATE_FALLTHROUGH() [[fallthrough]]
+#elif defined(__GNUC__)
+#	define SUBSTRATE_FALLTHROUGH() __attribute__((fallthrough))
+#else
+#	define SUBSTRATE_FALLTHROUGH() ((void)0)
+#endif
+
 #if __cplusplus >= 201103L
 #	define ALIGN(X) alignas(x)
 #elif defined(__GNUC__)
