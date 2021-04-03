@@ -1,0 +1,614 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_PRNG
+#define SUBSTRATE_PRNG
+
+#include <array>
+#include <cstdint>
+#include <limits>
+#include <random>
+#include <type_traits>
+
+#include <substrate/internal/defs>
+#include <substrate/bits>
+
+/* The xoroshiro/xoshiro/splitmix are all implemented from https://prng.di.unimi.it/ */
+/* The source code for the reference examples of which this code was based is CC-0 */
+
+namespace substrate
+{
+	using substrate::rotl;
+	/* splitmix used to generate seed for the xoshiro/xoroshiro prngs */
+	template<typename T, T a, T b, T c, typename = typename std::enable_if<std::is_integral<T>::value &&
+			std::is_unsigned<T>::value>::type>
+	struct splitmix_t final {
+	private:
+		T _seed{};
+
+		SUBSTRATE_NO_DISCARD(T _next() noexcept)
+		{
+			constexpr auto bits = std::numeric_limits<T>::digits;
+
+			T z = (_seed += a);
+			z = (z ^ (z >> ((bits / 2) - 2))) * b; // 30
+			z = (z ^ (z >> ((bits / 2) - 5))) * c; // 27
+
+			return z ^ (z >> ((bits / 2) - 1)); // 31
+		}
+
+	public:
+		explicit splitmix_t(const T seed) noexcept : _seed{seed} {}
+
+		SUBSTRATE_NO_DISCARD(T operator()() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using splitmix64_t = splitmix_t<std::uint64_t, 0x9E3779B97F4A7C15U, 0xBF58476D1CE4E5B9U, 0x94D049BB133111EBU>;
+	using splitmix32_t = splitmix_t<std::uint32_t, 0x9E3779B9U, 0xBF58476DU, 0x94D049BBU>;
+	using splitmix16_t = splitmix_t<std::uint16_t, 0x9E37U, 0xBF58U, 0x94D0U>;
+	using splitmix8_t  = splitmix_t<std::uint8_t, 0x9EU, 0xBFU, 0x94U>;
+
+	namespace prng_type
+	{
+		struct star_t final {};
+		struct starstar_t final {};
+		struct plus_t final {};
+		struct plusplus_t final {};
+	}
+
+	/* xoroshiro64* and xoroshiro64** 32-bit PRNGs */
+	template<typename T>
+	struct xoroshiro64_t final {
+	private:
+		std::array<std::uint32_t, 2> _seed{};
+
+		/* xoroshiro64* generator */
+		template<typename U = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<U, prng_type::star_t>::value, std::uint32_t>::type
+		 _next() noexcept)
+		{
+			const auto s0 = _seed[0];
+			auto s1 = _seed[1];
+
+			const auto res = s0 * 0x9E3779BBU;
+
+			s1 ^= s0;
+			_seed[0] = rotl(s0, 26) ^ s1 ^ (s1 << 9);
+			_seed[1] = rotl(s1, 13);
+
+			return res;
+		}
+
+		/* xoroshiro64** generator */
+		template<typename U = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<U, prng_type::starstar_t>::value, std::uint32_t>::type
+		 _next() noexcept)
+		{
+			const auto s0 = _seed[0];
+			auto s1 = _seed[1];
+
+			const auto res = rotl(s0 * 0x9E3779BBU, 5);
+
+			s1 ^= s0;
+			_seed[0] = rotl(s0, 26) ^ s1 ^ (s1 << 9);
+			_seed[1] = rotl(s1, 13);
+
+			return res;
+		}
+
+	public:
+		explicit xoroshiro64_t(std::array<uint32_t, 2> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro64_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix32_t{rd()};
+
+			_seed = { srng(), srng() };
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using xoroshiro64s_t = xoroshiro64_t<prng_type::star_t>;
+	using xoroshiro64ss_t = xoroshiro64_t<prng_type::starstar_t>;
+
+	/* xoshiro128+, xoshiro128++, and xoshiro128** 32-bit PRNGs */
+	template<typename T>
+	struct xoshiro128_t final {
+	private:
+		std::array<std::uint32_t, 4> _seed;
+
+		/* xoshrio128+ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plus_t>::value, std::uint32_t>::type
+		 _next() noexcept)
+		{
+			const auto res = _seed[0] + _seed[3];
+			const auto t = _seed[1] << 9;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+			_seed[3] = rotl(_seed[3], 11);
+
+			return res;
+		}
+
+		/* xoshrio128++ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plusplus_t>::value, std::uint32_t>::type
+		 _next() noexcept)
+		{
+			const auto res = rotl(_seed[0] + _seed[3], 7) + _seed[0];
+			const auto t = _seed[1] << 9;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+			_seed[3] = rotl(_seed[3], 11);
+
+			return res;
+		}
+
+		/* xoshrio128** generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::starstar_t>::value, std::uint32_t>::type
+		 _next() noexcept)
+		{
+			const auto res = rotl(_seed[1] * 5, 7) * 9;
+			const auto t = _seed[1] << 9;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+			_seed[3] = rotl(_seed[3], 11);
+
+			return res;
+		}
+
+	public:
+		explicit xoshiro128_t(std::array<std::uint32_t, 4> seed) noexcept : _seed{seed} {}
+		explicit xoshiro128_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix32_t{rd()};
+
+			_seed = {
+				srng(), srng(),
+				srng(), srng()
+			};
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept) {
+			return _next();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator uint32_t() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using xoshiro128p_t = xoshiro128_t<prng_type::plus_t>;
+	using xoshiro128pp_t = xoshiro128_t<prng_type::plusplus_t>;
+	using xoshiro128ss_t = xoshiro128_t<prng_type::starstar_t>;
+
+	/* xoroshiro128+, xoroshiro128++, and xoroshiro128** 64-bit PRNGs */
+	template<typename T>
+	struct xoroshiro128_t final {
+	private:
+		std::array<std::uint64_t, 2> _seed;
+
+		/* xoroshrio128+ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t s0 = _seed[0];
+			std::uint64_t s1 = _seed[1];
+			const uint64_t res = s0 + s1;
+
+			s1 ^= s0;
+			_seed[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16);
+			_seed[1] = rotl(s1, 37);
+
+			return res;
+		}
+
+		/* xoroshrio128++ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plusplus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t s0 = _seed[0];
+			std::uint64_t s1 = _seed[1];
+			const uint64_t res = rotl(s0 + s1, 17) + s0;
+
+			s1 ^= s0;
+			_seed[0] = rotl(s0, 49) ^ s1 ^ (s1 << 21);
+			_seed[1] = rotl(s1, 28);
+
+			return res;
+		}
+
+		/* xoroshrio128** generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::starstar_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t s0 = _seed[0];
+			std::uint64_t s1 = _seed[1];
+			const uint64_t res = rotl(s0 * 5, 7) * 9;
+
+			s1 ^= s0;
+			_seed[0] = rotl(s0, 24) ^ s1 ^ (s1 << 16);
+			_seed[1] = rotl(s1, 37);
+
+			return res;
+		}
+
+	public:
+		explicit xoroshiro128_t(std::array<std::uint64_t, 2> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro128_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix64_t{rd()};
+
+			_seed = { srng(), srng() };
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
+			return _next();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using xoroshiro128p_t = xoroshiro128_t<prng_type::plus_t>;
+	using xoroshiro128pp_t = xoroshiro128_t<prng_type::plusplus_t>;
+	using xoroshiro128ss_t = xoroshiro128_t<prng_type::starstar_t>;
+
+	/* xoshiro256+, xoshiro256++, and xoshiro256** 64-bit PRNGs */
+	template<typename T>
+	struct xoshiro256_t final {
+	private:
+		std::array<std::uint64_t, 4> _seed;
+
+		/* xoshiro256+ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = _seed[0] + _seed[3];
+			const std::uint64_t t = _seed[1] << 17;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+
+			_seed[3] = rotl(_seed[3], 45);
+
+			return res;
+		}
+
+		/* xoshiro256++ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plusplus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = rotl(_seed[0] + _seed[3], 23) + _seed[0];
+			const std::uint64_t t = _seed[1] << 17;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+
+			_seed[3] = rotl(_seed[3], 45);
+
+			return res;
+		}
+
+		/* xoshiro256** generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::starstar_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = rotl(_seed[1] * 5, 7) * 9;
+			const std::uint64_t t = _seed[1] << 17;
+
+			_seed[2] ^= _seed[0];
+			_seed[3] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[0] ^= _seed[3];
+
+			_seed[2] ^= t;
+
+			_seed[3] = rotl(_seed[3], 45);
+
+			return res;
+		}
+	public:
+		explicit xoshiro256_t(std::array<std::uint64_t, 4> seed) noexcept : _seed{seed} {}
+		explicit xoshiro256_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix64_t{rd()};
+
+			_seed = {
+				srng(), srng(),
+				srng(), srng()
+			};
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
+			return _next();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using xoshiro256p_t = xoshiro256_t<prng_type::plus_t>;
+	using xoshiro256pp_t = xoshiro256_t<prng_type::plusplus_t>;
+	using xoshiro256ss_t = xoshiro256_t<prng_type::starstar_t>;
+
+	/* xoshiro512+, xoshiro512++, and xoshiro512** 64-bit PRNGs */
+	template<typename T>
+	struct xoshiro512_t final {
+	private:
+		std::array<std::uint64_t, 8> _seed;
+
+		/* xoshiro512+ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = _seed[0] + _seed[2];
+			const std::uint64_t t = _seed[1] << 11;
+
+			_seed[2] ^= _seed[0];
+			_seed[5] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[7] ^= _seed[3];
+			_seed[3] ^= _seed[4];
+			_seed[4] ^= _seed[5];
+			_seed[0] ^= _seed[6];
+			_seed[6] ^= _seed[7];
+
+			_seed[6] ^= t;
+			_seed[7] = rotl(_seed[7], 21);
+
+			return res;
+		}
+
+		/* xoshiro512++ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plusplus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = rotl(_seed[0] + _seed[2], 17) + _seed[2];
+			const std::uint64_t t = _seed[1] << 11;
+
+			_seed[2] ^= _seed[0];
+			_seed[5] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[7] ^= _seed[3];
+			_seed[3] ^= _seed[4];
+			_seed[4] ^= _seed[5];
+			_seed[0] ^= _seed[6];
+			_seed[6] ^= _seed[7];
+
+			_seed[6] ^= t;
+			_seed[7] = rotl(_seed[7], 21);
+
+			return res;
+		}
+
+		/* xoshiro512** generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::starstar_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::uint64_t res = rotl(_seed[1] * 5, 7) * 9;
+			const std::uint64_t t = _seed[1] << 11;
+
+			_seed[2] ^= _seed[0];
+			_seed[5] ^= _seed[1];
+			_seed[1] ^= _seed[2];
+			_seed[7] ^= _seed[3];
+			_seed[3] ^= _seed[4];
+			_seed[4] ^= _seed[5];
+			_seed[0] ^= _seed[6];
+			_seed[6] ^= _seed[7];
+
+			_seed[6] ^= t;
+			_seed[7] = rotl(_seed[7], 21);
+
+			return res;
+		}
+	public:
+		explicit xoshiro512_t(std::array<std::uint64_t, 8> seed) noexcept : _seed{seed} {}
+		explicit xoshiro512_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix64_t{rd()};
+
+			_seed = {
+				srng(), srng(),	srng(), srng(),
+				srng(), srng(),	srng(), srng()
+			};
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
+			return _next();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	/* xoroshiro1024*, xoroshiro1024**, and xoroshiro1024++ 64-bit PRNGs */
+	template<typename T>
+	struct xoroshiro1024_t final {
+	private:
+		std::array<std::uint64_t, 16> _seed;
+		std::int64_t _p{};
+
+		/* xoroshiro1024_t* generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::star_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::int64_t q = _p;
+			const std::uint64_t s0 = _seed[_p = (_p + 1) & 15];
+			std::uint64_t s15 = _seed[q];
+			const std::uint64_t res = s0 * 0x9E3779B97F4A7C13U;
+
+			s15 ^= s0;
+			_seed[q] = rotl(s0, 25) ^ s15 ^ (s15 << 27);
+			_seed[_p] = rotl(s15, 36);
+
+			return res;
+		}
+
+		/* xoroshiro1024_t** generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::starstar_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::int64_t q = _p;
+			const std::uint64_t s0 = _seed[_p = (_p + 1) & 15];
+			std::uint64_t s15 = _seed[q];
+			const std::uint64_t res = rotl(s0 * 5, 7) * 9;
+
+			s15 ^= s0;
+			_seed[q] = rotl(s0, 25) ^ s15 ^ (s15 << 27);
+			_seed[_p] = rotl(s15, 36);
+
+			return res;
+		}
+
+		/* xoroshiro1024_t++ generator */
+		template<typename V = T>
+			SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_same<V, prng_type::plusplus_t>::value, std::uint64_t>::type
+		 _next() noexcept)
+		{
+			const std::int64_t q = _p;
+			const std::uint64_t s0 = _seed[_p = (_p + 1) & 15];
+			std::uint64_t s15 = _seed[q];
+			const std::uint64_t res = rotl(s0 + s15, 23) + s15;
+
+			s15 ^= s0;
+			_seed[q] = rotl(s0, 25) ^ s15 ^ (s15 << 27);
+			_seed[_p] = rotl(s15, 36);
+
+			return res;
+		}
+
+	public:
+		explicit xoroshiro1024_t(std::array<std::uint64_t, 16> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro1024_t() noexcept
+		{
+			std::random_device rd;
+			auto srng = splitmix64_t{rd()};
+
+			_seed = {
+				srng(), srng(), srng(), srng(),
+				srng(), srng(), srng(), srng(),
+				srng(), srng(), srng(), srng(),
+				srng(), srng(), srng(), srng()
+			};
+		}
+
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
+			return _next();
+		}
+
+		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
+			return _next();
+		}
+
+		void discard(std::size_t z) noexcept
+		{
+			for(; z > 0; --z)
+			{
+				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
+			}
+		}
+	};
+
+	using xoroshiro1024s_t = xoroshiro1024_t<prng_type::star_t>;
+	using xoroshiro1024ss_t = xoroshiro1024_t<prng_type::starstar_t>;
+	using xoroshiro1024pp_t = xoroshiro1024_t<prng_type::plusplus_t>;
+}
+
+#endif /* SUBSTRATE_PRNG */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
