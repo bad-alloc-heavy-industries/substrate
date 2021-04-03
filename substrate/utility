@@ -524,14 +524,6 @@ namespace substrate
 	template<typename T> struct is_duration : public std::false_type { };
 	template<typename R, typename P> struct is_duration<std::chrono::duration<R, P>> : public std::true_type { };
 
-	/* Shift nibble */
-	template<typename T> enable_if_t<std::is_integral<T>::value ,T>
-		constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept
-	{
-		return (((v | 0x00U) << ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2)) |
-			((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~((shift & ((sizeof(T) << 1) + ~0x00U)) << 2))));
-	}
-
 	/* typename decoding */
 	template<typename T> std::string decode_typename()
 	{
@@ -648,39 +640,6 @@ namespace substrate
 	template<typename T>
 	constexpr bool has_nullable_ctor_v = has_nullable_ctor<T>::value;
 #endif
-
-	/* endian swapping facilities */
-	inline constexpr uint16_t swap16(const uint16_t x) noexcept
-	{
-		return (
-			((x & 0x00FFU) << 8U) |
-			((x & 0xFF00U) >> 8U)
-		);
-	}
-
-	inline constexpr uint32_t swap32(const uint32_t x) noexcept
-	{
-		return (
-			((x & 0x000000FFU) << 24U) |
-			((x & 0x0000FF00U) << 8U ) |
-			((x & 0x00FF0000U) >> 8U ) |
-			((x & 0xFF000000U) >> 24U)
-		);
-	}
-
-	inline constexpr uint64_t swap64(const uint64_t x) noexcept
-	{
-		return (
-			((x & 0x00000000000000FFU) << 56U) |
-			((x & 0x000000000000FF00U) << 40U) |
-			((x & 0x0000000000FF0000U) << 24U) |
-			((x & 0x00000000FF000000U) << 8U ) |
-			((x & 0x000000FF00000000U) >> 8U ) |
-			((x & 0x0000FF0000000000U) >> 24U) |
-			((x & 0x00FF000000000000U) >> 40U) |
-			((x & 0xFF00000000000000U) >> 56U)
-		);
-	}
 
 	/* LEB128 encoding and decoding */
 	template<typename T> substrate::enable_if_t<std::is_integral<T>::value &&

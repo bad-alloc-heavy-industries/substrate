@@ -1,0 +1,73 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_BITS
+#define SUBSTRATE_BITS
+
+#include <cstdint>
+#include <limits>
+#include <type_traits>
+
+#include <substrate/internal/defs>
+
+namespace substrate
+{
+	/* endian swapping facilities */
+	SUBSTRATE_NO_DISCARD(inline constexpr uint16_t swap16(const uint16_t x) noexcept)
+	{
+		return (
+			((x & 0x00FFU) << 8U) |
+			((x & 0xFF00U) >> 8U)
+		);
+	}
+
+	SUBSTRATE_NO_DISCARD(inline constexpr uint32_t swap32(const uint32_t x) noexcept)
+	{
+		return (
+			((x & 0x000000FFU) << 24U) |
+			((x & 0x0000FF00U) << 8U ) |
+			((x & 0x00FF0000U) >> 8U ) |
+			((x & 0xFF000000U) >> 24U)
+		);
+	}
+
+	SUBSTRATE_NO_DISCARD(inline constexpr uint64_t swap64(const uint64_t x) noexcept)
+	{
+		return (
+			((x & 0x00000000000000FFU) << 56U) |
+			((x & 0x000000000000FF00U) << 40U) |
+			((x & 0x0000000000FF0000U) << 24U) |
+			((x & 0x00000000FF000000U) << 8U ) |
+			((x & 0x000000FF00000000U) >> 8U ) |
+			((x & 0x0000FF0000000000U) >> 24U) |
+			((x & 0x00FF000000000000U) >> 40U) |
+			((x & 0xFF00000000000000U) >> 56U)
+		);
+	}
+
+	/* TODO: Determin if we can drop this and abstract rotl/rotr to shift by the fixed nybble amount */
+	template<typename T> SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_integral<T>::value ,T>::type
+		constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept)
+	{
+		return (((v | 0x00U) << ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2)) |
+			((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~((shift & ((sizeof(T) << 1) + ~0x00U)) << 2))));
+	}
+
+	template<typename T>
+		SUBSTRATE_NO_DISCARD(inline typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+	rotl(T x, const std::size_t k) noexcept)
+	{
+		constexpr auto bits = std::numeric_limits<T>::digits;
+		return (x << k) | (x >> (bits - k));
+	}
+
+	template<typename T>
+		SUBSTRATE_NO_DISCARD(inline typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+	rotr(T x, const std::size_t k) noexcept)
+	{
+		constexpr auto bits = std::numeric_limits<T>::digits;
+		return (x >> k) | (x << (bits - k));
+	}
+
+}
+
+#endif /* SUBSTRATE_BITS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
