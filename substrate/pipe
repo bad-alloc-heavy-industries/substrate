@@ -3,6 +3,7 @@
 #define SUBSTRATE_PIPE
 
 #include <array>
+#include <utility>
 #include <substrate/internal/fd_compat>
 #ifdef _WINDOWS
 #include <io.h>
@@ -20,10 +21,17 @@ namespace substrate
 	public:
 		constexpr readPipe_t() noexcept = default;
 		constexpr readPipe_t(const int32_t fd_) noexcept : fd{fd_} { }
+		readPipe_t(readPipe_t &&other) noexcept : readPipe_t{} { swap(other); }
 		~readPipe_t() noexcept { if (fd != -1) close(fd); }
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
 		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
 		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
+
+		readPipe_t &operator =(readPipe_t &&other) noexcept
+		{
+			swap(other);
+			return *this;
+		}
 
 		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 			{ return internal::fdread(fd, bufferPtr, bufferLen); }
@@ -43,10 +51,11 @@ namespace substrate
 			return read(value, valueLen, resultLen);
 		}
 
+		void swap(readPipe_t &other) noexcept
+			{ std::swap(fd, other.fd); }
+
 		readPipe_t(const readPipe_t &) = delete;
-		readPipe_t(readPipe_t &&) = delete;
 		readPipe_t &operator =(const readPipe_t &) = delete;
-		readPipe_t &operator =(readPipe_t &&) = delete;
 	};
 
 	struct writePipe_t final
@@ -57,10 +66,17 @@ namespace substrate
 	public:
 		constexpr writePipe_t() noexcept = default;
 		constexpr writePipe_t(const int32_t fd_) noexcept : fd{fd_} { }
+		writePipe_t(writePipe_t &&other) noexcept : writePipe_t{} { swap(other); }
 		~writePipe_t() noexcept { if (fd != -1) close(fd); }
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
 		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
 		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
+
+		writePipe_t &operator =(writePipe_t &&other) noexcept
+		{
+			swap(other);
+			return *this;
+		}
 
 		SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
@@ -73,10 +89,11 @@ namespace substrate
 			return size_t(result) == valueLen;
 		}
 
+		void swap(writePipe_t &other) noexcept
+			{ std::swap(fd, other.fd); }
+
 		writePipe_t(const writePipe_t &) = delete;
-		writePipe_t(writePipe_t &&) = delete;
 		writePipe_t &operator =(const writePipe_t &) = delete;
-		writePipe_t &operator =(writePipe_t &&) = delete;
 	};
 
 	struct pipe_t final
@@ -99,7 +116,9 @@ namespace substrate
 					return {-1, -1};
 				return fds;
 			}()} { }
+		pipe_t(pipe_t &&) = default;
 		~pipe_t() noexcept = default;
+		pipe_t &operator =(pipe_t &&) = default;
 		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return readFD_.valid() && writeFD_.valid(); }
 
 		const readPipe_t &readFD() const noexcept { return readFD_; }
@@ -109,9 +128,7 @@ namespace substrate
 		operator const writePipe_t &() const noexcept { return writeFD_; }
 
 		pipe_t(const pipe_t &) = delete;
-		pipe_t(pipe_t &&) = delete;
 		pipe_t &operator =(const pipe_t &) = delete;
-		pipe_t &operator =(pipe_t &&) = delete;
 	};
 } // namespace substrate
 
