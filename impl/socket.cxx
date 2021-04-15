@@ -61,11 +61,19 @@ ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
 #endif
 
 ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept
-	{ return ::sendto(socket, static_cast<char *const>(bufferPtr), len, 0, reinterpret_cast<const sockaddr *>(&addr), sockaddrLen(addr)); }
+{
+	return ::sendto(socket, static_cast<char *>(bufferPtr), len, 0,
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+		reinterpret_cast<const sockaddr *>(&addr), sockaddrLen(addr)); // lgtm[cpp/reinterpret-cast]
+}
+
 ssize_t socket_t::readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept
 {
 	socklen_t size = sizeof(sockaddr_storage);
-	return ::recvfrom(socket, static_cast<char *const>(bufferPtr), len, 0, reinterpret_cast<sockaddr *>(&addr), &size); }
+	return ::recvfrom(socket, static_cast<char *>(bufferPtr), len, 0,
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+		reinterpret_cast<sockaddr *>(&addr), &size); // lgtm[cpp/reinterpret-cast]
+}
 
 char socket_t::peek() const noexcept
 {
@@ -135,8 +143,10 @@ inline uint16_t toBE(const uint16_t value) noexcept
 
 template<size_t offset> inline void *offsetPtr(void *ptr)
 {
-	const auto addr = reinterpret_cast<std::uintptr_t>(ptr); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm[cpp/reinterpret-cast]
-	return reinterpret_cast<void *>(addr + offset); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm[cpp/reinterpret-cast]
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+	const auto addr = reinterpret_cast<std::uintptr_t>(ptr); // lgtm[cpp/reinterpret-cast]
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+	return reinterpret_cast<void *>(addr + offset); // lgtm[cpp/reinterpret-cast]
 }
 
 template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest, const U value)
