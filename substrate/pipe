@@ -113,7 +113,7 @@ namespace substrate
 			{
 				std::array<int32_t, 2> fds{};
 				if (pipe(fds.data()))
-					return {-1, -1};
+					return {{-1, -1}};
 				return fds;
 			}()} { }
 		pipe_t(pipe_t &&) = default;
