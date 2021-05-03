@@ -2,26 +2,49 @@
 #ifndef SUBSTRATE_MMAP
 #define SUBSTRATE_MMAP
 
-#include <substrate/internal/defs>
-#ifdef _WINDOWS
-#	error "mmap is a *nix only header"
-#endif
-
 #include <cstdint>
-#include <unistd.h>
-#include <sys/mman.h>
+#include <substrate/internal/defs>
+#ifndef _WINDOWS
+#	include <unistd.h>
+#	include <sys/mman.h>
+#else
+#	include <io.h>
+#	define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
+#	undef WIN32_LEAN_AND_MEAN
+#	undef min
+#	undef max
+#endif
 #include <stdexcept>
-
+#include <cstring>
+#include <cassert>
+#include <string>
+#if __cplusplus >= 201703L
+#include <string_view>
+#endif
 #include <substrate/utility>
 
 namespace substrate
 {
+#ifdef _WINDOWS
+	const DWORD PROT_READ{PAGE_READONLY};
+	const DWORD PROT_WRITE{PAGE_READWRITE};
+	const int32_t MAP_PRIVATE{0};
+
+	const auto MADV_SEQUENTIAL{0};
+	const auto MADV_WILLNEED{0};
+	const auto MADV_DONTDUMP{0};
+#endif
+
 	struct mmap_t final
 	{
 	private:
-		int32_t _fd;
-		off_t _len;
-		void *_addr;
+		int32_t _fd{-1};
+		off_t _len{0};
+#ifdef _WINDOWS
+		HANDLE _mapping{INVALID_HANDLE_VALUE};
+#endif
+		void *_addr{nullptr};
 
 		mmap_t(const mmap_t &map, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _fd{-1}, _len{len}, _addr{[&]() noexcept -> void *
@@ -70,8 +93,29 @@ namespace substrate
 			throw std::out_of_range("mmap_t index out of range");
 		}
 
+#ifdef _WINDOWS
+		SUBSTRATE_CXX14_CONSTEXPR static DWORD cleanProt(const DWORD prot) noexcept
+		{
+			if (prot & PAGE_READWRITE)
+				return prot & ~PAGE_READONLY;
+			return prot;
+		}
+
+		SUBSTRATE_CXX14_CONSTEXPR static DWORD protToAccess(const DWORD prot) noexcept
+		{
+			if (prot & PAGE_READWRITE)
+				return FILE_MAP_WRITE;
+			else if (prot & PAGE_READONLY)
+				return FILE_MAP_READ;
+			else if (prot & PAGE_WRITECOPY)
+				return FILE_MAP_WRITE;
+			return {};
+		}
+#endif
+
 	public:
-		constexpr mmap_t() noexcept : _fd{-1}, _len{0}, _addr{nullptr} { }
+		constexpr mmap_t() noexcept = default;
+#ifndef _WINDOWS
 		mmap_t(const int32_t fd, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _fd{fd}, _len{len}, _addr{[&]() noexcept -> void *
 			{
@@ -89,12 +133,67 @@ namespace substrate
 				::close(_fd);
 		}
 
-		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return _addr; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _addr; }
+#else
+		mmap_t(const fd_t &fd, const off_t len, const DWORD prot, const int32_t = 0,
+			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
+			{
+				const auto file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+				static_assert(sizeof(DWORD) == 4);
+				return CreateFileMappingA(file, nullptr, cleanProt(prot), DWORD(len >> 32U),
+					DWORD(len), nullptr);
+			}()}, _addr{[&]() noexcept -> void *
+			{
+				if (!_mapping)
+					return nullptr;
+				return MapViewOfFile(_mapping, protToAccess(prot), 0, 0, 0);
+			}()} { }
+
+		mmap_t(const fd_t &fd, const off_t offset, const off_t length, const DWORD prot,
+			const int32_t = 0, void * = nullptr) noexcept : _len{length},
+			_mapping{[&]() noexcept -> HANDLE
+			{
+				const auto file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
+				static_assert(sizeof(DWORD) == 4);
+#if 0
+				return CreateFileMappingA(file, nullptr, cleanProt(prot), DWORD(length >> 32U),
+					DWORD(length), nullptr);
+#else
+				return CreateFileMappingA(file, nullptr, cleanProt(prot), 0, 0, nullptr);
+#endif
+			}()}, _addr{[&]() noexcept -> void *
+			{
+				if (!_mapping)
+					return nullptr;
+#if 0
+				return MapViewOfFile(_mapping, protToAccess(prot), DWORD(offset >> 32U), DWORD(offset), 0);
+#else
+				if (DWORD(length >> 32U))
+					return nullptr;
+				return MapViewOfFile(_mapping, protToAccess(prot), DWORD(offset >> 32U), DWORD(offset), SIZE_T(length));
+#endif
+			}()} { }
+
+		~mmap_t() noexcept
+		{
+			if (_addr)
+				UnmapViewOfFile(_addr);
+			if (_mapping)
+				CloseHandle(_mapping);
+		}
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _mapping && _addr; }
+#endif
+		mmap_t(const mmap_t &) = delete;
+		mmap_t &operator =(const mmap_t &) = delete;
 
 		void swap(mmap_t &map) noexcept
 		{
 			std::swap(_fd, map._fd);
 			std::swap(_addr, map._addr);
+#ifdef _WINDOWS
+			std::swap(_mapping, map._mapping);
+#endif
 			std::swap(_len, map._len);
 		}
 
@@ -145,18 +244,6 @@ namespace substrate
 			return ::munlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 
-
-		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice) const noexcept) { return advise(advice, _len); }
-		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice, const size_t length) const noexcept) { return ::madvise(_addr, length, advice) == 0; }
-		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t advice, const size_t length, const off_t idx) const noexcept)
-		{
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			return ::madvise(reinterpret_cast<void *>(addr + idx), length, advice) == 0; // lgtm[cpp/reinterpret-cast]
-		}
-
-
 		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const size_t new_length) noexcept)
 		{
 			const size_t old_len = _len;
@@ -176,24 +263,96 @@ namespace substrate
 			return (_addr = ::mremap(_addr, old_len, _len, flags, wanted_addr)) != MAP_FAILED;
 		}
 
+#ifndef _WINDOWS
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return sync(_len, flags); }
 
 		SUBSTRATE_NO_DISCARD(bool sync(const size_t length, const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return msync(_addr, length, flags) == 0; }
 
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice) const noexcept)
+			{ return advise(advice, _len); }
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice, const size_t length) const noexcept)
+			{ return ::madvise(_addr, length, advice) == 0; }
+		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t advice, const size_t length, const off_t idx) const noexcept)
+		{
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			return ::madvise(reinterpret_cast<void *>(addr + idx), length, advice) == 0; // lgtm[cpp/reinterpret-cast]
+		}
+#else
+		[[nodiscard]] bool sync() const noexcept { return sync(_len); }
+		[[nodiscard]] bool sync(const size_t length) const noexcept
+			{ return FlushViewOfFile(_addr, length); }
+
+		[[nodiscard]] bool advise(const int32_t) const noexcept { return true; }
+		[[nodiscard]] bool advise(const int32_t, const size_t) const noexcept { return true; }
+		[[nodiscard]] bool advise_at(const int32_t, const size_t, const off_t) const noexcept
+			{ return true; }
+#endif
 
 		template<typename T> void copyTo(const off_t idx, T &value) const
 		{
 			const auto src = index<const void *>(idx);
-			memcpy(&value, src, sizeof(T));
+			assert(sizeof(T) <= _len - idx);
+			std::memcpy(&value, src, sizeof(T));
 		}
+
+		template<typename T, std::size_t N> void copyTo(const off_t idx, std::array<T, N> &value) const
+		{
+			constexpr auto length{sizeof(T) * N};
+			const auto src = index<const void *>(idx);
+			assert(length <= _len - idx);
+			std::memcpy(value.data(), src, length);
+		}
+
+		void copyTo(const off_t idx, std::string &value) const
+		{
+			const auto src = index<const void *>(idx);
+			assert(value.size() <= _len - idx);
+			std::memcpy(const_cast<char *>(value.data()), src, value.size());
+		}
+
+#if __cplusplus >= 201703L
+		void copyTo(const off_t idx, std::string_view &value) const
+		{
+			const auto src = index<const void *>(idx);
+			assert(value.size() <= _len - idx);
+			std::memcpy(value.data(), src, value.size());
+		}
+#endif
 
 		template<typename T> void copyFrom(const off_t idx, const T &value) const
 		{
 			const auto dest = index<void *>(idx);
-			memcpy(dest, &value, sizeof(T));
+			assert(sizeof(T) <= _len - idx);
+			std::memcpy(dest, &value, sizeof(T));
 		}
+
+		template<typename T, std::size_t N> void copyFrom(const off_t idx, const std::array<T, N> &value) const
+		{
+			constexpr auto length{sizeof(T) * N};
+			const auto dest = index<void *>(idx);
+			assert(length <= _len - idx);
+			std::memcpy(dest, value.data(), length);
+		}
+
+		void copyFrom(const off_t idx, const std::string &value) const
+		{
+			const auto dest = index<void *>(idx);
+			assert(value.size() <= _len - idx);
+			std::memcpy(dest, value.data(), value.size());
+		}
+
+#if __cplusplus >= 201703L
+		void copyFrom(const off_t idx, const std::string_view &value) const
+		{
+			const auto dest = index<void *>(idx);
+			assert(value.size() <= _len - idx);
+			std::memcpy(dest, value.data(), value.size());
+		}
+#endif
 
 		bool operator ==(const mmap_t &b) const noexcept
 			{ return _fd == b._fd && _addr == b._addr && _len == b._len; }
