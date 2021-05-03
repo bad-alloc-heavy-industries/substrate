@@ -19,8 +19,9 @@ namespace substrate
 	using substrate::rotl;
 	/* splitmix used to generate seed for the xoshiro/xoroshiro prngs */
 	template<typename T, T a, T b, T c, typename = typename std::enable_if<std::is_integral<T>::value &&
-			std::is_unsigned<T>::value>::type>
-	struct splitmix_t final {
+		std::is_unsigned<T>::value>::type>
+	struct splitmix_t final
+	{
 	private:
 		T _seed{};
 
@@ -38,9 +39,8 @@ namespace substrate
 	public:
 		explicit splitmix_t(const T seed) noexcept : _seed{seed} {}
 
-		SUBSTRATE_NO_DISCARD(T operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(T operator()() noexcept)
+			{ return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -65,8 +65,8 @@ namespace substrate
 	}
 
 	/* xoroshiro64* and xoroshiro64** 32-bit PRNGs */
-	template<typename T>
-	struct xoroshiro64_t final {
+	template<typename T> struct xoroshiro64_t final
+	{
 	private:
 		std::array<std::uint32_t, 2> _seed{};
 
@@ -105,7 +105,7 @@ namespace substrate
 		}
 
 	public:
-		explicit xoroshiro64_t(std::array<uint32_t, 2> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro64_t(std::array<uint32_t, 2> seed) noexcept : _seed{seed} { }
 		explicit xoroshiro64_t() noexcept
 		{
 			std::random_device rd;
@@ -114,9 +114,8 @@ namespace substrate
 			_seed = { srng(), srng() };
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept)
+			{ return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -131,8 +130,8 @@ namespace substrate
 	using xoroshiro64ss_t = xoroshiro64_t<prng_type::starstar_t>;
 
 	/* xoshiro128+, xoshiro128++, and xoshiro128** 32-bit PRNGs */
-	template<typename T>
-	struct xoshiro128_t final {
+	template<typename T> struct xoshiro128_t final
+	{
 	private:
 		std::array<std::uint32_t, 4> _seed;
 
@@ -194,7 +193,7 @@ namespace substrate
 		}
 
 	public:
-		explicit xoshiro128_t(std::array<std::uint32_t, 4> seed) noexcept : _seed{seed} {}
+		explicit xoshiro128_t(std::array<std::uint32_t, 4> seed) noexcept : _seed{seed} { }
 		explicit xoshiro128_t() noexcept
 		{
 			std::random_device rd;
@@ -206,9 +205,8 @@ namespace substrate
 			};
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept)
+			{ return _next(); }
 
 		SUBSTRATE_NO_DISCARD(operator uint32_t() noexcept) {
 			return _next();
@@ -228,8 +226,8 @@ namespace substrate
 	using xoshiro128ss_t = xoshiro128_t<prng_type::starstar_t>;
 
 	/* xoroshiro128+, xoroshiro128++, and xoroshiro128** 64-bit PRNGs */
-	template<typename T>
-	struct xoroshiro128_t final {
+	template<typename T> struct xoroshiro128_t final
+	{
 	private:
 		std::array<std::uint64_t, 2> _seed;
 
@@ -282,7 +280,7 @@ namespace substrate
 		}
 
 	public:
-		explicit xoroshiro128_t(std::array<std::uint64_t, 2> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro128_t(std::array<std::uint64_t, 2> seed) noexcept : _seed{seed} { }
 		explicit xoroshiro128_t() noexcept
 		{
 			std::random_device rd;
@@ -291,9 +289,8 @@ namespace substrate
 			_seed = { srng(), srng() };
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
+			{ return _next(); }
 
 		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
 			return _next();
@@ -313,10 +310,10 @@ namespace substrate
 	using xoroshiro128ss_t = xoroshiro128_t<prng_type::starstar_t>;
 
 	/* xoshiro256+, xoshiro256++, and xoshiro256** 64-bit PRNGs */
-	template<typename T>
-	struct xoshiro256_t final {
+	template<typename T> struct xoshiro256_t final
+	{
 	private:
-		std::array<std::uint64_t, 4> _seed;
+		std::array<std::uint64_t, 4> _seed{};
 
 		/* xoshiro256+ generator */
 		template<typename V = T>
@@ -377,8 +374,9 @@ namespace substrate
 
 			return res;
 		}
+
 	public:
-		explicit xoshiro256_t(std::array<std::uint64_t, 4> seed) noexcept : _seed{seed} {}
+		explicit xoshiro256_t(std::array<std::uint64_t, 4> seed) noexcept : _seed{seed} { }
 		explicit xoshiro256_t() noexcept
 		{
 			std::random_device rd;
@@ -390,9 +388,8 @@ namespace substrate
 			};
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
+			{ return _next(); }
 
 		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
 			return _next();
@@ -412,10 +409,10 @@ namespace substrate
 	using xoshiro256ss_t = xoshiro256_t<prng_type::starstar_t>;
 
 	/* xoshiro512+, xoshiro512++, and xoshiro512** 64-bit PRNGs */
-	template<typename T>
-	struct xoshiro512_t final {
+	template<typename T> struct xoshiro512_t final
+	{
 	private:
-		std::array<std::uint64_t, 8> _seed;
+		std::array<std::uint64_t, 8> _seed{};
 
 		/* xoshiro512+ generator */
 		template<typename V = T>
@@ -486,7 +483,7 @@ namespace substrate
 			return res;
 		}
 	public:
-		explicit xoshiro512_t(std::array<std::uint64_t, 8> seed) noexcept : _seed{seed} {}
+		explicit xoshiro512_t(std::array<std::uint64_t, 8> seed) noexcept : _seed{seed} { }
 		explicit xoshiro512_t() noexcept
 		{
 			std::random_device rd;
@@ -498,9 +495,8 @@ namespace substrate
 			};
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
+			{ return _next(); }
 
 		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
 			return _next();
@@ -516,10 +512,10 @@ namespace substrate
 	};
 
 	/* xoroshiro1024*, xoroshiro1024**, and xoroshiro1024++ 64-bit PRNGs */
-	template<typename T>
-	struct xoroshiro1024_t final {
+	template<typename T> struct xoroshiro1024_t final
+	{
 	private:
-		std::array<std::uint64_t, 16> _seed;
+		std::array<std::uint64_t, 16> _seed{};
 		std::int64_t _p{};
 
 		/* xoroshiro1024_t* generator */
@@ -574,7 +570,7 @@ namespace substrate
 		}
 
 	public:
-		explicit xoroshiro1024_t(std::array<std::uint64_t, 16> seed) noexcept : _seed{seed} {}
+		explicit xoroshiro1024_t(std::array<std::uint64_t, 16> seed) noexcept : _seed{seed} { }
 		explicit xoroshiro1024_t() noexcept
 		{
 			std::random_device rd;
@@ -588,9 +584,8 @@ namespace substrate
 			};
 		}
 
-		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept) {
-			return _next();
-		}
+		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
+			{ return _next(); }
 
 		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
 			return _next();
