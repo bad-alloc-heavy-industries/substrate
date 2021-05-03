@@ -45,9 +45,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -120,9 +118,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -215,9 +211,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -299,9 +293,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -398,9 +390,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -505,9 +495,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
@@ -594,9 +582,7 @@ namespace substrate
 		void discard(std::size_t z) noexcept
 		{
 			for(; z > 0; --z)
-			{
-				SUBSTRATE_NOWARN_UNUSED(const auto v = _next());
-			}
+				SUBSTRATE_NOWARN_UNUSED(const auto v) = _next();
 		}
 	};
 
