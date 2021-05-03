@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INDEXED_ITERATOR
+#define SUBSTRATE_INDEXED_ITERATOR
+
+#include <cstddef>
+#include <utility>
+#include <substrate/internal/defs>
+
+namespace substrate
+{
+	template<typename T> struct indexedItem_t final
+	{
+	private:
+		std::pair<std::size_t, T> item_;
+
+	public:
+		constexpr indexedItem_t(const std::size_t index, const T item) noexcept : item_{index, item} { }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t index() const noexcept) { return item_.first; }
+		SUBSTRATE_NO_DISCARD(constexpr T item() const noexcept) { return item_.second; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX17_CONSTEXPR decltype(item_) &operator *() noexcept) { return item_; }
+		SUBSTRATE_NO_DISCARD(constexpr const decltype(item_) &operator *() const noexcept) { return item_; }
+
+		SUBSTRATE_CXX14_CONSTEXPR indexedItem_t &operator ++() noexcept
+		{
+			++item_.first;
+			++item_.second;
+			return *this;
+		}
+	};
+
+#if __cplusplus >= 201703L
+	template<typename T> indexedItem_t(std::size_t, T) -> indexedItem_t<T>;
+#endif
+
+	template<typename T> SUBSTRATE_NO_DISCARD(constexpr inline bool operator ==
+			(const indexedItem_t<T> &a, const indexedItem_t<T> &b) noexcept)
+		{ return a.index() == b.index(); }
+
+	template<typename T> SUBSTRATE_NO_DISCARD(constexpr inline bool operator !=
+			(const indexedItem_t<T> &a, const indexedItem_t<T> &b) noexcept)
+		{ return a.index() != b.index(); }
+
+	template<typename T> struct indexedIterator_t final
+	{
+	private:
+		T &container_;
+		using const_iterator = typename T::const_iterator;
+
+	public:
+		constexpr indexedIterator_t(T &container) noexcept : container_{container} { }
+
+		SUBSTRATE_NO_DISCARD(constexpr indexedItem_t<const_iterator> begin() const noexcept)
+			{ return {0, std::begin(container_)}; }
+#if __cplusplus >= 201703L
+		[[nodiscard]] constexpr indexedItem_t<value_type> end() const noexcept
+			{ return {std::size(container_), std::end(container_)}; }
+#else
+		SUBSTRATE_NO_DISCARD(constexpr indexedItem_t<const_iterator> end() const noexcept)
+			{ return {container_.size(), std::end(container_)}; }
+#endif
+	};
+
+#if __cplusplus >= 201703L
+	template<typename T> indexedIterator_t(T) -> indexedIterator_t<T>;
+#endif
+} // namespace substrate
+
+#endif /* SUBSTRATE_INDEXED_ITERATOR */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
