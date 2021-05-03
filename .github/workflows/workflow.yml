@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         compiler:
@@ -68,7 +68,7 @@ jobs:
           wget https://apt.llvm.org/llvm-snapshot.gpg.key
           sudo apt-key add llvm-snapshot.gpg.key
           rm llvm-snapshot.gpg.key
-          sudo apt-add-repository "deb https://apt.llvm.org/bionic/ llvm-toolchain-bionic${CC/#clang/} main"
+          sudo apt-add-repository "deb https://apt.llvm.org/focal/ llvm-toolchain-focal${CC/#clang/} main"
           sudo apt-get update
           CXX=${CC/#clang/clang++}
           sudo apt-get install $CC $CXX
@@ -86,7 +86,7 @@ jobs:
       - name: Setup Meson + Ninja
         shell: bash
         run: |
-          wget https://github.com/ninja-build/ninja/releases/download/v1.9.0/ninja-linux.zip
+          wget https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-linux.zip
           sudo pip3 install --upgrade pip setuptools wheel
           pip3 install --user meson
           unzip ninja-linux.zip -d ~/.local/bin
