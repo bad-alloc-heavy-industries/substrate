@@ -327,7 +327,7 @@ namespace substrate
 		{
 			const auto src = index<const void *>(idx);
 			assert(value.size() <= _len - idx);
-			std::memcpy(value.data(), src, value.size());
+			std::memcpy(const_cast<char *>(value.data()), src, value.size());
 		}
 #endif
 
