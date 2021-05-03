@@ -28,8 +28,7 @@ namespace substrate
 		using ::fstat;
 	}
 
-	template<size_t size>
-	struct memfd_t final
+	template<size_t size> struct memfd_t final
 	{
 	private:
 		int32_t fd;
@@ -355,7 +354,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept)
 			{ return map(prot, length(), flags); }
 
-		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const off_t len, const int flags, void* map_addr = nullptr) noexcept)
+		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const std::size_t len, const int flags, void* map_addr = nullptr) noexcept)
 		{
 			if (!valid())
 				return {};
