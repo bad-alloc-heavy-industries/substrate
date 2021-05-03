@@ -9,6 +9,11 @@
 #include <substrate/utility>
 #include <substrate/internal/defs>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+
 namespace substrate
 {
 	template<typename int_t, typename valueType_t, size_t _length = static_cast<std::size_t>(-1), char padding = '0'>
@@ -22,18 +27,21 @@ namespace substrate
 		const valueType_t &_value;
 
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t calcDigits(const uint_t number) const noexcept)
-			{ return 1 + (number < 10 ? 0 : calcDigits(number / 10)); }
+			{ return uint8_t(1U + (number < 10 ? 0U : calcDigits(number / 10U))); }
 
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits(const int_t number) const noexcept)
-			{ return std::is_signed<int_t>::value && number < 0 ? 1 + calcDigits(-number) : calcDigits(number); }
+		{
+			return std::is_signed<int_t>::value && number < 0 ?
+				uint8_t(1U + calcDigits(uint_t(-number))) : calcDigits(uint_t(number));
+		}
 
 		SUBSTRATE_NO_DISCARD(constexpr size_t power10(const size_t power) const noexcept)
-			{ return power ? power10(power - 1) * 10 : 1; }
+			{ return power ? power10(power - 1U) * 10U : 1U; }
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t zeros(const int_t number) const noexcept)
 		{
 			const int_t num{number / 10};
-			return (num * 10 == number ? 1 + zeros(num) : 0);
+			return uint8_t(num * 10 == number ? 1U + zeros(num) : 0U);
 		}
 
 		template<typename R, typename P> SUBSTRATE_CXX14_CONSTEXPR uint8_t
@@ -41,7 +49,7 @@ namespace substrate
 				{ return zeros(number.count()); }
 
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t hexDigits(const uint_t number) const noexcept)
-			{ return 1 + (number < 16 ? 0 : hexDigits(number >> 4)); }
+			{ return uint8_t(1U + (number < 16 ? 0U : hexDigits(number >> 4U))); }
 
 		template<typename value_t> constexpr enable_if_t<!is_duration<value_t>::value, int_t>
 			valueAsInt(const value_t &number) const noexcept { return number; }
@@ -56,21 +64,21 @@ namespace substrate
 			if (number < 10)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				buffer[digits - index] = number + '0';
+				buffer[digits - index] = static_cast<char>(number + '0');
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[digits + 1] = 0;
 			}
 			else
 			{
-				const uint_t num = number - (process(number / 10, buffer, digits, index + 1) * 10);
+				const uint_t num = uint_t(number - (process(number / 10U, buffer, digits, index + 1U) * 10U));
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				buffer[digits - index] = num + '0';
+				buffer[digits - index] = static_cast<char>(num + '0');
 			}
 			return number;
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void process(const uint_t number, char *const buffer) const noexcept
-			{ process(number, buffer, digits() - 1, 0); }
+			{ process(number, buffer, uint8_t(digits() - 1U), 0); }
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length == npos>
 			format(char *const buffer) const noexcept { process(valueAsInt(_value), buffer); }
@@ -96,7 +104,7 @@ namespace substrate
 			{
 				const auto offset{_length - length};
 				const auto _buffer{std::fill_n(buffer, offset, padding)};
-				process(value, _buffer, length - 1, 0);
+				process(value, _buffer, uint8_t(length - 1U), 0U);
 			}
 			else
 				std::fill_n(buffer, _length, padding);
@@ -119,7 +127,7 @@ namespace substrate
 					const auto offset{_length - length};
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					const auto _buffer{std::fill_n(buffer + 1, offset, padding)};
-					process(uint_t(-value), _buffer, length - 2, 0);
+					process(uint_t(-value), _buffer, uint8_t(length - 2U), 0U);
 				}
 				else
 					std::fill_n(buffer, _length, padding);
@@ -140,9 +148,9 @@ namespace substrate
 				value >>= 4U;
 				if (hex > 9U)
 				{
-					hex += 0x07U;
+					hex += uint8_t(0x07U);
 					if (!upperCase)
-						hex += 0x20U;
+						hex += uint8_t(0x20U);
 				}
 				*digit++ = char(hex + 0x30U);
 				if (!value)
@@ -156,16 +164,18 @@ namespace substrate
 			const auto value{valueAsInt(_value)};
 			const auto digits_{digits(value)};
 			if (digits_ > maxDigits)
-				process(value - ((value / power10(maxDigits)) * power10(maxDigits)), buffer, maxDigits - 1, 0);
+				process(value - ((value / power10(maxDigits)) * power10(maxDigits)), buffer,
+					uint8_t(maxDigits - 1U), 0U);
 			else
 			{
 				const uint8_t trailingZeros_ = trailingZeros();
-				const uint8_t leadingZeros = maxDigits - digits_;
+				const uint8_t leadingZeros = uint8_t(maxDigits - digits_);
 				for (uint8_t i{0}; i < leadingZeros; ++i)
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				process(value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
+				process(value / power10(trailingZeros_), buffer + leadingZeros,
+					uint8_t(digits_ - trailingZeros_ - 1), 0U);
 			}
 		}
 
@@ -212,9 +222,9 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
 		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(valueAsInt(_value)); }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
-			{ return _length == npos ? digits() + 1 : _length + 1; }
+			{ return _length == npos ? digits() + 1U : _length + 1U; }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t hexLength() const noexcept)
-			{ return _length == npos ? hexDigits(valueAsInt(_value)) + 1 : _length + 1; }
+			{ return _length == npos ? hexDigits(valueAsInt(_value)) + 1U : _length + 1U; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
@@ -233,13 +243,13 @@ namespace substrate
 			const uint8_t digits_ = digits();
 			if (digits_ > maxDigits)
 				return maxDigits;
-			return (maxDigits - digits_) + (digits_ - trailingZeros());
+			return uint8_t((maxDigits - digits_) + (digits_ - trailingZeros()));
 		}
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t trailingZeros() const noexcept)
-			{ return valueAsInt(_value) ? zeros(_value) : 0; }
+			{ return valueAsInt(_value) ? zeros(_value) : 0U; }
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionLength(const uint8_t maxDigits) const noexcept)
-			{ return fractionDigits(maxDigits) + 1; }
+			{ return uint8_t(fractionDigits(maxDigits) + 1U); }
 		void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept
 			{ formatFraction(maxDigits, buffer); }
 	};
@@ -313,11 +323,11 @@ namespace substrate
 			for (size_t i{}; i < _length; ++i)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				if (_isSigned && i == 0 && _value[i] == '-')
+				if (_isSigned && i == 0U && _value[i] == '-')
 					continue;
-				result *= 10;
+				result *= 10U;
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				result += _value[i] - '0';
+				result += uint_t(_value[i] - '0');
 			}
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			if (_isSigned && _length > 0 && _value[0] == '-')
@@ -333,14 +343,14 @@ namespace substrate
 			for (size_t i{}; i < _length; ++i)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				uint8_t hex = _value[i];
+				uint8_t hex = uint8_t(_value[i]);
 				if (hex >= 'a' && hex <= 'f')
-					hex -= 0x20;
-				value <<= 4;
-				hex -= 0x30;
-				if (hex > 9)
-					hex -= 0x07;
-				value += hex;
+					hex -= uint8_t(0x20U);
+				value <<= 4U;
+				hex -= uint8_t(0x30U);
+				if (hex > 9U)
+					hex -= uint8_t(0x07U);
+				value += int_t(hex);
 			}
 			return value;
 		}
@@ -352,13 +362,17 @@ namespace substrate
 			int_t result{};
 			for (size_t i{}; i < _length; ++i)
 			{
-				result <<= 3;
+				result <<= 3U;
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				result += _value[i] - 0x30;
+				result += int_t(_value[i] - 0x30);
 			}
 			return result;
 		}
 	};
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #endif /*SUBSTRATE_CONVERSIONS*/
