@@ -2,6 +2,8 @@
 #ifndef SUBSTRATE_UNITS
 #define SUBSTRATE_UNITS
 
+#include <cstdint>
+
 namespace substrate
 {
 	/* IEC Units*/
