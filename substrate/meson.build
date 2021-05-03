@@ -14,7 +14,11 @@ headers = [
 	'pipe',
 	'mmap',
 	'span',
-	'conversions'
+	'conversions',
+	'bits',
+	'hash',
+	'prng',
+	'index_sequence'
 ]
 
 advanced_headers = [

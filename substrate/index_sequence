@@ -1,0 +1,51 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INDEX_SEQUENCE
+#define SUBSTRATE_INDEX_SEQUENCE
+
+#include <cstdint>
+#include <substrate/internal/defs>
+
+namespace substrate
+{
+	struct indexIterator_t final
+	{
+	private:
+		std::size_t index;
+
+	public:
+		constexpr indexIterator_t(const std::size_t value) noexcept : index{value} { }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t operator *() const noexcept) { return index; }
+
+		SUBSTRATE_CXX14_CONSTEXPR indexIterator_t &operator ++() noexcept
+		{
+			++index;
+			return *this;
+		}
+	};
+
+	SUBSTRATE_NO_DISCARD(constexpr inline bool operator ==
+			(const indexIterator_t &a, const indexIterator_t &b) noexcept)
+		{ return *a == *b; }
+
+	SUBSTRATE_NO_DISCARD(constexpr inline bool operator !=
+			(const indexIterator_t &a, const indexIterator_t &b) noexcept)
+		{ return *a != *b; }
+
+	struct indexSequence_t final
+	{
+	private:
+		std::size_t begin_;
+		std::size_t end_;
+
+	public:
+		constexpr indexSequence_t(const std::size_t end) noexcept : begin_{0}, end_{end} { }
+		constexpr indexSequence_t(const std::size_t begin, const std::size_t end) noexcept :
+			begin_{begin}, end_{end} { }
+
+		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t begin() const noexcept) { return {begin_}; }
+		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t end() const noexcept) { return {end_}; }
+	};
+} // namespace substrate
+
+#endif /* SUBSTRATE_INDEX_SEQUENCE */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
