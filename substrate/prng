@@ -199,9 +199,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::uint32_t operator()() noexcept)
 			{ return _next(); }
 
-		SUBSTRATE_NO_DISCARD(operator uint32_t() noexcept) {
-			return _next();
-		}
+		operator uint32_t() noexcept { return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -278,9 +276,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
 			{ return _next(); }
 
-		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
-			return _next();
-		}
+		operator uint64_t() noexcept { return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -372,9 +368,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
 			{ return _next(); }
 
-		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
-			return _next();
-		}
+		operator uint64_t() noexcept { return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -474,9 +468,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
 			{ return _next(); }
 
-		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
-			return _next();
-		}
+		operator uint64_t() noexcept { return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
@@ -558,9 +550,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(std::uint64_t operator()() noexcept)
 			{ return _next(); }
 
-		SUBSTRATE_NO_DISCARD(operator uint64_t() noexcept) {
-			return _next();
-		}
+		operator uint64_t() noexcept { return _next(); }
 
 		void discard(std::size_t z) noexcept
 		{
