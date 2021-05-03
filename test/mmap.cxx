@@ -13,7 +13,7 @@ using substrate::fd_t;
 TEST_CASE("Anonymous map test", "[mmap_t]")
 {
 	memfd_t<4096> mapfd{"mapfd", O_RDWR};
-	mmap_t map{mapfd, static_cast<off_t>(mapfd.length()), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS};
+	mmap_t map{mapfd, mapfd.length(), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS};
 	REQUIRE(map.valid());
 }
 
@@ -63,10 +63,10 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 		REQUIRE(!file.valid());
 		REQUIRE(mp.length() == sizeof(foo) * 4);
 
-		auto _a = mp.at<foo>(0);
-		auto _b = mp.at<foo>(1);
-		auto _c = mp.at<foo>(2);
-		auto _d = mp.at<foo>(3);
+		SUBSTRATE_NOWARN_UNUSED(auto _a) = mp.at<foo>(0);
+		SUBSTRATE_NOWARN_UNUSED(auto _b) = mp.at<foo>(1);
+		SUBSTRATE_NOWARN_UNUSED(auto _c) = mp.at<foo>(2);
+		SUBSTRATE_NOWARN_UNUSED(auto _d) = mp.at<foo>(3);
 
 		std::memcpy(_a, &a, sizeof(foo));
 		std::memcpy(_b, &b, sizeof(foo));
@@ -92,10 +92,10 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 		REQUIRE(!file.valid());
 		REQUIRE(mp.length() == sizeof(foo) * 4);
 
-		auto _a = mp.at<foo>(0);
-		auto _b = mp.at<foo>(1);
-		auto _c = mp.at<foo>(2);
-		auto _d = mp.at<foo>(3);
+		SUBSTRATE_NOWARN_UNUSED(auto _a) = mp.at<foo>(0);
+		SUBSTRATE_NOWARN_UNUSED(auto _b) = mp.at<foo>(1);
+		SUBSTRATE_NOWARN_UNUSED(auto _c) = mp.at<foo>(2);
+		SUBSTRATE_NOWARN_UNUSED(auto _d) = mp.at<foo>(3);
 
 		// REQUIRE(std::memcmp(_a, &a, sizeof(foo)) == 0);
 		// REQUIRE(std::memcmp(_b, &b, sizeof(foo)) == 0);
