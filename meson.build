@@ -46,7 +46,7 @@ extended_warnings = [
 	'-Wsign-conversion',
 	'-Wfloat-conversion',
 	'-Wpacked',
-	'-Wpadded',
+#	'-Wpadded',
 	'-Wredundant-decls',
 	'-Winline',
 	'-Wvla',
