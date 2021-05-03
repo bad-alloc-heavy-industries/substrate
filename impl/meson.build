@@ -17,5 +17,4 @@ libSubstrate = library(
 	implicit_include_directories: false,
 	pic: true,
 	install: (not meson.is_subproject()),
-	native: true,
 )
