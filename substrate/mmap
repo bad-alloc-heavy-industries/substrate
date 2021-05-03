@@ -39,19 +39,19 @@ namespace substrate
 	struct mmap_t final
 	{
 	private:
-		int32_t _fd{-1};
 		std::size_t _len{0};
 #ifdef _WINDOWS
 		HANDLE _mapping{INVALID_HANDLE_VALUE};
 #endif
 		void *_addr{nullptr};
+		int32_t _fd{-1};
 
 		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
-			void *addr = nullptr) noexcept : _fd{-1}, _len{len}, _addr{[&]() noexcept -> void *
+			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
 				const auto ptr = ::mmap(addr, len, prot, flags, map._fd, 0);
 				return ptr == MAP_FAILED ? nullptr : ptr;
-			}()} { }
+			}()}, _fd{-1} { }
 
 		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
 			index(const std::size_t idx) const
@@ -117,11 +117,11 @@ namespace substrate
 		constexpr mmap_t() noexcept = default;
 #ifndef _WINDOWS
 		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
-			void *addr = nullptr) noexcept : _fd{fd}, _len{len}, _addr{[&]() noexcept -> void *
+			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
 				const auto ptr = ::mmap(addr, len, prot, flags, fd, 0);
 				return ptr == MAP_FAILED ? nullptr : ptr;
-			}()} { }
+			}()}, _fd{fd} { }
 		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
 		void operator =(mmap_t &&map) noexcept { swap(map); }
 
