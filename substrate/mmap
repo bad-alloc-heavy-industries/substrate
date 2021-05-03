@@ -40,13 +40,13 @@ namespace substrate
 	{
 	private:
 		int32_t _fd{-1};
-		off_t _len{0};
+		std::size_t _len{0};
 #ifdef _WINDOWS
 		HANDLE _mapping{INVALID_HANDLE_VALUE};
 #endif
 		void *_addr{nullptr};
 
-		mmap_t(const mmap_t &map, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
+		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _fd{-1}, _len{len}, _addr{[&]() noexcept -> void *
 			{
 				const auto ptr = ::mmap(addr, len, prot, flags, map._fd, 0);
@@ -54,7 +54,7 @@ namespace substrate
 			}()} { }
 
 		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
-			index(const off_t idx) const
+			index(const std::size_t idx) const
 		{
 			if (idx < _len)
 			{
@@ -69,7 +69,7 @@ namespace substrate
 		}
 
 		template<typename T> substrate::enable_if_t<has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
-			index(const off_t idx) const
+			index(const std::size_t idx) const
 		{
 			if (idx < _len)
 			{
@@ -82,7 +82,7 @@ namespace substrate
 		}
 
 		template<typename T> substrate::enable_if_t<std::is_same<T, void*>::value, void*>
-			index(const off_t idx) const
+			index(const std::size_t idx) const
 		{
 			if (idx < _len) {
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -116,7 +116,7 @@ namespace substrate
 	public:
 		constexpr mmap_t() noexcept = default;
 #ifndef _WINDOWS
-		mmap_t(const int32_t fd, const off_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
+		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _fd{fd}, _len{len}, _addr{[&]() noexcept -> void *
 			{
 				const auto ptr = ::mmap(addr, len, prot, flags, fd, 0);
@@ -135,7 +135,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _addr; }
 #else
-		mmap_t(const fd_t &fd, const off_t len, const DWORD prot, const int32_t = 0,
+		mmap_t(const fd_t &fd, const std::size_t len, const DWORD prot, const int32_t = 0,
 			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
 			{
 				const auto file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
@@ -149,7 +149,7 @@ namespace substrate
 				return MapViewOfFile(_mapping, protToAccess(prot), 0, 0, 0);
 			}()} { }
 
-		mmap_t(const fd_t &fd, const off_t offset, const off_t length, const DWORD prot,
+		mmap_t(const fd_t &fd, const off_t offset, const std::size_t length, const DWORD prot,
 			const int32_t = 0, void * = nullptr) noexcept : _len{length},
 			_mapping{[&]() noexcept -> HANDLE
 			{
@@ -197,7 +197,7 @@ namespace substrate
 			std::swap(_len, map._len);
 		}
 
-		SUBSTRATE_NO_DISCARD(mmap_t dup(const int32_t prot, const off_t len, const int32_t flags,
+		SUBSTRATE_NO_DISCARD(mmap_t dup(const int32_t prot, const std::size_t len, const int32_t flags,
 			void *addr) const noexcept)
 		{
 			if (!valid())
@@ -210,23 +210,25 @@ namespace substrate
 		template<typename T> T *address() noexcept { return static_cast<T *>(_addr); }
 		template<typename T> const T *address() const noexcept { return static_cast<const T *>(_addr); }
 
-		SUBSTRATE_NO_DISCARD(off_t length() const noexcept) { return _len; }
+		SUBSTRATE_NO_DISCARD(std::size_t length() const noexcept) { return _len; }
 
-		template<typename T> T *operator [](const off_t idx) { return index<T>(idx); }
+		template<typename T> T *operator [](const std::size_t idx) { return index<T>(idx); }
 		template<typename T> const T *operator [](const off_t idx) const { return index<const T>(idx); }
-		template<typename T> T *at(const off_t idx) { return index<T>(idx); }
-		template<typename T> const T *at(const off_t idx) const { return index<const T>(idx); }
+		template<typename T> T *at(const std::size_t idx) { return index<T>(idx); }
+		template<typename T> const T *at(const std::size_t idx) const { return index<const T>(idx); }
 
-		void *address(const off_t offset) noexcept { return index<void *>(offset); }
-		const void *address(const off_t offset) const noexcept { return index<const void *>(offset); }
+		void *address(const std::size_t offset) noexcept { return index<void *>(offset); }
+		const void *address(const std::size_t offset) const noexcept { return index<const void *>(offset); }
 
 		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept)
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 			{ return reinterpret_cast<std::uintptr_t>(_addr); } // lgtm[cpp/reinterpret-cast]
 
-		SUBSTRATE_NO_DISCARD(bool lock() const noexcept) { return lock(_len); }
-		SUBSTRATE_NO_DISCARD(bool lock(const size_t length) const noexcept) { return ::mlock(_addr, length) == 0; }
-		SUBSTRATE_NO_DISCARD(bool lock_at(const off_t idx, const size_t length) const noexcept)
+		SUBSTRATE_NO_DISCARD(bool lock() const noexcept)
+			{ return lock(_len); }
+		SUBSTRATE_NO_DISCARD(bool lock(const std::size_t length) const noexcept)
+			{ return ::mlock(_addr, length) == 0; }
+		SUBSTRATE_NO_DISCARD(bool lock_at(const std::size_t idx, const size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
@@ -234,9 +236,11 @@ namespace substrate
 			return ::mlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 
-		SUBSTRATE_NO_DISCARD(bool unlock() const noexcept) { return unlock(_len); }
-		SUBSTRATE_NO_DISCARD(bool unlock(const size_t length) const noexcept) { return ::munlock(_addr, length) == 0; }
-		SUBSTRATE_NO_DISCARD(bool unlock_at(const off_t idx, const size_t length) const noexcept)
+		SUBSTRATE_NO_DISCARD(bool unlock() const noexcept)
+			{ return unlock(_len); }
+		SUBSTRATE_NO_DISCARD(bool unlock(const std::size_t length) const noexcept)
+			{ return ::munlock(_addr, length) == 0; }
+		SUBSTRATE_NO_DISCARD(bool unlock_at(const std::size_t idx, const std::size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
@@ -244,17 +248,18 @@ namespace substrate
 			return ::munlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 
-		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const size_t new_length) noexcept)
+		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const std::size_t new_length) noexcept)
 		{
-			const size_t old_len = _len;
+			const auto old_len = _len;
 			_len = new_length;
 
 			return (_addr = ::mremap(_addr, old_len, _len, flags)) != MAP_FAILED;
 		}
 
-		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const size_t new_length, const uintptr_t new_addr) noexcept)
+		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const std::size_t new_length,
+			const std::uintptr_t new_addr) noexcept)
 		{
-			const size_t old_len = _len;
+			const auto old_len = _len;
 			_len = new_length;
 
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -267,14 +272,16 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return sync(_len, flags); }
 
-		SUBSTRATE_NO_DISCARD(bool sync(const size_t length, const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
+		SUBSTRATE_NO_DISCARD(bool sync(const std::size_t length,
+				const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return msync(_addr, length, flags) == 0; }
 
 		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice) const noexcept)
 			{ return advise(advice, _len); }
-		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice, const size_t length) const noexcept)
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t advice, const std::size_t length) const noexcept)
 			{ return ::madvise(_addr, length, advice) == 0; }
-		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t advice, const size_t length, const off_t idx) const noexcept)
+		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t advice, const std::size_t length,
+			const std::size_t idx) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
@@ -283,23 +290,24 @@ namespace substrate
 		}
 #else
 		[[nodiscard]] bool sync() const noexcept { return sync(_len); }
-		[[nodiscard]] bool sync(const size_t length) const noexcept
+		[[nodiscard]] bool sync(const std::size_t length) const noexcept
 			{ return FlushViewOfFile(_addr, length); }
 
 		[[nodiscard]] bool advise(const int32_t) const noexcept { return true; }
-		[[nodiscard]] bool advise(const int32_t, const size_t) const noexcept { return true; }
-		[[nodiscard]] bool advise_at(const int32_t, const size_t, const off_t) const noexcept
+		[[nodiscard]] bool advise(const int32_t, const std::size_t) const noexcept { return true; }
+		[[nodiscard]] bool advise_at(const int32_t, const std::size_t, const std::size_t) const noexcept
 			{ return true; }
 #endif
 
-		template<typename T> void copyTo(const off_t idx, T &value) const
+		template<typename T> void copyTo(const std::size_t idx, T &value) const
 		{
 			const auto src = index<const void *>(idx);
 			assert(sizeof(T) <= _len - idx);
 			std::memcpy(&value, src, sizeof(T));
 		}
 
-		template<typename T, std::size_t N> void copyTo(const off_t idx, std::array<T, N> &value) const
+		template<typename T, std::size_t N> void copyTo(const std::size_t idx,
+			std::array<T, N> &value) const
 		{
 			constexpr auto length{sizeof(T) * N};
 			const auto src = index<const void *>(idx);
@@ -307,7 +315,7 @@ namespace substrate
 			std::memcpy(value.data(), src, length);
 		}
 
-		void copyTo(const off_t idx, std::string &value) const
+		void copyTo(const std::size_t idx, std::string &value) const
 		{
 			const auto src = index<const void *>(idx);
 			assert(value.size() <= _len - idx);
@@ -315,7 +323,7 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void copyTo(const off_t idx, std::string_view &value) const
+		void copyTo(const std::size_t idx, std::string_view &value) const
 		{
 			const auto src = index<const void *>(idx);
 			assert(value.size() <= _len - idx);
@@ -323,14 +331,15 @@ namespace substrate
 		}
 #endif
 
-		template<typename T> void copyFrom(const off_t idx, const T &value) const
+		template<typename T> void copyFrom(const std::size_t idx, const T &value) const
 		{
 			const auto dest = index<void *>(idx);
 			assert(sizeof(T) <= _len - idx);
 			std::memcpy(dest, &value, sizeof(T));
 		}
 
-		template<typename T, std::size_t N> void copyFrom(const off_t idx, const std::array<T, N> &value) const
+		template<typename T, std::size_t N> void copyFrom(const std::size_t idx,
+			const std::array<T, N> &value) const
 		{
 			constexpr auto length{sizeof(T) * N};
 			const auto dest = index<void *>(idx);
@@ -338,7 +347,7 @@ namespace substrate
 			std::memcpy(dest, value.data(), length);
 		}
 
-		void copyFrom(const off_t idx, const std::string &value) const
+		void copyFrom(const std::size_t idx, const std::string &value) const
 		{
 			const auto dest = index<void *>(idx);
 			assert(value.size() <= _len - idx);
@@ -346,7 +355,7 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void copyFrom(const off_t idx, const std::string_view &value) const
+		void copyFrom(const std::size_t idx, const std::string_view &value) const
 		{
 			const auto dest = index<void *>(idx);
 			assert(value.size() <= _len - idx);
