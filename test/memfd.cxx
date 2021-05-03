@@ -10,7 +10,7 @@
 using substrate::memfd_t;
 using substrate::make_unique;
 
-constexpr static std::array<char, 4> testArray{'t', 'E', 'S', 't'};
+constexpr static std::array<char, 4> testArray{{'t', 'E', 'S', 't'}};
 constexpr static char testChar{'.'};
 static std::string testString{"fileDescriptor"};
 
@@ -94,7 +94,7 @@ TEST_CASE("memfd_t seek", "[memfd_t]")
 {
 	REQUIRE(file.valid());
 	REQUIRE(file.tell() == 0);
-	const off_t length = file.length();
+	const auto length = static_cast<off_t>(file.length());
 	REQUIRE(length == 78);
 	REQUIRE(file.tail());
 	REQUIRE(file.tell() == length);

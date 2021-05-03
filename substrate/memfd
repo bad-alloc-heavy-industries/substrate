@@ -37,9 +37,9 @@ namespace substrate
 	public:
 		constexpr memfd_t() noexcept : fd{-1}, eof{false} { }
 		constexpr memfd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
-		memfd_t(const char *const file, const int flags) noexcept :
+		memfd_t(const char *const file, const uint32_t flags) noexcept :
 			fd{::memfd_create(file, flags)}, eof{false} { ::ftruncate(fd, size); }
-		memfd_t(const std::string& file, const int flags) noexcept :
+		memfd_t(const std::string& file, const uint32_t flags) noexcept :
 			fd{::memfd_create(file.c_str(), flags)}, eof{false} { ::ftruncate(fd, size); }
 		memfd_t(memfd_t &&memfd_) noexcept { swap(memfd_); }
 		~memfd_t() noexcept { if (fd != -1) close(fd); }
@@ -97,10 +97,10 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool head() const noexcept) { return seek(0, SEEK_SET) == 0; }
 		SUBSTRATE_NO_DISCARD(bool tail() const noexcept)
 		{
-			const auto result = seek(length(), SEEK_SET);
+			const auto result = seek(static_cast<off_t>(length()), SEEK_SET);
 			if (result < 0)
 				return false;
-			return  size_t(result) == length();
+			return std::size_t(result) == length();
 		}
 
 		SUBSTRATE_NO_DISCARD(memfd_t dup() const noexcept) { return ::dup(fd); }
@@ -171,17 +171,17 @@ namespace substrate
 		{
 			std::array<uint8_t, 2> data{};
 			const bool result = read(data);
-			value = (uint16_t(data[1]) << 8U) | data[0];
+			value = uint16_t((uint16_t(data[1]) << 8U) | data[0]);
 			return result;
 		}
 
 		SUBSTRATE_NO_DISCARD(bool writeLE(const uint16_t value) const noexcept)
 		{
 			const std::array<uint8_t, 2> data
-			{
+			{{
 				uint8_t(value),
 				uint8_t(value >> 8U)
-			};
+			}};
 			return write(data);
 		}
 
@@ -197,12 +197,12 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool writeLE(const uint32_t value) const noexcept)
 		{
 			const std::array<uint8_t, 4> data
-			{
+			{{
 				uint8_t(value),
 				uint8_t(value >> 8U),
 				uint8_t(value >> 16U),
 				uint8_t(value >> 24U)
-			};
+			}};
 			return write(data);
 		}
 
@@ -220,7 +220,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool writeLE(const uint64_t value) const noexcept)
 		{
 			const std::array<uint8_t, 8> data
-			{
+			{{
 				uint8_t(value),
 				uint8_t(value >> 8U),
 				uint8_t(value >> 16U),
@@ -229,7 +229,7 @@ namespace substrate
 				uint8_t(value >> 40U),
 				uint8_t(value >> 48U),
 				uint8_t(value >> 56U)
-			};
+			}};
 			return write(data);
 		}
 
@@ -259,17 +259,17 @@ namespace substrate
 		{
 			std::array<uint8_t, 2> data{};
 			const bool result = read(data);
-			value = (uint16_t(data[0]) << 8U) | data[1];
+			value = uint16_t((uint16_t(data[0]) << 8U) | data[1]);
 			return result;
 		}
 
 		SUBSTRATE_NO_DISCARD(bool writeBE(const uint16_t value) const noexcept)
 		{
 			const std::array<uint8_t, 2> data
-			{
+			{{
 				uint8_t(value >> 8U),
 				uint8_t(value)
-			};
+			}};
 			return write(data);
 		}
 
@@ -285,12 +285,12 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool writeBE(const uint32_t value) const noexcept)
 		{
 			const std::array<uint8_t, 4> data
-			{
+			{{
 				uint8_t(value >> 24U),
 				uint8_t(value >> 16U),
 				uint8_t(value >> 8U),
 				uint8_t(value)
-			};
+			}};
 			return write(data);
 		}
 
@@ -308,7 +308,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool writeBE(const uint64_t value) const noexcept)
 		{
 			const std::array<uint8_t, 8> data
-			{
+			{{
 				uint8_t(value >> 56U),
 				uint8_t(value >> 48U),
 				uint8_t(value >> 40U),
@@ -317,7 +317,7 @@ namespace substrate
 				uint8_t(value >> 16U),
 				uint8_t(value >> 8U),
 				uint8_t(value)
-			};
+			}};
 			return write(data);
 		}
 
