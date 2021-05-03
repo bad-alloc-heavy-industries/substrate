@@ -44,17 +44,21 @@ namespace substrate
 	{
 	private:
 		T &container_;
+#if __cplusplus < 201703L
 		using const_iterator = typename T::const_iterator;
+#endif
 
 	public:
 		constexpr indexedIterator_t(T &container) noexcept : container_{container} { }
 
+#if __cplusplus >= 201703L
+		[[nodiscard]] constexpr auto begin() const noexcept
+			{ return indexedItem_t{0, std::begin(container_)}; }
+		[[nodiscard]] constexpr auto end() const noexcept
+			{ return indexedItem_t{std::size(container_), std::end(container_)}; }
+#else
 		SUBSTRATE_NO_DISCARD(constexpr indexedItem_t<const_iterator> begin() const noexcept)
 			{ return {0, std::begin(container_)}; }
-#if __cplusplus >= 201703L
-		[[nodiscard]] constexpr indexedItem_t end() const noexcept
-			{ return {std::size(container_), std::end(container_)}; }
-#else
 		SUBSTRATE_NO_DISCARD(constexpr indexedItem_t<const_iterator> end() const noexcept)
 			{ return {container_.size(), std::end(container_)}; }
 #endif
