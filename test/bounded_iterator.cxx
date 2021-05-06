@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <array>
 #include <substrate/bounded_iterator>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::boundedIterator_t;
 

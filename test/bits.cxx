@@ -5,7 +5,7 @@
 #	define SUBSTRATE_CXX11_COMPAT
 #endif
 #include <substrate/bits>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::shift_nibble;
 TEST_CASE("shift nibble", "[bits]")

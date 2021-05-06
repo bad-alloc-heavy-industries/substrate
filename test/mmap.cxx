@@ -3,7 +3,7 @@
 #include <substrate/memfd>
 #include <substrate/fd>
 
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 #include <cstring>
 
 using substrate::mmap_t;

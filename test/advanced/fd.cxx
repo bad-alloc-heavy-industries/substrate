@@ -4,7 +4,7 @@
 #include <array>
 #include <substrate/advanced/fd>
 #include <substrate/utility>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::advanced::fd_t;
 using substrate::make_unique;

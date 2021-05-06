@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstdint>
 #include <substrate/units>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::operator ""_KiB;
 using substrate::operator ""_MiB;

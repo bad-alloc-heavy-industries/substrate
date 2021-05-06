@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <substrate/enum_utils>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 enum class Flags : uint8_t
 {

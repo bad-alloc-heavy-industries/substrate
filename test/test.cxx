@@ -4,7 +4,7 @@
 #include <crtdbg.h>
 #endif
 #define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 #ifdef _WINDOWS
 void invalidHandler(const wchar_t *, const wchar_t *, const wchar_t *, const uint32_t, const uintptr_t) { }

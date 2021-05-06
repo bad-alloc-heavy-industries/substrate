@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
 #include <substrate/string>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::stringDup;
 using substrate::stringsLength;

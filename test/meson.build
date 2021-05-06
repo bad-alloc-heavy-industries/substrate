@@ -12,12 +12,20 @@ if target_machine.system() == 'linux'
 	]
 endif
 
+catch2 = dependency(
+	'catch2',
+	required: true,
+	version: '>=2.13.3',
+	fallback: ['catch2', 'catch2_dep']
+)
+
 tests = executable(
 	'tests',
 	testSrcs,
 	include_directories: include_directories(
-		'..', 'catch2/single_include/catch2'
+		'..'
 	),
+	dependencies: [ catch2 ],
 	link_with: libSubstrate,
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,

@@ -5,7 +5,7 @@
 #include <array>
 #include <substrate/memfd>
 #include <substrate/utility>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::memfd_t;
 using substrate::make_unique;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
 #include <substrate/fixed_vector>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::fixedVector_t;
 using substrate::vectorStateException_t;

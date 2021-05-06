@@ -5,7 +5,7 @@
 #	define SUBSTRATE_CXX11_COMPAT
 #endif
 #include <substrate/prng>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 
 

@@ -6,7 +6,8 @@ project(
 		'warning_level=3'
 	],
 	version: '0.0.1',
-	license: 'BSD-3-Clause'
+	license: 'BSD-3-Clause',
+	subproject_dir: 'deps'
 )
 
 cxx = meson.get_compiler('cpp')

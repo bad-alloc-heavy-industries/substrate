@@ -5,7 +5,7 @@
 #include <substrate/fixed_vector>
 #include <substrate/fd>
 #include <substrate/utility>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::fd_t;
 using substrate::make_unique;

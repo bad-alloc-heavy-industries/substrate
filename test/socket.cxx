@@ -8,7 +8,7 @@
 #endif
 #include <cstring>
 #include <substrate/socket>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 using substrate::socket_t;
 using substrate::socketType_t;

@@ -8,7 +8,7 @@
 #	define SUBSTRATE_CXX11_COMPAT
 #endif
 #include <substrate/utility>
-#include <catch.hpp>
+#include <catch2/catch.hpp>
 
 namespace test
 {
