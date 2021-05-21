@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 def globFiles():
 	srcDir = Path(args.sourcePath)
-	paths = set(('impl', 'test'))
+	paths = set(('impl',)) # 'test'))
 	suffixes = set(('cxx', 'hxx'))
 	for path in paths:
 		for suffix in suffixes:
