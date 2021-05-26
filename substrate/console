@@ -191,7 +191,7 @@ namespace substrate
 				stream.write(char(number + '0'));
 			else
 			{
-				const char value = char(number - format(stream, number / 10) * 10) + '0';
+				const char value = char(char(number - format(stream, number / 10) * 10) + '0');
 				stream.write(value);
 			}
 			return number;
@@ -220,7 +220,7 @@ namespace substrate
 			{ printTo<int_t>(stream); }
 	};
 
-	template<uint8_t paddedWidth, char paddingChar> struct writePadding_t final
+	template<size_t paddedWidth, char paddingChar> struct writePadding_t final
 	{
 		void operator ()(const consoleStream_t &stream, const uint8_t maxDigits) const noexcept
 		{
@@ -236,7 +236,7 @@ namespace substrate
 	template<char paddingChar> struct writePadding_t<0, paddingChar> final
 		{ void operator ()(const consoleStream_t &, const uint8_t) const noexcept { } };
 
-	template<uint8_t paddedWidth = 0, char paddingChar = ' '> struct asHex_t final : public printable_t
+	template<size_t paddedWidth = 0, char paddingChar = ' '> struct asHex_t final : public printable_t
 	{
 	private:
 		uint8_t maxDigits;
