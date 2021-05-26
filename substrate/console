@@ -208,7 +208,7 @@ namespace substrate
 			if (value_ < 0)
 			{
 				stream.write('-');
-				format(stream, ~uint_t(value_) + 1U);
+				format(stream, uint_t(uint_t(~uint_t(value_)) + 1U));
 			}
 			else
 				format(stream, uint_t(value_));
@@ -246,7 +246,7 @@ namespace substrate
 	public:
 		template<typename T, typename = enable_if_t<std::is_unsigned<T>::value>>
 			constexpr asHex_t(const T value) noexcept : maxDigits{sizeof(T) * 2},
-			msbShift(4 * (maxDigits - 1)), _value(value) { }
+			msbShift{uint8_t(4U * (maxDigits - 1U))}, _value(value) { }
 
 		[[gnu::noinline]]
 		void operator ()(const consoleStream_t &stream) const noexcept final
@@ -274,7 +274,7 @@ namespace substrate
 			for (; digits > 0; --digits)
 			{
 				const uint8_t nibble((value >> msbShift) & 0x0FU);
-				const char digit = nibble + '0';
+				const char digit = char(nibble + '0');
 				if (digit > '9')
 					stream.write(char(digit + 7));
 				else
