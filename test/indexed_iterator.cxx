@@ -21,7 +21,7 @@ TEST_CASE("enumerated iteration", "[indexedIterator_t]")
 	REQUIRE(end.index() == 6);
 
 	size_t value{0};
-	for (const auto item : iter)
+	for (const auto &item : iter)
 	{
 		REQUIRE(item.first == value);
 		REQUIRE(*item.second == container[value]);

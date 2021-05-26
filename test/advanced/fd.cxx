@@ -9,7 +9,7 @@
 using substrate::advanced::fd_t;
 using substrate::make_unique;
 
-constexpr static std::array<char, 4> testArray{'t', 'E', 'S', 't'};
+constexpr static std::array<char, 4> testArray{{'t', 'E', 'S', 't'}};
 constexpr static char testChar{'.'};
 static std::string testString{"fileDescriptor"};
 

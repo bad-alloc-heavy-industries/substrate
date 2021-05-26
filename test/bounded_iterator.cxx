@@ -6,10 +6,10 @@
 using substrate::boundedIterator_t;
 
 std::array<int32_t, 10> testNums =
-{
+{{
 	0, 1, 2, 3, 4,
 	5, 6, 7, 8, 9
-};
+}};
 
 using arrayIter_t = boundedIterator_t<int32_t>;
 template<typename T, size_t N> constexpr size_t count(const std::array<T, N> &) noexcept

@@ -60,8 +60,8 @@ const std::string plainIntegerOverMaxPaddedHex{" [INF] __F0\n"_s};
 const std::string plainCharArray{" [INF] testing\n"_s};
 const std::string plainIntegerArray{" [INF] F00D, DEAD\n"_s};
 
-const std::array<char, 7> testCharArray{'t', 'e', 's', 't', 'i', 'n', 'g'};
-const std::array<uint16_t, 2> testIntegerArray{0xF00DU, 0xDEADU};
+const std::array<char, 7> testCharArray{{'t', 'e', 's', 't', 'i', 'n', 'g'}};
+const std::array<uint16_t, 2> testIntegerArray{{0xF00DU, 0xDEADU}};
 
 TEST_CASE("consoleStream_t construction", "[console_t] [!mayfail]")
 {
