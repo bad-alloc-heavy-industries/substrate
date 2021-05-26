@@ -37,11 +37,11 @@ socket_t::socket_t(const int family, const int type, const int protocol) noexcep
 socket_t::~socket_t() noexcept
 	{ if (socket != -1) closesocket(socket); }
 bool socket_t::bind(const void *const addr, const size_t len) const noexcept
-	{ return ::bind(socket, static_cast<const sockaddr *>(addr), len) == 0; }
+	{ return ::bind(socket, static_cast<const sockaddr *>(addr), socklen_t(len)) == 0; }
 bool socket_t::bind(const sockaddr_storage &addr) const noexcept
-	{ return bind(static_cast<const void *>(&addr), sockaddrLen(addr)); }
+	{ return bind(static_cast<const void *>(&addr), socklen_t(sockaddrLen(addr))); }
 bool socket_t::connect(const void *const addr, const size_t len) const noexcept
-	{ return ::connect(socket, static_cast<const sockaddr *>(addr), len) == 0; }
+	{ return ::connect(socket, static_cast<const sockaddr *>(addr), socklen_t(len)) == 0; }
 bool socket_t::connect(const sockaddr_storage &addr) const noexcept
 	{ return connect(static_cast<const void *>(&addr), sockaddrLen(addr)); }
 bool socket_t::listen(const int32_t queueLength) const noexcept
@@ -64,7 +64,7 @@ ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockadd
 {
 	return ::sendto(socket, static_cast<char *>(bufferPtr), len, 0,
 		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-		reinterpret_cast<const sockaddr *>(&addr), sockaddrLen(addr)); // lgtm[cpp/reinterpret-cast]
+		reinterpret_cast<const sockaddr *>(&addr), socklen_t(sockaddrLen(addr))); // lgtm[cpp/reinterpret-cast]
 }
 
 ssize_t socket_t::readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept
@@ -132,10 +132,10 @@ inline size_t familyToSize(const sa_family_t family) noexcept
 inline uint16_t toBE(const uint16_t value) noexcept
 {
 	const std::array<uint8_t, 2> resultBytes
-	{
+	{{
 		uint8_t(value >> 8U),
 		uint8_t(value)
-	};
+	}};
 	uint16_t result{};
 	memcpy(&result, resultBytes.data(), resultBytes.size());
 	return result;
