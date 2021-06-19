@@ -78,6 +78,7 @@ subdir('substrate')
 if get_option('build_library')
 	subdir('impl')
 else
+	deps = []
 	libSubstrate = []
 endif
 
