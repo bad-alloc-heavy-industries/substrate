@@ -1,3 +1,4 @@
 option('valgrind_checks', type: 'boolean', value: false, description: 'Enables the valgrind run targets')
 option('gen_docs', type: 'boolean', value: false, description: 'Generate documentation for Substrate')
 option('build_tests', type: 'boolean', value: true, description: 'Enables the building of tests')
+option('build_library', type: 'boolean', value: true, description: 'Enables the implementation library for complex features')

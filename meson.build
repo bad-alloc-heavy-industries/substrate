@@ -75,7 +75,11 @@ elif cxx.get_id() == 'clang'
 endif
 
 subdir('substrate')
-subdir('impl')
+if get_option('build_library')
+	subdir('impl')
+else
+	libSubstrate = []
+endif
 
 if get_option('build_tests')
 	subdir('test')
@@ -86,7 +90,7 @@ if get_option('gen_docs')
 	subdir('docs')
 endif
 
-if not meson.is_subproject()
+if not meson.is_subproject() and get_option('build_library')
 	pkgconfig.generate(
 		subdirs: '.',
 		name: 'substrate',
