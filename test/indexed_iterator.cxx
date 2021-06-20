@@ -17,14 +17,14 @@ TEST_CASE("enumerated iteration", "[indexedIterator_t]")
 	const auto begin{iter.begin()};
 	const auto end{iter.end()};
 	REQUIRE(begin.index() == 0);
-	REQUIRE(*begin.item() == 'a');
+	REQUIRE(begin.item() == 'a');
 	REQUIRE(end.index() == 6);
 
 	size_t value{0};
 	for (const auto &item : iter)
 	{
 		REQUIRE(item.first == value);
-		REQUIRE(*item.second == container[value]);
+		REQUIRE(item.second == container[value]);
 		++value;
 	}
 }

@@ -12,13 +12,17 @@ namespace substrate
 	{
 	private:
 		std::pair<std::size_t, T> item_;
+		using value_type = decltype(*item_.second);
 
 	public:
 		constexpr indexedItem_t(const std::size_t index, const T item) noexcept : item_{index, item} { }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t index() const noexcept) { return item_.first; }
-		SUBSTRATE_NO_DISCARD(constexpr T item() const noexcept) { return item_.second; }
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX17_CONSTEXPR decltype(item_) &operator *() noexcept) { return item_; }
-		SUBSTRATE_NO_DISCARD(constexpr const decltype(item_) &operator *() const noexcept) { return item_; }
+		SUBSTRATE_NO_DISCARD(constexpr value_type &item() noexcept) { return *item_.second; }
+		//SUBSTRATE_NO_DISCARD(constexpr const value_type &item() const noexcept) { return *item_.second; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX17_CONSTEXPR std::pair<std::size_t, value_type &> operator *() noexcept)
+			{ return {item_.first, *item_.second}; }
+		SUBSTRATE_NO_DISCARD(constexpr std::pair<std::size_t, const value_type &> operator *() const noexcept)
+			{ return {item_.first, *item_.second}; }
 
 		SUBSTRATE_CXX14_CONSTEXPR indexedItem_t &operator ++() noexcept
 		{
@@ -54,7 +58,11 @@ namespace substrate
 #if __cplusplus >= 201703L
 		[[nodiscard]] constexpr auto begin() const noexcept
 			{ return indexedItem_t{0, std::begin(container_)}; }
+		[[nodiscard]] constexpr auto begin() noexcept
+			{ return indexedItem_t{0, std::begin(container_)}; }
 		[[nodiscard]] constexpr auto end() const noexcept
+			{ return indexedItem_t{std::size(container_), std::end(container_)}; }
+		[[nodiscard]] constexpr auto end() noexcept
 			{ return indexedItem_t{std::size(container_), std::end(container_)}; }
 #else
 		SUBSTRATE_NO_DISCARD(constexpr indexedItem_t<const_iterator> begin() const noexcept)
