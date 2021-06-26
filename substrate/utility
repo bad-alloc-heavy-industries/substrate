@@ -524,6 +524,7 @@ namespace substrate
 	template<typename T> struct is_duration : public std::false_type { };
 	template<typename R, typename P> struct is_duration<std::chrono::duration<R, P>> : public std::true_type { };
 
+#if !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
 	template<typename T> std::string decode_typename()
 	{
@@ -547,6 +548,7 @@ namespace substrate
 
 		return _type_name;
 	}
+#endif
 
 	/* C++11 and newer, version independent std::unique_ptr<> helpers */
 	template<typename T> struct makeUnique_t { using uniqueType = std::unique_ptr<T>; };
