@@ -19,7 +19,8 @@ headers = [
 	'hash',
 	'prng',
 	'index_sequence',
-	'indexed_iterator'
+	'indexed_iterator',
+	'bitfield',
 ]
 
 advanced_headers = [
