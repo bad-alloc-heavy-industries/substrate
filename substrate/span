@@ -176,7 +176,10 @@ namespace substrate
 		constexpr reference operator [](const size_t idx) const noexcept
 		{
 			static_assert(extent != 0, "span extent must not be zero");
-			static_assert(idx < size(), "index must be less than the size of the span");
+#if __cplusplus > 201703L
+			if constexpr (std::is_constant_evaluated())
+				static_assert(idx < size(), "index must be less than the size of the span");
+#endif
 			return _ptr[idx];
 		}
 
