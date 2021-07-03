@@ -29,7 +29,7 @@ namespace substrate
 	template<typename E> constexpr const E *data(std::initializer_list<E> il) noexcept;
 	template<typename C> constexpr auto size(const C &c) -> decltype(c.size());
 	template<typename T, std::size_t N> constexpr std::size_t size(const T (&array)[N]) noexcept;
-	template<typename T, std::ptrdiff_t N> constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
+	template<typename T, std::size_t N> constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
 	template<bool B> using bool_constant = std::integral_constant<bool, B>;
 
 	enum class byte : unsigned char { };
