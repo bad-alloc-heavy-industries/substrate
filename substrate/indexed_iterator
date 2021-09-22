@@ -17,7 +17,8 @@ namespace substrate
 	public:
 		constexpr indexedItem_t(const std::size_t index, const T item) noexcept : item_{index, item} { }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t index() const noexcept) { return item_.first; }
-		SUBSTRATE_NO_DISCARD(constexpr value_type &item() noexcept) { return *item_.second; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX17_CONSTEXPR value_type &item() noexcept) { return *item_.second; }
+		SUBSTRATE_NO_DISCARD(constexpr const value_type &item() const noexcept) { return *item_.second; }
 		//SUBSTRATE_NO_DISCARD(constexpr const value_type &item() const noexcept) { return *item_.second; }
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX17_CONSTEXPR std::pair<std::size_t, value_type &> operator *() noexcept)
 			{ return {item_.first, *item_.second}; }
