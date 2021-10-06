@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include <cstddef>
-#ifndef _WINDOWS
+#ifndef _MSC_VER
 #	include <unistd.h>
 #else
 #	include <io.h>
@@ -12,13 +12,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(_MSC_VER) && !defined(_WINDOWS)
-#define _WINDOWS 1
+#if defined(_MSC_VER) || defined(__MINGW64__) || defined(__MINGW32__)
+#	if !defined(_WINDOWS)
+#		define _WINDOWS 1
+#	endif
 #endif
 
 namespace substrate
 {
-#ifndef _WINDOWS
+#ifndef _WIN32
 	using mode_t = ::mode_t;
 	using ssize_t = ::ssize_t;
 	using off_t = ::off_t;
@@ -30,7 +32,7 @@ namespace substrate
 
 	namespace internal
 	{
-#ifndef _WINDOWS
+#ifndef _WIN32
 		using stat_t = struct stat;
 		using ::fstat;
 
@@ -45,8 +47,11 @@ namespace substrate
 		inline int32_t fdtruncate(const int32_t fd, const off_t size) noexcept
 			{ return ftruncate(fd, size); }
 #else
+#if defined(__MINGW32__) || defined(__MINGW64__)
+#undef fstat
+#endif
 #	define O_NOCTTY _O_BINARY
-		using stat_t = struct ::_stat64;
+		using stat_t = struct _stat64;
 
 		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }

@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include <cstdlib>
-#ifdef _MSC_VER
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <ws2tcpip.h>
 #undef WIN32_LEAN_AND_MEAN
@@ -21,10 +21,12 @@ struct sockaddr_storage;
 
 namespace substrate
 {
-#ifndef _MSC_VER
+#ifndef _WIN32
 	using socklen_t = unsigned int;
 	using sockType_t = int32_t;
+#define INVALID_SOCKET -1
 #else
+	using sa_family_t = ADDRESS_FAMILY;
 	using sockType_t = SOCKET;
 #endif
 
@@ -37,8 +39,9 @@ namespace substrate
 		bool connect(const void *const addr, const size_t len) const noexcept;
 
 	public:
-		constexpr socket_t() noexcept : socket{-1} { }
-		constexpr socket_t(const int32_t s) noexcept : socket{s} { }
+		constexpr socket_t() noexcept : socket{static_cast<sockType_t>(-1)} { }
+		constexpr explicit socket_t(const sockType_t s) noexcept : socket{s} { }
+		constexpr socket_t(const int32_t s) noexcept : socket{static_cast<sockType_t>(s)} { }
 		SUBSTRATE_CLS_API socket_t(const int family, const int type, const int protocol = 0) noexcept;
 		socket_t(const socket_t &) = delete;
 		socket_t(socket_t &&s) noexcept : socket_t{} { swap(s); }
@@ -47,10 +50,10 @@ namespace substrate
 		socket_t &operator =(const socket_t &) = delete;
 		void operator =(socket_t &&s) noexcept { swap(s); }
 		operator int32_t() const noexcept { return socket; }
-		bool operator ==(const int32_t s) const noexcept { return socket == s; }
-		bool operator !=(const int32_t s) const noexcept { return socket != s; }
+		bool operator ==(const sockType_t s) const noexcept { return socket == s; }
+		bool operator !=(const sockType_t s) const noexcept { return socket != s; }
 		void swap(socket_t &s) noexcept { std::swap(socket, s.socket); }
-		bool valid() const noexcept { return socket != -1; }
+		bool valid() const noexcept { return socket != INVALID_SOCKET; }
 
 		template<typename T> bool bind(const T &addr) const noexcept
 			{ return bind(static_cast<const void *>(&addr), sizeof(T)); }

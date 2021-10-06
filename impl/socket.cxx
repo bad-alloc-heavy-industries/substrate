@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
-#ifndef _MSC_VER
+#ifndef _WIN32
 #	include <sys/socket.h>
 #	include <netdb.h>
 #	include <arpa/inet.h>
@@ -11,7 +11,7 @@
 #include <substrate/utility>
 #include <substrate/socket>
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #	include <unistd.h>
 inline int closesocket(const int s) { return close(s); }
 #else
@@ -35,7 +35,7 @@ size_t sockaddrLen(const sockaddr_storage &addr) noexcept
 socket_t::socket_t(const int family, const int type, const int protocol) noexcept :
 	socket(::socket(family, type, protocol)) { }
 socket_t::~socket_t() noexcept
-	{ if (socket != -1) closesocket(socket); }
+	{ if (socket != INVALID_SOCKET) closesocket(socket); }
 bool socket_t::bind(const void *const addr, const size_t len) const noexcept
 	{ return ::bind(socket, static_cast<const sockaddr *>(addr), socklen_t(len)) == 0; }
 bool socket_t::bind(const sockaddr_storage &addr) const noexcept
@@ -48,7 +48,7 @@ bool socket_t::listen(const int32_t queueLength) const noexcept
 	{ return ::listen(socket, queueLength) == 0; }
 socket_t socket_t::accept(sockaddr *peerAddr, socklen_t *peerAddrLen) const noexcept
 	{ return ::accept(socket, peerAddr, peerAddrLen); }
-#ifndef _MSC_VER
+#ifndef _WIN32
 ssize_t socket_t::write(const void *const bufferPtr, const size_t len) const noexcept
 	{ return ::write(socket, bufferPtr, len); }
 ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
@@ -157,6 +157,16 @@ template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest
 sockaddr_storage substrate::socket::prepare(const socketType_t family, const char *const where,
 	const uint16_t port, const socketProtocol_t protocol) noexcept
 {
+#ifdef _WIN32
+	const auto wVersionRequested = MAKEWORD(2, 2);
+	WSADATA wsaData;
+	const auto err = WSAStartup(wVersionRequested, &wsaData);
+	if (err != 0) {
+		// No usable WinSock DLL.
+		return {AF_UNSPEC};
+	}
+#endif
+
 	addrinfo hints{};
 	hints.ai_family = typeToFamily(family);
 	hints.ai_socktype = protocolToType(protocol);
@@ -164,8 +174,10 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 	hints.ai_flags = AI_PASSIVE; // This may not be right/complete..
 
 	addrinfo *results = nullptr;
-	if (getaddrinfo(where, nullptr, &hints, &results) || !results)
+	const auto res = getaddrinfo(where, nullptr, &hints, &results);
+	if (res || !results) {
 		return {AF_UNSPEC};
+	}
 
 	sockaddr_storage service{};
 	memcpy(&service, results->ai_addr, familyToSize(results->ai_addr->sa_family));

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
-#ifndef _MSC_VER
+#include <errno.h>
+#ifndef _WIN32
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -23,11 +24,7 @@ template<typename T, typename U> T as(const U &value) noexcept
 	return result;
 }
 
-void assertErrno(int expected)
-{
-	REQUIRE(errno == expected);
-	errno = 0;
-}
+#define assertErrno(x) REQUIRE(errno == (x)); errno = 0;
 
 TEST_CASE("sockaddr prepare", "[socket_t]")
 {
@@ -54,7 +51,7 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 		REQUIRE(addr.sin6_port == 0);
 	}
 
-	REQUIRE(unknAddr.ss_family == AF_UNSPEC);
+	REQUIRE((unknAddr.ss_family == AF_UNSPEC || unknAddr.ss_family == AF_INET6));
 	REQUIRE((dncAddr.ss_family == AF_INET || dncAddr.ss_family == AF_INET6));
 
 	/* UDP sockets */
@@ -79,7 +76,7 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 		REQUIRE(addr.sin6_port == 0);
 	}
 
-	REQUIRE(unknAddrUDP.ss_family == AF_UNSPEC);
+	REQUIRE((unknAddrUDP.ss_family == AF_UNSPEC || unknAddrUDP.ss_family == AF_INET6));
 	REQUIRE((dncAddrUDP.ss_family == AF_INET || dncAddrUDP.ss_family == AF_INET6));
 
 	/* RAW sockets */
@@ -104,37 +101,43 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 		REQUIRE(addr.sin6_port == 0);
 	}
 
-	REQUIRE(unknAddrRAW.ss_family == AF_UNSPEC);
+	REQUIRE((unknAddrRAW.ss_family == AF_UNSPEC || unknAddrRAW.ss_family == AF_INET6));
 	REQUIRE((dncAddrRAW.ss_family == AF_INET || dncAddrRAW.ss_family == AF_INET6));
 }
+
+#ifdef _WIN32
+#define ASSERT_BAD_SOCKET REQUIRE(WSAGetLastError() == WSAENOTSOCK)
+#else
+#define ASSERT_BAD_SOCKET assertErrno(EBADF)
+#endif
 
 TEST_CASE("socket_t bad socket", "[socket_t]")
 {
 	const auto addr = prepare(socketType_t::dontCare, "localhost", 0);
 	errno = 0;
 	socket_t socket{};
-	REQUIRE(socket == -1);
+	REQUIRE(socket == INVALID_SOCKET);
 	REQUIRE_FALSE(socket.valid());
 
 	assertErrno(0);
 	REQUIRE(socket.read(nullptr, 0) == -1);
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 	REQUIRE(socket.write(nullptr, 0) == -1);
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 	REQUIRE_FALSE(socket.bind(addr));
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 	REQUIRE_FALSE(socket.connect(addr));
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 	REQUIRE_FALSE(socket.listen(1));
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 	REQUIRE(socket.peek() == 0);
-	assertErrno(EBADF);
+	ASSERT_BAD_SOCKET;
 }
 
 TEST_CASE("socket_t inheriting construction", "[socket_t]")
 {
-	const int32_t socketFD{::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)};
-	REQUIRE(socketFD != -1);
+	const substrate::sockType_t socketFD{::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)};
+	REQUIRE(socketFD != INVALID_SOCKET);
 	socket_t socket{socketFD};
 	REQUIRE(socket.valid());
 }

@@ -12,6 +12,12 @@ if target_machine.system() == 'linux'
 	]
 endif
 
+# Work around https://github.com/mesonbuild/meson/issues/1426
+deps = []
+if target_machine.system() == 'windows'
+	deps += cxx.find_library('ws2_32')
+endif
+
 catch2 = dependency(
 	'catch2',
 	required: true,
@@ -19,13 +25,15 @@ catch2 = dependency(
 	fallback: ['catch2', 'catch2_dep']
 )
 
+deps += catch2
+
 tests = executable(
 	'tests',
 	testSrcs,
 	include_directories: include_directories(
 		'..'
 	),
-	dependencies: [ catch2 ],
+	dependencies: deps,
 	link_with: libSubstrate,
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
