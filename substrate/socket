@@ -40,8 +40,7 @@ namespace substrate
 
 	public:
 		constexpr socket_t() noexcept : socket{static_cast<sockType_t>(-1)} { }
-		constexpr explicit socket_t(const sockType_t s) noexcept : socket{s} { }
-		constexpr socket_t(const int32_t s) noexcept : socket{static_cast<sockType_t>(s)} { }
+		constexpr socket_t(const sockType_t s) noexcept : socket{s} { }
 		SUBSTRATE_CLS_API socket_t(const int family, const int type, const int protocol = 0) noexcept;
 		socket_t(const socket_t &) = delete;
 		socket_t(socket_t &&s) noexcept : socket_t{} { swap(s); }
@@ -49,7 +48,7 @@ namespace substrate
 
 		socket_t &operator =(const socket_t &) = delete;
 		void operator =(socket_t &&s) noexcept { swap(s); }
-		operator int32_t() const noexcept { return socket; }
+		operator sockType_t() const noexcept { return socket; }
 		bool operator ==(const sockType_t s) const noexcept { return socket == s; }
 		bool operator !=(const sockType_t s) const noexcept { return socket != s; }
 		void swap(socket_t &s) noexcept { std::swap(socket, s.socket); }

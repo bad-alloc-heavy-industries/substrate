@@ -47,7 +47,7 @@ bool socket_t::connect(const sockaddr_storage &addr) const noexcept
 bool socket_t::listen(const int32_t queueLength) const noexcept
 	{ return ::listen(socket, queueLength) == 0; }
 socket_t socket_t::accept(sockaddr *peerAddr, socklen_t *peerAddrLen) const noexcept
-	{ return ::accept(socket, peerAddr, peerAddrLen); }
+	{ return {::accept(socket, peerAddr, peerAddrLen)}; }
 #ifndef _WIN32
 ssize_t socket_t::write(const void *const bufferPtr, const size_t len) const noexcept
 	{ return ::write(socket, bufferPtr, len); }
