@@ -158,13 +158,12 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 	const uint16_t port, const socketProtocol_t protocol) noexcept
 {
 #ifdef _WIN32
-	const auto wVersionRequested = MAKEWORD(2, 2);
-	WSADATA wsaData;
+	const auto wVersionRequested{MAKEWORD(2, 2)};
+	WSADATA wsaData{};
 	const auto err = WSAStartup(wVersionRequested, &wsaData);
-	if (err != 0) {
+	if (err)
 		// No usable WinSock DLL.
 		return {AF_UNSPEC};
-	}
 #endif
 
 	addrinfo hints{};
@@ -175,9 +174,8 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 
 	addrinfo *results = nullptr;
 	const auto res = getaddrinfo(where, nullptr, &hints, &results);
-	if (res || !results) {
+	if (res || !results)
 		return {AF_UNSPEC};
-	}
 
 	sockaddr_storage service{};
 	memcpy(&service, results->ai_addr, familyToSize(results->ai_addr->sa_family));
