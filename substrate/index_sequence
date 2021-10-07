@@ -2,6 +2,7 @@
 #ifndef SUBSTRATE_INDEX_SEQUENCE
 #define SUBSTRATE_INDEX_SEQUENCE
 
+#include <cstddef>
 #include <cstdint>
 #include <substrate/internal/defs>
 

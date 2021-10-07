@@ -6,8 +6,9 @@
 template<class T, class U, typename V = decltype(std::is_same<T, U>::value)>
 	constexpr inline V is_same_v() { return std::is_same<T, U>::value; }
 
-template<class T, typename V = decltype(std::is_null_pointer<T>::value)>
-	constexpr inline V is_null_pointer_v() { return std::is_null_pointer<T>::value; }
+// is_null_pointer is c++14
+template<class T, typename V = decltype(std::is_same<std::nullptr_t, remove_cv_t<T>>::value)>
+	constexpr inline V is_null_pointer_v() { return std::is_same<std::nullptr_t, remove_cv_t<T>>::value; }
 
 template<class T, typename V = decltype(std::is_integral<T>::value)>
 	constexpr inline V is_integral_v() { return std::is_integral<T>::value; }

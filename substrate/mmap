@@ -248,6 +248,7 @@ namespace substrate
 			return ::munlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 
+#ifndef __APPLE__
 		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const std::size_t new_length) noexcept)
 		{
 			const auto old_len = _len;
@@ -267,6 +268,7 @@ namespace substrate
 
 			return (_addr = ::mremap(_addr, old_len, _len, flags, wanted_addr)) != MAP_FAILED;
 		}
+#endif
 
 #ifndef _WINDOWS
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)

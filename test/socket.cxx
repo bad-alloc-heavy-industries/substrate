@@ -102,7 +102,11 @@ TEST_CASE("sockaddr prepare", "[socket_t]")
 	}
 
 	REQUIRE((unknAddrRAW.ss_family == AF_UNSPEC || unknAddrRAW.ss_family == AF_INET6));
+#ifdef __APPLE__
+	REQUIRE((dncAddrRAW.ss_family == AF_UNSPEC));
+#else
 	REQUIRE((dncAddrRAW.ss_family == AF_INET || dncAddrRAW.ss_family == AF_INET6));
+#endif
 }
 
 #ifdef _WIN32

@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <limits>
+#include <tuple>
 #include <type_traits>
 #include <array>
 
@@ -337,23 +338,7 @@ namespace std // NOLINT(cert-dcl58-cpp)
 		return span[index];
 	}
 
-	template<typename T> struct tuple_size;
-	template<size_t index, typename T> struct tuple_element;
-
-	template<typename T, size_t extent>
-	struct tuple_size<span<T, extent>> : public integral_constant<size_t, extent>
-	{
-		static_assert(extent != dynamic_extent,
-			"tuple_size can only be used with a span of non-dynamic (fixed) extent");
-	};
-
-	template<size_t index, typename T, size_t extent> struct tuple_element<index, span<T, extent>>
-	{
-		static_assert(extent != dynamic_extent,
-			"tuple_element can only be used with a span of non-dynamic (fixed) extent");
-		static_assert(index < extent, "index is less than extent");
-		using type = T;
-	};
+	// tuple_size and tuple_element are already available starting with c++11
 } // namespace std
 
 #endif
