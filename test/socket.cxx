@@ -16,6 +16,10 @@ using substrate::socketType_t;
 using substrate::socketProtocol_t;
 using substrate::socket::prepare;
 
+#ifndef _WIN32
+using substrate::INVALID_SOCKET;
+#endif
+
 template<typename T, typename U> T as(const U &value) noexcept
 {
 	T result{};

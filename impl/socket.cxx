@@ -13,6 +13,7 @@
 
 #ifndef _WIN32
 #	include <unistd.h>
+using substrate::INVALID_SOCKET;
 inline int closesocket(const int s) { return close(s); }
 #else
 #	include <Winsock2.h>
