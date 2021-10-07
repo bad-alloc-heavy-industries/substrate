@@ -161,7 +161,7 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 #ifdef _WIN32
 	const auto wVersionRequested{MAKEWORD(2, 2)};
 	WSADATA wsaData{};
-	const auto err = WSAStartup(wVersionRequested, &wsaData);
+	const auto err{WSAStartup(wVersionRequested, &wsaData)};
 	if (err)
 		// No usable WinSock DLL.
 		return {AF_UNSPEC};

@@ -92,14 +92,14 @@
 #endif
 
 #ifdef _WIN32
-	namespace substrate
-	{
+namespace substrate
+{
 #ifdef _WIN64
 	using ssize_t = __int64;
 #else
 	using ssize_t = int;
 #endif
-	}
+}
 #endif
 
 #endif /* SUBSTRATE_INTERNAL_DEFS */
