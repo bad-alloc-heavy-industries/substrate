@@ -1555,7 +1555,7 @@ using substrate::is_polymorphic_v;
 TEST_CASE("[C++ 17] is_polymorphic_v helper", "[utility]")
 {
 	struct A { int foo; };
-	struct B { virtual void bar(); virtual ~B() = default; };
+	struct B { virtual void bar() = 0; virtual ~B() = default; };
 	struct C : B {};
 
 	REQUIRE_FALSE(is_polymorphic_v<A>());
@@ -1570,7 +1570,7 @@ TEST_CASE("[C++ 17] is_empty_v helper", "[utility]")
 {
 	struct A {};
 	struct B { int foo; };
-	struct D { virtual ~D(); };
+	struct D { virtual ~D() = 0; };
 
 	enum E : int {};
 	union F {};
@@ -1669,7 +1669,11 @@ TEST_CASE("[C++ 14] underlying_type_t helper", "[utility]")
 	REQUIRE(std::is_same<int, underlying_type_t<A>>::value);
 	REQUIRE(std::is_same<long, underlying_type_t<B>>::value);
 	REQUIRE(std::is_same<unsigned short, underlying_type_t<C>>::value);
+#if defined(_MSC_VER) && _MSC_VER >= 1920
+	REQUIRE(std::is_same<int, underlying_type_t<D>>::value);
+#else
 	REQUIRE(std::is_same<unsigned int, underlying_type_t<D>>::value);
+#endif
 }
 
 using substrate::conditional_t;
@@ -1897,24 +1901,55 @@ TEST_CASE("C++ typename decoding", "[utility]")
 
 	REQUIRE(decode_typename<A>() == "int");
 	REQUIRE(decode_typename<Au>() == "unsigned int");
-	REQUIRE(decode_typename<B>() == "int*");
-	REQUIRE(decode_typename<Bu>() == "unsigned int*");
 	REQUIRE(decode_typename<C>() == "int const");
 	REQUIRE(decode_typename<Cu>() == "unsigned int const");
+	REQUIRE(decode_typename<F>() == "int volatile");
+	REQUIRE(decode_typename<Fu>() == "unsigned int volatile");
+	REQUIRE(decode_typename<J>() == "int const volatile");
+	REQUIRE(decode_typename<Ju>() == "unsigned int const volatile");
+
+#if defined(_MSC_VER)
+#if defined(_WIN64)
+	REQUIRE(decode_typename<B>() == "int * __ptr64");
+	REQUIRE(decode_typename<Bu>() == "unsigned int * __ptr64");
+	REQUIRE(decode_typename<D>() == "int const * __ptr64");
+	REQUIRE(decode_typename<Du>() == "unsigned int const * __ptr64");
+	REQUIRE(decode_typename<E>() == "int * __ptr64 const");
+	REQUIRE(decode_typename<Eu>() == "unsigned int * __ptr64 const");
+	REQUIRE(decode_typename<G>() == "int volatile * __ptr64");
+	REQUIRE(decode_typename<Gu>() == "unsigned int volatile * __ptr64");
+	REQUIRE(decode_typename<H>() == "int * __ptr64 volatile");
+	REQUIRE(decode_typename<Hu>() == "unsigned int * __ptr64 volatile");
+	REQUIRE(decode_typename<I>() == "int * __ptr64 const volatile");
+	REQUIRE(decode_typename<Iu>() == "unsigned int * __ptr64 const volatile");
+#else
+	REQUIRE(decode_typename<B>() == "int *");
+	REQUIRE(decode_typename<Bu>() == "unsigned int *");
+	REQUIRE(decode_typename<D>() == "int const *");
+	REQUIRE(decode_typename<Du>() == "unsigned int const *");
+	REQUIRE(decode_typename<E>() == "int * const");
+	REQUIRE(decode_typename<Eu>() == "unsigned int * const");
+	REQUIRE(decode_typename<G>() == "int volatile *");
+	REQUIRE(decode_typename<Gu>() == "unsigned int volatile *");
+	REQUIRE(decode_typename<H>() == "int* volatile");
+	REQUIRE(decode_typename<Hu>() == "unsigned int * volatile");
+	REQUIRE(decode_typename<I>() == "int* const volatile");
+	REQUIRE(decode_typename<Iu>() == "unsigned int * const volatile");
+#endif
+#else
+	REQUIRE(decode_typename<B>() == "int*");
+	REQUIRE(decode_typename<Bu>() == "unsigned int*");
 	REQUIRE(decode_typename<D>() == "int const*");
 	REQUIRE(decode_typename<Du>() == "unsigned int const*");
 	REQUIRE(decode_typename<E>() == "int* const");
 	REQUIRE(decode_typename<Eu>() == "unsigned int* const");
-	REQUIRE(decode_typename<F>() == "int volatile");
-	REQUIRE(decode_typename<Fu>() == "unsigned int volatile");
 	REQUIRE(decode_typename<G>() == "int volatile*");
 	REQUIRE(decode_typename<Gu>() == "unsigned int volatile*");
 	REQUIRE(decode_typename<H>() == "int* volatile");
 	REQUIRE(decode_typename<Hu>() == "unsigned int* volatile");
 	REQUIRE(decode_typename<I>() == "int* const volatile");
 	REQUIRE(decode_typename<Iu>() == "unsigned int* const volatile");
-	REQUIRE(decode_typename<J>() == "int const volatile");
-	REQUIRE(decode_typename<Ju>() == "unsigned int const volatile");
+#endif
 }
 
 using substrate::leb128_decode;
@@ -1926,10 +1961,15 @@ TEST_CASE("leb128 tests", "[utility]")
 
 	SECTION("signed leb128 int8_t")
 	{
-		std::uniform_int_distribution<int8_t> int8Dist{std::numeric_limits<int8_t>::min()};
+		// std::uniform_int_distribution<int8_t> is UB
+		std::uniform_int_distribution<int16_t> int8Dist
+		{
+			std::numeric_limits<int8_t>::min(),
+			std::numeric_limits<int8_t>::max()
+		};
 		for (size_t c{}; c < check_itr; ++c)
 		{
-			auto value = int8Dist(rand);
+			auto value = int8_t(int8Dist(rand));
 			auto enc = leb128_encode<int8_t>(value);
 			auto res = leb128_decode<int8_t>(enc);
 			REQUIRE(value == res);
@@ -1974,10 +2014,15 @@ TEST_CASE("leb128 tests", "[utility]")
 
 	SECTION("unsigned leb128 uint8_t")
 	{
-		std::uniform_int_distribution<uint8_t> uint8Dist{std::numeric_limits<uint8_t>::min()};
+		// std::uniform_int_distribution<int8_t> is UB
+		std::uniform_int_distribution<uint16_t> uint8Dist
+		{
+			std::numeric_limits<uint8_t>::min(),
+			std::numeric_limits<uint8_t>::max()
+		};
 		for (size_t c{}; c < check_itr; ++c)
 		{
-			auto value = uint8Dist(rand);
+			auto value = uint8_t(uint8Dist(rand));
 			auto enc = leb128_encode<uint8_t>(value);
 			auto res = leb128_decode<uint8_t>(enc);
 			REQUIRE(value == res);

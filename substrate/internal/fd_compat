@@ -18,6 +18,13 @@
 #	endif
 #endif
 
+#if defined(_WIN32)
+#	define O_NOCTTY _O_BINARY
+#	if defined(__MINGW32__) || defined(__MINGW64__)
+#		undef fstat // macro conflicts with fstat definition below
+#	endif
+#endif
+
 namespace substrate
 {
 #ifndef _WIN32
@@ -48,10 +55,10 @@ namespace substrate
 			{ return ftruncate(fd, size); }
 #else
 #if defined(__MINGW32__) || defined(__MINGW64__)
-#undef fstat
-#endif
-#	define O_NOCTTY _O_BINARY
 		using stat_t = struct _stat64;
+#else
+		using stat_t = struct ::_stat64;
+#endif
 
 		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
 			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }
