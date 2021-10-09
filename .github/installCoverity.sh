@@ -32,4 +32,4 @@ PATH=$TOOL_DIR/bin:$PATH
 
 cov-configure --template --comptype gcc --compiler gcc-9
 
-echo ::set-env name=PATH::"$PATH"
+echo "PATH=$PATH" >> $GITHUB_ENV
