@@ -309,9 +309,7 @@ namespace substrate
 		as_bytes(span<T, extent> span) noexcept
 #else
 	// MSVC < 2019 parser chokes on ?: inside a template parameter definition
-	template <typename T, size_t extent,
-				size_t U = extent == dynamic_extent ? dynamic_extent
-													: extent * sizeof(T)>
+	template <typename T, size_t extent, size_t U = extent == dynamic_extent ? dynamic_extent : extent * sizeof(T)>
 	inline span<const substrate::byte, U> as_bytes(span<T, extent> span) noexcept
 #endif
 	{
@@ -327,9 +325,7 @@ namespace substrate
 		as_writeable_bytes(span<T, extent> span) noexcept
 #else
 	// MSVC < 2019 parser chokes on ?: inside a template parameter definition
-	template <typename T, size_t extent,
-				size_t U = extent == dynamic_extent ? dynamic_extent
-													: extent * sizeof(T)>
+	template <typename T, size_t extent, size_t U = extent == dynamic_extent ? dynamic_extent : extent * sizeof(T)>
 	inline span<const substrate::byte, U> as_writeable_bytes(span<T, extent> span) noexcept
 #endif
 	{
@@ -346,25 +342,25 @@ namespace std // NOLINT(cert-dcl58-cpp)
 	using substrate::dynamic_extent;
 	using substrate::span;
 
-	template<size_t index, typename T, size_t N> constexpr T &get(span<T, N> span) noexcept
+	template<size_t index, typename T, size_t extent_> constexpr T &get(span<T, extent_> span) noexcept
 	{
-		static_assert(N != dynamic_extent && index < N,
+		static_assert(extent_ != dynamic_extent && index < extent_,
 			"get<I> can only be used with a span of non-dynamic (fixed) extent");
 		return span[index];
 	}
 
-	template<typename T, size_t N>
-	struct tuple_size<span<T, N>> : public integral_constant<size_t, N>
+	template<typename T, size_t extent_>
+	struct tuple_size<span<T, extent_>> : public integral_constant<size_t, extent_>
 	{
-		static_assert(N != dynamic_extent,
+		static_assert(extent_ != dynamic_extent,
 			"tuple_size can only be used with a span of non-dynamic (fixed) extent");
 	};
 
-	template<size_t index, typename T, size_t N> struct tuple_element<index, span<T, N>>
+	template<size_t index, typename T, size_t extent_> struct tuple_element<index, span<T, extent_>>
 	{
-		static_assert(N != dynamic_extent,
+		static_assert(extent_ != dynamic_extent,
 			"tuple_element can only be used with a span of non-dynamic (fixed) extent");
-		static_assert(index < N, "index is less than extent");
+		static_assert(index < extent_, "index is less than extent");
 		using type = T;
 	};
 } // namespace std
