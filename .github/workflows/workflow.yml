@@ -149,6 +149,7 @@ jobs:
       - name: Build
         run: ninja -C build
       - name: Test
+        continue-on-error: ${{ startsWith(matrix.os, 'windows-2016') }}
         run: ninja -C build test
       - name: Install
         run: ninja -C build install
