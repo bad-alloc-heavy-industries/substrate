@@ -92,7 +92,7 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: ninja -C build
       - name: Test
@@ -100,5 +100,5 @@ jobs:
       - name: Install
         run: ninja -C build  install
       - name: Codecov
-        if: success() && matrix.coverage
+        if: success()
         uses: codecov/codecov-action@v2
