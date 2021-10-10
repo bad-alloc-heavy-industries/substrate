@@ -31,8 +31,6 @@ namespace substrate
 		reference operator *() const noexcept { return data[index]; }
 		pointer operator ->() const noexcept { return data + index; }
 		reference operator [](const std::size_t n) const noexcept { return *(*this + n); }
-		boundedIterator_t operator +(const std::size_t n) const noexcept { return boundedIterator_t{*this} += n; }
-		boundedIterator_t operator -(const std::size_t n) const noexcept { return boundedIterator_t{*this} -= n; }
 
 		boundedIterator_t &operator ++() noexcept
 		{
@@ -83,6 +81,25 @@ namespace substrate
 		bool operator ==(const boundedIterator_t &b) const noexcept
 			{ return data == b.data && index == b.index && max == b.max; }
 		bool operator !=(const boundedIterator_t &b) const noexcept { return !(*this == b); }
+
+		boundedIterator_t operator +(const std::size_t n) const noexcept
+		{
+#if defined(_MSC_VER) && _MSC_VER < 1920
+			auto copy{*this};
+			return copy += n;
+#else
+			return boundedIterator_t{*this} += n;
+#endif
+		}
+		boundedIterator_t operator -(const std::size_t n) const noexcept
+		{
+#if defined(_MSC_VER) && _MSC_VER < 1920
+			auto copy{*this};
+			return copy -= n;
+#else
+			return boundedIterator_t{*this} -= n;
+#endif
+		}
 	};
 }
 
