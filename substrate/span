@@ -331,25 +331,25 @@ namespace std // NOLINT(cert-dcl58-cpp)
 	using substrate::dynamic_extent;
 	using substrate::span;
 
-	template<size_t index, typename T, size_t extent> constexpr T &get(span<T, extent> span) noexcept
+	template<size_t index, typename T, size_t N> constexpr T &get(span<T, N> span) noexcept
 	{
-		static_assert(extent != dynamic_extent && index < extent,
+		static_assert(N != dynamic_extent && index < N,
 			"get<I> can only be used with a span of non-dynamic (fixed) extent");
 		return span[index];
 	}
 
-	template<typename T, size_t extent>
-	struct tuple_size<span<T, extent>> : public integral_constant<size_t, extent>
+	template<typename T, size_t N>
+	struct tuple_size<span<T, N>> : public integral_constant<size_t, N>
 	{
-		static_assert(extent != dynamic_extent,
+		static_assert(N != dynamic_extent,
 			"tuple_size can only be used with a span of non-dynamic (fixed) extent");
 	};
 
-	template<size_t index, typename T, size_t extent> struct tuple_element<index, span<T, extent>>
+	template<size_t index, typename T, size_t N> struct tuple_element<index, span<T, N>>
 	{
-		static_assert(extent != dynamic_extent,
+		static_assert(N != dynamic_extent,
 			"tuple_element can only be used with a span of non-dynamic (fixed) extent");
-		static_assert(index < extent, "index is less than extent");
+		static_assert(index < N, "index is less than extent");
 		using type = T;
 	};
 } // namespace std
