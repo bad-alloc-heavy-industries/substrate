@@ -62,7 +62,7 @@ jobs:
           wget https://apt.llvm.org/llvm-snapshot.gpg.key
           sudo apt-key add llvm-snapshot.gpg.key
           rm llvm-snapshot.gpg.key
-          sudo apt-add-repository "deb https://apt.llvm.org/focal/ llvm-toolchain-focal${CC/#clang/} main"
+          sudo apt-add-repository "deb https://apt.llvm.org/focal/ llvm-toolchain-focal main"
           sudo apt-get update
           CXX=${CC/#clang/clang++}
           sudo apt-get install $CC $CXX
