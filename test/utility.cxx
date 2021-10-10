@@ -1669,7 +1669,7 @@ TEST_CASE("[C++ 14] underlying_type_t helper", "[utility]")
 	REQUIRE(std::is_same<int, underlying_type_t<A>>::value);
 	REQUIRE(std::is_same<long, underlying_type_t<B>>::value);
 	REQUIRE(std::is_same<unsigned short, underlying_type_t<C>>::value);
-#if defined(_MSC_VER) && _MSC_VER >= 1920
+#if defined(_MSC_VER)
 	REQUIRE(std::is_same<int, underlying_type_t<D>>::value);
 #else
 	REQUIRE(std::is_same<unsigned int, underlying_type_t<D>>::value);
