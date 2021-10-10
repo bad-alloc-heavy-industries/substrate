@@ -32,7 +32,7 @@ jobs:
           - 'c++11'
           - 'c++14'
           - 'c++17'
-      fail-fast: false
+      fail-fast: true
     steps:
       - name: Runtime environment
         shell: bash
@@ -89,6 +89,138 @@ jobs:
           ninja --version
       - name: Configure
         run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }}
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+  build-windows:
+    name: 'Windows 
+      <os=${{ matrix.os }}
+       cpp_std=${{ matrix.cpp_std }}>'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2016
+          - windows-2019
+          - windows-2022
+        cpp_std:
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    env:
+      CC: cl.exe
+      CXX: cl.exe
+      LD: link.exe
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Setup compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          pip3 install --upgrade pip setuptools wheel
+          pip3 install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC  || true
+          $LD  || true
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+  build-windows-mingw:
+    name: 'Windows 2019 
+      <MSYS MinGW 
+       abi=${{ matrix.sys.abi }}
+       cpp_std=${{ matrix.cpp_std }}>'
+    runs-on: windows-2019
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        sys:
+          - { abi: mingw64, env: x86_64,       compiler: gcc }
+          - { abi: ucrt64,  env: ucrt-x86_64,  compiler: gcc }
+          - { abi: clang64, env: clang-x86_64, compiler: clang } # Experimental!
+        cpp_std:
+          - 'c++11'
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    steps:
+      - name: Use MinGW from MSYS
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys.abi}}
+          update: true
+          path-type: inherit
+          install: >-
+            mingw-w64-${{matrix.sys.env}}-toolchain
+      - name: Runtime environment
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'mingw64') || startsWith(matrix.sys.abi, 'ucrt64')
+        run: |
+          CXX=${CC/#gcc/g++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'clang64')
+        run: |
+          CXX=${CC/#clang/clang++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        run: |
+          pip3 install --upgrade setuptools wheel
+          pip3 install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        run: |
+          $CC --version
+          $CXX --version
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
       - name: Build
         run: ninja -C build
       - name: Test
