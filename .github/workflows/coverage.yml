@@ -6,7 +6,7 @@ on:
       - 'coverityScan'
   pull_request:
     branches:
-      - 'master'
+      - 'main'
   schedule:
     - cron: "0 0 1 * *"
 
