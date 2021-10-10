@@ -1,4 +1,4 @@
-name: GitHub Actions
+name: Coverage
 
 on:
   push:
@@ -7,22 +7,20 @@ on:
   pull_request:
     branches:
       - 'master'
+  schedule:
+    - cron: "0 0 1 * *"
 
 jobs:
-  build-linux:
-    #-focal:
+  build-coverage-linux:
+    if: github.repository == 'bad-alloc-heavy-industries/substrate'
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         compiler:
-          #- 'clang-6.0'
-          #- 'clang-7'
-          #- 'clang-8'
           - 'clang-9'
           - 'clang-10'
           - 'clang-11'
           - 'clang-12'
-          #- 'gcc-6'
           - 'gcc-7'
           - 'gcc-8'
           - 'gcc-9'
@@ -41,6 +39,9 @@ jobs:
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Coverage environment
+        run: |
+          echo "BUILD_OPTS=--buildtype=debug" >> $GITHUB_ENV
       - name: Setup GCC
         if: startsWith(matrix.compiler, 'gcc')
         shell: bash
@@ -51,6 +52,7 @@ jobs:
           sudo apt-get install $CC $CXX
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.compiler }}
       - name: Setup Clang
@@ -66,6 +68,7 @@ jobs:
           sudo apt-get install $CC $CXX
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.compiler }}
         working-directory: ${{ runner.temp }}
@@ -85,13 +88,17 @@ jobs:
         run: |
           $CC --version
           $CXX --version
+          $GCOV --version
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }}
+        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: ninja -C build
       - name: Test
         run: ninja -C build test
       - name: Install
-        run: ninja -C build install
+        run: ninja -C build  install
+      - name: Codecov
+        if: success() && matrix.coverage
+        uses: codecov/codecov-action@v2
