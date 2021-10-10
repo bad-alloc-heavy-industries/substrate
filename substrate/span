@@ -303,9 +303,17 @@ namespace substrate
 	template<typename container_t> span(const container_t &) -> span<const typename container_t::value_type>;
 #endif
 
+#if !defined(_MSC_VER) || _MSC_VER >= 1920
 	template<typename T, size_t extent> inline span<const substrate::byte,
 		extent == dynamic_extent ? dynamic_extent : extent * sizeof(T)>
 		as_bytes(span<T, extent> span) noexcept
+#else
+	// MSVC < 2019 parser chokes on ?: inside a template parameter definition
+	template <typename T, size_t extent,
+				size_t U = extent == dynamic_extent ? dynamic_extent
+													: extent * sizeof(T)>
+	inline span<const substrate::byte, U> as_bytes(span<T, extent> span) noexcept
+#endif
 	{
 		return {
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -313,10 +321,17 @@ namespace substrate
 			span.size_bytes()
 		};
 	}
-
+#if !defined(_MSC_VER) || _MSC_VER >= 1920
 	template<typename T, size_t extent> inline span<substrate::byte,
 		extent == dynamic_extent ? dynamic_extent : extent * sizeof(T)>
 		as_writeable_bytes(span<T, extent> span) noexcept
+#else
+	// MSVC < 2019 parser chokes on ?: inside a template parameter definition
+	template <typename T, size_t extent,
+				size_t U = extent == dynamic_extent ? dynamic_extent
+													: extent * sizeof(T)>
+	inline span<const substrate::byte, U> as_writeable_bytes(span<T, extent> span) noexcept
+#endif
 	{
 		return {
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
