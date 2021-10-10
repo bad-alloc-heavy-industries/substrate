@@ -462,8 +462,14 @@ namespace substrate
 	template<class T, class... Args>
 	constexpr bool is_nothrow_constructible_v = std::is_nothrow_constructible<T, Args...>::value;
 
-	template<class T>
+#if defined(__clang__) && (defined(__MINGW32__) || defined(__MINGW64__))
+	// MSYS Clang (all standards) leaks the signedness of unscoped enums
+	template <class T>
+	constexpr bool is_unsigned_v = std::is_integral<T>::value && std::is_unsigned<T>::value;
+#else
+	template <class T>
 	constexpr bool is_unsigned_v = std::is_unsigned<T>::value;
+#endif
 
 	template<class T>
 	constexpr bool is_signed_v = std::is_signed<T>::value;

@@ -149,7 +149,15 @@ template<class T, class... Args> constexpr inline decltype(std::is_nothrow_const
 	is_nothrow_constructible_v() { return std::is_nothrow_constructible<T, Args...>::value; }
 
 template<class T, typename V = decltype(std::is_unsigned<T>::value)>
-	constexpr inline V is_unsigned_v() { return std::is_unsigned<T>::value; }
+	constexpr inline V is_unsigned_v()
+	{
+#if defined(__clang__) && (defined(__MINGW32__) || defined(__MINGW64__))
+		// MSYS Clang (all standards) leaks the signedness of unscoped enums
+		return std::is_integral<T>::value && std::is_unsigned<T>::value;
+#else
+		return std::is_unsigned<T>::value;
+#endif
+	}
 
 template<class T, typename V = decltype(std::is_signed<T>::value)>
 	constexpr inline V is_signed_v() { return std::is_signed<T>::value; }
