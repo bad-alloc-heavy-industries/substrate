@@ -132,9 +132,7 @@ jobs:
       - name: Install
         run: ninja -C build install
   build-windows:
-    name: 'Windows
-      <os=${{ matrix.os }}
-       cpp_std=${{ matrix.cpp_std }}>'
+    name: 'build-windows (${{ matrix.os }}, msvc, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
