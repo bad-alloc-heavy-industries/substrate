@@ -2,11 +2,14 @@
 #ifndef SUBSTRATE_PROMOTION_HELPERS
 #define SUBSTRATE_PROMOTION_HELPERS
 
+#if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
+#	define SUBSTRATE_CXX11_COMPAT
+#endif
 #include <substrate/utility>
 
 namespace substrate
 {
-#if defined(SUBSTRATE_CXX11_COMPAT) && __cplusplus < 201402L
+#if __cplusplus < 201402L
 	template<typename T, bool = is_unsigned_v<T>()> struct promoted_type;
 #else
 	template<typename T, bool = is_unsigned_v<T>> struct promoted_type;
@@ -15,7 +18,7 @@ namespace substrate
 	template<typename T> struct promoted_type<T, false> { using type = int32_t; };
 	template<> struct promoted_type<uint64_t, true> { using type = uint64_t; };
 	template<> struct promoted_type<int64_t, false> { using type = int64_t; };
-#if defined(SUBSTRATE_CXX11_COMPAT) && __cplusplus < 201402L
+#if __cplusplus < 201402L
 	template<> struct promoted_type<size_t, !is_same_v<uint64_t, size_t>()> { using type = size_t; };
 	template<> struct promoted_type<ssize_t, is_same_v<int64_t, ssize_t>()> { using type = ssize_t; };
 #else
