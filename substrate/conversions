@@ -12,7 +12,7 @@
 
 namespace substrate
 {
-	template<typename int_t, typename valueType_t, size_t _length = static_cast<std::size_t>(-1), char padding = '0'>
+	template<typename int_t, typename valueType_t, std::size_t _length = static_cast<std::size_t>(-1), char padding = '0'>
 		struct fromInt_t
 	{
 	public:
@@ -24,16 +24,16 @@ namespace substrate
 		using arithUint_t = make_unsigned_t<arithInt_t>;
 		const valueType_t &_value;
 
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t calcDigits(const arithUint_t number) const noexcept)
-			{ return uint8_t(1U + (number < 10 ? 0U : calcDigits(number / 10U))); }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t calcDigits(const arithUint_t number) const noexcept)
+			{ return 1U + (number < 10 ? 0U : calcDigits(number / 10U)); }
 
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits(const arithInt_t number) const noexcept)
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t digits(const arithInt_t number) const noexcept)
 		{
 			return std::is_signed<int_t>::value && number < 0 ?
-				uint8_t(1U + calcDigits(arithUint_t(-number))) : calcDigits(arithUint_t(number));
+				1U + calcDigits(arithUint_t(-number)) : calcDigits(arithUint_t(number));
 		}
 
-		SUBSTRATE_NO_DISCARD(constexpr size_t power10(const size_t power) const noexcept)
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t power10(const std::size_t power) const noexcept)
 			{ return power ? power10(power - 1U) * 10U : 1U; }
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t zeros(const arithInt_t number) const noexcept)
@@ -57,7 +57,7 @@ namespace substrate
 				{ return number.count(); }
 
 		[[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR arithUint_t process(const arithUint_t number, char *const buffer,
-			const uint8_t digits, const size_t index) const noexcept
+			const std::size_t digits, const std::size_t index) const noexcept
 		{
 			if (number < 10)
 			{
@@ -76,7 +76,7 @@ namespace substrate
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR void process(const arithUint_t number, char *const buffer) const noexcept
-			{ process(number, buffer, uint8_t(digits() - 1U), 0); }
+			{ process(number, buffer, digits() - 1U, 0); }
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length == npos>
 			format(char *const buffer) const noexcept { process(valueAsInt(_value), buffer); }
@@ -125,7 +125,7 @@ namespace substrate
 					const auto offset{_length - length};
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					const auto _buffer{std::fill_n(buffer + 1, offset, padding)};
-					process(uint_t(-value), _buffer, uint8_t(length - 2U), 0U);
+					process(uint_t(-value), _buffer, length - 2U, 0U);
 				}
 				else
 					std::fill_n(buffer, _length, padding);
@@ -166,14 +166,14 @@ namespace substrate
 					uint8_t(maxDigits - 1U), 0U);
 			else
 			{
-				const uint8_t trailingZeros_ = trailingZeros();
-				const uint8_t leadingZeros = uint8_t(maxDigits - digits_);
-				for (uint8_t i{0}; i < leadingZeros; ++i)
+				const uint8_t trailingZeros_{trailingZeros()};
+				const auto leadingZeros{maxDigits - digits_};
+				for (size_t i{0}; i < leadingZeros; ++i)
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				process(value / power10(trailingZeros_), buffer + leadingZeros,
-					uint8_t(digits_ - trailingZeros_ - 1), 0U);
+					digits_ - trailingZeros_ - 1U, 0U);
 			}
 		}
 
@@ -218,7 +218,7 @@ namespace substrate
 		}
 
 		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t digits() const noexcept) { return digits(valueAsInt(_value)); }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t digits() const noexcept) { return digits(valueAsInt(_value)); }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
 			{ return _length == npos ? digits() + 1U : _length + 1U; }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t hexLength() const noexcept)
@@ -238,7 +238,7 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionDigits(const uint8_t maxDigits) const noexcept)
 		{
-			const uint8_t digits_ = digits();
+			const auto digits_{digits()};
 			if (digits_ > maxDigits)
 				return maxDigits;
 			return uint8_t((maxDigits - digits_) + (digits_ - trailingZeros()));
@@ -268,7 +268,7 @@ namespace substrate
 		using arithInt_t = promoted_type_t<int_t>;
 		using arithUint_t = make_unsigned_t<arithInt_t>;
 		const char *const _value{nullptr};
-		const size_t _length{};
+		const std::size_t _length{};
 		constexpr static const bool _isSigned = std::is_signed<int_t>::value;
 
 		SUBSTRATE_NO_DISCARD(constexpr static bool isNumber(const char x) noexcept) { return x >= '0' && x <= '9'; }
@@ -290,9 +290,9 @@ namespace substrate
 	public:
 		SUBSTRATE_CXX17_CONSTEXPR toInt_t(const char *const value) noexcept :
 			_value{value}, _length{std::char_traits<char>::length(value)} { }
-		constexpr toInt_t(const char *const value, const size_t subLength) noexcept :
+		constexpr toInt_t(const char *const value, const std::size_t subLength) noexcept :
 			_value{value}, _length{subLength} { }
-		constexpr size_t length() const noexcept { return _length; }
+		constexpr std::size_t length() const noexcept { return _length; }
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isDec() const noexcept)
 		{
@@ -327,7 +327,7 @@ namespace substrate
 					continue;
 				result *= 10U;
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				result += size_t(_value[i] - '0');
+				result += std::size_t(_value[i] - '0');
 			}
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			if (_isSigned && _length > 0 && _value[0] == '-')
