@@ -373,8 +373,4 @@ namespace substrate
 	};
 }
 
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
-
 #endif /*SUBSTRATE_CONVERSIONS*/
