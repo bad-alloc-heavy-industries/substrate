@@ -159,11 +159,13 @@ namespace substrate
 
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
 		{
-			const auto value{valueAsInt(_value)};
+			const arithInt_t value{valueAsInt(_value)};
 			const auto digits_{digits(value)};
+			// TODO: This technically hides crimes for signed numbers.. We need to consider if this is right or not
+			const auto fraction{static_cast<arithUint_t>(value)};
 			if (digits_ > maxDigits)
-				process(value - ((value / power10(maxDigits)) * power10(maxDigits)), buffer,
-					uint8_t(maxDigits - 1U), 0U);
+				process(fraction - ((fraction / power10(maxDigits)) * power10(maxDigits)), buffer,
+					maxDigits - 1U, 0U);
 			else
 			{
 				const auto trailingZeros_{trailingZeros()};
@@ -172,7 +174,7 @@ namespace substrate
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				process(value / power10(trailingZeros_), buffer + leadingZeros,
+				process(fraction / power10(trailingZeros_), buffer + leadingZeros,
 					digits_ - trailingZeros_ - 1U, 0U);
 			}
 		}
