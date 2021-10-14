@@ -132,7 +132,7 @@ jobs:
       - name: Install
         run: ninja -C build install
   build-windows:
-    name: 'Windows 
+    name: 'Windows
       <os=${{ matrix.os }}
        cpp_std=${{ matrix.cpp_std }}>'
     runs-on: ${{ matrix.os }}
@@ -190,16 +190,15 @@ jobs:
       - name: Install
         run: ninja -C build install
   build-windows-mingw:
-    name: 'Windows 2019 
-      <MSYS MinGW 
-       abi=${{ matrix.sys.abi }}
-       cpp_std=${{ matrix.cpp_std }}>'
-    runs-on: windows-2019
+    name: 'build-mingw (${{ matrix.os }}, ${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: msys2 {0}
     strategy:
       matrix:
+        os:
+          - windows-2019
         sys:
           - { abi: mingw64, env: x86_64,       compiler: gcc }
           - { abi: ucrt64,  env: ucrt-x86_64,  compiler: gcc }
