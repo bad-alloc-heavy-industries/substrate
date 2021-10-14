@@ -36,18 +36,18 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t power10(const std::size_t power) const noexcept)
 			{ return power ? power10(power - 1U) * 10U : 1U; }
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t zeros(const arithInt_t number) const noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR size_t zeros(const arithInt_t number) const noexcept)
 		{
 			const int_t num{number / 10};
-			return uint8_t(num * 10 == number ? 1U + zeros(num) : 0U);
+			return num * 10U == number ? 1U + zeros(num) : 0U;
 		}
 
-		template<typename R, typename P> SUBSTRATE_CXX14_CONSTEXPR uint8_t
+		template<typename R, typename P> SUBSTRATE_CXX14_CONSTEXPR size_t
 			zeros(const std::chrono::duration<R, P> &number) const noexcept
 				{ return zeros(number.count()); }
 
-		SUBSTRATE_NO_DISCARD(constexpr uint8_t hexDigits(const arithUint_t number) const noexcept)
-			{ return uint8_t(1U + (number < 16 ? 0U : hexDigits(number >> 4U))); }
+		SUBSTRATE_NO_DISCARD(constexpr size_t hexDigits(const arithUint_t number) const noexcept)
+			{ return 1U + (number < 16U ? 0U : hexDigits(number >> 4U)); }
 
 		template<typename value_t> constexpr enable_if_t<!is_duration<value_t>::value, arithInt_t>
 			valueAsInt(const value_t &number) const noexcept { return number; }
@@ -166,7 +166,7 @@ namespace substrate
 					uint8_t(maxDigits - 1U), 0U);
 			else
 			{
-				const uint8_t trailingZeros_{trailingZeros()};
+				const auto trailingZeros_{trailingZeros()};
 				const auto leadingZeros{maxDigits - digits_};
 				for (size_t i{0}; i < leadingZeros; ++i)
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -236,15 +236,15 @@ namespace substrate
 			return number;
 		}
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionDigits(const uint8_t maxDigits) const noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR size_t fractionDigits(const uint8_t maxDigits) const noexcept)
 		{
 			const auto digits_{digits()};
 			if (digits_ > maxDigits)
 				return maxDigits;
-			return uint8_t((maxDigits - digits_) + (digits_ - trailingZeros()));
+			return (maxDigits - digits_) + (digits_ - trailingZeros());
 		}
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t trailingZeros() const noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR size_t trailingZeros() const noexcept)
 			{ return valueAsInt(_value) ? zeros(_value) : 0U; }
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR uint8_t fractionLength(const uint8_t maxDigits) const noexcept)
 			{ return uint8_t(fractionDigits(maxDigits) + 1U); }
