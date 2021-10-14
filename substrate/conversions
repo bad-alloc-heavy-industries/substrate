@@ -10,11 +10,6 @@
 #include <substrate/internal/defs>
 #include <substrate/promotion_helpers>
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-
 namespace substrate
 {
 	template<typename int_t, typename valueType_t, size_t _length = static_cast<std::size_t>(-1), char padding = '0'>
