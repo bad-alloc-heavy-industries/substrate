@@ -2,29 +2,18 @@
 #ifndef SUBSTRATE_PROMOTION_HELPERS
 #define SUBSTRATE_PROMOTION_HELPERS
 
-#if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
-#	define SUBSTRATE_CXX11_COMPAT
-#endif
-#include <substrate/utility>
+#include <cstdint>
+#include <type_traits>
 
 namespace substrate
 {
-#if __cplusplus < 201402L
-	template<typename T, bool = is_unsigned_v<T>()> struct promoted_type;
-#else
-	template<typename T, bool = is_unsigned_v<T>> struct promoted_type;
-#endif
+	template<typename T, bool = std::is_unsigned<T>::value> struct promoted_type;
 	template<typename T> struct promoted_type<T, true> { using type = uint32_t; };
 	template<typename T> struct promoted_type<T, false> { using type = int32_t; };
 	template<> struct promoted_type<uint64_t, true> { using type = uint64_t; };
 	template<> struct promoted_type<int64_t, false> { using type = int64_t; };
-#if __cplusplus < 201402L
-	template<> struct promoted_type<size_t, !is_same_v<uint64_t, size_t>()> { using type = size_t; };
-	template<> struct promoted_type<ssize_t, is_same_v<int64_t, ssize_t>()> { using type = ssize_t; };
-#else
-	template<> struct promoted_type<size_t, !is_same_v<uint64_t, size_t>> { using type = size_t; };
-	template<> struct promoted_type<ssize_t, is_same_v<int64_t, ssize_t>> { using type = ssize_t; };
-#endif
+	template<> struct promoted_type<size_t, !std::is_same<uint64_t, size_t>::value> { using type = size_t; };
+	template<> struct promoted_type<ssize_t, std::is_same<int64_t, ssize_t>::value> { using type = ssize_t; };
 
 	template<typename T> using promoted_type_t = typename promoted_type<T>::type;
 } // namespace substrate
