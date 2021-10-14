@@ -113,8 +113,8 @@ jobs:
       - name: Setup Meson + Ninja
         shell: bash
         run: |
-          sudo pip3 install --upgrade pip setuptools wheel
-          pip3 install --user meson ninja
+          sudo python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install --user meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
         shell: bash
@@ -170,8 +170,8 @@ jobs:
       - name: Setup Meson + Ninja
         shell: bash
         run: |
-          pip3 install --upgrade pip setuptools wheel
-          pip3 install meson ninja
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
         shell: bash
@@ -246,9 +246,10 @@ jobs:
           lfs: true
           submodules: true
       - name: Setup Meson + Ninja
+        shell: bash
         run: |
-          pip3 install --upgrade setuptools wheel
-          pip3 install meson ninja
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
         run: |
