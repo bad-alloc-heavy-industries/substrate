@@ -321,7 +321,7 @@ namespace substrate
 		{
 			if (!isDec())
 				return {};
-			size_t result{};
+			arithUint_t result{};
 			for (size_t i{}; i < _length; ++i)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -329,7 +329,7 @@ namespace substrate
 					continue;
 				result *= 10U;
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				result += std::size_t(_value[i] - '0');
+				result += arithUint_t(_value[i] - '0');
 			}
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 			if (_isSigned && _length > 0 && _value[0] == '-')
