@@ -145,7 +145,7 @@ namespace substrate
 			auto digit{result.rbegin() + 1};
 			while (digit != result.rend())
 			{
-				auto hex{uint32_t(value & 0x0FU)};
+				auto hex{arithUint_t(value & 0x0FU)};
 				value >>= 4U;
 				if (hex > 9U)
 				{
@@ -166,7 +166,7 @@ namespace substrate
 			auto digit{result.rbegin() + 1};
 			while (digit != result.rend())
 			{
-				auto hex{uint32_t(value & 0x07U)};
+				auto hex{arithUint_t(value & 0x07U)};
 				value >>= 3U;
 				*digit++ = char(hex + 0x30U);
 				if (!value)
@@ -373,7 +373,7 @@ namespace substrate
 			for (size_t i{}; i < _length; ++i)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				uint32_t hex{uint8_t(_value[i])};
+				auto hex{arithUint_t(_value[i])};
 				if (hex >= 'a' && hex <= 'f')
 					hex -= 0x20U;
 				value <<= 4U;
