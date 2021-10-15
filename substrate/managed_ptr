@@ -147,7 +147,6 @@ namespace substrate
 		void *get() const noexcept { return ptr; }
 		template<typename T> T *get() const noexcept { return static_cast<T *const>(ptr); }
 		bool valid() const noexcept { return ptr; }
-		explicit operator bool() const noexcept { return ptr; }
 
 		void swap(managedPtr_t &p) noexcept
 		{
