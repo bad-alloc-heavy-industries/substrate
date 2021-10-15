@@ -655,17 +655,18 @@ namespace substrate
 		std::is_signed<T>::value, std::vector<uint8_t>> leb128_encode(T num)
 	{
 		using U = typename std::make_unsigned<T>::type;
+		using V = promoted_type_t<U>;
 		std::vector<uint8_t> enc{};
 		bool more{true};
-		while(more)
+		while (more)
 		{
-			uint8_t byte = U(num & 0x7F);
-			num >>= 0x07;
+			auto byte{uint8_t(static_cast<V>(num) & 0x7FU)};
+			num >>= 7U;
 
-			if ((!num && !U(byte & 0x40)) || (num == -1 && U(byte & 0x40)))
+			if ((!num && !(byte & 0x40U)) || (num == -1 && (byte & 0x40U)))
 				more = false;
 			else
-				byte |= 0x80;
+				byte |= 0x80U;
 			enc.emplace_back(byte);
 		}
 		return enc;
