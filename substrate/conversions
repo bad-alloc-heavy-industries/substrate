@@ -374,3 +374,4 @@ namespace substrate
 }
 
 #endif /*SUBSTRATE_CONVERSIONS*/
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
