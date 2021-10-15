@@ -672,13 +672,13 @@ namespace substrate
 	}
 
 	template<typename T> substrate::enable_if_t<std::is_integral<T>::value &&
-		std::is_signed<T>::value, T> leb128_decode(std::vector<uint8_t>& vec)
+		std::is_signed<T>::value, T> leb128_decode(const std::vector<uint8_t> &vec)
 	{
 		using U = typename std::make_unsigned<T>::type;
 		using V = promoted_type_t<U>;
 		V enc{};
 		size_t shift{};
-		for (auto &byte : vec)
+		for (const auto &byte : vec)
 		{
 			enc |= V{byte & 0x7FU} << shift;
 			shift += 7U;
@@ -712,17 +712,18 @@ namespace substrate
 	}
 
 	template<typename T> substrate::enable_if_t<std::is_integral<T>::value &&
-		std::is_unsigned<T>::value, T> leb128_decode(std::vector<uint8_t>& vec)
+		std::is_unsigned<T>::value, T> leb128_decode(const std::vector<uint8_t> &vec)
 	{
 		using U = typename std::make_unsigned<T>::type;
-		T enc{};
+		using V = promoted_type_t<U>;
+		V enc{};
 		size_t shift{};
-		for (auto &byte : vec)
+		for (const auto &byte : vec)
 		{
-			enc |= U(byte & 0x7F) << shift;
-			shift += 7;
+			enc |= V{byte & 0x7FU} << shift;
+			shift += 7U;
 		}
-		return enc;
+		return static_cast<T>(enc);
 	}
 }
 
