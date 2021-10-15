@@ -75,7 +75,7 @@ namespace substrate
 			{
 				std::array<uint8_t, 2> data{};
 				const bool result = read(data);
-				value = (uint16_t(data[1]) << 8U) | data[0];
+				value = uint16_t((uint16_t(data[1]) << 8U) | data[0]);
 				return result;
 			}
 
@@ -115,7 +115,7 @@ namespace substrate
 			{
 				std::array<uint8_t, 2> data{};
 				const bool result = read(data);
-				value = (uint16_t(data[0]) << 8U) | data[1];
+				value = uint16_t((uint16_t(data[0]) << 8U) | data[1]);
 				return result;
 			}
 

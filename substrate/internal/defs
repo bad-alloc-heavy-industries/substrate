@@ -12,6 +12,15 @@
 #	define __has_cpp_attribute(x) 0
 #endif
 
+// GCC 9 in C++03 mode reports __has_cpp_attribute as true.
+// See
+// https://github.com/boostorg/config/commit/8d58766c7b097ecdf99d414cc08feec313741332
+#if __has_cpp_attribute(no_unique_address) && !(defined(__GNUC__) && (__cplusplus < 201100))
+#	define SUBSTRATE_NO_UNIQUE_ADDRESS(x) [[no_unique_address]] x
+#else
+#	define SUBSTRATE_NO_UNIQUE_ADDRESS(x) x
+#endif
+
 #if __has_cpp_attribute(maybe_unused) || __cplusplus >= 201703L
 #	define SUBSTRATE_NOWARN_UNUSED(x) [[maybe_unused]] x
 #elif defined(__GNUC__)

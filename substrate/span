@@ -124,7 +124,7 @@ namespace substrate
 		constexpr static size_t extent = extent_v;
 
 	private:
-		[[no_unique_address]] internal::extentStorage_t<extent> _extent{0};
+		SUBSTRATE_NO_UNIQUE_ADDRESS(internal::extentStorage_t<extent> _extent{0});
 		pointer _ptr{nullptr};
 
 	public:

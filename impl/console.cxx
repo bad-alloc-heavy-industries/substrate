@@ -60,10 +60,10 @@ namespace substrate
 		if (value)
 		{
 #ifdef _WINDOWS
-			const auto consoleMode = setmode(fd, _O_U8TEXT);
-			const size_t valueLen = charTraits::length(value);
-			const size_t stringLen = MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS,
-				value, int(valueLen), nullptr, 0);
+			const auto consoleMode{setmode(fd, _O_U8TEXT)};
+			const auto valueLen{charTraits::length(value)};
+			const auto stringLen{static_cast<size_t>(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS,
+				value, int(valueLen), nullptr, 0))};
 			auto string{make_unique_nothrow<wchar_t []>(stringLen)};
 			if (!string)
 				return;

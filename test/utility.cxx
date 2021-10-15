@@ -7,6 +7,7 @@
 #if __cplusplus < 201402L && !defined(SUBSTRATE_CXX11_COMPAT)
 #	define SUBSTRATE_CXX11_COMPAT
 #endif
+#include <substrate/internal/defs>
 #include <substrate/utility>
 #include <catch2/catch.hpp>
 
@@ -120,8 +121,8 @@ namespace test
 
 	class Y
 	{
-		int foo; // NOLINT(clang-diagnostic-unused-private-field)
-		double bar; // NOLINT(clang-diagnostic-unused-private-field)
+		SUBSTRATE_NOWARN_UNUSED(int foo);
+		SUBSTRATE_NOWARN_UNUSED(double bar);
 
 	public:
 		Y(int baz) : foo{baz}, bar{} { }
@@ -132,7 +133,7 @@ namespace test
 	{
 		int bar;
 	private:
-		int baz; // NOLINT(clang-diagnostic-unused-private-field)
+		SUBSTRATE_NOWARN_UNUSED(int baz); // NOLINT(clang-diagnostic-unused-private-field)
 	};
 
 	struct AA
@@ -203,8 +204,8 @@ namespace test
 	struct AK
 	{
 	private:
-		int foo;
-		int bar;
+		SUBSTRATE_NOWARN_UNUSED(int foo);
+		SUBSTRATE_NOWARN_UNUSED(int bar);
 	public:
 
 		constexpr AK(std::nullptr_t) noexcept :

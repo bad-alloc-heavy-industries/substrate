@@ -160,7 +160,7 @@ namespace substrate
 		}
 		std::uint32_t res = sum % m16 + (sum % m32) / m16;
 
-		return (res % m16) + res / m16;
+		return std::uint16_t((res % m16) + res / m16);
 	}
 
 	template<std::size_t N>
@@ -183,7 +183,7 @@ namespace substrate
 			chksum &= 0xFFFFU;
 		}
 
-		return chksum;
+		return std::uint16_t(chksum);
 	}
 
 	template<std::size_t N>
