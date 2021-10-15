@@ -680,31 +680,34 @@ namespace substrate
 		size_t shift{};
 		for (auto &byte : vec)
 		{
-			enc |= U(byte & 0x7FU) << shift;
+			enc |= V{byte & 0x7FU} << shift;
 			shift += 7U;
 		}
 		if (shift && shift < sizeof(T) * 8U)
 		{
 			--shift;
 			for (size_t i{1U}; i < (sizeof(T) * 8U) - shift; ++i)
-				enc |= (enc & (U(1U) << shift)) << i;
+				enc |= (enc & (V{1U} << shift)) << i;
 		}
 		return static_cast<T>(enc);
 	}
 
 	template<typename T> substrate::enable_if_t<std::is_integral<T>::value &&
-		std::is_unsigned<T>::value, std::vector<uint8_t>> leb128_encode(T num)
+		std::is_unsigned<T>::value, std::vector<uint8_t>> leb128_encode(const T value)
 	{
+		using U = typename std::make_unsigned<T>::type;
+		using V = promoted_type_t<U>;
+		auto num{static_cast<V>(value)};
 		std::vector<uint8_t> enc{};
 		do
 		{
-			uint8_t byte = num & 0x7F;
-			num >>= 7;
-			if (num != 0)
-				byte |= 0x80;
+			uint8_t byte = num & 0x7FU;
+			num >>= 7U;
+			if (num != 0U)
+				byte |= 0x80U;
 			enc.emplace_back(byte);
 		}
-		while (num != 0);
+		while (num != 0U);
 		return enc;
 	}
 
