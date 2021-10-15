@@ -35,6 +35,12 @@ using str_t = std::char_traits<char>;
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define i64(n)		INT64_C(n)
 
+template<typename> constexpr inline size_t typeToOctalLength() noexcept { return static_cast<std::size_t>(-1); }
+template<> constexpr inline size_t typeToOctalLength<uint8_t>() noexcept { return 3; }
+template<> constexpr inline size_t typeToOctalLength<uint16_t>() noexcept { return 6; }
+template<> constexpr inline size_t typeToOctalLength<uint32_t>() noexcept { return 11; }
+template<> constexpr inline size_t typeToOctalLength<uint64_t>() noexcept { return 22; }
+
 template<typename> constexpr inline size_t typeToDecLength() noexcept;
 template<> constexpr inline size_t typeToDecLength<uint8_t>() noexcept { return 4; }
 template<> constexpr inline size_t typeToDecLength<uint16_t>() noexcept { return 6; }
@@ -55,10 +61,38 @@ template<typename int_t> struct testFromInt_t final
 {
 private:
 	using fromInt = fromInt_t<int_t, int_t>;
+	using toOctalFixed = fromInt_t<int_t, int_t, typeToOctalLength<int_t>()>;
 	using toDecFixed = fromInt_t<int_t, int_t, typeToDecLength<int_t>()>;
 	using toHexFixed = fromInt_t<int_t, int_t, typeToHexLength<int_t>()>;
 
 public:
+	static void testOctConversions(const testOk_t<int_t> &tests)
+	{
+		for (const auto &test : tests)
+		{
+			const auto inputNumber{test.inputNumber};
+			const auto result{test.variableResult};
+			REQUIRE_NOTHROW([&]()
+			{
+				const auto value{fromInt{inputNumber}.toOctal()};
+				REQUIRE(!value.empty());
+				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
+			}());
+		}
+
+		for (const auto &test : tests)
+		{
+			const auto inputNumber{test.inputNumber};
+			const auto result{test.fixedResult};
+			REQUIRE_NOTHROW([&]()
+			{
+				const auto value{toOctalFixed{inputNumber}.toOctal()};
+				REQUIRE(!value.empty());
+				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
+			}());
+		}
+	}
+
 	static void testDecConversions(const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
@@ -123,6 +157,58 @@ public:
 		}
 	}
 };
+
+TEST_CASE("Octal conversion from uint8_t", "[conversions]")
+{
+	testFromInt_t<uint8_t>::testOctConversions(
+	{
+		{0, "0", "000"},
+		{7, "7", "007"},
+		{8, "10", "010"},
+		{32, "40", "040"},
+		{127, "177", "177"},
+		{128, "200", "200"},
+		{255, "377", "377"}
+	});
+}
+
+TEST_CASE("Octal conversion from uint16_t", "[conversions]")
+{
+	testFromInt_t<uint16_t>::testOctConversions(
+	{
+		{0, "0", "000000"},
+		{256, "400", "000400"},
+		{32767, "77777", "077777"},
+		{32768, "100000", "100000"},
+		{65535, "177777", "177777"}
+	});
+}
+
+TEST_CASE("Octal conversion from uint32_t", "[conversions]")
+{
+	testFromInt_t<uint32_t>::testOctConversions(
+	{
+		{0, "0", "00000000000"},
+		{65536, "200000", "00000200000"},
+		{2147483647, "17777777777", "17777777777"},
+		{2147483648, "20000000000", "20000000000"},
+		{4294967295, "37777777777", "37777777777"}
+	});
+}
+
+TEST_CASE("Octal conversion from uint64_t", "[conversions]")
+{
+	testFromInt_t<uint64_t>::testOctConversions(
+	{
+		{0, "0", "0000000000000000"},
+		{4294967296, "40000000000", "0000000000040000000000"},
+		{140737488355327, "3777777777777777", "0000003777777777777777"},
+		{140737488355328, "4000000000000000", "0000004000000000000000"},
+		{9223372036854775807, "777777777777777777777", "0777777777777777777777"},
+		{u64(9223372036854775808), "1000000000000000000000", "1000000000000000000000"},
+		{u64(18446744073709551615), "1777777777777777777777", "1777777777777777777777"}
+	});
+}
 
 TEST_CASE("Decimal conversion from uint8_t", "[conversions]")
 {

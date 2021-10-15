@@ -49,6 +49,9 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr size_t hexDigits(const arithUint_t number) const noexcept)
 			{ return 1U + (number < 16U ? 0U : hexDigits(number >> 4U)); }
 
+		SUBSTRATE_NO_DISCARD(constexpr size_t octalDigits(const arithUint_t number) const noexcept)
+			{ return 1U + (number < 8U ? 0U : octalDigits(number >> 3U)); }
+
 		template<typename value_t> constexpr enable_if_t<!is_duration<value_t>::value, arithInt_t>
 			valueAsInt(const value_t &number) const noexcept { return number; }
 
@@ -157,6 +160,21 @@ namespace substrate
 			std::fill_n(result.begin(), result.rend() - digit, padding);
 		}
 
+		void formatOctal(std::string &result) const noexcept
+		{
+			auto value{valueAsInt(_value)};
+			auto digit{result.rbegin() + 1};
+			while (digit != result.rend())
+			{
+				auto hex{uint32_t(value & 0x07U)};
+				value >>= 3U;
+				*digit++ = char(hex + 0x30U);
+				if (!value)
+					break;
+			}
+			std::fill_n(result.begin(), result.rend() - digit, padding);
+		}
+
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
 		{
 			const arithInt_t value{valueAsInt(_value)};
@@ -219,12 +237,22 @@ namespace substrate
 			return number;
 		}
 
+		template<typename T = int_t> enable_if_t<std::is_same<T, int_t>::value && std::is_unsigned<T>::value,
+			std::string> toOctal() const noexcept
+		{
+			std::string number(octalLength(), '\0');
+			formatOctal(number);
+			return number;
+		}
+
 		SUBSTRATE_NO_DISCARD(std::string toDec() const noexcept) { return *this; }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t digits() const noexcept) { return digits(valueAsInt(_value)); }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t length() const noexcept)
 			{ return _length == npos ? digits() + 1U : _length + 1U; }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t hexLength() const noexcept)
 			{ return _length == npos ? hexDigits(valueAsInt(_value)) + 1U : _length + 1U; }
+		SUBSTRATE_NO_DISCARD(constexpr std::size_t octalLength() const noexcept)
+			{ return _length == npos ? octalDigits(valueAsInt(_value)) + 1U : _length + 1U; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
