@@ -13,6 +13,7 @@
 #include <array>
 #include <chrono>
 #include <utility>
+#include <substrate/promotion_helpers>
 
 #ifndef _MSC_VER
 #include <cxxabi.h>
@@ -674,20 +675,21 @@ namespace substrate
 		std::is_signed<T>::value, T> leb128_decode(std::vector<uint8_t>& vec)
 	{
 		using U = typename std::make_unsigned<T>::type;
-		T enc{};
+		using V = promoted_type_t<U>;
+		V enc{};
 		size_t shift{};
 		for (auto &byte : vec)
 		{
-			enc |= U(byte & 0x7F) << shift;
-			shift += 7;
+			enc |= U(byte & 0x7FU) << shift;
+			shift += 7U;
 		}
-		if (shift && shift < sizeof(T) * 8)
+		if (shift && shift < sizeof(T) * 8U)
 		{
 			--shift;
-			for (size_t i{1}; i < (sizeof(T) * 8) - shift; ++i)
+			for (size_t i{1U}; i < (sizeof(T) * 8U) - shift; ++i)
 				enc |= (enc & (U(1U) << shift)) << i;
 		}
-		return enc;
+		return static_cast<T>(enc);
 	}
 
 	template<typename T> substrate::enable_if_t<std::is_integral<T>::value &&
