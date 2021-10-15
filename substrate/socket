@@ -24,10 +24,12 @@ namespace substrate
 #ifndef _WIN32
 	using socklen_t = unsigned int;
 	using sockType_t = int32_t;
+	using bufferlen_t = size_t; 
 	constexpr static sockType_t INVALID_SOCKET{-1};
 #else
 	using sa_family_t = ADDRESS_FAMILY;
 	using sockType_t = SOCKET;
+	using bufferlen_t = int;
 #endif
 
 	struct socket_t final

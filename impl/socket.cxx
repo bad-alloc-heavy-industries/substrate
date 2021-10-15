@@ -40,7 +40,7 @@ socket_t::~socket_t() noexcept
 bool socket_t::bind(const void *const addr, const size_t len) const noexcept
 	{ return ::bind(socket, static_cast<const sockaddr *>(addr), socklen_t(len)) == 0; }
 bool socket_t::bind(const sockaddr_storage &addr) const noexcept
-	{ return bind(static_cast<const void *>(&addr), socklen_t(sockaddrLen(addr))); }
+	{ return bind(static_cast<const void *>(&addr), sockaddrLen(addr)); }
 bool socket_t::connect(const void *const addr, const size_t len) const noexcept
 	{ return ::connect(socket, static_cast<const sockaddr *>(addr), socklen_t(len)) == 0; }
 bool socket_t::connect(const sockaddr_storage &addr) const noexcept
@@ -63,7 +63,7 @@ ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
 
 ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept
 {
-	return ::sendto(socket, static_cast<char *>(bufferPtr), len, 0,
+	return ::sendto(socket, static_cast<char *>(bufferPtr), bufferlen_t(len), 0,
 		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 		reinterpret_cast<const sockaddr *>(&addr), socklen_t(sockaddrLen(addr))); // lgtm[cpp/reinterpret-cast]
 }
@@ -71,7 +71,7 @@ ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockadd
 ssize_t socket_t::readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept
 {
 	socklen_t size = sizeof(sockaddr_storage);
-	return ::recvfrom(socket, static_cast<char *>(bufferPtr), len, 0,
+	return ::recvfrom(socket, static_cast<char *>(bufferPtr), bufferlen_t(len), 0,
 		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 		reinterpret_cast<sockaddr *>(&addr), &size); // lgtm[cpp/reinterpret-cast]
 }
