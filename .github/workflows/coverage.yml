@@ -92,11 +92,21 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
+        shell: bash
         run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
+        shell: bash
         run: ninja -C build
       - name: Test
-        run: ninja -C build test
+        shell: bash
+        run: |
+          ninja -C build test
+      # Codecov no longer parses gcov files automatically
+      - name: Prepare coverage files
+        shell: bash
+        run: |
+          cd build
+          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
       - name: Install
         run: ninja -C build  install
       - name: Codecov
@@ -147,6 +157,7 @@ jobs:
           CXX=${CC/#gcc/g++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Setup compiler
@@ -155,6 +166,7 @@ jobs:
           CXX=${CC/#clang/clang++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=llvm-cov gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Checkout substrate
@@ -172,7 +184,7 @@ jobs:
         run: |
           $CC --version
           $CXX --version
-          gcov --version
+          $GCOV --version
           meson --version
           ninja --version
       - name: Configure
@@ -181,6 +193,11 @@ jobs:
         run: ninja -C build
       - name: Test
         run: ninja -C build test
+      # Codecov no longer parses gcov files automatically
+      - name: Prepare coverage files
+        run: |
+          cd build
+          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
       - name: Install
         run: ninja -C build  install
       - name: Codecov
@@ -236,6 +253,11 @@ jobs:
         run: ninja -C build test
       - name: Install
         run: ninja -C build install
+      # Codecov no longer parses gcov files automatically
+      - name: Prepare coverage files
+        run: |
+          cd build
+          find . -type f -name '*.gcda' -exec gcov -p {} + > /dev/null
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
@@ -311,6 +333,11 @@ jobs:
         run: ninja -C build test
       - name: Install
         run: ninja -C build install
+      # Codecov no longer parses gcov files automatically
+      - name: Prepare coverage files
+        run: |
+          cd build
+          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
