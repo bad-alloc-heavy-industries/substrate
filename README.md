@@ -11,27 +11,26 @@
         <tr>
             <th rowspan="3">Platform</th>
             <th rowspan="3">C++ Standard</th>
-            <th colspan="13">Compiler</th>
+            <th colspan="20">Compiler</th>
         </tr>
         <tr>
-            <th colspan="6" style="border-right: 1px solid !important;">G++</th>
-            <th colspan="6" style="border-right: 1px solid !important;">Clang</th>
-            <th colspan="1">MSVC</th>
+            <th colspan="5" style="border-right: 1px solid !important;">G++</th>
+            <th colspan="8" style="border-right: 1px solid !important;">Clang</th>
         </tr>
         <tr>
+            <th>7</th>
+            <th>8</th>
+            <th>9</th>
+            <th>10</th>
+            <th>11</th>
             <th>5</th>
             <th>6</th>
             <th>7</th>
             <th>8</th>
             <th>9</th>
             <th>10</th>
-            <th>5</th>
-            <th>6</th>
-            <th>7</th>
-            <th>8</th>
-            <th>9</th>
-            <th>10</th>
-            <th>14.11</th>
+            <th>11</th>
+            <th>12</th>
         </tr>
     </thead>
     <tbody>
@@ -50,7 +49,7 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 14</td>
@@ -66,11 +65,10 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 17</td>
-        <td>:x:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -82,7 +80,8 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td rowspan="3">NetBSD</td>
@@ -133,54 +132,114 @@
         <td>:grey_question:</td>
         <td>:x:</td>
       </tr>
+    </tbody>
+</table>
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Platform</th>
+            <th rowspan="3">C++ Standard</th>
+            <th colspan="16">Compiler</th>
+        </tr>
+        <tr>
+            <th colspan="5" style="border-right: 1px solid !important;">G++</th>
+            <th colspan="3">Apple Clang</th>
+        </tr>
+        <tr>
+            <th>7</th>
+            <th>8</th>
+            <th>9</th>
+            <th>10</th>
+            <th>11</th>
+            <th>10.15</th>
+            <th>11.6</th>
+        </tr>
+    </thead>
+    <tbody>
       <tr>
-       <td rowspan="3">Windows</td>
+       <td rowspan="3">macOS</td>
         <td>C++ 11</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:grey_question:</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 14</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:grey_question:</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 17</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:grey_question:</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+      </tr>
+    </tbody>
+</table>
+
+(1): Programs built on Big Sur may crash on exception handle: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
+
+<table>
+    <thead>
+        <tr>
+            <th rowspan="3">Platform</th>
+            <th rowspan="3">C++ Standard</th>
+            <th colspan="6">Compiler</th>
+        </tr>
+        <tr>
+            <th colspan="2" style="border-right: 1px solid !important;">MSYS G++</th>
+            <th colspan="1" style="border-right: 1px solid !important;">MSYS Clang</th>
+            <th colspan="3">MSVC</th>
+        </tr>
+        <tr>
+            <th>mingw64</th>
+            <th>ucrt64</th>
+            <th>clang64</th>
+            <th>15.9</th>
+            <th>16.11</th>
+            <th>17.0</th>
+        </tr>
+    </thead>
+    <tbody>
+      <tr>
+       <td rowspan="3">Windows</td>
+        <td>C++ 11</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td colspan="3" style="text-align:center;">N/A</td>
+      </tr>
+      <tr>
+        <td>C++ 14</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+      </tr>
+      <tr>
+        <td>C++ 17</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
     </tbody>
 </table>
