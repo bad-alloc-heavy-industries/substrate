@@ -102,3 +102,215 @@ jobs:
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
+
+  build-coverage-windows-mingw:
+    if: github.repository == 'bad-alloc-heavy-industries/substrate'
+    name: 'build-coverage-mingw (${{ matrix.os }}, ${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: msys2 {0}
+    strategy:
+      matrix:
+        os:
+          - windows-2019
+        sys:
+          - { abi: mingw64, env: x86_64,       compiler: gcc }
+          - { abi: ucrt64,  env: ucrt-x86_64,  compiler: gcc }
+          - { abi: clang64, env: clang-x86_64, compiler: clang } # Experimental!
+        cpp_std:
+          - 'c++11'
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    steps:
+      - name: Use MinGW from MSYS
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys.abi}}
+          update: true
+          path-type: inherit
+          install: >-
+            mingw-w64-${{matrix.sys.env}}-toolchain
+      - name: Runtime environment
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Coverage environment
+        run: |
+          echo "BUILD_OPTS=--buildtype=debug" >> $GITHUB_ENV
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'mingw64') || startsWith(matrix.sys.abi, 'ucrt64')
+        run: |
+          CXX=${CC/#gcc/g++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Setup compiler
+        if: startsWith(matrix.sys.abi, 'clang64')
+        run: |
+          CXX=${CC/#clang/clang++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.sys.compiler }}
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        run: |
+          $CC --version
+          $CXX --version
+          gcov --version
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build  install
+      - name: Codecov
+        if: success()
+        uses: codecov/codecov-action@v2
+
+  build-coverage-macos:
+    if: github.repository == 'bad-alloc-heavy-industries/substrate'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-11
+          - macos-10.15
+        cpp_std:
+          - 'c++11'
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Coverage environment
+        run: |
+          echo "BUILD_OPTS=--buildtype=debug" >> $GITHUB_ENV
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          brew install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          cc --version  || true
+          ld --version || true
+          gcov --version || true
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+      - name: Codecov
+        if: success()
+        uses: codecov/codecov-action@v2
+
+  build-coverage-macos-homebrew:
+    if: github.repository == 'bad-alloc-heavy-industries/substrate'
+    # Do not use Big Sur here, GCC < 9 is known to crash
+    # on exception unwind
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805 
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        compiler:
+          # GCC5 cannot compile anything on macOS
+          # - gcc@5
+          ## GCC6 cannot handle constexpr-ness of mmap_t
+          ## See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
+          # - gcc@6
+          - gcc@7
+          - gcc@8
+          - gcc@9
+          - gcc@10
+          - gcc
+        cpp_std:
+          - 'c++11'
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Coverage environment
+        run: |
+          echo "BUILD_OPTS=--buildtype=debug" >> $GITHUB_ENV
+      - name: Setup compiler
+        shell: bash
+        run: |
+          brew install ${{ matrix.compiler }}
+          CC=${COMPILER/@/-}
+          CXX=${CC/#gcc/g++}
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
+        env:
+          COMPILER: ${{ matrix.compiler }}
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          brew install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC --version
+          $CXX --version
+          $GCOV --version
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+      - name: Codecov
+        if: success()
+        uses: codecov/codecov-action@v2
