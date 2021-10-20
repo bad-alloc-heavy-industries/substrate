@@ -40,11 +40,20 @@ tests = executable(
 	install: false,
 )
 
-test(
-	'substrate',
-	tests,
-	workdir: meson.current_build_dir()
-)
+if isWindows and coverage
+	test(
+		'substrate',
+		coverageRunner,
+		args: coverageArgs + ['cobertura:crunch-none-coverage.xml', '--', tests],
+		workdir: meson.current_build_dir()
+	)
+else
+	test(
+		'substrate',
+		tests,
+		workdir: meson.current_build_dir()
+	)
+endif
 
 valgrind = find_program('valgrind', required: false)
 if get_option('valgrind_checks') and valgrind.found()

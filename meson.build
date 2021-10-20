@@ -13,6 +13,7 @@ project(
 cxx = meson.get_compiler('cpp')
 isWindows = target_machine.system() == 'windows'
 pkgconfig = import('pkgconfig')
+coverage = get_option('b_coverage')
 
 extended_warnings = [
 	'-Wdouble-promotion',
@@ -77,7 +78,7 @@ endif
 
 # Add default defines
 if isWindows
-	add_project_arguments('-DWIN32', '-D_WIN32', '-D_WINDOWS', language: ['c', 'cpp'])
+	add_project_arguments('-DWIN32', '-D_WIN32', '-D_WINDOWS', '-D_CRT_NONSTDC_NO_DEPRECATE', language: ['c', 'cpp'])
 
 	if target_machine.cpu_family() == 'x86_64' or target_machine.cpu_family() == 'aarch64'
 		add_project_arguments('-D_WIN64', language: ['c', 'cpp'])
@@ -87,6 +88,19 @@ if isWindows
 	# Console APIs require Windows 10 17763 (Redstone 5)
 	if cxx.get_id() == 'gcc' or cxx.get_id() == 'clang'
 		add_project_arguments('-DWINVER=NTDDI_WIN10_RS5', '-D_WIN32_WINNT=NTDDI_WIN10_RS5', '-DNTDDI_VERSION=NTDDI_WIN10_RS5', language: ['c', 'cpp'])
+	endif
+
+	if coverage
+		coverageRunner = find_program('OpenCppCoverage', required: false)
+		coverageArgs = [
+			'--sources', '@0@\impl*\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\substrate*\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\test*\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\*'.format(meson.current_build_dir()),
+			'--modules', meson.current_build_dir(),
+			'--export_type'
+		]
+		coverage = coverageRunner.found() and debug
 	endif
 endif
 

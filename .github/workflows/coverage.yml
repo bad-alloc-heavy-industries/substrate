@@ -108,11 +108,79 @@ jobs:
           cd build
           find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
       - name: Install
+        shell: bash
         run: ninja -C build  install
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
 
+  build-coverage-windows:
+    if: github.repository == 'bad-alloc-heavy-industries/substrate'
+    name: 'build-coverage-windows (${{ matrix.os }}, msvc, ${{ matrix.cpp_std }})'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - windows-2016
+          - windows-2019
+          - windows-2022
+        cpp_std:
+          - 'c++14'
+          - 'c++17'
+      fail-fast: false
+    env:
+      CC: cl.exe
+      CXX: cl.exe
+      LD: link.exe
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Setup compiler
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86_64
+      - name: Setup OpenCppCoverage
+        shell: bash
+        run: |
+          curl -L1O https://github.com/OpenCppCoverage/OpenCppCoverage/releases/download/release-0.9.9.0/OpenCppCoverageSetup-x64-0.9.9.0.exe
+          MSYS2_ARG_CONV_EXCL=/dir=\;/verysilent ./OpenCppCoverageSetup-x64-0.9.9.0 \
+            /dir="C:\Program Files\OpenCppCoverage" /verysilent
+          rm OpenCppCoverageSetup-x64-0.9.9.0.exe
+      - name: Checkout substrate
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC  || true
+          $LD  || true
+          meson --version
+          ninja --version
+      - name: Configure
+        run: meson build -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        continue-on-error: ${{ startsWith(matrix.os, 'windows-2016') }}
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build  install
+      - name: Codecov
+        if: success()
+        uses: codecov/codecov-action@v2
   build-coverage-windows-mingw:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
     name: 'build-coverage-mingw (${{ matrix.os }}, ${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
