@@ -33,3 +33,4 @@ PATH=$TOOL_DIR/bin:$PATH
 cov-configure --template --comptype gcc --compiler gcc-9
 
 echo "PATH=$PATH" >> $GITHUB_ENV
+echo "COVERITY_PROJECT_NAME=$COVERITY_PROJECT_NAME" >> $GITHUB_ENV
