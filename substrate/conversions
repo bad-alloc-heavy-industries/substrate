@@ -175,17 +175,31 @@ namespace substrate
 			std::fill_n(result.begin(), result.rend() - digit, padding);
 		}
 
+		// This function aims to do two things
+		// If the number of digits in the number is less than maxDigits,
+		// pad the front of the number with 0's and chop any trailing 0's off
+		// If the number of digits in the number is more, truncate to maxDigits and chop trailing 0's off.
+		// In the former case, 0 is a special-case that results in a single 0
+		// In the latter case, if the result of truncation is 0, we also trunate the output to a single 0.
 		SUBSTRATE_CXX14_CONSTEXPR void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
 		{
 			const arithInt_t value{valueAsInt(_value)};
 			const auto digits_{digits(value)};
 			// TODO: This technically hides crimes for signed numbers.. We need to consider if this is right or not
 			const auto fraction{static_cast<arithUint_t>(value)};
-			if (digits_ >= maxDigits)
+			if (!fraction)
+				buffer[0] = '0';
+			else if (digits_ >= maxDigits)
 			{
-				const auto trailingZeros_{trailingZeros()};
-				process((fraction - ((fraction / power10(maxDigits)) * power10(maxDigits))) / power10(trailingZeros_),
-					buffer, maxDigits - trailingZeros_ - 1U, 0U);
+				const auto truncatedFraction{fraction - ((fraction / power10(maxDigits)) * power10(maxDigits))};
+				if (!truncatedFraction)
+					buffer[0] = '0';
+				else
+				{
+					const auto trailingZeros_{trailingZeros()};
+					process(static_cast<arithUint_t>(truncatedFraction / power10(trailingZeros_)),
+						buffer, maxDigits - trailingZeros_ - 1U, 0U);
+				}
 			}
 			else
 			{
@@ -195,7 +209,7 @@ namespace substrate
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					buffer[i] = '0';
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				process(fraction / power10(trailingZeros_), buffer + leadingZeros,
+				process(static_cast<arithUint_t>(fraction / power10(trailingZeros_)), buffer + leadingZeros,
 					digits_ - trailingZeros_ - 1U, 0U);
 			}
 		}

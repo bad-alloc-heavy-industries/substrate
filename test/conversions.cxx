@@ -1045,12 +1045,12 @@ TEST_CASE("Fractional component conversions", "[conversions]")
 		}
 	};
 
-	testConversion(0_ns, "000000000000000000000", "000000000");
+	testConversion(0_ns, "0", "0");
 	testConversion(900900_ns, "0000000000000009009", "0009009");
 	testConversion(123456789123000_ns, "000000123456789123", "789123");
 
-	const auto uint32Value{static_cast<uint32_t>(9876543210U)};
+	const auto uint32Value{static_cast<uint32_t>(876543210U)};
 	const auto uint32{substrate::fromInt(uint32Value)};
 	const auto uint32Result{uint32.formatFraction(12)};
-	checkResult("00987654321", uint32Result.get());
+	checkResult("00087654321", uint32Result.get());
 }
