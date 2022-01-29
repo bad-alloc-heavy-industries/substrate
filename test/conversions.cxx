@@ -1020,19 +1020,37 @@ TEST_CASE("Fractional component conversions", "[conversions]")
 	using fromIntVariable = fromInt_t<typename nanoseconds::rep, nanoseconds>;
 	using fromIntFixed = fromInt_t<typename nanoseconds::rep, nanoseconds, 9>;
 
-	const auto testConversion
+	const auto checkResult
 	{
-		[](const nanoseconds value, const char *const variableExpected, const char *const fixedExpected)
+		[](const char *const expected, const char *result)
 		{
-			const auto variableResult{fromIntVariable{value}.formatFraction(21)};
-			REQUIRE(variableResult.get());
-			REQUIRE(memcmp(variableResult.get(), variableExpected, str_t::length(variableExpected)) == 0);
-
-			const auto fixedResult{fromIntFixed{value}.formatFraction(9)};
-			REQUIRE(fixedResult.get());
-			REQUIRE(memcmp(fixedResult.get(), fixedExpected, str_t::length(fixedExpected)) == 0);
+			REQUIRE(expected);
+			REQUIRE(result);
+			const auto expectedLength{str_t::length(expected)};
+			const auto resultLength{str_t::length(result)};
+			REQUIRE(expectedLength == resultLength);
+			REQUIRE(memcmp(result, expected, expectedLength) == 0);
 		}
 	};
 
-	testConversion(0_ns, "0", "0");
+	const auto testConversion
+	{
+		[&](const nanoseconds value, const char *const variableExpected, const char *const fixedExpected)
+		{
+			const auto variableResult{fromIntVariable{value}.formatFraction(21)};
+			checkResult(variableExpected, variableResult.get());
+
+			const auto fixedResult{fromIntFixed{value}.formatFraction(9)};
+			checkResult(fixedExpected, fixedResult.get());
+		}
+	};
+
+	testConversion(0_ns, "000000000000000000000", "000000000");
+	testConversion(900900_ns, "0000000000000009009", "0009009");
+	testConversion(123456789123000_ns, "000000123456789123", "789123");
+
+	const auto uint32Value{static_cast<uint32_t>(9876543210U)};
+	const auto uint32{substrate::fromInt(uint32Value)};
+	const auto uint32Result{uint32.formatFraction(12)};
+	checkResult("00987654321", uint32Result.get());
 }
