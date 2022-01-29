@@ -181,9 +181,12 @@ namespace substrate
 			const auto digits_{digits(value)};
 			// TODO: This technically hides crimes for signed numbers.. We need to consider if this is right or not
 			const auto fraction{static_cast<arithUint_t>(value)};
-			if (digits_ > maxDigits)
-				process(fraction - ((fraction / power10(maxDigits)) * power10(maxDigits)), buffer,
-					maxDigits - 1U, 0U);
+			if (digits_ >= maxDigits)
+			{
+				const auto trailingZeros_{trailingZeros()};
+				process((fraction - ((fraction / power10(maxDigits)) * power10(maxDigits))) / power10(trailingZeros_),
+					buffer, maxDigits - trailingZeros_ - 1U, 0U);
+			}
 			else
 			{
 				const auto trailingZeros_{trailingZeros()};
