@@ -21,6 +21,7 @@ headers = [
 	'index_sequence',
 	'indexed_iterator',
 	'bitfield',
+	'promotion_helpers'
 ]
 
 advanced_headers = [
