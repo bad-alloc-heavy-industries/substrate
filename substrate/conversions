@@ -290,6 +290,11 @@ namespace substrate
 		constexpr inline fromInt_t<value_t, value_t> fromInt(const value_t &value) { return {value}; }
 	template<typename int_t, typename value_t>
 		constexpr inline fromInt_t<int_t, value_t> fromInt(const value_t &value) { return {value}; }
+	template<size_t length, typename value_t>
+		constexpr inline fromInt_t<value_t, value_t, length> fromInt(const value_t &value) noexcept { return {value}; }
+	template<size_t length, char padding, typename value_t>
+		constexpr inline fromInt_t<value_t, value_t, length, padding>
+			fromInt(const value_t &value) noexcept { return {value}; }
 
 	template<typename int_t> struct toInt_t
 	{
