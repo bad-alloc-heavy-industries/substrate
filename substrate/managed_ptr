@@ -38,8 +38,10 @@ namespace substrate
 
 		operator T &() const noexcept { return *ptr; }
 		explicit operator T &&() const = delete;
-		T &operator *() const noexcept { return *ptr; }
-		T *operator ->() const noexcept { return ptr; }
+		const T &operator *() const noexcept { return *ptr; }
+		T &operator *() noexcept { return *ptr; }
+		const T *operator ->() const noexcept { return ptr; }
+		T *operator ->() noexcept { return ptr; }
 		T *get() noexcept { return ptr; }
 		T *get() const noexcept { return ptr; }
 		bool valid() const noexcept { return ptr; }
