@@ -78,7 +78,14 @@ endif
 
 # Add default defines
 if isWindows
-	add_project_arguments('-DWIN32', '-D_WIN32', '-D_WINDOWS', '-D_CRT_NONSTDC_NO_DEPRECATE', language: ['c', 'cpp'])
+	add_project_arguments(
+		'-DWIN32',
+		'-D_WIN32',
+		'-D_WINDOWS',
+		'-D_CRT_NONSTDC_NO_DEPRECATE',
+		'-D_CRT_SECURE_NO_WARNINGS',
+		language: ['c', 'cpp']
+	)
 
 	if target_machine.cpu_family() == 'x86_64' or target_machine.cpu_family() == 'aarch64'
 		add_project_arguments('-D_WIN64', language: ['c', 'cpp'])
