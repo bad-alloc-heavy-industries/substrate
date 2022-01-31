@@ -406,7 +406,7 @@ namespace substrate
 	// NOLINTNEXTLINE(hicpp-signed-bitwise)
 	SUBSTRATE_NOWARN_UNUSED(constexpr static mode_t normalMode) = _S_IWRITE | _S_IREAD;
 #endif
-}
+} // namespace substrate
 
 #endif /* SUBSTRATE_FD */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
