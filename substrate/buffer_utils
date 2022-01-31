@@ -1,0 +1,184 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_BUFFER_UTILS
+#define SUBSTRATE_BUFFER_UTILS
+
+#include <cstdint>
+#include <cstring>
+#include <array>
+#include <utility>
+#include <substrate/promotion_helpers>
+
+namespace substrate
+{
+	namespace buffer_utils
+	{
+		namespace internal
+		{
+			template<typename T, size_t = sizeof(T)> struct helper_t;
+		}
+
+		template<typename T> static inline T readLE(const void *const buffer) noexcept
+			{ return internal::helper_t<T>::readLE(buffer); }
+		template<typename T> static inline void writeLE(const T value, void *const buffer) noexcept
+			{ internal::helper_t<T>::writeLE(value, buffer); }
+
+		template<typename T> static inline T readBE(const void *const buffer) noexcept
+			{ return internal::helper_t<T>::readBE(buffer); }
+		template<typename T> static inline void writeBE(const T value, void *const buffer) noexcept
+			{ internal::helper_t<T>::writeBE(value, buffer); }
+
+		namespace internal
+		{
+			template<typename T> struct helper_t<T, 2>
+			{
+				static inline T readLE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 2> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(uint(data[1] << 8U) | data[0]);
+				}
+
+				static inline T readBE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 2> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(uint(data[0] << 8U) | data[1]);
+				}
+
+				static inline void writeLE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 2> data
+					{{
+						uint8_t(value),
+						uint8_t(value >> 8U)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+
+				static inline void writeBE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 2> data
+					{{
+						uint8_t(value >> 8U),
+						uint8_t(value)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+			};
+
+			template<typename T> struct helper_t<T, 4>
+			{
+				static inline T readLE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 4> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(
+						(uint(data[3]) << 24U) | (uint(data[2]) << 16U) |
+						(uint(data[1]) << 8U) | data[0]
+					);
+				}
+
+				static inline T readBE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 4> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(
+						(uint(data[0]) << 24U) | (uint(data[1]) << 16U) |
+						(uint(data[2]) << 8U) | data[3]
+					);
+				}
+
+				static inline void writeLE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 4> data
+					{{
+						uint8_t(value),
+						uint8_t(value >> 8U),
+						uint8_t(value >> 16U),
+						uint8_t(value >> 24U)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+
+				static inline void writeBE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 4> data
+					{{
+						uint8_t(value >> 24U),
+						uint8_t(value >> 16U),
+						uint8_t(value >> 8U),
+						uint8_t(value)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+			};
+
+			template<typename T> struct helper_t<T, 8>
+			{
+				static inline T readLE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 8> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(
+						(uint(data[7]) << 56U) | (uint(data[6]) << 48U) |
+						(uint(data[5]) << 40U) | (uint(data[4]) << 32U) |
+						(uint(data[3]) << 24U) | (uint(data[2]) << 16U) |
+						(uint(data[1]) << 8U) | data[0]
+					);
+				}
+
+				static inline T readBE(const void *const buffer) noexcept
+				{
+					using uint = promoted_type_t<typename std::make_unsigned<T>::type>;
+					std::array<uint8_t, 8> data{};
+					std::memcpy(data.data(), buffer, data.size());
+					return static_cast<T>(
+						(uint(data[0]) << 56U) | (uint(data[1]) << 48U) |
+						(uint(data[2]) << 40U) | (uint(data[3]) << 32U) |
+						(uint(data[4]) << 24U) | (uint(data[5]) << 16U) |
+						(uint(data[6]) << 8U) | data[7]
+					);
+				}
+
+				static inline void writeLE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 8> data
+					{{
+						uint8_t(value),
+						uint8_t(value >> 8U),
+						uint8_t(value >> 16U),
+						uint8_t(value >> 24U),
+						uint8_t(value >> 32U),
+						uint8_t(value >> 40U),
+						uint8_t(value >> 48U),
+						uint8_t(value >> 56U)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+
+				static inline void writeBE(const T value, void *const buffer) noexcept
+				{
+					const std::array<uint8_t, 8> data
+					{{
+						uint8_t(value >> 56U),
+						uint8_t(value >> 48U),
+						uint8_t(value >> 40U),
+						uint8_t(value >> 32U),
+						uint8_t(value >> 24U),
+						uint8_t(value >> 16U),
+						uint8_t(value >> 8U),
+						uint8_t(value)
+					}};
+					std::memcpy(buffer, data.data(), data.size());
+				}
+			};
+		} // namespace internal
+	} // namespace buffer_utils
+} // namespace substrate
+
+#endif /*SUBSTRATE_BUFFER_UTILS*/
