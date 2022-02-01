@@ -1,0 +1,190 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_FLEX_STRUCT
+#define SUBSTRATE_FLEX_STRUCT
+
+#include <type_traits>
+#include <limits>
+#include <cstdint>
+
+#include <substrate/internal/defs>
+
+#if __cplusplus < 201703L
+	#error "substrate/flex_struct requires C++17 or newer"
+#else
+
+namespace substrate
+{
+ namespace {
+        enum struct signedness : std::uint8_t {
+            Unsigned      = 0,
+            Signed        = 1,
+            NotApplicable = 2,
+        };
+
+        enum struct endianness : std::uint8_t {
+            Big    = 0,
+            Little = 1,
+            NotApplicable = 2,
+        };
+
+        template<std::size_t type_size, signedness _sign, endianness _endian, typename T>
+        struct element final {
+            using element_type = T;
+			static constexpr std::size_t size{type_size};
+            static constexpr signedness sign{_sign};
+            static constexpr endianness endian{_endian};
+        };
+
+
+        template<std::size_t, typename...>
+		struct type_at_index_t;
+
+		template<std::size_t N, typename T, typename... U>
+		struct type_at_index_t<N, T, U...> {
+			using type = typename type_at_index_t<N - 1, U...>::type;
+		};
+
+		template<typename T, typename... U>
+		struct type_at_index_t<0, T, U...> {
+			using type = T;
+		};
+
+		template<typename>
+		struct struct_size_t;
+
+		template<typename>
+		struct is_std_vector : std::false_type {};
+
+		template<typename T>
+		struct is_std_vector<std::vector<T>> : std::true_type {};
+
+		template<typename T>
+		constexpr inline bool is_std_vector_v = is_std_vector<T>::value;
+
+		template<typename>
+		struct is_std_array : std::false_type {};
+
+		template<typename T, std::size_t len>
+		struct is_std_array<std::array<T, len>> : std::true_type {};
+
+		template<typename T>
+		constexpr inline bool is_std_array_v = is_std_array<T>::value;
+    }
+
+    /* 1-byte type alias */
+    using u8le_t  = element<1U, signedness::Unsigned, endianness::Little, std::uint8_t >;
+    using i8le_t  = element<1U, signedness::Signed  , endianness::Little, std::int8_t  >;
+    using u8be_t  = element<1U, signedness::Unsigned, endianness::Big   , std::uint8_t >;
+    using i8be_t  = element<1U, signedness::Signed  , endianness::Big   , std::int8_t  >;
+    /* 2-byte type alias */
+    using u16le_t = element<2U, signedness::Unsigned, endianness::Little, std::uint16_t>;
+    using i16le_t = element<2U, signedness::Signed  , endianness::Little, std::int16_t >;
+    using u16be_t = element<2U, signedness::Unsigned, endianness::Big   , std::uint16_t>;
+    using i16be_t = element<2U, signedness::Signed  , endianness::Big   , std::int16_t >;
+    /* 4-byte type alias */
+    using u32le_t = element<4U, signedness::Unsigned, endianness::Little, std::uint32_t>;
+    using i32le_t = element<4U, signedness::Signed  , endianness::Little, std::int32_t >;
+    using u32be_t = element<4U, signedness::Unsigned, endianness::Big   , std::uint32_t>;
+    using i32be_t = element<4U, signedness::Signed  , endianness::Big   , std::int32_t >;
+    /* 8-byte type alias */
+    using u64le_t = element<8U, signedness::Unsigned, endianness::Little, std::uint64_t>;
+    using i64le_t = element<8U, signedness::Signed  , endianness::Little, std::int64_t >;
+    using u64be_t = element<8U, signedness::Unsigned, endianness::Big   , std::uint64_t>;
+    using i64be_t = element<8U, signedness::Signed  , endianness::Big   , std::int64_t >;
+
+
+#if __cplusplus >= 202002L
+    namespace {
+        template<std::size_t len>
+        struct template_name_literal final {
+            char literal[len];
+            constexpr template_name_literal(const char (&string)[len]) {
+                std::copy_n(string, len, literal);
+            }
+        };
+    }
+
+    template<typename T, template_name_literal name = "">
+    struct member final {
+        using member_type = T;
+        static constexpr std::string_view member_name{name.literal};
+        static constexpr std::size_t size = T::size;
+        static constexpr signedness sign{T::sign};
+        static constexpr endianness endian{T::endian};
+    };
+#else
+    template<typename T, const char name[] = nullptr>
+    struct member final {
+        using member_type = T;
+        static constexpr std::string_view member_name{name};
+        static constexpr std::size_t size = T::size;
+        static constexpr signedness sign{T::sign};
+        static constexpr endianness endian{T::endian};
+    };
+#endif
+
+    template<typename... Ts>
+    struct structure final {
+		static_assert(sizeof... (Ts) > 0, "substrate::flex_struct::structure must contain at least one member");
+    private:
+
+
+    public:
+        static constexpr std::size_t member_count{sizeof... (Ts)};
+		static constexpr std::size_t size{struct_size_t<structure>::size};
+		static constexpr signedness sign{signedness::NotApplicable};
+		static constexpr endianness endian{endianness::NotApplicable};
+
+
+        [[nodiscard]]
+        static auto from_bytes(const void* data, const std::size_t len) {
+            (void)len;
+            return data;
+        }
+
+		template<typename T>
+		[[nodiscard]]
+		static auto from_container(const T& container) {
+			if constexpr (is_std_array_v<T>) {
+				return from_array(container);
+			} else if constexpr (is_std_vector_v<T>) {
+				return from_vector(container);
+			} else {
+				return;
+			}
+		}
+
+        template<typename T, std::size_t len>
+        [[nodiscard]]
+        static auto from_array(const std::array<T, len>& data) {
+            return data;
+        }
+
+		template<typename T>
+		[[nodiscard]]
+		static auto from_vector(const std::vector<T>& data) {
+			return data;
+		}
+
+		template<std::size_t len>
+		[[nodiscard]]
+		constexpr auto operator[](const char name[len]) {
+			return operator[](std::string_view{name});
+		}
+		[[nodiscard]]
+		constexpr auto operator[](const std::string_view& name) {
+
+		}
+    };
+
+	namespace {
+		template<typename... Ts>
+		struct struct_size_t<structure<Ts...>> final {
+			static constexpr auto size{(Ts::size + ...)};
+		};
+	}
+}
+
+
+#endif /* SUBSTRATE_FLEX_STRUCT */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

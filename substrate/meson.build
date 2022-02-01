@@ -22,7 +22,8 @@ headers = [
 	'indexed_iterator',
 	'bitfield',
 	'promotion_helpers',
-	'buffer_utils'
+	'buffer_utils',
+	'flex_struct'
 ]
 
 advanced_headers = [
