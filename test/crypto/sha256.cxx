@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#include <cstdint>
+#include <substrate/crypto/sha256>
+#include <catch2/catch.hpp>
+
+using namespace substrate;
+
+TEST_CASE("sha256 std::array<>", "[crypto/sha256]")
+{
+	crypto::sha256_t hasher{};
+
+	std::array<int32_t, 3> small_input{{ 'n', 'y', 'a' }};
+	std::array<uint8_t, 32> small_hash{{
+		0xe7U, 0xa0U, 0x0eU, 0x53U,
+		0xbdU, 0x04U, 0xbfU, 0x48U,
+		0xc4U, 0xcdU, 0xe3U, 0x00U,
+		0xb1U, 0x1fU, 0x10U, 0xdeU,
+		0xceU, 0xe1U, 0x8dU, 0x7aU,
+		0x82U, 0x55U, 0x02U, 0xc4U,
+		0xedU, 0xcbU, 0xc2U, 0xfaU,
+		0x38U, 0xf7U, 0xfaU, 0x1f
+	}};
+
+	REQUIRE(hasher(small_input) == small_hash);
+
+}
