@@ -9,7 +9,7 @@ TEST_CASE("sha512 std::array<>", "[crypto/sha512]")
 {
 	crypto::sha512_t hasher{};
 
-	std::array<int32_t, 3> small_input{{ 'n', 'y', 'a' }};
+	std::array<int8_t, 3> small_input{{ 'n', 'y', 'a' }};
 	std::array<uint8_t, 64> small_hash{{
 		0x28U, 0x4dU, 0x70U, 0x8eU,
 		0xd1U, 0x20U, 0xe6U, 0x43U,

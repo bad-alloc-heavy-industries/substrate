@@ -90,7 +90,12 @@ namespace substrate
 				ext_msg_t(const std::array<T, len>& msg) noexcept {
 					static_assert(sizeof(T) * len >= 16 * sizeof(uint32_t), "msg too small");
 					for (uint8_t i{}; i < 16; ++i) {
-						_blks[i] = bu::readBE<uint32_t>(msg.data() + i);
+						_blks[i] = bu::readBE<uint32_t>(
+							// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+							reinterpret_cast<const uint8_t*>( // lgtm[cpp/reinterpret-cast]
+								msg.data()
+							) + (i * sizeof(uint32_t))
+						);
 					}
 				}
 
@@ -160,19 +165,49 @@ namespace substrate
 				std::array<uint32_t, 16> block{{}};
 
 				std::memcpy(block.data(), msg.data(), (len * sizeof(T)));
-				std::memset(block.data() + (len * sizeof(T)), 0x80U, 1);
+				std::memset(
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
+						block.data()
+					) + (len * sizeof(T)),
+					0x80U,
+					1
+				);
+
 				_len += len;
 				if (len > 54) {
 					round(_state, block);
 					block.fill(UINT32_C(0x00000000));
 				}
 
-				bu::writeLE(uint64_t(_len << 3), block.data() + (14 * 4));
+				const uint64_t nlen{_len << 3};
+
+				bu::writeLE(
+					uint32_t(nlen),
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
+						block.data()
+					) + (14 * sizeof(uint32_t))
+				);
+
+				bu::writeLE(
+					uint32_t(nlen >> 32),
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
+						block.data()
+					) + (15 * sizeof(uint32_t))
+				);
 
 				round(_state, block);
 
 				for (uint8_t i{}; i < _state.size(); ++i){
-					bu::writeLE(_state[i], _hash.data() + (i * 4));
+					bu::writeLE(
+						_state[i],
+						// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+						reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
+							_hash.data()
+						) + (i * sizeof(uint32_t))
+					);
 				}
 
 				/* Hashing is done, reset our state */
@@ -190,7 +225,12 @@ namespace substrate
 
 				while (bidx != blk_max) {
 					for (uint8_t i{}; i < 16; ++i) {
-						buf[i] = bu::readLE<uint32_t>(msg.data() + (i * 4));
+						buf[i] = bu::readLE<uint32_t>(
+							// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+							reinterpret_cast<const uint8_t*>( // lgtm[cpp/reinterpret-cast]
+								msg.data()
+							) + (i * sizeof(uint32_t))
+						);
 					}
 					round(buf);
 					bidx += 64;

@@ -9,7 +9,7 @@ TEST_CASE("sha256 std::array<>", "[crypto/sha256]")
 {
 	crypto::sha256_t hasher{};
 
-	std::array<int32_t, 3> small_input{{ 'n', 'y', 'a' }};
+	std::array<int8_t, 3> small_input{{ 'n', 'y', 'a' }};
 	std::array<uint8_t, 32> small_hash{{
 		0xe7U, 0xa0U, 0x0eU, 0x53U,
 		0xbdU, 0x04U, 0xbfU, 0x48U,
