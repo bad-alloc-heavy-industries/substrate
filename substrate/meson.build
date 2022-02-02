@@ -32,6 +32,10 @@ advanced_headers = [
 	'advanced/guard_page'
 ]
 
+crypto_headers = [
+	'crypto/twofish',
+]
+
 internal_headers = [
 	'internal/defs',
 	'internal/cxx11_compat',
@@ -47,6 +51,11 @@ if not meson.is_subproject()
 	install_headers(
 		advanced_headers,
 		subdir: 'substrate/advanced'
+	)
+
+	install_headers(
+		crypto_headers,
+		subdir: 'substrate/crypto'
 	)
 
 	install_headers(
