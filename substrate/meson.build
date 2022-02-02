@@ -34,6 +34,7 @@ advanced_headers = [
 
 crypto_headers = [
 	'crypto/twofish',
+	'crypto/sha256',
 	'crypto/sha512'
 ]
 
