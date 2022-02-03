@@ -30,7 +30,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t digits(const arithInt_t number) const noexcept)
 		{
 			return std::is_signed<int_t>::value && number < 0 ?
-				1U + calcDigits(arithUint_t(-number)) : calcDigits(arithUint_t(number));
+				1U + calcDigits(~arithUint_t(number) + 1U) : calcDigits(arithUint_t(number));
 		}
 
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t power10(const std::size_t power) const noexcept)
@@ -92,7 +92,7 @@ namespace substrate
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				buffer[0] = '-';
-				process(arithUint_t(-value), buffer);
+				process(~arithUint_t(value) + 1U, buffer);
 			}
 			else
 				process(arithUint_t(value), buffer);
@@ -128,7 +128,7 @@ namespace substrate
 					const auto offset{_length - length};
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 					const auto _buffer{std::fill_n(buffer + 1, offset, padding)};
-					process(uint_t(-value), _buffer, length - 2U, 0U);
+					process(~arithUint_t(value) + 1U, _buffer, length - 2U, 0U);
 				}
 				else
 					std::fill_n(buffer, _length, padding);
