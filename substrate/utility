@@ -533,16 +533,21 @@ namespace substrate
 
 #if !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
-	template<typename T> std::string decode_typename()
+	static std::string decode_typename(const char *const mangled_name)
 	{
-		using _type_ref = typename substrate::remove_reference_t<T>;
 #ifndef _MSC_VER
-		auto * const demangler = abi::__cxa_demangle(typeid(_type_ref).name(), nullptr, nullptr, nullptr);
+		auto * const demangler = abi::__cxa_demangle(mangled_name, nullptr, nullptr, nullptr);
 #else
 		const auto demangler = nullptr;
 #endif
 		std::unique_ptr<char, void(*)(void*)> _demangle{demangler, std::free};
-		std::string _type_name{_demangle ? _demangle.get() : typeid(_type_ref).name()};
+		return {_demangle ? _demangle.get() : mangled_name};
+	}
+
+	template<typename T> static std::string decode_typename()
+	{
+		using _type_ref = typename substrate::remove_reference_t<T>;
+		auto _type_name{decode_typename(typeid(_type_ref).name())};
 
 		if (std::is_const<_type_ref>::value)
 			_type_name += " const";
