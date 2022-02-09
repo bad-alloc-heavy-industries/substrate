@@ -533,7 +533,7 @@ namespace substrate
 
 #if !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
-	static std::string decode_typename(const char *const mangled_name)
+	static inline std::string decode_typename(const char *const mangled_name)
 	{
 #ifndef _MSC_VER
 		auto * const demangler = abi::__cxa_demangle(mangled_name, nullptr, nullptr, nullptr);
