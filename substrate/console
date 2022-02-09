@@ -48,8 +48,8 @@ namespace substrate
 	public:
 		constexpr consoleStream_t() noexcept = default;
 		consoleStream_t(const int32_t desc) noexcept : fd{desc} { checkTTY(); }
-		bool valid() const noexcept { return fd != -1; }
-		bool isTTY() const noexcept { return _tty; }
+		constexpr bool valid() const noexcept { return fd != -1; }
+		constexpr bool isTTY() const noexcept { return _tty; }
 #if defined(_WIN32)
 		void *handle() const noexcept { return reinterpret_cast<void *>(_get_osfhandle(fd)); }
 #endif
@@ -83,8 +83,8 @@ namespace substrate
 	{
 	private:
 		mutable std::mutex consoleMutex{};
-		consoleStream_t outputStream;
-		consoleStream_t errorStream;
+		consoleStream_t outputStream{};
+		consoleStream_t errorStream{};
 		bool valid_{false};
 		bool showDebug_{true};
 
@@ -103,7 +103,7 @@ namespace substrate
 		void _debug() const noexcept;
 
 	public:
-		SUBSTRATE_CXX14_MAYBE_CONSTEXPR console_t() noexcept : outputStream{}, errorStream{} { }
+		constexpr console_t() noexcept = default;
 		SUBSTRATE_CLS_MAYBE_API console_t(FILE *outStream, FILE *errStream) noexcept;
 		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
 			outputStream{outStream}, errorStream{errStream}, valid_{outputStream.valid() && errorStream.valid()} { }
