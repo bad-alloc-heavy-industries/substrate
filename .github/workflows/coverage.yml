@@ -65,7 +65,7 @@ jobs:
           sudo apt-add-repository "deb https://apt.llvm.org/focal/ llvm-toolchain-focal main"
           sudo apt-get update
           CXX=${CC/#clang/clang++}
-          sudo apt-get install $CC $CXX
+          sudo apt-get install $CC $CXX gcovr
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
           echo "GCOV=/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" >> $GITHUB_ENV
@@ -110,6 +110,10 @@ jobs:
       - name: Install
         shell: bash
         run: ninja -C build  install
+      - name: Coverage prep
+        if: success()
+        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+        working-directory: build
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
@@ -295,6 +299,10 @@ jobs:
       - name: Coverage environment
         run: |
           echo "BUILD_OPTS=--buildtype=debug" >> $GITHUB_ENV
+      - name: Setup tools
+        shell: bash
+        run: |
+          brew install gcovr
       - name: Checkout substrate
         uses: actions/checkout@v2
         with:
@@ -321,11 +329,10 @@ jobs:
         run: ninja -C build test
       - name: Install
         run: ninja -C build install
-      # Codecov no longer parses gcov files automatically
-      - name: Prepare coverage files
-        run: |
-          cd build
-          find . -type f -name '*.gcda' -exec gcov -p {} + > /dev/null
+      - name: Coverage prep
+        if: success()
+        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+        working-directory: build
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
@@ -334,7 +341,7 @@ jobs:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
     # Do not use Big Sur here, GCC < 9 is known to crash
     # on exception unwind
-    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805 
+    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
     runs-on: macos-10.15
     strategy:
       matrix:
@@ -367,7 +374,7 @@ jobs:
       - name: Setup compiler
         shell: bash
         run: |
-          brew install ${{ matrix.compiler }}
+          brew install ${{ matrix.compiler }} gcovr
           CC=${COMPILER/@/-}
           CXX=${CC/#gcc/g++}
           echo "CC=$CC" >> $GITHUB_ENV
@@ -401,11 +408,10 @@ jobs:
         run: ninja -C build test
       - name: Install
         run: ninja -C build install
-      # Codecov no longer parses gcov files automatically
-      - name: Prepare coverage files
-        run: |
-          cd build
-          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
+      - name: Coverage prep
+        if: success()
+        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+        working-directory: build
       - name: Codecov
         if: success()
         uses: codecov/codecov-action@v2
