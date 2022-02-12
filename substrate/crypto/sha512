@@ -164,7 +164,7 @@ namespace substrate
 			}
 
 			template<typename T>
-			std::array<uint8_t, 64> hash(const T* data, std::size_t len) noexcept {
+			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const T* data, std::size_t len) noexcept) {
 				std::array<uint8_t, 64> _hash{{}};
 				std::array<uint64_t, 16> block{{}};
 
@@ -205,17 +205,17 @@ namespace substrate
 			}
 
 			template<typename T>
-			std::array<uint8_t, 64> hash(const span<T>& msg) noexcept {
+			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const span<T>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept {
+			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			std::array<uint8_t, 64> operator()(const std::array<T, len>& msg) noexcept {
+			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> operator()(const std::array<T, len>& msg) noexcept) {
 				uint64_t bidx{};
 				std::array<uint64_t, 16> buf{};
 
