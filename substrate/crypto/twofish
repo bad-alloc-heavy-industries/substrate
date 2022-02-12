@@ -104,10 +104,13 @@ namespace substrate
 				switch(e) {
 					case 0xEFU: {
 						ret ^= uint8_t((v >> 1U) ^ ((0x169U * (v & 1U)) >> 1U));
+						SUBSTRATE_FALLTHROUGH();
 					} case 0x5BU: {
 						ret ^= uint8_t((v >> 2U) ^ ((0x169U * (v & 1U)) >> 2U) ^ ((0x169U * (v & 2U)) >> 2U));
+						SUBSTRATE_FALLTHROUGH();
 					} case 0x01U: {
 						return uint8_t(v ^ ret);
+						SUBSTRATE_FALLTHROUGH();
 					} default: {
 						std::abort();
 					}
