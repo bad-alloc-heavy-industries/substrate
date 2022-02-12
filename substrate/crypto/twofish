@@ -157,6 +157,9 @@ namespace substrate
 
 			template <typename T>
 			SUBSTRATE_NO_DISCARD(inline uint32_t g(const uint32_t val, const T* key, const size_t len) noexcept) {
+				if (len * sizeof(T) < 32)
+					std::abort();
+
 				constexpr std::array<std::array<uint8_t, 4>, 5> box_tlb{{
 					{{ 1U, 0U, 0U, 1U }},
 					{{ 1U, 1U, 0U, 0U }},
@@ -170,8 +173,8 @@ namespace substrate
 				uint8_t c{uint8_t((val >> 16U) & 0xFFU)};
 				uint8_t d{uint8_t((val >> 24U) & 0xFFU)};
 
-				for (uint8_t i{}; i < 4; ++i) {
-					const uint32_t idx{6U - (i << 1U)};
+				for (size_t i{}; i < 4; ++i) {
+					const auto idx{6U - (i << 1U)};
 					box_lookup(a, box_tlb[i][0], key[idx], 0U);
 					box_lookup(b, box_tlb[i][1], key[idx], 8U);
 					box_lookup(c, box_tlb[i][2], key[idx], 16U);
@@ -186,7 +189,7 @@ namespace substrate
 			}
 
 			template<typename T>
-			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const uint8_t idx, const T* key, const size_t len) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const size_t idx, const T* key, const size_t len) noexcept) {
 				return g(
 					uint32_t(idx ^ (idx << 8U) ^ (idx << 16U) ^ (idx << 24U)),
 					key, len
@@ -194,7 +197,7 @@ namespace substrate
 			}
 
 			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const uint8_t idx, const std::array<T, len>& key) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const size_t idx, const std::array<T, len>& key) noexcept) {
 				return key_mds(idx, key.data(), key.size());
 			}
 		}
@@ -228,7 +231,10 @@ namespace substrate
 				d = rotl(d, 1) ^ b1;
 			}
 
-			void enc_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+			void enc_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				std::array<uint32_t, 4> state{{
 					uint32_t(src[0] ^ _key[0]),
 					uint32_t(src[1] ^ _key[1]),
@@ -252,6 +258,10 @@ namespace substrate
 				dst[3] = uint32_t(state[1] ^ _key[7]);
 			}
 
+			void enc_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				enc_blk(src.data(), src.size(), dst.data(), dst.size());
+			}
+
 			void dec_rnd(const uint8_t rn, const uint32_t a, const uint32_t b, uint32_t& c, uint32_t& d) noexcept {
 				uint32_t a1{g(a, _sbox_key)};
 				uint32_t b1{g(rotl(b, 8U), _sbox_key)};
@@ -263,7 +273,10 @@ namespace substrate
 				d = rotl(d ^ b1, 1);
 			}
 
-			void dec_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+			void dec_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				std::array<uint32_t, 4> state{{
 					uint32_t(src[2] ^ _key[6]),
 					uint32_t(src[3] ^ _key[7]),
@@ -285,6 +298,10 @@ namespace substrate
 				dst[1] = uint32_t(state[1] ^ _key[1]);
 				dst[2] = uint32_t(state[2] ^ _key[2]);
 				dst[3] = uint32_t(state[3] ^ _key[3]);
+			}
+
+			void dec_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				dec_blk(src.data(), src.size(), dst.data(), dst.size());
 			}
 
 		public:
@@ -323,21 +340,30 @@ namespace substrate
 				std::memcpy(_iv.data() + 8, &counter, sizeof(counter));
 			}
 
+
 			// TODO(aki): make endian aware
 			// Key initialization and scheduling
 			template<typename T, std::size_t len>
 			void set_key(const std::array<T, len>& key) noexcept {
 				static_assert(sizeof(T) * len == 32, "Key must be exactly 32 bytes (256 bits)");
-				std::memcpy(_kparts.data(), key.data(), 32);
+				set_key(key.data(), key.size());
+			}
 
-				for (uint8_t i{}; i < _key.size();) {
+			template<typename T>
+			void set_key(const T* key, const size_t len) noexcept {
+				if (len > _kparts.size())
+					std::abort();
+
+				std::memcpy(_kparts.data(), key, len);
+
+				for (size_t i{}; i < len;) {
 					uint32_t a{key_mds(i, _kparts)};
-					uint32_t b{rotl(key_mds((i + 1U), _kparts /* Needs to be offset by 1 */), 8U)};
+					uint32_t b{rotl(key_mds(i + 1U, _kparts.data() + 1, _kparts.size() - 1), 8U)};
 					_key[i++] = uint32_t(a + b);
 					_key[i++] = uint32_t(rotl(a + (b << 1U), 9));
 				}
 
-				for (uint8_t i{}; i < 4; ++i) {
+				for (size_t i{}; i < 4; ++i) {
 					_sbox_key[(3U - i) << 1U] = rs(_kparts[i << 1U], _kparts[(i << 1U) | 1u]);
 				}
 
@@ -348,24 +374,36 @@ namespace substrate
 			// CBC Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CBC, void>::type
-			encrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+			encrypt_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				std::array<uint32_t, 4> state{{}};
 
 				for (uint8_t i{}; i < 4; ++i) {
 					state[i] = uint32_t(_iv[i] ^ src[i]);
 				}
 
-				enc_blk(state, dst);
+				enc_blk(state.data(), state.size(), dst, dlen);
 
 				for (uint8_t i{}; i < 4; ++i) {
 					_iv[i] = dst[i];
 				}
 			}
 
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CBC, void>::type
+			encrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				encrypt_blk(src.data(), src.size(), dst.data(), dst.size());
+			}
+
 			// CTR Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
-			encrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+			encrypt_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				/* In CTR mode, the last 8 bytes of the IV are the counter and the first are the nonce */
 				std::array<uint32_t, 4> state{{}};
 
@@ -379,10 +417,19 @@ namespace substrate
 				// TODO(aki): increment counter (_iv[2:3])
 			}
 
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
+			encrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				encrypt_blk(src.data(), src.size(), dst.data(), dst.size());
+			}
+
 			// CTR Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
-			encrypt_blk_by_idx(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst, const uint64_t idx) noexcept {
+			encrypt_blk_by_idx(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen, const uint64_t idx) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				/* In CTR mode, the last 8 bytes of the IV are the counter and the first are the nonce */
 				std::array<uint32_t, 4> state{{}};
 				std::array<uint32_t, 4> nonce{_iv};
@@ -397,11 +444,20 @@ namespace substrate
 				dst[3] = uint32_t(src[3] ^ state[3]);
 			}
 
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
+			encrypt_blk_by_idx(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst, const uint64_t idx) noexcept {
+				encrypt_blk_by_idx(src.data(), src.size(), dst.data(), dst.size(), idx);
+			}
+
 			// CBC Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CBC, void>::type
-			decrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
-				dec_blk(src, dst);
+			decrypt_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
+				dec_blk(src, slen, dst, dlen);
 
 				for (uint8_t i{}; i < 4; ++i) {
 					dst[i] ^= _iv[i];
@@ -409,10 +465,20 @@ namespace substrate
 				}
 			}
 
+
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CBC, void>::type
+			decrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				decrypt_blk(src.data(), src.size(), dst.data(), dst.size());
+			}
+
 			// CTR Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
-			decrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+			decrypt_blk(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				/* In CTR mode, the last 8 bytes of the IV are the counter and the first are the nonce */
 				std::array<uint32_t, 4> state{{}};
 
@@ -428,10 +494,19 @@ namespace substrate
 				// TODO(aki): increment counter (_iv[2:3])
 			}
 
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
+			decrypt_blk(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst) noexcept {
+				decrypt_blk(src.data(), src.size(), dst.data(), dst.size());
+			}
+
 			// CTR Mode
 			template<twofish_mode_t _mode = m>
 			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
-			decrypt_blk_by_idx(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst, const uint64_t idx) noexcept {
+			decrypt_blk_by_idx(const uint32_t* src, const size_t slen, uint32_t* dst, const size_t dlen, const uint64_t idx) noexcept {
+				if (slen < 4 || dlen < 4)
+					std::abort();
+
 				/* In CTR mode, the last 8 bytes of the IV are the counter and the first are the nonce */
 				std::array<uint32_t, 4> state{{}};
 				std::array<uint32_t, 4> nonce{_iv};
@@ -445,6 +520,12 @@ namespace substrate
 				dst[1] = uint32_t(src[1] ^ state[1]);
 				dst[2] = uint32_t(src[2] ^ state[2]);
 				dst[3] = uint32_t(src[3] ^ state[3]);
+			}
+
+			template<twofish_mode_t _mode = m>
+			typename std::enable_if<_mode == twofish_mode_t::CTR, void>::type
+			decrypt_blk_by_idx(const std::array<uint32_t, 4>& src, std::array<uint32_t, 4>& dst, const uint64_t idx) noexcept {
+				decrypt_blk_by_idx(src.data(), src.size(), dst.data(), dst.size(), idx);
 			}
 		};
 
