@@ -317,7 +317,7 @@ namespace substrate
 			template<typename T, std::size_t len>
 			void set_key(const std::array<T, len>& key) noexcept {
 				static_assert(sizeof(T) * len == 32, "Key must be exactly 32 bytes (256 bits)");
-				std::memcpy(key.data(), _kparts.data(), 32);
+				std::memcpy(_kparts.data(), key.data(), 32);
 
 				for (uint8_t i{}; i < _key.size();) {
 					uint32_t a{key_mds(i, _kparts)};
