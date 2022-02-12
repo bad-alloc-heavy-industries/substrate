@@ -155,8 +155,8 @@ namespace substrate
 				val = uint8_t(box_seeds[box][val] ^ ((key >> shift) & 0xFFU));
 			}
 
-			template <typename T, size_t n>
-			SUBSTRATE_NO_DISCARD(inline uint32_t g(const uint32_t val, const std::array<T, n>& key) noexcept) {
+			template <typename T>
+			SUBSTRATE_NO_DISCARD(inline uint32_t g(const uint32_t val, const T* key, const size_t len) noexcept) {
 				constexpr std::array<std::array<uint8_t, 4>, 5> box_tlb{{
 					{{ 1U, 0U, 0U, 1U }},
 					{{ 1U, 1U, 0U, 0U }},
@@ -180,12 +180,22 @@ namespace substrate
 				return mds_mult(box_seeds[1][a], box_seeds[0][b], box_seeds[1][c], box_seeds[0][d]);
 			}
 
-			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const uint8_t idx, const std::array<T, len>& key) noexcept) {
+			template <typename T, size_t n>
+			SUBSTRATE_NO_DISCARD(inline uint32_t g(const uint32_t val, const std::array<T, n>& key) noexcept) {
+				return g(val, key.data(), key.size());
+			}
+
+			template<typename T>
+			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const uint8_t idx, const T* key, const size_t len) noexcept) {
 				return g(
 					uint32_t(idx ^ (idx << 8U) ^ (idx << 16U) ^ (idx << 24U)),
-					key
+					key, len
 				);
+			}
+
+			template<typename T, std::size_t len>
+			SUBSTRATE_NO_DISCARD(inline uint32_t key_mds(const uint8_t idx, const std::array<T, len>& key) noexcept) {
+				return key_mds(idx, key.data(), key.size());
 			}
 		}
 
