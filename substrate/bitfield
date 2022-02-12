@@ -8,6 +8,8 @@
 
 #include <substrate/internal/defs>
 
+#include <substrate/promotion_helpers>
+
 #if __cplusplus < 201402L
 	#error "substrate/bitfield requires C++14 or newer"
 #else
@@ -51,21 +53,22 @@ namespace substrate
 			}
 
 			/* Set the value of this field in the given register */
-            template<typename V>
+			template<typename V>
 				SUBSTRATE_NO_DISCARD(static inline constexpr
-            	std::enable_if_t<!std::is_enum<V>::value> set(V& f, const V v) noexcept)
-            {
-
-				f = (((f) & ~computed_mask) | ((vu_type(v) << lsb) & computed_mask));
+				std::enable_if_t<!std::is_enum<V>::value> set(V& f, const V v) noexcept)
+			{
+				using Vp = promoted_type_t<V>;
+				f = V(Vp(((f) & ~computed_mask) | ((vu_type(v) << lsb) & computed_mask)));
 			}
 
-            template<typename V>
+			template<typename V>
 			SUBSTRATE_NO_DISCARD(static inline constexpr
-            std::enable_if_t<std::is_enum<V>::value> set(V& f, const V v) noexcept)
-            {
-                using Vt = typename std::underlying_type_t<V>;
+			std::enable_if_t<std::is_enum<V>::value> set(V& f, const V v) noexcept)
+			{
+				using Vt = typename std::underlying_type_t<V>;
+				using Vp = promoted_type_t<Vt>;
 
-				f = (((f) & ~computed_mask) | ((vu_type(v) << lsb) & computed_mask));
+				f = Vp(((f) & ~computed_mask) | ((vu_type(v) << lsb) & computed_mask));
 			}
 		};
 	};
