@@ -307,7 +307,8 @@ namespace substrate
 
 			// TODO(aki): make endian aware
 			// Set the CTR counter
-			typename std::enable_if<mode == twofish_mode_t::CTR>::type
+			template<twofish_mode_t _mode = mode>
+			typename std::enable_if<_mode == twofish_mode_t::CTR>::type
 			set_counter(const uint64_t counter) noexcept {
 				std::memcpy(_iv.data() + 8, &counter, sizeof(counter));
 			}
