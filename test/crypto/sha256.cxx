@@ -5,7 +5,26 @@
 
 using namespace substrate;
 
-TEST_CASE("sha256 std::array<>", "[crypto/sha256]")
+TEST_CASE("sha256: empty hash", "[crypto/sha256]")
+{
+	crypto::sha256_t hasher{};
+
+	std::array<int8_t, 0> empty_input{{}};
+	std::array<uint8_t, 32> empty_hash{{
+		0xe3U, 0xb0U, 0xc4U, 0x42U,
+		0x98U, 0xfcU, 0x1cU, 0x14U,
+		0x9aU, 0xfbU, 0xf4U, 0xc8U,
+		0x99U, 0x6fU, 0xb9U, 0x24U,
+		0x27U, 0xaeU, 0x41U, 0xe4U,
+		0x64U, 0x9bU, 0x93U, 0x4cU,
+		0xa4U, 0x95U, 0x99U, 0x1bU,
+		0x78U, 0x52U, 0xb8U, 0x55U
+	}};
+
+	REQUIRE(hasher(empty_input) == empty_hash);
+}
+
+TEST_CASE("sha256: std::array<>", "[crypto/sha256]")
 {
 	crypto::sha256_t hasher{};
 
