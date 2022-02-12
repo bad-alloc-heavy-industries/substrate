@@ -11,6 +11,8 @@
 #include <substrate/utility>
 #include <substrate/bits>
 #include <substrate/buffer_utils>
+#include <substrate/span>
+
 
 namespace substrate
 {
@@ -75,8 +77,8 @@ namespace substrate
 				return uint64_t(rotr(E, 14) ^ rotr(E, 18) ^ rotl(E, 23));
 			}
 
-			inline void rnd_stp(const uint8_t n, const uint64_t A, const uint64_t B, const uint64_t C, uint64_t& D, const uint64_t E, const uint64_t F, const uint64_t G, uint64_t& H, const uint64_t W) noexcept {
-				uint64_t t1{Ch(E, F, G) + H + W + k[n] + S1(E)};
+			inline void rnd_stp(const size_t n, const uint64_t A, const uint64_t B, const uint64_t C, uint64_t& D, const uint64_t E, const uint64_t F, const uint64_t G, uint64_t& H, const uint64_t W) noexcept {
+				const uint64_t t1{Ch(E, F, G) + H + W + k[n] + S1(E)};
 				D += t1;
 				H = t1 + Ma(A, B, C) + S0(A);
 			}
@@ -92,31 +94,26 @@ namespace substrate
 			struct ext_msg_t {
 			private:
 				std::array<uint64_t, 16> _blks;
-				SUBSTRATE_NO_DISCARD(uint64_t& W(const uint8_t idx) noexcept) {
-					return _blks[idx & 15];
+				SUBSTRATE_NO_DISCARD(uint64_t& W(const size_t idx) noexcept) {
+					return _blks[idx & 15U];
 				}
 			public:
 				template<typename T, std::size_t len>
 				ext_msg_t(const std::array<T, len>& msg) noexcept {
 					static_assert(sizeof(T) * len >= 16 * sizeof(uint64_t), "msg too small");
-					for (uint8_t i{}; i < 16; ++i) {
-						_blks[i] = bu::readBE<uint64_t>(
-							// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-							reinterpret_cast<const uint8_t*>( // lgtm[cpp/reinterpret-cast]
-								msg.data()
-							) + (i * sizeof(uint64_t))
-						);
+					for (size_t i{}; i < 16; ++i) {
+						_blks[i] = bu::readBE<uint64_t>(msg.data() + i);
 					}
 				}
 
-				SUBSTRATE_NO_DISCARD(uint64_t operator[](const uint8_t i) noexcept) {
+				SUBSTRATE_NO_DISCARD(uint64_t operator[](const size_t i) noexcept) {
 					if (i < 16) {
 						return W(i);
 					}
 
-					uint64_t s0{rotr(W(uint8_t(i - 15)),  1) ^ rotr(W(uint8_t(i - 15)), 3) ^ (W(uint8_t(i - 15)) >> 7)};
-					uint64_t s1{rotr(W(uint8_t(i -  2)), 19) ^ rotl(W(uint8_t(i -  2)), 8) ^ (W(uint8_t(i -  2)) >> 6)};
-					return W(i) = W(uint8_t(i - 16)) + s0 + W(uint8_t(i - 7)) + s1;
+					uint64_t s0{rotr(W(i - 15U),  1U) ^ rotr(W(i - 15U), 8U) ^ (W(i - 15U) >> 7U)};
+					uint64_t s1{rotr(W(i -  2U), 19U) ^ rotl(W(i -  2U), 3U) ^ (W(i -  2U) >> 6U)};
+					return W(i) = W(i - 16U) + s0 + W(i - 7U) + s1;
 				}
 			};
 
@@ -134,23 +131,25 @@ namespace substrate
 			template<typename T, std::size_t len>
 			void round(std::array<uint64_t, 8>& i_state, const std::array<T, len>& msg) noexcept {
 				ext_msg_t W(msg);
-				std::array<uint64_t, 8> state{i_state};
+				auto state{i_state};
 
-				for (uint8_t i{}; i < 80; ++i) {
+				for (size_t i{}; i < 80; ++i) {
 					rnd_stp(
 						i,
-						state[7 - ((i + 7) % 8)],
-						state[7 - ((i + 6) % 8)],
-						state[7 - ((i + 5) % 8)],
-						state[7 - ((i + 4) % 8)],
-						state[7 - ((i + 3) % 8)],
-						state[7 - ((i + 2) % 8)],
-						state[7 - ((i + 1) % 8)],
-						state[7 - (i % 8)], W[i]
+						state[7U - ((i + 7U) % 8U)],
+						state[7U - ((i + 6U) % 8U)],
+						state[7U - ((i + 5U) % 8U)],
+						state[7U - ((i + 4U) % 8U)],
+						state[7U - ((i + 3U) % 8U)],
+						state[7U - ((i + 2U) % 8U)],
+						state[7U - ((i + 1U) % 8U)],
+						state[7U - (i % 8U)], W[i]
 					);
 				}
 
-				i_state = state;
+				for (size_t i{}; i < state.size(); ++i) {
+					i_state[i] += state[i];
+				}
 			}
 
 		public:
@@ -164,17 +163,17 @@ namespace substrate
 				round(_state, msg);
 			}
 
-			template<typename T, std::size_t len>
-			std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept {
+			template<typename T>
+			std::array<uint8_t, 64> hash(const T* data, std::size_t len) noexcept {
 				std::array<uint8_t, 64> _hash{{}};
 				std::array<uint64_t, 16> block{{}};
 
-				std::memcpy(block.data(), msg.data(), (len * sizeof(T)));
+				std::memcpy(block.data(), data, len);
 				std::memset(
 					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
 						block.data()
-					) + (len * sizeof(T)),
+					) + len,
 					0x80U,
 					1
 				);
@@ -184,26 +183,13 @@ namespace substrate
 					block.fill(UINT64_C(0x0000000000000000));
 				}
 
-				bu::writeLE(
-					uint64_t(_len << 3),
-					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
-						block.data()
-					) + (15 * sizeof(uint64_t))
-				);
-
-				bu::writeLE(
-					uint64_t(_len >> 61),
-					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
-						block.data()
-					) + (14 * sizeof(uint64_t))
-				);
+				bu::writeBE(uint64_t(_len << 3U), block.data() + 15);
+				bu::writeBE(uint64_t(_len >> 61U), block.data() + 14);
 
 				round(_state, block);
 
 				for (uint8_t i{}; i < _state.size(); ++i){
-					bu::writeLE(
+					bu::writeBE(
 						_state[i],
 						// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 						reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
@@ -218,6 +204,16 @@ namespace substrate
 				return _hash;
 			}
 
+			template<typename T>
+			std::array<uint8_t, 64> hash(const span<T>& msg) noexcept {
+				return hash(msg.data(), msg.size());
+			}
+
+			template<typename T, std::size_t len>
+			std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept {
+				return hash(msg.data(), msg.size());
+			}
+
 			template<typename T, std::size_t len>
 			std::array<uint8_t, 64> operator()(const std::array<T, len>& msg) noexcept {
 				uint64_t bidx{};
@@ -230,15 +226,21 @@ namespace substrate
 						buf[i] = bu::readLE<uint64_t>(
 							// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 							reinterpret_cast<const uint8_t*>( // lgtm[cpp/reinterpret-cast]
-								msg.data()
-							) + (i * sizeof(uint64_t))
+								msg.data() + i
+							) + bidx
 						);
 					}
 					round(buf);
 					bidx += 128;
 				}
 
-				return hash(msg);
+				return hash(
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+					reinterpret_cast<const uint8_t*>( // lgtm[cpp/reinterpret-cast]
+						msg.data()
+					) + bidx,
+					size_t(len - bidx)
+				);
 			}
 		};
 	}
