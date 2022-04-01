@@ -331,7 +331,7 @@ jobs:
         run: ninja -C build install
       - name: Coverage prep
         if: success()
-        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+        run: gcovr -r .. -x coverage.xml -e ../deps -e ../test
         working-directory: build
       - name: Codecov
         if: success()
