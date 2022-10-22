@@ -12,6 +12,7 @@
 #include <vector>
 #include <chrono>
 #include <utility>
+#include <substrate/internal/defs>
 #include <substrate/promotion_helpers>
 
 #ifndef _MSC_VER
@@ -532,7 +533,7 @@ namespace substrate
 
 #if !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
-	static inline std::string decode_typename(const char *const mangled_name)
+	SUBSTRATE_NOWARN_UNUSED(static inline std::string decode_typename(const char *const mangled_name))
 	{
 #ifndef _MSC_VER
 		auto * const demangler = abi::__cxa_demangle(mangled_name, nullptr, nullptr, nullptr);
