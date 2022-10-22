@@ -321,11 +321,9 @@ jobs:
           ## GCC6 cannot handle constexpr-ness of mmap_t
           ## See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
           # - gcc@6
-          ## GCC < 10 is known to crash on exception unwind
-          ## https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
-          # - gcc@7
-          # - gcc@8
-          # - gcc@9
+          - gcc@7
+          - gcc@8
+          - gcc@9
           - gcc@10
           - gcc@11
           - gcc
