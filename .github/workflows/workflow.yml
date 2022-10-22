@@ -305,22 +305,22 @@ jobs:
       - name: Install
         run: ninja -C build install
   build-macos-homebrew:
-    # Do not use Big Sur here, GCC < 9 is known to crash
-    # on exception unwind
-    # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805 
     runs-on: macos-12
     strategy:
       matrix:
         compiler:
-          # GCC5 cannot compile anything on macOS
+          ## GCC5 cannot compile anything on macOS
           # - gcc@5
           ## GCC6 cannot handle constexpr-ness of mmap_t
           ## See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
           # - gcc@6
-          - gcc@7
-          - gcc@8
-          - gcc@9
+          ## GCC < 10 is known to crash on exception unwind
+          ## https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
+          # - gcc@7
+          # - gcc@8
+          # - gcc@9
           - gcc@10
+          - gcc@11
           - gcc
         cpp_std:
           - 'c++11'
