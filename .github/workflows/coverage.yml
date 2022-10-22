@@ -280,8 +280,8 @@ jobs:
     strategy:
       matrix:
         os:
+          - macos-12
           - macos-11
-          - macos-10.15
         cpp_std:
           - 'c++11'
           - 'c++14'
@@ -340,7 +340,7 @@ jobs:
     # Do not use Big Sur here, GCC < 9 is known to crash
     # on exception unwind
     # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
-    runs-on: macos-10.15
+    runs-on: macos-12
     strategy:
       matrix:
         compiler:
