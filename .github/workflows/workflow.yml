@@ -305,7 +305,10 @@ jobs:
       - name: Install
         run: ninja -C build install
   build-macos-homebrew:
-    runs-on: macos-12
+    # Apple LLD is unable to link GCC < 11 generated object files.
+    # https://stackoverflow.com/questions/73714336/xcode-update-to-version-2395-ld-compile-problem-occurs-computedatomcount-m
+    # rdar://FB11369327
+    runs-on: macos-11
     strategy:
       matrix:
         compiler:

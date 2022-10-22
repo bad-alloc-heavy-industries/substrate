@@ -337,7 +337,7 @@ jobs:
 
   build-coverage-macos-homebrew:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
-    runs-on: macos-12
+    runs-on: macos-11
     strategy:
       matrix:
         compiler:
