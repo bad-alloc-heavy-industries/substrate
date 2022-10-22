@@ -8,6 +8,10 @@ on:
     branches:
       - 'main'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.job }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-coverage-linux:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
