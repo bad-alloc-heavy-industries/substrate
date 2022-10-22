@@ -10,7 +10,6 @@
 #include <string>
 #include <limits>
 #include <vector>
-#include <array>
 #include <chrono>
 #include <utility>
 #include <substrate/promotion_helpers>
