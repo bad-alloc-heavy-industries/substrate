@@ -72,7 +72,7 @@ jobs:
         env:
           CC: ${{ matrix.compiler }}
         working-directory: ${{ runner.temp }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -154,7 +154,7 @@ jobs:
           MSYS2_ARG_CONV_EXCL=/dir=\;/verysilent ./OpenCppCoverageSetup-x64-0.9.9.0 \
             /dir="C:\Program Files\OpenCppCoverage" /verysilent
           rm OpenCppCoverageSetup-x64-0.9.9.0.exe
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -239,7 +239,7 @@ jobs:
           echo "GCOV=llvm-cov gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -301,7 +301,7 @@ jobs:
         shell: bash
         run: |
           brew install gcovr
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -380,7 +380,7 @@ jobs:
           echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
         env:
           COMPILER: ${{ matrix.compiler }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true

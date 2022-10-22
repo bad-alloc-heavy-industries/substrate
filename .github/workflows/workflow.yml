@@ -105,7 +105,7 @@ jobs:
         env:
           CC: ${{ matrix.compiler }}
         working-directory: ${{ runner.temp }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -159,7 +159,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -235,7 +235,7 @@ jobs:
           echo "CXX=$CXX" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -279,7 +279,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
         run: |
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
@@ -347,7 +347,7 @@ jobs:
           echo "CXX=$CXX" >> $GITHUB_ENV
         env:
           COMPILER: ${{ matrix.compiler }}
-      - name: Checkout substrate
+      - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
