@@ -73,7 +73,7 @@ jobs:
           CC: ${{ matrix.compiler }}
         working-directory: ${{ runner.temp }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -155,7 +155,7 @@ jobs:
             /dir="C:\Program Files\OpenCppCoverage" /verysilent
           rm OpenCppCoverageSetup-x64-0.9.9.0.exe
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -240,7 +240,7 @@ jobs:
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -302,7 +302,7 @@ jobs:
         run: |
           brew install gcovr
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -381,7 +381,7 @@ jobs:
         env:
           COMPILER: ${{ matrix.compiler }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true

@@ -106,7 +106,7 @@ jobs:
           CC: ${{ matrix.compiler }}
         working-directory: ${{ runner.temp }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -160,7 +160,7 @@ jobs:
         with:
           arch: x86_64
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -236,7 +236,7 @@ jobs:
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -280,7 +280,7 @@ jobs:
         run: |
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
@@ -348,7 +348,7 @@ jobs:
         env:
           COMPILER: ${{ matrix.compiler }}
       - name: Checkout substrate
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
