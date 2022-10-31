@@ -11,6 +11,14 @@
 namespace substrate
 {
 	/* endian swapping facilities */
+	SUBSTRATE_NO_DISCARD(inline constexpr uint8_t swap8(const uint8_t x) noexcept)
+	{
+		return uint8_t(
+			((x & 0x0FU) << 4U) |
+			((x & 0xF0U) >> 4U)
+		);
+	}
+
 	SUBSTRATE_NO_DISCARD(inline constexpr uint16_t swap16(const uint16_t x) noexcept)
 	{
 		return uint16_t(

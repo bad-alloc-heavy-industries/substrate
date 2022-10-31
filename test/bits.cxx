@@ -44,11 +44,20 @@ TEST_CASE("shift nibble", "[bits]")
 	REQUIRE(shift_nibble<decltype(value2)>(value2, 16U) == 0x0123456789ABCDEFLLU);
 }
 
+using substrate::swap8;
 using substrate::swap16;
 using substrate::swap32;
 using substrate::swap64;
 TEST_CASE("bswap tests", "[bits]")
 {
+	SECTION("bswap8")
+	{
+		REQUIRE(swap8(0x34U) == 0x43U);
+		REQUIRE(swap8(0x12U) == 0x21U);
+		REQUIRE(swap8(0x24U) == 0x42U);
+		REQUIRE(swap8(0x23U) == 0x32U);
+	}
+
 	SECTION("bswap16")
 	{
 		REQUIRE(swap16(0x3412U) == 0x1234U);
