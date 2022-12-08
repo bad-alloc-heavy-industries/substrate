@@ -16,6 +16,7 @@ namespace substrate
 		using span = std::span<T, E>;
 }
 #else
+#include <stdexcept>
 #include <substrate/utility>
 #include <substrate/iterator>
 #include <substrate/internal/defs>
@@ -278,15 +279,35 @@ namespace substrate
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR span<T, dynamic_extent>
-			subspan(size_t offset, size_t count = dynamic_extent) const noexcept
+			subspan(size_t offset, size_t count = dynamic_extent) const
 		{
-			static_assert(offset <= size(), "Offset must be less than or equal to the size of the span");
+#if __cplusplus > 201703L
+			if constexpr (std::is_constant_evaluated())
+				static_assert(offset <= size(), "Offset must be less than or equal to the size of the span");
+			else
+#endif
+			if (offset > size())
+				throw std::out_of_range{"Offset must be less than or equal to the size of the span"};
 			if (count == dynamic_extent)
 				count = size() - offset;
 			else
 			{
-				static_assert(count <= size(), "count must be less than or equal to the size of the span");
-				static_assert(offset + count <= size(), "the sum of the offset and count must be less than or equal to the size of the span");
+#if __cplusplus > 201703L
+				if constexpr (std::is_constant_evaluated())
+				{
+					static_assert(count <= size(), "count must be less than or equal to the size of the span");
+					static_assert(offset + count <= size(), "the sum of the offset and count must be less than or equal to the size of the span");
+				}
+				else
+				{
+#endif
+					if (count > size())
+						throw std::out_of_range{"count must be less than or equal to the size of the span"};
+					if (offset + count > size())
+						throw std::out_of_range{"the sum of the offset and count must be less than or equal to the size of the span"};
+#if __cplusplus > 201703L
+				}
+#endif
 			}
 			return {data() + offset, count};
 		}
