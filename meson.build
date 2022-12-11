@@ -143,6 +143,10 @@ substrate_dep = declare_dependency(
 	dependencies: deps,
 	include_directories: include_directories('.'),
 	link_with: libSubstrate,
+	variables: {
+		'compile_args': '-I@0@'.format(meson.current_source_dir()),
+		'link_args': libSubstrate.full_path()
+	},
 	version: meson.project_version()
 )
 
