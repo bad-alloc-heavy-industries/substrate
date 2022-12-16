@@ -71,8 +71,10 @@ namespace substrate
 #endif
 		template<typename T, typename = enable_if_t<std::is_base_of<printable_t, T>::value>>
 			void write(T &&printable) const noexcept { printable(*this); }
-		template<typename T, typename = enable_if_t<is_numeric<T>::value>>
-			void write(T value) const noexcept;
+		template<typename T> enable_if_t<is_numeric<T>::value && !std::is_enum<T>::value>
+			write(T value) const noexcept;
+		template<typename T> enable_if_t<std::is_enum<T>::value> write(const T value) const noexcept
+			{ write(static_cast<typename std::underlying_type<T>::type>(value)); }
 		template<typename T> void write(const T *ptr) const noexcept;
 		void write(bool value) const noexcept;
 		template<size_t N> void write(const std::array<char, N> &value) const noexcept;
@@ -284,8 +286,8 @@ namespace substrate
 		}
 	};
 
-	template<typename T, typename> void consoleStream_t::write(const T value) const noexcept
-		{ write(asInt_t<T>{value}); }
+	template<typename T> enable_if_t<is_numeric<T>::value && !std::is_enum<T>::value>
+		consoleStream_t::write(const T value) const noexcept { write(asInt_t<T>{value}); }
 
 	template<typename T> void consoleStream_t::write(const T *const ptr) const noexcept
 	{
