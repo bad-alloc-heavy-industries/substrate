@@ -1,0 +1,22 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_INTERNAL_TYPES
+#define SUBSTRATE_INTERNAL_TYPES
+
+#ifndef _MSC_VER
+#include <sys/types.h>
+#else
+#include <cstddef>
+#include <type_traits>
+#endif
+
+namespace substrate
+{
+#ifndef _MSC_VER
+	using ssize_t = ::ssize_t;
+#else
+	using ssize_t = typename std::make_signed<std::size_t>::type;
+#endif
+} // namespace substrate
+
+#endif /*SUBSTRATE_INTERNAL_TYPES*/
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

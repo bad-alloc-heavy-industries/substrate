@@ -4,7 +4,7 @@
 
 #include <cstdint>
 #include <type_traits>
-#include <substrate/internal/fd_compat>
+#include <substrate/internal/types>
 
 namespace substrate
 {
