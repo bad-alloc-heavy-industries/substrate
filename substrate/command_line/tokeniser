@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_COMMAND_LINE_TOKENISER
+#define SUBSTRATE_COMMAND_LINE_TOKENISER
+
+#include <cstdint>
+#include <cstddef>
+#include <string_view>
+
+namespace substrate::commandLine::internal
+{
+	enum class tokenType_t : uint8_t
+	{
+		unknown,
+		arg,
+		space,
+		equals
+	};
+
+	struct token_t final
+	{
+	private:
+		tokenType_t type_{tokenType_t::unknown};
+		std::string_view value_{};
+
+	public:
+		constexpr token_t() noexcept = default;
+		constexpr token_t(const tokenType_t type) noexcept : type_{type} { }
+		token_t(const tokenType_t type, const std::string_view &value) noexcept : type_{type}, value_{value} { }
+
+		[[nodiscard]] auto valid() const noexcept { return type_ != tokenType_t::unknown; }
+		[[nodiscard]] auto type() const noexcept { return type_; }
+		[[nodiscard]] auto value() const noexcept { return value_; }
+	};
+
+	struct tokenizer_t final
+	{
+	private:
+		size_t _currentArg{};
+		const char *_arg{};
+		const char *_offset{};
+		size_t _length{};
+		token_t _token{};
+		size_t _count;
+		const char *const *_args;
+
+		void nextArg() noexcept;
+		void readToken() noexcept;
+
+	public:
+		tokenizer_t(const size_t argsCount, const char *const *const argsList) noexcept :
+			_count{argsCount}, _args{argsList}
+		{
+			nextArg();
+			readToken();
+		}
+
+		[[nodiscard]] const auto &token() const noexcept { return _token; }
+		[[nodiscard]] auto &token() noexcept { return _token; }
+
+		[[nodiscard]] auto &next() noexcept
+		{
+			readToken();
+			return _token;
+		}
+	};
+
+	[[nodiscard]] std::string_view typeToName(tokenType_t type) noexcept;
+} // namespace substrate::commandLine::internal
+
+#endif /* SUBSTRATE_COMMAND_LINE_TOKENISER */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

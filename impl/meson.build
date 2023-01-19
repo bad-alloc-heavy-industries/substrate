@@ -11,6 +11,8 @@ else
 	libSubstrateSrcs += 'pty.cxx'
 endif
 
+subdir('command_line')
+
 libSubstrate = library(
 	'substrate',
 	libSubstrateSrcs,
