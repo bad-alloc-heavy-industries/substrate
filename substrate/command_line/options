@@ -6,13 +6,12 @@
 #include <vector>
 #include <variant>
 #include <string_view>
-#include <array>
 #include <type_traits>
 #include <substrate/index_sequence>
 
 namespace substrate::commandLine
 {
-	struct optionFlagPair_t
+	struct optionFlagPair_t final
 	{
 		std::string_view _shortFlag{};
 		std::string_view _longFlag{};
@@ -23,23 +22,23 @@ namespace substrate::commandLine
 	struct optionAlternation_t;
 
 	// A singular command line option such as a simple flag
-	struct option_t
+	struct option_t final
 	{
 	private:
 		std::variant<std::string_view, optionFlagPair_t, std::monostate> _option;
 		std::string_view _help{};
 
 	public:
-		option_t(const std::string_view &option, const std::string_view &help) noexcept :
+		constexpr option_t(const std::string_view &option, const std::string_view &help) noexcept :
 			_option{option}, _help{help} { }
-		option_t(const optionFlagPair_t &optionPair, const std::string_view &help) noexcept :
+		constexpr option_t(const optionFlagPair_t &optionPair, const std::string_view &help) noexcept :
 			_option{optionPair}, _help{help} { }
-		option_t(const optionValue_t &, const std::string_view &help) noexcept :
+		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 	};
 
 	// A set of command line option alternations such as a set of commands
-	struct optionSet_t
+	struct optionSet_t final
 	{
 	private:
 		std::vector<optionAlternation_t> _alternations{};
@@ -51,7 +50,7 @@ namespace substrate::commandLine
 	};
 
 	// The base container for a program's command line options
-	struct options_t
+	struct options_t final
 	{
 	private:
 		using item_t = std::variant<option_t, optionSet_t>;
@@ -83,7 +82,7 @@ namespace substrate::commandLine
 	};
 
 	// Represents a specific alternation in an optionSet_t
-	struct optionAlternation_t
+	struct optionAlternation_t final
 	{
 	private:
 		std::string_view _value;
