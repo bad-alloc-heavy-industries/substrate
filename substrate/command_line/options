@@ -1,0 +1,102 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_COMMAND_LINE_OPTIONS
+#define SUBSTRATE_COMMAND_LINE_OPTIONS
+
+#include <cstddef>
+#include <vector>
+#include <variant>
+#include <string_view>
+#include <array>
+#include <type_traits>
+#include <substrate/index_sequence>
+
+namespace substrate::commandLine
+{
+	struct optionFlagPair_t
+	{
+		std::string_view _shortFlag{};
+		std::string_view _longFlag{};
+	};
+
+	struct optionValue_t { };
+	constexpr static inline optionValue_t optionValue{};
+	struct optionAlternation_t;
+
+	// A singular command line option such as a simple flag
+	struct option_t
+	{
+	private:
+		std::variant<std::string_view, optionFlagPair_t, std::monostate> _option;
+		std::string_view _help{};
+
+	public:
+		option_t(const std::string_view &option, const std::string_view &help) noexcept :
+			_option{option}, _help{help} { }
+		option_t(const optionFlagPair_t &optionPair, const std::string_view &help) noexcept :
+			_option{optionPair}, _help{help} { }
+		option_t(const optionValue_t &, const std::string_view &help) noexcept :
+			_option{std::monostate{}}, _help{help} { }
+	};
+
+	// A set of command line option alternations such as a set of commands
+	struct optionSet_t
+	{
+	private:
+		std::vector<optionAlternation_t> _alternations{};
+
+	public:
+		template<typename... Alternations, typename =
+			std::enable_if_t<(std::is_same_v<Alternations, optionAlternation_t> && ...)>>
+				optionSet_t(const Alternations &...alternations) : _alternations{alternations...} { }
+	};
+
+	// The base container for a program's command line options
+	struct options_t
+	{
+	private:
+		using item_t = std::variant<option_t, optionSet_t>;
+		std::vector<item_t> _options{};
+
+		void populateOption(const option_t &option) { _options.emplace_back(option); }
+		void populateOption(const optionSet_t &option) { _options.emplace_back(option); }
+		void populateOptions() noexcept { }
+
+		template<typename Option, typename... Options>
+			void populateOptions(const Option &option, const Options &...options)
+		{
+			populateOption(option);
+			populateOptions(options...);
+		}
+
+	public:
+		template<typename... Options> options_t(const Options &...options) { populateOptions(options...); }
+
+		[[nodiscard]] auto begin() const noexcept { return _options.begin(); }
+		[[nodiscard]] auto end() const noexcept { return _options.end(); }
+
+	private:
+		void populateOption(const options_t &options)
+		{
+			for (const auto &option : options)
+				_options.emplace_back(option);
+		}
+	};
+
+	// Represents a specific alternation in an optionSet_t
+	struct optionAlternation_t
+	{
+	private:
+		std::string_view _value;
+		std::string_view _help{};
+		options_t _suboptions{};
+
+	public:
+		optionAlternation_t(const std::string_view &value, const std::string_view &help) noexcept :
+			_value{value}, _help{help} { }
+		optionAlternation_t(const std::string_view &value, const std::string_view &help,
+			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
+	};
+} // namespace substrate::commandLine
+
+#endif /* SUBSTRATE_COMMAND_LINE_OPTIONS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
