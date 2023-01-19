@@ -6,7 +6,7 @@ using namespace std::literals::string_view_literals;
 
 namespace substrate::commandLine::internal
 {
-	void tokenizer_t::nextArg() noexcept
+	void tokeniser_t::nextArg() noexcept
 	{
 		if (_currentArg == _count)
 		{
@@ -24,7 +24,7 @@ namespace substrate::commandLine::internal
 
 	[[nodiscard]] static inline auto isEquals(const char chr) noexcept { return chr == '='; }
 
-	void tokenizer_t::readToken() noexcept
+	void tokeniser_t::readToken() noexcept
 	{
 		if (!_arg)
 			_token = {};

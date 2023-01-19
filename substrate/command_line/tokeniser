@@ -32,7 +32,7 @@ namespace substrate::commandLine::internal
 		[[nodiscard]] auto value() const noexcept { return value_; }
 	};
 
-	struct tokenizer_t final
+	struct tokeniser_t final
 	{
 	private:
 		size_t _currentArg{};
@@ -47,7 +47,7 @@ namespace substrate::commandLine::internal
 		void readToken() noexcept;
 
 	public:
-		tokenizer_t(const size_t argsCount, const char *const *const argsList) noexcept :
+		tokeniser_t(const size_t argsCount, const char *const *const argsList) noexcept :
 			_count{argsCount}, _args{argsList}
 		{
 			nextArg();
@@ -57,7 +57,7 @@ namespace substrate::commandLine::internal
 		[[nodiscard]] const auto &token() const noexcept { return _token; }
 		[[nodiscard]] auto &token() noexcept { return _token; }
 
-		[[nodiscard]] auto &next() noexcept
+		auto &next() noexcept
 		{
 			readToken();
 			return _token;

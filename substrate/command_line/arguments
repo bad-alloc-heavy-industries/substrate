@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_COMMAND_LINE_ARGUMENTS
+#define SUBSTRATE_COMMAND_LINE_ARGUMENTS
+
+#include <cstddef>
+#include <optional>
+#include <vector>
+#include <variant>
+#include <substrate/command_line/options>
+
+namespace substrate::commandLine
+{
+	struct choice_t;
+
+	struct flag_t
+	{
+	private:
+		std::string_view _name;
+		std::string_view _value{};
+	};
+
+	struct arguments_t
+	{
+	private:
+		using item_t = std::variant<flag_t, choice_t>;
+		std::vector<item_t> _arguments{};
+
+	public:
+		arguments_t() noexcept = default;
+	};
+
+	struct choice_t
+	{
+	private:
+		std::string_view _value;
+		arguments_t _arguments{};
+	};
+
+	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options);
+} // namespace substrate::commandLine
+
+#endif /* SUBSTRATE_COMMAND_LINE_ARGUMENTS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
