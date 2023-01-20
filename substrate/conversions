@@ -313,6 +313,13 @@ namespace substrate
 		constexpr inline fromInt_t<value_t, value_t, length, padding>
 			fromInt(const value_t &value) noexcept { return {value}; }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// (386): warning C4146: unary minus operator applied to unsigned type,
+// result still unsigned
+#pragma warning(disable: 4146)
+#endif
+
 	template<typename int_t> struct toInt_t
 	{
 	private:
@@ -421,6 +428,10 @@ namespace substrate
 			return int_t(result);
 		}
 	};
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 
 #endif /*SUBSTRATE_CONVERSIONS*/
