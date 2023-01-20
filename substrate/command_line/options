@@ -7,7 +7,9 @@
 #include <variant>
 #include <string_view>
 #include <type_traits>
+#include <substrate/static_vector>
 #include <substrate/index_sequence>
+#include <substrate/utility>
 
 namespace substrate::commandLine
 {
@@ -41,13 +43,15 @@ namespace substrate::commandLine
 	struct optionSet_t final
 	{
 	private:
-		std::vector<optionAlternation_t> _alternations{};
+		staticVector_t<optionAlternation_t> _alternations;
 
 	public:
-		template<typename... Alternations, typename =
-			std::enable_if_t<(std::is_same_v<Alternations, optionAlternation_t> && ...)>>
-				optionSet_t(const Alternations &...alternations) : _alternations{alternations...} { }
+		optionSet_t(const staticVector_t<optionAlternation_t> &alternations) : _alternations{alternations} { }
 	};
+
+	template<size_t N> constexpr static inline staticVector_t<optionAlternation_t>
+		optionAlternations(const optionAlternation_t (&&alternations)[N]) noexcept
+			{ return {makeArray(std::move(alternations))}; }
 
 	// The base container for a program's command line options
 	struct options_t final
