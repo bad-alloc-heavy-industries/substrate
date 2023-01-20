@@ -219,7 +219,7 @@ namespace substrate
 				uint64_t bidx{};
 				std::array<uint64_t, 16> buf{};
 
-				const uint64_t blk_max{len & ~127};
+				const uint64_t blk_max{len & ~127U};
 
 				while (bidx != blk_max) {
 					for (uint8_t i{}; i < 16; ++i) {
