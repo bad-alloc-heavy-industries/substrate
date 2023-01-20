@@ -12,7 +12,21 @@ else
 endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
-	subdir('command_line')
+	std_variant_test = '''
+		#include <variant>
+		#include <vector>
+		int main(int argc, char* argv[])
+		{
+			using tuple_t = std::variant<int, double>;
+			std::vector<tuple_t> list;
+			list.emplace_back(argc - 1);
+
+			return std::get<int>(v.begin());
+		}
+	'''
+	if cxx.compiles(std_variant_test, name: 'has a working std::variant implementation (GCC #90397, LLVM #41863)')
+		subdir('command_line')
+	endif
 endif
 
 libSubstrate = library(
