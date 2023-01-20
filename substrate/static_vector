@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_STATIC_VECTOR
+#define SUBSTRATE_STATIC_VECTOR
+
+#include <cstddef>
+#include <array>
+#include <stdexcept>
+
+namespace substrate
+{
+	template<typename T> struct staticVector_t final
+	{
+	private:
+		T *_data{nullptr};
+		size_t _length{};
+
+	public:
+		using value_type = T;
+		using reference = T &;
+		using const_reference = const T &;
+		using pointer = T *;
+		using const_pointer = const T *const;
+		using iterator = T *;
+		using const_iterator = const T *;
+
+		constexpr staticVector_t() noexcept = default;
+		constexpr staticVector_t(const staticVector_t &) noexcept = default;
+		constexpr staticVector_t(staticVector_t &&vec) noexcept : staticVector_t{} { swap(vec); }
+		template<size_t N> constexpr staticVector_t(const std::array<T, N> &data) noexcept :
+			_data{data.data()}, _length{data.size()} { }
+		constexpr staticVector_t &operator =(const staticVector_t &) noexcept = default;
+
+		constexpr staticVector_t &operator =(staticVector_t &&data) noexcept
+		{
+			swap(data);
+			return *this;
+		}
+
+		constexpr size_t length() const noexcept { return _length; }
+		constexpr size_t size() const noexcept { return _length; }
+		constexpr size_t count() const noexcept { return _length; }
+		constexpr bool empty() const noexcept { return !_length; }
+		constexpr T *data() noexcept { return _data; }
+		constexpr const T *data() const noexcept { return _data; }
+
+		constexpr reference operator [](const size_t index)
+		{
+			if (index < _length)
+				return _data[index];
+			throw std::out_of_range{"Index into staticVector_t is out of bounds"};
+		}
+
+		constexpr const_reference operator [](const size_t index) const
+		{
+			if (index < _length)
+				return _data[index];
+			throw std::out_of_range{"Index into staticVector_t is out of bounds"};
+		}
+
+		constexpr iterator begin() noexcept { return _data; }
+		constexpr const_iterator begin() const noexcept { return _data; }
+		constexpr iterator end() noexcept { return _data + _length; }
+		constexpr const_iterator end() const noexcept { return _data + _length; }
+
+		constexpr void swap(staticVector_t &vec) noexcept
+		{
+			std::swap(_data, vec._data);
+			std::swap(_length, vec._length);
+		}
+	};
+} // namespace substrate
+
+#endif /* SUBSTRATE_STATIC_VECTOR */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

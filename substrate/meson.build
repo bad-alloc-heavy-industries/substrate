@@ -23,25 +23,27 @@ headers = [
 	'bitfield',
 	'promotion_helpers',
 	'buffer_utils',
-	'flex_struct'
+	'flex_struct',
+	'static_vector',
 ]
 
 advanced_headers = [
 	'advanced/io',
 	'advanced/fd',
-	'advanced/guard_page'
+	'advanced/guard_page',
 ]
 
 crypto_headers = [
 	'crypto/twofish',
 	'crypto/sha256',
-	'crypto/sha512'
+	'crypto/sha512',
 ]
 
 internal_headers = [
 	'internal/defs',
 	'internal/cxx11_compat',
-	'internal/fd_compat'
+	'internal/fd_compat',
+	'internal/types',
 ]
 
 if not meson.is_subproject()
