@@ -11,7 +11,7 @@ else
 	libSubstrateSrcs += 'pty.cxx'
 endif
 
-if get_option('cpp_std').split('++')[1].to_int() >= 17
+if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 	subdir('command_line')
 endif
 
