@@ -43,15 +43,15 @@ namespace substrate
 		constexpr fd_t() noexcept = default;
 		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_} { }
 		fd_t(const char *const fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(fileName, flags, mode)} { }
+			fd{internal::fdopen(fileName, flags, mode)} { }
 		fd_t(const std::string &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(fileName.c_str(), flags, mode)} { }
+			fd{internal::fdopen(fileName.c_str(), flags, mode)} { }
 #if __cplusplus >= 201703L
 		fd_t(const std::string_view &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(fileName.data(), flags, mode)} { }
+			fd{internal::fdopen(fileName.data(), flags, mode)} { }
 #if __has_include(<filesystem>)
 		fd_t(const std::filesystem::path &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd{::open(fileName.c_str(), flags, mode)} { }
+			fd{internal::fdopen(fileName.c_str(), flags, mode)} { }
 #endif
 #endif
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
