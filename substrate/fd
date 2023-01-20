@@ -10,7 +10,9 @@
 #include <string>
 #if __cplusplus >= 201703L
 #include <string_view>
+#if __has_include(<filesystem>)
 #include <filesystem>
+#endif
 #endif
 
 #include <substrate/internal/defs>
@@ -47,8 +49,10 @@ namespace substrate
 #if __cplusplus >= 201703L
 		fd_t(const std::string_view &fileName, const int flags, const mode_t mode = 0) noexcept :
 			fd_t{fileName.data(), flags, mode} { }
+#if __has_include(<filesystem>)
 		fd_t(const std::filesystem::path &fileName, const int flags, const mode_t mode = 0) noexcept :
 			fd_t{fileName.c_str(), flags, mode} { }
+#endif
 #endif
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
 		~fd_t() noexcept { if (fd != -1) close(fd); }
