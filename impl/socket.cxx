@@ -153,8 +153,10 @@ template<size_t offset> inline void *offsetPtr(void *ptr)
 template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest, const U value)
 	{ memcpy(offsetPtr<offset>(&dest), &value, sizeof(U)); }
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#endif
 sockaddr_storage substrate::socket::prepare(const socketType_t family, const char *const where,
 	const uint16_t port, const socketProtocol_t protocol) noexcept
 {
@@ -191,5 +193,7 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 		return {AF_UNSPEC};
 	return service;
 }
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
