@@ -14,7 +14,7 @@ constexpr static char testChar{'.'};
 SUBSTRATE_CONSTEXPR_STRING static std::string testString{"fileDescriptor"};
 
 constexpr static auto u8{uint8_t(0x5A)};
-constexpr static auto i8{int8_t(0xA5)};
+constexpr static auto i8{int8_t(0xA5U)};
 constexpr static auto u16{uint16_t(0x125A)};
 constexpr static auto i16{int16_t(0x12A5)};
 constexpr static auto u32{uint32_t(UINT32_C(0x1234565A))};
@@ -102,7 +102,7 @@ TEST_CASE("advanced::fd_t seek", "[advanced::fd_t]")
 	fd_t file{"fd.test", O_RDONLY};
 	REQUIRE(file.valid());
 	REQUIRE(file.tell() == 0);
-	const off_t length = file.length();
+	const auto length = file.length();
 	REQUIRE(length == 78);
 	REQUIRE(file.tail());
 	REQUIRE(file.isEOF());
