@@ -118,7 +118,7 @@ jobs:
         working-directory: build
       - name: Codecov
         if: success()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
 
   build-coverage-windows:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
@@ -187,7 +187,7 @@ jobs:
         run: ninja -C build  install
       - name: Codecov
         if: success()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
   build-coverage-windows-mingw:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
     name: 'build-coverage-mingw (${{ matrix.os }}, ${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
@@ -277,7 +277,7 @@ jobs:
         run: ninja -C build  install
       - name: Codecov
         if: success()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
 
   build-coverage-macos:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
@@ -338,7 +338,7 @@ jobs:
         working-directory: build
       - name: Codecov
         if: success()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
 
   build-coverage-macos-homebrew:
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
@@ -415,4 +415,4 @@ jobs:
         working-directory: build
       - name: Codecov
         if: success()
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
