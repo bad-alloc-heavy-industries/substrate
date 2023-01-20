@@ -11,7 +11,9 @@ else
 	libSubstrateSrcs += 'pty.cxx'
 endif
 
-subdir('command_line')
+if get_option('cpp_std').split('++')[1].to_int() >= 17
+	subdir('command_line')
+endif
 
 libSubstrate = library(
 	'substrate',
