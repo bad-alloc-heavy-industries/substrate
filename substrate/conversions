@@ -59,7 +59,7 @@ namespace substrate
 			valueAsInt(const std::chrono::duration<R, P> &number) const noexcept
 				{ return number.count(); }
 
-		[[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR arithUint_t process(const arithUint_t number, char *const buffer,
+		SUBSTRATE_NOINLINE SUBSTRATE_CXX14_CONSTEXPR arithUint_t process(const arithUint_t number, char *const buffer,
 			const std::size_t digits, const std::size_t index) const noexcept
 		{
 			if (number < 10)
@@ -83,7 +83,7 @@ namespace substrate
 		template<typename T = int_t> SUBSTRATE_CXX14_CONSTEXPR enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length == npos>
 			format(char *const buffer) const noexcept { process(valueAsInt(_value), buffer); }
-		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
+		template<typename T = int_t> SUBSTRATE_NOINLINE SUBSTRATE_CXX14_CONSTEXPR
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
 			std::is_signed<T>::value && _length == npos> format(char *const buffer) const noexcept
 		{
@@ -115,7 +115,7 @@ namespace substrate
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value && _length != npos>
 			format(char *const buffer) const noexcept { formatFixed(buffer, valueAsInt(_value)); }
 
-		template<typename T = int_t> [[gnu::noinline]] SUBSTRATE_CXX14_CONSTEXPR
+		template<typename T = int_t> SUBSTRATE_NOINLINE SUBSTRATE_CXX14_CONSTEXPR
 			enable_if_t<std::is_same<T, int_t>::value && std::is_integral<T>::value && !is_boolean<T>::value &&
 			std::is_signed<T>::value && _length != npos> format(char *const buffer) const noexcept
 		{

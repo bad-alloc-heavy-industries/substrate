@@ -45,6 +45,16 @@
 #	define SUBSTRATE_FALLTHROUGH() ((void)0)
 #endif
 
+#if defined(__GNUC__)
+#	define SUBSTRATE_NOINLINE [[gnu::noinline]]
+#elif defined(__clang__)
+#	define SUBSTRATE_NOINLINE [[clang::noinline]]
+#elif defined(_WIN32)
+#	define SUBSTRATE_NOINLINE __declspec(noinline)
+#else
+#	define SUBSTRATE_NOINLINE 
+#endif
+
 #if __cplusplus >= 201103L
 #	define ALIGN(X) alignas(x)
 #elif defined(__GNUC__)

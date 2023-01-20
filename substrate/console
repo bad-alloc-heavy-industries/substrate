@@ -187,7 +187,7 @@ namespace substrate
 		using uint_t = typename std::make_unsigned<int_t>::type;
 		int_t value_;
 
-		[[gnu::noinline]] uint_t format(const consoleStream_t &stream, const uint_t number) const noexcept
+		SUBSTRATE_NOINLINE uint_t format(const consoleStream_t &stream, const uint_t number) const noexcept
 		{
 			if (number < 10)
 				stream.write(char(number + '0'));
@@ -203,7 +203,7 @@ namespace substrate
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_unsigned<T>::value>
 			printTo(const consoleStream_t &stream) const noexcept { format(stream, value_); }
 
-		template<typename T> [[gnu::noinline]] enable_if_t<std::is_same<T, int_t>::value &&
+		template<typename T> SUBSTRATE_NOINLINE enable_if_t<std::is_same<T, int_t>::value &&
 			std::is_integral<T>::value && !is_boolean<T>::value && std::is_signed<T>::value>
 			printTo(const consoleStream_t &stream) const noexcept
 		{
@@ -250,7 +250,7 @@ namespace substrate
 			constexpr asHex_t(const T value) noexcept : maxDigits{sizeof(T) * 2},
 			msbShift{uint8_t(4U * (maxDigits - 1U))}, _value(value) { }
 
-		[[gnu::noinline]]
+		SUBSTRATE_NOINLINE
 		void operator ()(const consoleStream_t &stream) const noexcept final
 		{
 			uintmax_t value{_value};
