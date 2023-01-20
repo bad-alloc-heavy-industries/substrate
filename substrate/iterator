@@ -42,8 +42,10 @@ namespace substrate
 
 		reference operator *() const noexcept { return *current; }
 		pointer operator ->() const noexcept { return current; }
-		normalIterator_t operator++(int) noexcept { return normalIterator_t{current++}; }
-		normalIterator_t operator--(int) noexcept { return normalIterator_t{current--}; }
+		// NOLINTNEXTLINE(cert-dcl21-cpp)
+		normalIterator_t operator++(int) noexcept { return {current++}; }
+		// NOLINTNEXTLINE(cert-dcl21-cpp)
+		normalIterator_t operator--(int) noexcept { return {current--}; }
 
 		normalIterator_t &operator ++() noexcept
 		{
