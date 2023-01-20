@@ -355,16 +355,20 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool isDec() const noexcept)
 		{
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-			if (_isSigned && _length > 0 && _value[0] == '-' && length() == 1)
-				return false;
+			SUBSTRATE_IF_CONSTEXPR (_isSigned) {
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+				if(_length > 0 && _value[0] == '-' && length() == 1)
+					return false;
+			}
 			for (size_t i{}; i < _length; ++i)
 			{
+				SUBSTRATE_IF_CONSTEXPR (_isSigned) {
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+					if(i == 0 && _value[i] == '-')
+						continue;
+				}
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				if (_isSigned && i == 0 && _value[i] == '-')
-					continue;
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				else if (!isNumber(_value[i]))
+				if (!isNumber(_value[i]))
 					return false;
 			}
 			return true;
@@ -381,16 +385,22 @@ namespace substrate
 			arithUint_t result{};
 			for (size_t i{}; i < _length; ++i)
 			{
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-				if (_isSigned && i == 0U && _value[i] == '-')
-					continue;
+				SUBSTRATE_IF_CONSTEXPR (_isSigned) {
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+					if(i == 0U && _value[i] == '-')
+						continue;
+				}
 				result *= 10U;
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 				result += arithUint_t(_value[i] - '0');
 			}
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-			if (_isSigned && _length > 0 && _value[0] == '-')
-				return static_cast<int_t>(-result);
+
+			SUBSTRATE_IF_CONSTEXPR (_isSigned) {
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+				if (_length > 0 && _value[0] == '-')
+					return static_cast<int_t>(-result);
+			}
+
 			return static_cast<int_t>(result);
 		}
 
