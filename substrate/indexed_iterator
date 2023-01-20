@@ -54,7 +54,7 @@ namespace substrate
 #endif
 
 	public:
-		constexpr indexedIterator_t(T &container) noexcept : container_{container} { }
+		constexpr indexedIterator_t(T &source) noexcept : container_{source} { }
 
 #if __cplusplus >= 201703L
 		[[nodiscard]] constexpr auto begin() const noexcept
