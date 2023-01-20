@@ -44,14 +44,14 @@ namespace substrate
 		constexpr fd_t(const int32_t fd_) noexcept : fd{fd_} { }
 		fd_t(const char *const fileName, const int flags, const mode_t mode = 0) noexcept :
 			fd{::open(fileName, flags, mode)} { }
-		explicit fd_t(const std::string &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd_t{fileName.c_str(), flags, mode} { }
+		fd_t(const std::string &fileName, const int flags, const mode_t mode = 0) noexcept :
+			fd{::open(fileName.c_str(), flags, mode)} { }
 #if __cplusplus >= 201703L
-		explicit fd_t(const std::string_view &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd_t{fileName.data(), flags, mode} { }
+		fd_t(const std::string_view &fileName, const int flags, const mode_t mode = 0) noexcept :
+			fd{::open(fileName.data(), flags, mode)} { }
 #if __has_include(<filesystem>)
-		explicit fd_t(const std::filesystem::path &fileName, const int flags, const mode_t mode = 0) noexcept :
-			fd_t{fileName.c_str(), flags, mode} { }
+		fd_t(const std::filesystem::path &fileName, const int flags, const mode_t mode = 0) noexcept :
+			fd{::open(fileName.c_str(), flags, mode)} { }
 #endif
 #endif
 		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
