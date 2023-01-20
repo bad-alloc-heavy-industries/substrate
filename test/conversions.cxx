@@ -30,10 +30,14 @@ template<typename int_t> using testFailInt_t = std::vector<int_t>;
 using testFailStr_t = std::vector<const char *>;
 using str_t = std::char_traits<char>;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define u8(n)		static_cast<uint8_t>(n)
+#define i8(n)		static_cast<int8_t>(n)
+#define u16(n)		static_cast<uint16_t>(n)
+#define i16(n)		static_cast<int16_t>(n)
 #define u64(n)		UINT64_C(n)
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define i64(n)		INT64_C(n)
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 template<typename> constexpr inline size_t typeToOctalLength() noexcept { return static_cast<std::size_t>(-1); }
 template<> constexpr inline size_t typeToOctalLength<uint8_t>() noexcept { return 3; }
@@ -526,13 +530,13 @@ TEST_CASE("Octal conversion to uint8_t", "[conversions]")
 {
 	testToInt_t<uint8_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "0"},
-		{0, "00"},
-		{0, "000"},
-		{127, "177"},
-		{128, "200"},
-		{255, "377"}
+		{u8(0), ""},
+		{u8(0), "0"},
+		{u8(0), "00"},
+		{u8(0), "000"},
+		{u8(127), "177"},
+		{u8(128), "200"},
+		{u8(255), "377"}
 	});
 }
 
@@ -540,12 +544,12 @@ TEST_CASE("Octal conversion to int8_t", "[conversions]")
 {
 	testToInt_t<int8_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "000"},
-		{127, "177"},
-		{-1, "377"},
-		{-127, "201"},
-		{-128, "200"}
+		{i8(0), ""},
+		{i8(0), "000"},
+		{i8(127), "177"},
+		{i8(-1), "377"},
+		{i8(-127), "201"},
+		{i8(-128), "200"}
 	});
 }
 
@@ -553,12 +557,12 @@ TEST_CASE("Octal conversion to uint16_t", "[conversions]")
 {
 	testToInt_t<uint16_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "000000"},
-		{256, "000400"},
-		{32767, "077777"},
-		{32768, "100000"},
-		{65535, "177777"}
+		{u16(0), ""},
+		{u16(0), "000000"},
+		{u16(256), "000400"},
+		{u16(32767), "077777"},
+		{u16(32768), "100000"},
+		{u16(65535), "177777"}
 	});
 }
 
@@ -566,17 +570,17 @@ TEST_CASE("Octal conversion to int16_t", "[conversions]")
 {
 	testToInt_t<int16_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "000000"},
-		{128, "000200"},
-		{255, "000377"},
-		{256, "000400"},
-		{32767, "077777"},
-		{-1, "177777"},
-		{-255, "177401"},
-		{-256, "177400"},
-		{-32767, "100001"},
-		{-32768, "100000"}
+		{i16(0), ""},
+		{i16(0), "000000"},
+		{i16(128), "000200"},
+		{i16(255), "000377"},
+		{i16(256), "000400"},
+		{i16(32767), "077777"},
+		{i16(-1), "177777"},
+		{i16(-255), "177401"},
+		{i16(-256), "177400"},
+		{i16(-32767), "100001"},
+		{i16(-32768), "100000"}
 	});
 }
 
@@ -584,12 +588,12 @@ TEST_CASE("Octal conversion to uint32_t", "[conversions]")
 {
 	testToInt_t<uint32_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "00000000000"},
-		{65536, "00000200000"},
-		{2147483647, "17777777777"},
-		{2147483648, "20000000000"},
-		{4294967295, "37777777777"}
+		{0U, ""},
+		{0U, "00000000000"},
+		{65536U, "00000200000"},
+		{2147483647U, "17777777777"},
+		{2147483648U, "20000000000"},
+		{4294967295U, "37777777777"}
 	});
 }
 
@@ -597,17 +601,17 @@ TEST_CASE("Octal conversion to int32_t", "[conversions]")
 {
 	testToInt_t<int32_t>::testOctConversions(
 	{
-		{0, ""},
-		{0, "00000000000"},
-		{32768, "00000100000"},
-		{65535, "00000177777"},
-		{65536, "00000200000"},
-		{2147483647, "17777777777"},
-		{-1, "37777777777"},
-		{-65535, "37777600001"},
-		{-65536, "37777600000"},
-		{-2147483647, "20000000001"},
-		{-2147483648, "20000000000"}
+		{0L, ""},
+		{0L, "00000000000"},
+		{32768L, "00000100000"},
+		{65535L, "00000177777"},
+		{65536L, "00000200000"},
+		{2147483647L, "17777777777"},
+		{-1L, "37777777777"},
+		{-65535L, "37777600001"},
+		{-65536L, "37777600000"},
+		{-2147483647L, "20000000001"},
+		{-2147483648L, "20000000000"}
 	});
 }
 
@@ -626,7 +630,7 @@ TEST_CASE("Octal conversion to uint64_t", "[conversions]")
 	});
 }
 
-TEST_CASE("Octal conversion to int64_t", "[conversions]")
+TEST_CASE("Octal conversion to int64_t", "[conversions] ")
 {
 	testToInt_t<int64_t>::testOctConversions(
 	{
@@ -647,6 +651,7 @@ TEST_CASE("Octal conversion to int64_t", "[conversions]")
 		{i64(-9223372036854775807) - 1, "1000000000000000000000"}
 	});
 }
+
 
 template<typename toInt_t> struct testOctShouldFail_t
 {
