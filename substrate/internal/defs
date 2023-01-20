@@ -37,7 +37,7 @@
 #	define SUBSTRATE_NO_DISCARD(...) __VA_ARGS__
 #endif
 
-#if __has_cpp_attribute(fallthrough) || __cplusplus >= 201402L
+#if __has_cpp_attribute(fallthrough) || __cplusplus >= 201603L
 #	define SUBSTRATE_FALLTHROUGH() [[fallthrough]]
 #elif defined(__GNUC__)
 #	define SUBSTRATE_FALLTHROUGH() __attribute__((fallthrough))
