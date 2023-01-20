@@ -8,7 +8,6 @@
 namespace substrate
 {
 	using std::iterator_traits;
-	using std::iterator;
 
 	/**
 	 * Defines an iterator adapter that is 'normal' in the sense that
