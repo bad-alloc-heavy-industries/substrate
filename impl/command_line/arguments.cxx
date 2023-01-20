@@ -10,8 +10,40 @@ namespace substrate::commandLine
 {
 	using namespace internal;
 
+	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
+	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
+
 	bool parseArgument(tokeniser_t &lexer, const options_t &options, arguments_t &ast)
 	{
+		const auto &token{lexer.token()};
+		if (token.type() == tokenType_t::space)
+			lexer.next();
+		else if (token.type() != tokenType_t::arg)
+			return false;
+		const auto argument{token.value()};
+		for (const auto &option : options)
+		{
+			const auto match
+			{
+				std::visit(match_t
+				{
+					[&](const option_t &option) -> std::optional<item_t>
+					{
+						if (option.matches(argument))
+							return flag_t{};
+						return std::nullopt;
+					},
+					[&](const optionSet_t &option) -> std::optional<item_t>
+					{
+						if (option.matches(argument))
+							return choice_t{};
+						return std::nullopt;
+					}
+				}, option)
+			};
+			// if (match)
+			// 	return ast.add(*match);
+		}
 		lexer.next();
 		return true;
 	}

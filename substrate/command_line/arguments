@@ -19,10 +19,11 @@ namespace substrate::commandLine
 		std::string_view _value{};
 	};
 
+	using item_t = std::variant<flag_t, choice_t>;
+
 	struct arguments_t
 	{
 	private:
-		using item_t = std::variant<flag_t, choice_t>;
 		std::vector<item_t> _arguments{};
 
 	public:
