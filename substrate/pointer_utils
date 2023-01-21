@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "internal/defs"
+#include "utility"
 
 #if __cplusplus >= 201304L
 #define SUBSTRATE_SUPPORTS_MANAGED_TUPLE
@@ -13,19 +14,6 @@
 namespace substrate
 {
 	template<typename, typename...> class managedTuple_t;
-
-	template<typename T>
-	using pure_type = std::remove_cv<typename std::remove_pointer<typename std::remove_reference<T>::type>::type>;
-	template <typename Argument, typename Value>
-	using requires_reference = std::integral_constant<bool, std::is_pointer<Argument>::value &&
-			!std::is_pointer<typename std::remove_reference<Value>::type>::value>;
-
-	template <typename Argument, typename Value>
-	using requires_dereference = std::integral_constant<bool, !std::is_pointer<Argument>::value &&
-			std::is_pointer<typename std::remove_reference<Value>::type>::value>;
-
-	template <typename Argument, typename Value>
-	using requires_passthrough = std::integral_constant<bool, !requires_reference<Argument, Value>::value && !requires_dereference<Argument, Value>::value>;
 
 	template<typename R, typename... Args> class managedTuple_t<R(Args...)>
 	{
@@ -48,7 +36,7 @@ namespace substrate
 
 	private:
 		std::function<R(Args...)> function;
-		std::tuple<typename pure_type<Args>::type...> elements{};
+		std::tuple<pure_type_t<Args>...> elements{};
 
 #if __cplusplus >= 201703L
 		template<typename Argument, typename Value>
