@@ -64,12 +64,14 @@ namespace substrate
 		template<typename Argument, typename Value, typename std::enable_if<requires_reference<Argument, Value>::value, bool>::type = true>
 			inline constexpr Argument argFor(Value &&value) const
 		{
+			static_assert(std::is_convertible<Argument, typename std::add_pointer<typename std::remove_reference<Value>::type>::type>::value, "This argument type is incompatible");
 			return &value;
 		}
 
 		template<typename Argument, typename Value, typename std::enable_if<requires_dereference<Argument, Value>::value, bool>::type = true>
 			inline constexpr Argument argFor(Value &&value) const
 		{
+			static_assert(std::is_convertible<Argument, typename std::add_rvalue_reference<Value&&>::type>::value, "This argument type is incompatible");
 			return *value;
 		}
 #endif
