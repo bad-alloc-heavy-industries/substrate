@@ -17,6 +17,9 @@ namespace substrate
 
 	template<typename R, typename... Args> class managedTuple_t<R(Args...)>
 	{
+		static_assert(sizeof...(Args) == sizeof...(Vals), "Mismatching arguments and variable types! Did you override them all?");
+		static_assert(sizeof...(Args) > 0, "You can't run a deleter with no arguments");
+
 	public:
 		managedTuple_t(std::function<R(Args...)> releaser) : function(std::move(releaser)) {}
 
