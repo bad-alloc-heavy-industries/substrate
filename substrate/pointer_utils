@@ -1,0 +1,95 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_POINTER_UTILS
+#define SUBSTRATE_POINTER_UTILS
+
+#include <functional>
+#include <memory>
+
+#include "internal/defs"
+
+#if __cplusplus >= 201304L
+#define SUBSTRATE_SUPPORTS_MANAGED_TUPLE
+
+namespace substrate
+{
+	template<typename, typename...> class managedTuple_t;
+
+	template<typename T>
+	using pure_type = std::remove_cv<typename std::remove_pointer<typename std::remove_reference<T>::type>::type>;
+	template <typename Argument, typename Value>
+	using requires_reference = std::integral_constant<bool, std::is_pointer<Argument>::value &&
+			!std::is_pointer<typename std::remove_reference<Value>::type>::value>;
+
+	template <typename Argument, typename Value>
+	using requires_dereference = std::integral_constant<bool, !std::is_pointer<Argument>::value &&
+			std::is_pointer<typename std::remove_reference<Value>::type>::value>;
+
+	template <typename Argument, typename Value>
+	using requires_passthrough = std::integral_constant<bool, !requires_reference<Argument, Value>::value && !requires_dereference<Argument, Value>::value>;
+
+	template<typename R, typename... Args> class managedTuple_t<R(Args...)>
+	{
+	public:
+		managedTuple_t(std::function<R(Args...)> releaser) : function(std::move(releaser)) {}
+
+		managedTuple_t(managedTuple_t&) = delete;
+		managedTuple_t operator=(managedTuple_t&) = delete;
+		managedTuple_t(managedTuple_t&&) noexcept = default;
+		managedTuple_t &operator=(managedTuple_t&&) noexcept = default;
+
+		template<size_t I> inline auto & get() noexcept
+			{ return std::get<I>(elements); }
+
+		inline constexpr size_t size() const
+			{ return std::tuple_size<decltype(elements)>::value; }
+
+		~managedTuple_t()
+			{ execute<Args...>(std::index_sequence_for<Args...>{}); }
+
+	private:
+		std::function<R(Args...)> function;
+		std::tuple<typename pure_type<Args>::type...> elements{};
+
+#if __cplusplus >= 201703L
+		template<typename Argument, typename Value>
+			inline constexpr Argument argFor(Value &&value) const
+		{
+			if constexpr (std::is_pointer_v<Argument> &&
+				!std::is_pointer_v<std::remove_reference_t<Value>>)
+				return &value;
+			else if constexpr (!std::is_pointer_v<Argument> &&
+				std::is_pointer_v<std::remove_reference_t<Value>>)
+				return *value;
+			else
+				return value;
+		}
+#else
+		template<typename Argument, typename Value, typename std::enable_if<std::is_convertible<Argument, Value&&>::value, bool>::type = true>
+			inline constexpr Argument argFor(Value &&value) const
+			{ return value;	}
+
+		template<typename Argument, typename Value, typename std::enable_if<requires_reference<Argument, Value>::value, bool>::type = true>
+			inline constexpr Argument argFor(Value &&value) const
+		{
+			return &value;
+		}
+
+		template<typename Argument, typename Value, typename std::enable_if<requires_dereference<Argument, Value>::value, bool>::type = true>
+			inline constexpr Argument argFor(Value &&value) const
+		{
+			return *value;
+		}
+#endif
+
+		template<typename... Arguments, size_t ...I>
+			inline void execute(std::index_sequence<I...>)
+			{ function(argFor<Arguments>(std::get<I>(elements))...); }
+	};
+
+SUBSTRATE_DEDUCTION_GUIDE(
+	template<typename R, typename... Args> managedTuple_t(R (*)(Args...)) -> managedTuple_t<R(Args...)>;
+)
+} // namespace substrate
+
+#endif
+#endif

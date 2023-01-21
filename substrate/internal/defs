@@ -122,6 +122,12 @@
 #	define SUBSTRATE_IF_CONSTEXPR if
 #endif
 
+#if __cplusplus >= 201703L
+#	define SUBSTRATE_DEDUCTION_GUIDE(...) __VA_ARGS__
+#else
+#	define SUBSTRATE_DEDUCTION_GUIDE(...)
+#endif
+
 #ifdef _WIN32
 namespace substrate
 {
