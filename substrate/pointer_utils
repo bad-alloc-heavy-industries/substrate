@@ -13,20 +13,22 @@
 
 namespace substrate
 {
+	template<typename, typename...> class managedTupleWithValues_t;
 	template<typename, typename...> class managedTuple_t;
 
-	template<typename R, typename... Args> class managedTuple_t<R(Args...)>
+	template<typename R, typename... Args, typename... Vals> class managedTupleWithValues_t<R(Args...), Vals...>
 	{
 		static_assert(sizeof...(Args) == sizeof...(Vals), "Mismatching arguments and variable types! Did you override them all?");
 		static_assert(sizeof...(Args) > 0, "You can't run a deleter with no arguments");
+		static_assert(sizeof...(Vals) > 0, "You can't run a deleter against no variables");
 
 	public:
-		managedTuple_t(std::function<R(Args...)> releaser) : function(std::move(releaser)) {}
+		managedTupleWithValues_t(std::function<R(Args...)> releaser) : function(std::move(releaser)) {}
 
-		managedTuple_t(managedTuple_t&) = delete;
-		managedTuple_t operator=(managedTuple_t&) = delete;
-		managedTuple_t(managedTuple_t&&) noexcept = default;
-		managedTuple_t &operator=(managedTuple_t&&) noexcept = default;
+		managedTupleWithValues_t(managedTupleWithValues_t &) = delete;
+		managedTupleWithValues_t operator=(managedTupleWithValues_t &) = delete;
+		managedTupleWithValues_t(managedTupleWithValues_t &&) noexcept = default;
+		managedTupleWithValues_t &operator=(managedTupleWithValues_t &&) noexcept = default;
 
 		template<size_t I> inline auto & get() noexcept
 			{ return std::get<I>(elements); }
@@ -34,12 +36,12 @@ namespace substrate
 		inline constexpr size_t size() const
 			{ return std::tuple_size<decltype(elements)>::value; }
 
-		~managedTuple_t()
+		~managedTupleWithValues_t()
 			{ execute<Args...>(std::index_sequence_for<Args...>{}); }
 
 	private:
 		std::function<R(Args...)> function;
-		std::tuple<pure_type_t<Args>...> elements{};
+		std::tuple<pure_type_t<Vals>...> elements{};
 
 #if __cplusplus >= 201703L
 		template<typename Argument, typename Value>
@@ -77,7 +79,17 @@ namespace substrate
 			{ function(argFor<Arguments>(std::get<I>(elements))...); }
 	};
 
+	template<typename R, typename... Args> class managedTuple_t<R(Args...)> :
+		public managedTupleWithValues_t<R(Args...), Args...>
+	{
+	public:
+		managedTuple_t(std::function<R(Args...)> releaser) :
+			managedTupleWithValues_t<R(Args...), Args...>(std::move(releaser)) {}
+	};
+
 SUBSTRATE_DEDUCTION_GUIDE(
+	template<typename R, typename... Args, typename... Vals> managedTupleWithValues_t(R (*)(Args...), Vals...) -> managedTupleWithValues_t<R(Args...), Vals...>;
+ 	template<typename R, typename... Args> managedTupleWithValues_t(R (*)(Args...)) -> managedTupleWithValues_t<R(Args...), Args...>;
 	template<typename R, typename... Args> managedTuple_t(R (*)(Args...)) -> managedTuple_t<R(Args...)>;
 )
 } // namespace substrate

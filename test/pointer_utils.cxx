@@ -59,4 +59,31 @@ TEST_CASE("managed release check through pointers", "[managedTuple_t]")
 	REQUIRE(released);
 }
 
+TEST_CASE("managed release check through convertible values", "[managedTupleWithValues_t]")
+{
+	bool released = false;
+
+	{
+		using releaser_t = void(std::array<int, 1>*, float*);
+
+		std::function<releaser_t> releaser = [&](std::array<int, 1> *x, float *a) -> void
+		{
+			REQUIRE(x->at(0) == 1);
+			REQUIRE(*a == 2.0F);
+			released = true;
+		};
+
+		substrate::managedTupleWithValues_t<releaser_t, std::array<int, 1>&, float&> sample{releaser};
+
+		const float a = 2.0F;
+		const std::array<int, 1> b = {1};
+
+		REQUIRE(sample.size() == 2);
+		sample.template get<0>() = b;
+		sample.template get<1>() = a;
+	}
+
+	REQUIRE(released);
+}
+
 #endif
