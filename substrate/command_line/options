@@ -5,7 +5,9 @@
 #include <cstddef>
 #include <vector>
 #include <variant>
+#include <optional>
 #include <string_view>
+#include <functional>
 #include <type_traits>
 #include <substrate/static_vector>
 #include <substrate/index_sequence>
@@ -38,7 +40,7 @@ namespace substrate::commandLine
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 
-		bool matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 	};
 
 	// A set of command line option alternations such as a set of commands
@@ -50,7 +52,8 @@ namespace substrate::commandLine
 	public:
 		optionSet_t(const staticVector_t<optionAlternation_t> &alternations) : _alternations{alternations} { }
 
-		bool matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
+			matches(const std::string_view &argument) const noexcept;
 	};
 
 	template<size_t N> constexpr static inline staticVector_t<optionAlternation_t>
@@ -103,7 +106,7 @@ namespace substrate::commandLine
 		optionAlternation_t(const std::string_view &value, const std::string_view &help,
 			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
 
-		bool matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 	};
 } // namespace substrate::commandLine
 

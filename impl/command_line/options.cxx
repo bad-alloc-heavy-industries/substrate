@@ -20,14 +20,15 @@ namespace substrate::commandLine
 	bool optionAlternation_t::matches(const std::string_view &argument) const noexcept
 		{ return argument == _value; }
 
-	bool optionSet_t::matches(const std::string_view &argument) const noexcept
+	std::optional<std::reference_wrapper<const optionAlternation_t>>
+		optionSet_t::matches(const std::string_view &argument) const noexcept
 	{
 		for (const auto &alternation : _alternations)
 		{
 			if (alternation.matches(argument))
-				return true;
+				return std::ref(alternation);
 		}
-		return false;
+		return std::nullopt;
 	}
 } // namespace substrate::commandLine
 
