@@ -118,7 +118,7 @@ namespace substrate
 	};
 
 	template<typename> struct deleter_type;
-	template<typename R, typename T> struct deleter_type<R(T *)>
+	template<typename R, typename T> struct deleter_type<R(*)(T *)>
 	{
 		using value_type = T;
 		using return_type = R;

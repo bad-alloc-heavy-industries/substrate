@@ -116,7 +116,7 @@ TEST_CASE("naughty (non-void-returning) deleter", "[naughtyPtr_t]")
 
 TEST_CASE("nice (void-returning) deleter", "[nicePtr_t]")
 {
-	using nicePtr = substrate::nicePtr_t<decltype(releaseFloat), &releaseFloat>;
+	using nicePtr = substrate::nicePtr_t<decltype(&releaseFloat), &releaseFloat>;
 
 	nicePtr sample{new float(2.0F)};
 
