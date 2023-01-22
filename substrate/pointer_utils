@@ -97,4 +97,42 @@ SUBSTRATE_DEDUCTION_GUIDE(
 } // namespace substrate
 
 #endif
+
+namespace substrate
+{
+	template<typename ValueType, typename ReturnType, ReturnType (*Deleter)(ValueType *)>
+		struct naughtyPtr_t : public std::shared_ptr<ValueType>
+	{
+	private:
+		static void deleter(ValueType* value)
+		{
+			if (value != nullptr)
+				Deleter(value);
+		}
+
+	public:
+		naughtyPtr_t() : std::shared_ptr<ValueType>{nullptr, deleter} { }
+
+		template<typename... Args> naughtyPtr_t(Args &&...args) :
+			std::shared_ptr<ValueType>{std::forward<Args>(args)..., deleter} { }
+	};
+
+	template<typename> struct deleter_type;
+	template<typename R, typename T> struct deleter_type<R(T *)>
+	{
+		using value_type = T;
+		using return_type = R;
+	};
+
+	template<typename T, T t, typename D = deleter_type<T>>
+	struct nicePtr_t : public naughtyPtr_t<typename D::value_type, 
+		typename D::return_type, t>
+	{
+	public:
+		nicePtr_t() = default;
+		template<typename... Args> nicePtr_t(Args &&...args) :
+			naughtyPtr_t<typename D::value_type, typename D::return_type, t>{std::forward<Args>(args)...} { }
+	};
+} // namespace substrate
+
 #endif

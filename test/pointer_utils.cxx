@@ -87,3 +87,40 @@ TEST_CASE("managed release check through convertible values", "[managedTupleWith
 }
 
 #endif
+
+static int releaseInt(int *value)
+{
+	REQUIRE(value != nullptr);
+	REQUIRE(*value == 1);
+	delete value; // NOLINT(*-owning-memory)
+	return 1;
+};
+
+static void releaseFloat(float *value)
+{
+	REQUIRE(value != nullptr);
+	REQUIRE(*value == 2.0F);
+	delete value; // NOLINT(*-owning-memory)
+};
+
+TEST_CASE("naughty (non-void-returning) deleter", "[naughtyPtr_t]")
+{
+	using naughtyPtr = substrate::naughtyPtr_t<int, int, releaseInt>;
+
+	naughtyPtr sample{new int(1)};
+
+	REQUIRE(*sample == 1);
+	sample.reset();
+	REQUIRE(sample.use_count() == 0);
+}
+
+TEST_CASE("nice (void-returning) deleter", "[nicePtr_t]")
+{
+	using nicePtr = substrate::nicePtr_t<decltype(releaseFloat), &releaseFloat>;
+
+	nicePtr sample{new float(2.0F)};
+
+	REQUIRE(*sample == 2.0F);
+	sample.reset();
+	REQUIRE(sample.use_count() == 0);
+}
