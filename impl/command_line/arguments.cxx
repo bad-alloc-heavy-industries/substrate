@@ -25,6 +25,7 @@ namespace substrate::commandLine
 		// The first argument is the name of the program, so skip that at least and start at the second.
 		tokeniser_t lexer{argCount - 1U, argList + 1};
 		arguments_t result{};
+		// Try to parse all available arguments against the options tree for the program
 		if (result.parseFrom(lexer, options))
 			return std::nullopt;
 		return result;
@@ -35,7 +36,12 @@ namespace substrate::commandLine
 		const auto &token{lexer.token()};
 		while (token.valid())
 		{
-			if (!parseArgument(lexer, options))
+			const auto result{parseArgument(lexer, options)};
+			// If the result is a nullopt, we're unwinding an inner failure
+			if (!result)
+				return false;
+			// Else if the result is false, we just experienced failure that needs reporting
+			if (!*result)
 			{
 				const auto argument{token.value()};
 				console.error("Found invalid token '"sv, argument, "' ("sv, typeToName(token.type()),
@@ -46,35 +52,44 @@ namespace substrate::commandLine
 		return true;
 	}
 
-	bool arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
+	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
 	{
 		using item_t = std::variant<flag_t, choice_t, std::monostate>;
+		// Start by checking we're in a suitable state
 		const auto &token{lexer.token()};
 		if (token.type() == tokenType_t::space)
 			lexer.next();
+		// If we're not, fast-fail
 		else if (token.type() != tokenType_t::arg)
 			return false;
+		// Next, grab the argument string and start trying to match it to an option
 		const auto argument{token.value()};
 		for (const auto &option : options)
 		{
 			const auto match
 			{
+				// Dispatch based on the option type
 				std::visit(match_t
 				{
 					[&](const option_t &option) -> std::optional<item_t>
 					{
+						// Check if we're parsing a "simple" option
 						if (option.matches(argument))
 							return flag_t{};
 						return std::nullopt;
 					},
 					[&](const optionSet_t &option) -> std::optional<item_t>
 					{
+						// Check if we're parsing an alternation from a set
 						const auto match{option.matches(argument)};
 						if (match)
 						{
+							// Check which alternation matched, recurse and parse all further options from the
+							// alternation's perspective
 							const auto &alternation{match->get()};
 							arguments_t subarguments{};
 							if (!subarguments.parseFrom(lexer, alternation.suboptions()))
+								// If the operation fails, use monostate to signal match-but-fail.
 								return std::monostate{};
 							return choice_t{};
 						}
@@ -83,15 +98,21 @@ namespace substrate::commandLine
 				}, option)
 			};
 
+			// If we got a valid match, us the result
 			if (match)
 			{
 				return std::visit(match_t
 				{
-					[this](const auto &result) { return true; /*add(result);*/ },
-					[](std::monostate) { return true; },
+					// We got a match and parsing it succeeded?
+					[this](const auto &result) -> std::optional<bool>
+						{ return true; /*add(result);*/ },
+					// Match but inner parsing failed
+					[](std::monostate) -> std::optional<bool>
+						{ return std::nullopt; },
 				}, *match);
 			}
 		}
+		// XXX: Need to handle the no-match situation.
 		lexer.next();
 		return true;
 	}

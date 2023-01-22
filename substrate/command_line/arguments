@@ -30,7 +30,7 @@ namespace substrate::commandLine
 		using item_t = std::variant<flag_t, choice_t>;
 		std::vector<item_t> _arguments{};
 
-		[[nodiscard]] bool parseArgument(internal::tokeniser_t &lexer, const options_t &options);
+		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options);
 
 	public:
 		arguments_t() noexcept = default;
