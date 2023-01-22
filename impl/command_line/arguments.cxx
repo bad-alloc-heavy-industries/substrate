@@ -48,6 +48,7 @@ namespace substrate::commandLine
 
 	bool arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
 	{
+		using item_t = std::variant<flag_t, choice_t, std::monostate>;
 		const auto &token{lexer.token()};
 		if (token.type() == tokenType_t::space)
 			lexer.next();
@@ -74,15 +75,22 @@ namespace substrate::commandLine
 							const auto &alternation{match->get()};
 							arguments_t subarguments{};
 							if (!subarguments.parseFrom(lexer, alternation.suboptions()))
-								return std::nullopt; // This is wrong but we need to change the result type to fix this.
+								return std::monostate{};
 							return choice_t{};
 						}
 						return std::nullopt;
 					},
 				}, option)
 			};
-			// if (match)
-			// 	return ast.add(*match);
+
+			if (match)
+			{
+				return std::visit(match_t
+				{
+					[this](const auto &result) { return true; /*add(result);*/ },
+					[](std::monostate) { return true; },
+				}, *match);
+			}
 		}
 		lexer.next();
 		return true;
