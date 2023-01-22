@@ -13,7 +13,40 @@ namespace substrate::commandLine
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
 	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
 
-	bool parseArgument(tokeniser_t &lexer, const options_t &options, arguments_t &ast)
+	// This implemnts a recursive descent parser that efficiently matches the current token from argv against
+	// the set of allowed arguments at the current parsing level, and returns an AST of the results for
+	// later easier exploration by the caller
+	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options)
+	{
+		constexpr static auto intBits{std::numeric_limits<int>::digits - 1U};
+		// Check if we even got any arguments or if argv was negative
+		if (!argCount || (argCount & (1U << intBits)) || !argList)
+			return std::nullopt;
+		// The first argument is the name of the program, so skip that at least and start at the second.
+		tokeniser_t lexer{argCount - 1U, argList + 1};
+		arguments_t result{};
+		if (result.parseFrom(lexer, options))
+			return std::nullopt;
+		return result;
+	}
+
+	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
+	{
+		const auto &token{lexer.token()};
+		while (token.valid())
+		{
+			if (!parseArgument(lexer, options))
+			{
+				const auto argument{token.value()};
+				console.error("Found invalid token '"sv, argument, "' ("sv, typeToName(token.type()),
+					") in arguments while parsing command line"sv);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
 	{
 		const auto &token{lexer.token()};
 		if (token.type() == tokenType_t::space)
@@ -46,33 +79,6 @@ namespace substrate::commandLine
 		}
 		lexer.next();
 		return true;
-	}
-
-	// This implemnts a recursive descent parser that efficiently matches the current token from argv against
-	// the set of allowed arguments at the current parsing level, and returns an AST of the results for
-	// later easier exploration by the caller
-	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options)
-	{
-		constexpr static auto intBits{std::numeric_limits<int>::digits - 1U};
-		// Check if we even got any arguments or if argv was negative
-		if (!argCount || (argCount & (1U << intBits)) || !argList)
-			return std::nullopt;
-		// The first argument is the name of the program, so skip that at least and start at the second.
-		tokeniser_t lexer{argCount - 1U, argList + 1};
-		const auto &token{lexer.token()};
-		arguments_t result{};
-
-		while (token.valid())
-		{
-			if (!parseArgument(lexer, options, result))
-			{
-				const auto argument{token.value()};
-				console.error("Found invalid token '"sv, argument, "' ("sv, typeToName(token.type()),
-					") in arguments while parsing command line"sv);
-				return std::nullopt;
-			}
-		}
-		return result;
 	}
 } // namespace substrate::commandLine
 

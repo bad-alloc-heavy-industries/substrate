@@ -10,6 +10,11 @@
 
 namespace substrate::commandLine
 {
+	namespace internal
+	{
+		struct tokeniser_t;
+	}
+
 	struct choice_t;
 
 	struct flag_t
@@ -26,8 +31,12 @@ namespace substrate::commandLine
 	private:
 		std::vector<item_t> _arguments{};
 
+		[[nodiscard]] bool parseArgument(internal::tokeniser_t &lexer, const options_t &options);
+
 	public:
 		arguments_t() noexcept = default;
+
+		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
 	};
 
 	struct choice_t
