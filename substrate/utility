@@ -308,8 +308,10 @@ namespace substrate
 	template<class T>
 	constexpr inline bool is_const_v = std::is_const_v<T>;
 
+#if __cplusplus < 202002L
 	template<class T>
 	constexpr inline bool is_literal_type_v = std::is_literal_type_v<T>;
+#endif
 
 	template<class T>
 	constexpr inline bool is_final_v = std::is_final_v<T>;
