@@ -110,12 +110,6 @@
 #	define SUBSTRATE_CXX17_INLINE
 #endif
 
-#if __cplusplus >= 201907L
-#	define SUBSTRATE_CONSTEXPR_STRING constexpr
-#else
-#	define SUBSTRATE_CONSTEXPR_STRING const
-#endif
-
 #if __cplusplus >= 201606L
 #	define SUBSTRATE_IF_CONSTEXPR if constexpr
 #else

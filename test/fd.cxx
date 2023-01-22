@@ -12,7 +12,7 @@ using substrate::make_unique;
 
 constexpr static std::array<char, 4> testArray{{'t', 'E', 'S', 't'}};
 constexpr static char testChar{'.'};
-SUBSTRATE_CONSTEXPR_STRING static std::string testString{"fileDescriptor"};
+const static std::string testString{"fileDescriptor"};
 
 constexpr static auto u8{uint8_t(0x5A)};
 constexpr static auto i8{int8_t(0xA5U)};
