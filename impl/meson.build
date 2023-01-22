@@ -13,18 +13,28 @@ endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 	std_variant_test = '''
-		#include <variant>
-		#include <vector>
-		int main(int argc, char* argv[])
+		template <typename U>
+		auto foo(U u)
 		{
-			using tuple_t = std::variant<int, double>;
-			std::vector<tuple_t> list;
-			list.emplace_back(argc - 1);
+			u.v;
+		}
 
-			return std::get<int>(v.begin());
+		template <typename T>
+		class X
+		{
+			T v;
+
+		public:
+			template <typename U>
+			friend auto foo(U);
+		};
+
+		int main()
+		{
+			::foo(X<int>{});
 		}
 	'''
-	if cxx.compiles(std_variant_test, name: 'has a working std::variant implementation (GCC #90397, LLVM #41863)')
+	if cxx.compiles(std_variant_test, name: 'has a working std::variant implementation (LLVM #31852, #33222)')
 		subdir('command_line')
 	endif
 endif
