@@ -107,6 +107,7 @@ namespace substrate::commandLine
 			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] const auto &suboptions() const noexcept { return _suboptions; }
 	};
 } // namespace substrate::commandLine
 

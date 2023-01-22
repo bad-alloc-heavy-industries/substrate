@@ -68,10 +68,17 @@ namespace substrate::commandLine
 					},
 					[&](const optionSet_t &option) -> std::optional<item_t>
 					{
-						if (option.matches(argument))
+						const auto match{option.matches(argument)};
+						if (match)
+						{
+							const auto &alternation{match->get()};
+							arguments_t subarguments{};
+							if (!subarguments.parseFrom(lexer, alternation.suboptions()))
+								return std::nullopt; // This is wrong but we need to change the result type to fix this.
 							return choice_t{};
+						}
 						return std::nullopt;
-					}
+					},
 				}, option)
 			};
 			// if (match)
