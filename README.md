@@ -15,7 +15,7 @@
         </tr>
         <tr>
             <th colspan="5" style="border-right: 1px solid !important;">G++</th>
-            <th colspan="8" style="border-right: 1px solid !important;">Clang</th>
+            <th colspan="11" style="border-right: 1px solid !important;">Clang</th>
         </tr>
         <tr>
             <th>7</th>
@@ -31,12 +31,18 @@
             <th>10</th>
             <th>11</th>
             <th>12</th>
+            <th>13</th>
+            <th>14</th>
+            <th>15</th>
         </tr>
     </thead>
     <tbody>
       <tr>
-        <td rowspan="3">Linux</td>
+        <td rowspan="4">Linux</td>
         <td>C++ 11</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -66,6 +72,9 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 17</td>
@@ -81,6 +90,28 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+      </tr>
+      <tr>
+        <td>C++ 20</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
         <td>:heavy_check_mark:</td>
       </tr>
       <tr>
@@ -158,7 +189,7 @@
     </thead>
     <tbody>
       <tr>
-       <td rowspan="3">macOS</td>
+       <td rowspan="4">macOS</td>
         <td>C++ 11</td>
         <td>:heavy_check_mark: (1)</td>
         <td>:heavy_check_mark: (1)</td>
@@ -187,6 +218,16 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
+      </tr>
+      <tr>
+        <td>C++ 20</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:x:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
+        <td>:x:</td>
       </tr>
     </tbody>
 </table>
@@ -215,7 +256,7 @@
     </thead>
     <tbody>
       <tr>
-       <td rowspan="3">Windows</td>
+       <td rowspan="4">Windows</td>
         <td>C++ 11</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -236,6 +277,14 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+      </tr>
+      <tr>
+        <td>C++ 20</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:heavy_check_mark:</td>
+        <td>:x:</td>
         <td>:heavy_check_mark:</td>
       </tr>
     </tbody>
