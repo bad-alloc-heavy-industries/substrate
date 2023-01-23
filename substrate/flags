@@ -1,0 +1,76 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_FLAGS
+#define SUBSTRATE_FLAGS
+
+#include <type_traits>
+
+namespace substrate
+{
+	template<typename storage_t, typename enum_t> struct bitFlags_t
+	{
+	private:
+		static_assert(std::is_integral_v<storage_t>, "bitFlags_t must be backed by an integral type");
+		static_assert(std::is_enum_v<enum_t>, "bitFlags_t must be enumerated by an enum");
+		storage_t value{};
+
+		using enumInt_t = std::underlying_type_t<enum_t>;
+		constexpr static storage_t flagAsBit(const enum_t flag) noexcept { return storage_t(1U << enumInt_t(flag)); }
+
+		// Internal value constructor to make .without() work
+		constexpr bitFlags_t(const storage_t &flags) noexcept : value{flags} { }
+
+	public:
+		constexpr bitFlags_t() noexcept = default;
+		constexpr bitFlags_t(const bitFlags_t &flags) noexcept : value{flags.value} { }
+		// move ctor omitted as it doesn't really make sense for this type
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			constexpr bitFlags_t(const values_t ...flags) noexcept : value{(flagAsBit(flags) | ...)} { }
+
+		constexpr bitFlags_t &operator =(const bitFlags_t &flags) noexcept
+		{
+			if (&flags != this)
+				value = flags.value;
+			return *this;
+		}
+
+		// Move assignment omitted as it doesn't really make sense for this type.
+
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			constexpr bitFlags_t &operator =(const values_t ...flags) noexcept
+		{
+			value = (flagAsBit(flags) | ...);
+			return *this;
+		}
+
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			constexpr void set(const values_t ...flags) noexcept { value |= (flagAsBit(flags) | ...); }
+
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			constexpr void clear(const values_t ...flags) noexcept { value &= storage_t(~(flagAsBit(flags) | ...)); }
+
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			[[nodiscard]] constexpr bool includes(const values_t ...flags) const noexcept
+		{
+			const storage_t bits{(flagAsBit(flags) | ...)};
+			return value & bits;
+		}
+
+		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
+			[[nodiscard]] constexpr bitFlags_t without(const values_t ...flags) const noexcept
+		{
+			const auto bits{(flagAsBit(flags) | ...)};
+			const auto newValue{value & ~bits};
+			return {storage_t(newValue)};
+		}
+
+		[[nodiscard]] constexpr auto toRaw() const noexcept { return value; }
+
+		constexpr bool operator ==(const bitFlags_t &flags) const noexcept { return value == flags.value; }
+		constexpr bool operator ==(const enum_t flag) const noexcept { return value == flagAsBit(flag); }
+		constexpr bool operator !=(const bitFlags_t &flags) const noexcept { return value != flags.value; }
+		constexpr bool operator !=(const enum_t flag) const noexcept { return value != flagAsBit(flag); }
+	};
+} // namespace substrate
+
+#endif /* SUBSTRATE_FLAGS */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
