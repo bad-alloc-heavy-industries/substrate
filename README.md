@@ -209,7 +209,6 @@
             <th>mingw64</th>
             <th>ucrt64</th>
             <th>clang64</th>
-            <th>15.9</th>
             <th>16.11</th>
             <th>17.0</th>
         </tr>
@@ -221,7 +220,7 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td colspan="3" style="text-align:center;">N/A</td>
+        <td colspan="2" style="text-align:center;">N/A</td>
       </tr>
       <tr>
         <td>C++ 14</td>
@@ -230,11 +229,9 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 17</td>
-        <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
