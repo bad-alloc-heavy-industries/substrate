@@ -116,6 +116,7 @@ subdir('substrate')
 if get_option('build_library')
 	subdir('impl')
 else
+	targetLibraryBuildable = false
 	deps = []
 	libSubstrate = []
 endif
@@ -140,16 +141,37 @@ if not meson.is_subproject() and get_option('build_library')
 	)
 endif
 
+variables = {
+	'compile_args': '-I@0@'.format(meson.current_source_dir()),
+}
+
+if targetLibraryBuildable
+	variables += {
+		'link_args': libSubstrate.full_path(),
+	}
+endif
+
 substrate_dep = declare_dependency(
 	dependencies: deps,
 	include_directories: include_directories('.'),
 	link_with: libSubstrate,
-	variables: {
-		'compile_args': '-I@0@'.format(meson.current_source_dir()),
-		'link_args': libSubstrate.full_path()
-	},
+	variables: variables,
 	version: meson.project_version()
 )
+
+# When we're in a cross-build environment, also declade the native version of the library
+if meson.is_cross_build()
+	substrate_native_dep = declare_dependency(
+		dependencies: deps,
+		include_directories: include_directories('.'),
+		link_with: libSubstrateNative,
+		variables: {
+			'compile_args': '-I@0@'.format(meson.current_source_dir()),
+			'link_args': libSubstrateNative.full_path()
+		},
+		version: meson.project_version()
+	)
+endif
 
 runClangTidy = find_program('runClangTidy.py')
 run_target(
