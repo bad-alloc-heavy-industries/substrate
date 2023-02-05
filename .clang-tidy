@@ -3,7 +3,6 @@ Checks:              'bugprone-*,cert-*,cppcoreguidelines-*,modernize-*,performa
 WarningsAsErrors: ''
 HeaderFilterRegex: '(substrate/.+(?!catch2/).*|test/(?!catch2/).+'
 FormatStyle: 'none'
-AnalyzeTemporaryDtors: false
 CheckOptions:
   - key:             cert-dcl16-c.NewSuffixes
     value:           'L;LL;LU;LLU'
