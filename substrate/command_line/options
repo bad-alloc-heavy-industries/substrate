@@ -11,10 +11,17 @@
 #include <type_traits>
 #include <substrate/static_vector>
 #include <substrate/index_sequence>
+#include <substrate/flags>
 #include <substrate/utility>
 
 namespace substrate::commandLine
 {
+	enum class optionFlags_t
+	{
+		repeatable,
+		takesParameter
+	};
+
 	enum class optionValueType_t
 	{
 		signedInt,
@@ -40,9 +47,11 @@ namespace substrate::commandLine
 	{
 	private:
 		using optionHolder_t = std::variant<std::string_view, optionFlagPair_t, std::monostate>;
+		using flagsHolder_t = bitFlags_t<uint8_t, optionFlags_t>;
 
 		optionHolder_t _option;
 		std::string_view _help;
+		flagsHolder_t _flags{};
 		optionValueType_t _valueType{optionValueType_t::string};
 
 	public:
@@ -50,6 +59,13 @@ namespace substrate::commandLine
 			_option{option}, _help{help} { }
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
+
+		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string) noexcept
+		{
+			_flags.set(optionFlags_t::takesParameter);
+			_valueType = type;
+			return *this;
+		}
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 	};
