@@ -74,9 +74,18 @@ namespace substrate::commandLine
 					[&](const option_t &option) -> std::optional<item_t>
 					{
 						// Check if we're parsing a "simple" option
-						if (option.matches(argument))
-							return flag_t{};
-						return std::nullopt;
+						if (!option.matches(argument))
+							return std::nullopt;
+						// If the option matches, try parsing out and validating the value portion if there is one
+						if (!option.takesParameter())
+							return flag_t{argument};
+						lexer.next();
+						// Check that we have a parameter component following
+						if (token.type() != tokenType_t::equals && token.type() != tokenType_t::space)
+							return std::nullopt;
+						lexer.next();
+						const auto value{token.value()};
+						return flag_t{argument, value};
 					},
 					[&](const optionSet_t &option) -> std::optional<item_t>
 					{

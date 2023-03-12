@@ -6,6 +6,7 @@
 #include <optional>
 #include <vector>
 #include <variant>
+#include <any>
 #include <substrate/command_line/options>
 
 namespace substrate::commandLine
@@ -21,7 +22,11 @@ namespace substrate::commandLine
 	{
 	private:
 		std::string_view _name;
-		std::string_view _value{};
+		std::any _value{};
+
+	public:
+		flag_t(const std::string_view &name) : _name{name} { }
+		flag_t(const std::string_view &name, std::any &&value) : _name{name}, _value{std::move(value)} { }
 	};
 
 	struct arguments_t
