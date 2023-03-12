@@ -3,8 +3,10 @@
 #define SUBSTRATE_COMMAND_LINE_OPTIONS
 
 #include <cstddef>
+#include <cassert>
 #include <vector>
 #include <variant>
+#include <any>
 #include <optional>
 #include <string_view>
 #include <functional>
@@ -54,6 +56,8 @@ namespace substrate::commandLine
 		uint64_t max{UINT64_MAX};
 	};
 
+	using optionValueParser_t = std::optional<std::any> (*)(const std::string_view &) noexcept;
+
 	// A singular command line option such as a simple flag
 	struct option_t final
 	{
@@ -66,6 +70,7 @@ namespace substrate::commandLine
 		flagsHolder_t _flags{};
 		optionValueType_t _valueType{optionValueType_t::string};
 		std::variant<std::monostate, optionSignedInt_t, optionUnsignedInt_t> _valueAllowedRange{};
+		optionValueParser_t _valueParserFn{nullptr};
 
 	public:
 		constexpr option_t(const optionHolder_t &option, const std::string_view &help) noexcept :
@@ -73,10 +78,17 @@ namespace substrate::commandLine
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 
-		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string) noexcept
+		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string,
+			const optionValueParser_t valueParserFn = nullptr) noexcept
 		{
 			_flags.set(optionFlags_t::takesParameter);
 			_valueType = type;
+			if (type == optionValueType_t::userDefined)
+			{
+				// A user-defined option must supply a parsing function to use
+				assert(valueParserFn != nullptr);
+				_valueParserFn = valueParserFn;
+			}
 			return *this;
 		}
 
