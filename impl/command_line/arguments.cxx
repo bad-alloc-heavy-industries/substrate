@@ -52,9 +52,14 @@ namespace substrate::commandLine
 		return true;
 	}
 
+	using optionMatch_t = std::variant<flag_t, choice_t, std::monostate>;
+	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
+		const std::string_view &argument) noexcept;
+	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
+		const std::string_view &argument);
+
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
 	{
-		using item_t = std::variant<flag_t, choice_t, std::monostate>;
 		// Start by checking we're in a suitable state
 		const auto &token{lexer.token()};
 		if (token.type() == tokenType_t::space)
@@ -71,39 +76,10 @@ namespace substrate::commandLine
 				// Dispatch based on the option type
 				std::visit(match_t
 				{
-					[&](const option_t &option) -> std::optional<item_t>
-					{
-						// Check if we're parsing a "simple" option
-						if (!option.matches(argument))
-							return std::nullopt;
-						// If the option matches, try parsing out and validating the value portion if there is one
-						if (!option.takesParameter())
-							return flag_t{argument};
-						lexer.next();
-						// Check that we have a parameter component following
-						if (token.type() != tokenType_t::equals && token.type() != tokenType_t::space)
-							return std::nullopt;
-						lexer.next();
-						const auto value{token.value()};
-						return flag_t{argument, value};
-					},
-					[&](const optionSet_t &option) -> std::optional<item_t>
-					{
-						// Check if we're parsing an alternation from a set
-						const auto match{option.matches(argument)};
-						if (match)
-						{
-							// Check which alternation matched, recurse and parse all further options from the
-							// alternation's perspective
-							const auto &alternation{match->get()};
-							arguments_t subarguments{};
-							if (!subarguments.parseFrom(lexer, alternation.suboptions()))
-								// If the operation fails, use monostate to signal match-but-fail.
-								return std::monostate{};
-							return choice_t{};
-						}
-						return std::nullopt;
-					},
+					[&](const option_t &option) -> std::optional<optionMatch_t>
+						{ return matchOption(lexer, option, argument); },
+					[&](const optionSet_t &option) -> std::optional<optionMatch_t>
+						{ return matchOptionSet(lexer, option, argument); },
 				}, option)
 			};
 
@@ -113,7 +89,7 @@ namespace substrate::commandLine
 				return std::visit(match_t
 				{
 					// We got a match and parsing it succeeded?
-					[this](const auto &result) -> std::optional<bool>
+					[this]([[maybe_unused]] const auto &result) -> std::optional<bool>
 						{ return true; /*add(result);*/ },
 					// Match but inner parsing failed
 					[](std::monostate) -> std::optional<bool>
@@ -124,6 +100,45 @@ namespace substrate::commandLine
 		// XXX: Need to handle the no-match situation.
 		lexer.next();
 		return true;
+	}
+
+	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
+		const std::string_view &argument) noexcept
+	{
+		const auto &token{lexer.token()};
+		// Check if we're parsing a "simple" option
+		if (!option.matches(argument))
+			return std::nullopt;
+		// If the option matches, try parsing out and validating the value portion if there is one
+		if (!option.takesParameter())
+			return flag_t{argument};
+		lexer.next();
+		// Check that we have a parameter component following
+		if (token.type() != tokenType_t::equals && token.type() != tokenType_t::space)
+			// If the operation fails, use monostate to signal match-but-fail.
+			return std::monostate{};
+		lexer.next();
+		const auto value{token.value()};
+		return flag_t{argument, value};
+	}
+
+	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
+		const std::string_view &argument)
+	{
+		// Check if we're parsing an alternation from a set
+		const auto match{option.matches(argument)};
+		if (match)
+		{
+			// Check which alternation matched, recurse and parse all further options from the
+			// alternation's perspective
+			const auto &alternation{match->get()};
+			arguments_t subarguments{};
+			if (!subarguments.parseFrom(lexer, alternation.suboptions()))
+				// If the operation fails, use monostate to signal match-but-fail.
+				return std::monostate{};
+			return choice_t{};
+		}
+		return std::nullopt;
 	}
 } // namespace substrate::commandLine
 
