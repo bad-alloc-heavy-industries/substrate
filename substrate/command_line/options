@@ -80,6 +80,12 @@ namespace substrate::commandLine
 			return *this;
 		}
 
+		constexpr option_t &repeatable() noexcept
+		{
+			_flags.set(optionFlags_t::repeatable);
+			return *this;
+		}
+
 		template<typename T> constexpr option_t &valueRange(T min, T max) noexcept
 		{
 			if (_valueType == optionValueType_t::signedInt)
