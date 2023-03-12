@@ -78,10 +78,9 @@ namespace substrate::commandLine
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 
-		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string,
+		constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
 		{
-			_flags.set(optionFlags_t::takesParameter);
 			_valueType = type;
 			if (type == optionValueType_t::userDefined)
 			{
@@ -90,6 +89,13 @@ namespace substrate::commandLine
 				_valueParserFn = valueParserFn;
 			}
 			return *this;
+		}
+
+		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string,
+			const optionValueParser_t valueParserFn = nullptr) noexcept
+		{
+			_flags.set(optionFlags_t::takesParameter);
+			return valueType(type, valueParserFn);
 		}
 
 		constexpr option_t &repeatable() noexcept
