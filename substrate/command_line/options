@@ -78,7 +78,7 @@ namespace substrate::commandLine
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 
-		constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
+		[[nodiscard]] constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
 		{
 			_valueType = type;
@@ -91,20 +91,20 @@ namespace substrate::commandLine
 			return *this;
 		}
 
-		constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string,
+		[[nodiscard]] constexpr option_t &takesParameter(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
 		{
 			_flags.set(optionFlags_t::takesParameter);
 			return valueType(type, valueParserFn);
 		}
 
-		constexpr option_t &repeatable() noexcept
+		[[nodiscard]] constexpr option_t &repeatable() noexcept
 		{
 			_flags.set(optionFlags_t::repeatable);
 			return *this;
 		}
 
-		template<typename T> constexpr option_t &valueRange(T min, T max) noexcept
+		template<typename T> [[nodiscard]] constexpr option_t &valueRange(T min, T max) noexcept
 		{
 			if (_valueType == optionValueType_t::signedInt)
 				_valueAllowedRange = optionSignedInt_t{min, max};
@@ -114,6 +114,11 @@ namespace substrate::commandLine
 		}
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
+
+		[[nodiscard]] constexpr bool takesParameter() const noexcept
+			{ return _flags.includes(optionFlags_t::takesParameter); }
+		[[nodiscard]] constexpr bool isRepeatable() const noexcept
+			{ return _flags.includes(optionFlags_t::repeatable); }
 	};
 
 	// A set of command line option alternations such as a set of commands
