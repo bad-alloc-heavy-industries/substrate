@@ -15,6 +15,16 @@
 
 namespace substrate::commandLine
 {
+	enum class optionValueType_t
+	{
+		signedInt,
+		unsignedInt,
+		boolean,
+		string,
+		path,
+		userDefined,
+	};
+
 	struct optionFlagPair_t final
 	{
 		std::string_view _shortFlag{};
@@ -29,14 +39,15 @@ namespace substrate::commandLine
 	struct option_t final
 	{
 	private:
-		std::variant<std::string_view, optionFlagPair_t, std::monostate> _option;
-		std::string_view _help{};
+		using optionHolder_t = std::variant<std::string_view, optionFlagPair_t, std::monostate>;
+
+		optionHolder_t _option;
+		std::string_view _help;
+		optionValueType_t _valueType{optionValueType_t::string};
 
 	public:
-		constexpr option_t(const std::string_view &option, const std::string_view &help) noexcept :
+		constexpr option_t(const optionHolder_t &option, const std::string_view &help) noexcept :
 			_option{option}, _help{help} { }
-		constexpr option_t(const optionFlagPair_t &optionPair, const std::string_view &help) noexcept :
-			_option{optionPair}, _help{help} { }
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help} { }
 
