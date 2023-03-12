@@ -42,6 +42,18 @@ namespace substrate::commandLine
 	constexpr static inline optionValue_t optionValue{};
 	struct optionAlternation_t;
 
+	struct optionSignedInt_t final
+	{
+		int64_t min{INT64_MIN};
+		int64_t max{INT64_MAX};
+	};
+
+	struct optionUnsignedInt_t final
+	{
+		uint64_t min{0U};
+		uint64_t max{UINT64_MAX};
+	};
+
 	// A singular command line option such as a simple flag
 	struct option_t final
 	{
@@ -53,6 +65,7 @@ namespace substrate::commandLine
 		std::string_view _help;
 		flagsHolder_t _flags{};
 		optionValueType_t _valueType{optionValueType_t::string};
+		std::variant<std::monostate, optionSignedInt_t, optionUnsignedInt_t> _valueAllowedRange{};
 
 	public:
 		constexpr option_t(const optionHolder_t &option, const std::string_view &help) noexcept :
@@ -64,6 +77,15 @@ namespace substrate::commandLine
 		{
 			_flags.set(optionFlags_t::takesParameter);
 			_valueType = type;
+			return *this;
+		}
+
+		template<typename T> constexpr option_t &valueRange(T min, T max) noexcept
+		{
+			if (_valueType == optionValueType_t::signedInt)
+				_valueAllowedRange = optionSignedInt_t{min, max};
+			else if (_valueType == optionValueType_t::unsignedInt)
+				_valueAllowedRange = optionUnsignedInt_t{min, max};
 			return *this;
 		}
 
