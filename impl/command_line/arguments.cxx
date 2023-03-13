@@ -116,8 +116,12 @@ namespace substrate::commandLine
 			// If the operation fails, use monostate to signal match-but-fail.
 			return std::monostate{};
 		lexer.next();
-		const auto value{token.value()};
-		return flag_t{argument, value};
+		// Try parsing that parameter component as a value for the option
+		auto value{option.parseValue(token.value())};
+		if (!value)
+			// If the operation fails, use monostate to signal match-but-fail.
+			return std::monostate{};
+		return flag_t{argument, std::move(*value)};
 	}
 
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
