@@ -114,6 +114,7 @@ namespace substrate::commandLine
 		}
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] std::optional<std::any> parseValue(const std::string_view &value) const noexcept;
 
 		[[nodiscard]] constexpr bool takesParameter() const noexcept
 			{ return _flags.includes(optionFlags_t::takesParameter); }

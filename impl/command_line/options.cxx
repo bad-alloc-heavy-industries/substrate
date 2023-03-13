@@ -21,6 +21,33 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
+	std::optional<std::any> option_t::parseValue(const std::string_view &value) const noexcept
+	{
+		switch (_valueType)
+		{
+			case optionValueType_t::signedInt:
+				// If the option takes a signed integer, dispatch to the signed int parser
+				return parseSignedValue(value);
+			case optionValueType_t::unsignedInt:
+				// If the option takes a unsigned integer, dispatch to the unsigned int parser
+				return parseUnsignedValue(value);
+			case optionValueType_t::boolean:
+				// If the option takes a boolean, dispatch to the bool parser
+				return parseBoolValue(value);
+			case optionValueType_t::string:
+				// If the option takes a string, do nothing and return the string
+				return value;
+			case optionValueType_t::path:
+				// If the option takes a path, dispatch to the path parser
+				return parsePathValue(value);
+			case optionValueType_t::userDefined:
+				// If the value type is used defined, dispatch to the user's custom value parser
+				return _valueParserFn(value);
+		}
+		// If we reach here, something's gone wrong
+		return std::nullopt;
+	}
+
 	std::optional<std::any> option_t::parseSignedValue(const std::string_view &value) const noexcept
 	{
 		toInt_t<int64_t> number{value.data()};
