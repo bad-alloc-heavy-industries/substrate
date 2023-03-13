@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <filesystem>
 #include <substrate/command_line/options>
 #include <substrate/conversions>
 
@@ -69,6 +70,14 @@ namespace substrate::commandLine
 			return false;
 		// If not then parsing fails
 		return std::nullopt;
+	}
+
+	std::optional<std::any> option_t::parsePathValue(const std::string_view &value) noexcept
+	{
+		// There's unfortunately not much of any validation can be done on a path, so..
+		// This function just converts the string_view ith a path object and returns it
+		std::filesystem::path path{value};
+		return path;
 	}
 
 	bool optionAlternation_t::matches(const std::string_view &argument) const noexcept
