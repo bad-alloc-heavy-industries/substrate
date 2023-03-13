@@ -119,6 +119,10 @@ namespace substrate::commandLine
 			{ return _flags.includes(optionFlags_t::takesParameter); }
 		[[nodiscard]] constexpr bool isRepeatable() const noexcept
 			{ return _flags.includes(optionFlags_t::repeatable); }
+
+		private:
+			[[nodiscard]] std::optional<std::any> parseSignedValue(const std::string_view &value) const noexcept;
+			[[nodiscard]] std::optional<std::any> parseUnsignedValue(const std::string_view &value) const noexcept;
 	};
 
 	// A set of command line option alternations such as a set of commands
