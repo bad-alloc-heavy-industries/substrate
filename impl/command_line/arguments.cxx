@@ -76,10 +76,8 @@ namespace substrate::commandLine
 				// Dispatch based on the option type
 				std::visit(match_t
 				{
-					[&](const option_t &option) -> std::optional<optionMatch_t>
-						{ return matchOption(lexer, option, argument); },
-					[&](const optionSet_t &option) -> std::optional<optionMatch_t>
-						{ return matchOptionSet(lexer, option, argument); },
+					[&](const option_t &option) { return matchOption(lexer, option, argument); },
+					[&](const optionSet_t &option) { return matchOptionSet(lexer, option, argument); },
 				}, option)
 			};
 
