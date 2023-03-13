@@ -123,6 +123,7 @@ namespace substrate::commandLine
 		private:
 			[[nodiscard]] std::optional<std::any> parseSignedValue(const std::string_view &value) const noexcept;
 			[[nodiscard]] std::optional<std::any> parseUnsignedValue(const std::string_view &value) const noexcept;
+			[[nodiscard]] static std::optional<std::any> parseBoolValue(const std::string_view &value) noexcept;
 	};
 
 	// A set of command line option alternations such as a set of commands

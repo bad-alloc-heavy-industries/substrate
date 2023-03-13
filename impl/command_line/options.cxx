@@ -2,6 +2,8 @@
 #include <substrate/command_line/options>
 #include <substrate/conversions>
 
+using namespace std::literals::string_view_literals;
+
 namespace substrate::commandLine
 {
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
@@ -56,6 +58,17 @@ namespace substrate::commandLine
 			return std::nullopt;
 		// Now we know the value is in the proper range, return it
 		return result;
+	}
+
+	std::optional<std::any> option_t::parseBoolValue(const std::string_view &value) noexcept
+	{
+		// If the value matches the strings "true" or "false", convert to the boolean equivilent
+		if (value == "true"sv)
+			return true;
+		if (value == "false"sv)
+			return false;
+		// If not then parsing fails
+		return std::nullopt;
 	}
 
 	bool optionAlternation_t::matches(const std::string_view &argument) const noexcept
