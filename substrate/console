@@ -106,50 +106,50 @@ namespace substrate
 
 	public:
 		constexpr console_t() noexcept = default;
-		SUBSTRATE_CLS_MAYBE_API console_t(FILE *outStream, FILE *errStream) noexcept;
-		SUBSTRATE_CLS_MAYBE_API console_t(const int32_t outStream, const int32_t errStream) noexcept :
+		console_t(FILE *outStream, FILE *errStream) noexcept;
+		console_t(const int32_t outStream, const int32_t errStream) noexcept :
 			outputStream{outStream}, errorStream{errStream}, valid_{outputStream.valid() && errorStream.valid()} { }
 		console_t(const console_t &) noexcept = delete;
-		SUBSTRATE_CLS_MAYBE_API console_t(console_t &&other) noexcept : console_t{} { swap(other); }
+		console_t(console_t &&other) noexcept : console_t{} { swap(other); }
 		~console_t() noexcept = default;
 		console_t operator =(const console_t &) noexcept = delete;
 		constexpr bool valid() const noexcept { return valid_; }
 
-		SUBSTRATE_CLS_MAYBE_API console_t &operator =(console_t &&other) noexcept
+		console_t &operator =(console_t &&other) noexcept
 		{
 			swap(other);
 			return *this;
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void error(T &&...values) const noexcept
+		template<typename... T> void error(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			_error();
 			write(errorStream, std::forward<T>(values)...);
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void warning(T &&...values) const noexcept
+		template<typename... T> void warning(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			_warning();
 			write(outputStream, std::forward<T>(values)...);
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void warn(T &&...values) const noexcept
+		template<typename... T> void warn(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			_warning();
 			write(outputStream, std::forward<T>(values)...);
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void info(T &&...values) const noexcept
+		template<typename... T> void info(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			_info();
 			write(outputStream, std::forward<T>(values)...);
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void debug(T &&...values) const noexcept
+		template<typename... T> void debug(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			if (showDebug_)
@@ -159,7 +159,7 @@ namespace substrate
 			}
 		}
 
-		template<typename... T> SUBSTRATE_CLS_MAYBE_API void writeln(T &&...values) const noexcept
+		template<typename... T> void writeln(T &&...values) const noexcept
 		{
 			SUBSTRATE_NOWARN_UNUSED(std::lock_guard<std::mutex> lock){consoleMutex};
 			write(outputStream, std::forward<T>(values)...);

@@ -63,17 +63,17 @@
 #	define SUBSTRATE_ALIGN(X)
 #endif
 
-#ifdef _WIN32
-#	ifdef SUBSTRATE_BUILD_INTERNAL
+#ifdef _MSC_VER
+#	if defined(SUBSTRATE_BUILD_STATIC)
+#		define SUBSTRATE_CLS_API
+#	elif defined(SUBSTRATE_BUILD_INTERNAL)
 #		define SUBSTRATE_CLS_API __declspec(dllexport)
 #	else
 #		define SUBSTRATE_CLS_API __declspec(dllimport)
 #	endif
 #	define SUBSTRATE_API extern SUBSTRATE_CLS_API
-#	define SUBSTRATE_CLS_MAYBE_API
 #else
 #	define SUBSTRATE_CLS_API __attribute__ ((visibility("default")))
-#	define SUBSTRATE_CLS_MAYBE_API SUBSTRATE_CLS_API
 #	define SUBSTRATE_API extern SUBSTRATE_CLS_API
 #endif
 
@@ -92,14 +92,8 @@
 
 #if __cplusplus >= 201402L
 #	define SUBSTRATE_CXX14_CONSTEXPR constexpr
-#	if defined (_WIN32)
-#		define SUBSTRATE_CXX14_MAYBE_CONSTEXPR
-#	else
-#		define SUBSTRATE_CXX14_MAYBE_CONSTEXPR constexpr
-#	endif
 #else
 #	define SUBSTRATE_CXX14_CONSTEXPR
-#	define SUBSTRATE_CXX14_MAYBE_CONSTEXPR
 #endif
 
 #if __cplusplus >= 201703L

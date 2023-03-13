@@ -63,12 +63,27 @@ targetLibraryBuildable = not (meson.is_cross_build() and (
 	or target_machine.cpu_family() == 'avr'
 ))
 
+library_type = get_option('default_library')
+
+# xclaesse says that library_type == 'both' is not yet supported on Windows
+# Reference: https://gitlab.gnome.org/GNOME/glib/-/blob/main/meson.build#L279
+# See: https://matrix.to/#/!GNNuZCPFOXyoAJPmtC:matrix.org/$Igksu0vUvmDxcEKZUpQ2KZCduFiPA22Q2Z7veH5ZFUE
+if library_type == 'both' and isWindows
+  error('On Windows default_library must be "shared" or "static" but not "both"')
+endif
+
+libSubstrateArgs = []
+
+if library_type == 'static' and isWindows
+	libSubstrateArgs = ['-DSUBSTRATE_BUILD_STATIC']
+endif
+
 if targetLibraryBuildable
 	libSubstrate = library(
 		'substrate',
 		libSubstrateSrcs,
-		c_args: ['-DSUBSTRATE_BUILD_INTERNAL'],
-		cpp_args: ['-DSUBSTRATE_BUILD_INTERNAL'],
+		c_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
+		cpp_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
 		include_directories: include_directories('..'),
 		dependencies: deps,
 		gnu_symbol_visibility: 'inlineshidden',
@@ -85,8 +100,8 @@ if meson.is_cross_build()
 	libSubstrateNative = library(
 		'substrateNative',
 		libSubstrateSrcs,
-		c_args: ['-DSUBSTRATE_BUILD_INTERNAL'],
-		cpp_args: ['-DSUBSTRATE_BUILD_INTERNAL'],
+		c_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
+		cpp_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
 		include_directories: include_directories('..'),
 		dependencies: deps,
 		gnu_symbol_visibility: 'inlineshidden',

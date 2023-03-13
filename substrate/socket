@@ -32,7 +32,7 @@ namespace substrate
 	using bufferlen_t = int;
 #endif
 
-	struct socket_t final
+	struct SUBSTRATE_CLS_API socket_t final
 	{
 	private:
 		sockType_t socket;
@@ -43,10 +43,10 @@ namespace substrate
 	public:
 		constexpr socket_t() noexcept : socket{INVALID_SOCKET} { }
 		constexpr socket_t(const sockType_t s) noexcept : socket{s} { }
-		SUBSTRATE_CLS_API socket_t(const int family, const int type, const int protocol = 0) noexcept;
+		socket_t(const int family, const int type, const int protocol = 0) noexcept;
 		socket_t(const socket_t &) = delete;
 		socket_t(socket_t &&s) noexcept : socket_t{} { swap(s); }
-		SUBSTRATE_CLS_API ~socket_t() noexcept;
+		~socket_t() noexcept;
 
 		socket_t &operator =(const socket_t &) = delete;
 		void operator =(socket_t &&s) noexcept { swap(s); }
@@ -58,17 +58,17 @@ namespace substrate
 
 		template<typename T> bool bind(const T &addr) const noexcept
 			{ return bind(static_cast<const void *>(&addr), sizeof(T)); }
-		SUBSTRATE_CLS_API bool bind(const sockaddr_storage &addr) const noexcept;
+		bool bind(const sockaddr_storage &addr) const noexcept;
 		template<typename T> bool connect(const T &addr) const noexcept
 			{ return connect(static_cast<const void *>(&addr), sizeof(T)); }
-		SUBSTRATE_CLS_API bool connect(const sockaddr_storage &addr) const noexcept;
-		SUBSTRATE_CLS_API bool listen(const int32_t queueLength) const noexcept;
-		SUBSTRATE_CLS_API socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
-		SUBSTRATE_CLS_API ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
-		SUBSTRATE_CLS_API ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
-		SUBSTRATE_CLS_API ssize_t writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept;
-		SUBSTRATE_CLS_API ssize_t readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept;
-		SUBSTRATE_CLS_API char peek() const noexcept;
+		 bool connect(const sockaddr_storage &addr) const noexcept;
+		 bool listen(const int32_t queueLength) const noexcept;
+		 socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
+		 ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
+		 ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
+		 ssize_t writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept;
+		 ssize_t readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept;
+		 char peek() const noexcept;
 	};
 
 	inline void swap(socket_t &a, socket_t &b) noexcept

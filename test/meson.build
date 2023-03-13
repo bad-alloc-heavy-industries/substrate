@@ -36,8 +36,7 @@ tests = executable(
 	include_directories: include_directories(
 		'..'
 	),
-	dependencies: deps,
-	link_with: libSubstrate,
+	dependencies: deps + [substrate_dep],
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
 	install: false,

@@ -119,10 +119,7 @@ else
 	targetLibraryBuildable = false
 	deps = []
 	libSubstrate = []
-endif
-
-if get_option('build_tests')
-	subdir('test')
+	libSubstrateArgs = []
 endif
 
 if get_option('gen_docs')
@@ -137,27 +134,35 @@ if not meson.is_subproject() and get_option('build_library')
 		filebase: 'substrate',
 		libraries: [libSubstrate, deps],
 		version: meson.project_version(),
+		extra_cflags: libSubstrateArgs,
 		description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 	)
 endif
 
-variables = {
-	'compile_args': '-I@0@'.format(meson.current_source_dir()),
-}
+variables_compile_args = [
+	'-I@0@'.format(meson.current_source_dir()),
+] + libSubstrateArgs
+
+variables_link_args = []
 
 if targetLibraryBuildable
-	variables += {
-		'link_args': libSubstrate.full_path(),
-	}
+	variables_link_args += libSubstrate.full_path()
 endif
 
 substrate_dep = declare_dependency(
 	dependencies: deps,
 	include_directories: include_directories('.'),
 	link_with: libSubstrate,
-	variables: variables,
+	variables: {
+		'compile_args': ' '.join(variables_compile_args),
+		'link_args': ' '.join(variables_link_args)
+	},
 	version: meson.project_version()
 )
+
+if get_option('build_tests') and targetLibraryBuildable
+	subdir('test')
+endif
 
 # When we're in a cross-build environment, also declade the native version of the library
 if meson.is_cross_build()
@@ -166,7 +171,7 @@ if meson.is_cross_build()
 		include_directories: include_directories('.'),
 		link_with: libSubstrateNative,
 		variables: {
-			'compile_args': '-I@0@'.format(meson.current_source_dir()),
+			'compile_args': ' '.join(['-I@0@'.format(meson.current_source_dir())] + libSubstrateArgs),
 			'link_args': libSubstrateNative.full_path()
 		},
 		version: meson.project_version()
