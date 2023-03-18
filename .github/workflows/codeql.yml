@@ -19,9 +19,11 @@ jobs:
       matrix:
         os:
           - { id: ubuntu-20.04, name: focal }
+        compiler:
+          - 'gcc-11'
+        cpp_std:
+          - 'c++17'
         language: ['cpp', 'python']
-        compiler: 'gcc-11'
-        cpp_std: 'c++17'
       fail-fast: false
     steps:
       - name: Runtime environment
