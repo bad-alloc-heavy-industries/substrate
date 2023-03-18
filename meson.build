@@ -139,24 +139,25 @@ if not meson.is_subproject() and get_option('build_library')
 	)
 endif
 
-variables_compile_args = [
+variablesCompileArgs = [
 	'-I@0@'.format(meson.current_source_dir()),
 ] + libSubstrateArgs
 
-variables_link_args = []
+variables = {
+	'compile_args': ' '.join(variablesCompileArgs),
+}
 
 if targetLibraryBuildable
-	variables_link_args += libSubstrate.full_path()
+	variables += {
+		'link_args': libSubstrate.full_path(),
+	}
 endif
 
 substrate_dep = declare_dependency(
 	dependencies: deps,
 	include_directories: include_directories('.'),
 	link_with: libSubstrate,
-	variables: {
-		'compile_args': ' '.join(variables_compile_args),
-		'link_args': ' '.join(variables_link_args)
-	},
+	variables: variables,
 	version: meson.project_version()
 )
 
@@ -164,7 +165,7 @@ if get_option('build_tests') and targetLibraryBuildable
 	subdir('test')
 endif
 
-# When we're in a cross-build environment, also declade the native version of the library
+# When we're in a cross-build environment, also declare the native version of the library
 if meson.is_cross_build()
 	substrate_native_dep = declare_dependency(
 		dependencies: deps,
