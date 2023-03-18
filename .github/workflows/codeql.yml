@@ -3,8 +3,6 @@ name: CodeQL
 on:
   push:
     branches: ['main']
-    branches-ignore:
-      - 'coverityScan'
   pull_request:
     branches:
       - 'main'
