@@ -94,14 +94,14 @@ static int releaseInt(int *value)
 	REQUIRE(*value == 1);
 	delete value; // NOLINT(*-owning-memory)
 	return 1;
-};
+}
 
 static void releaseFloat(float *value)
 {
 	REQUIRE(value != nullptr);
 	REQUIRE(*value == 2.0F);
 	delete value; // NOLINT(*-owning-memory)
-};
+}
 
 TEST_CASE("naughty (non-void-returning) deleter", "[naughtyPtr_t]")
 {
