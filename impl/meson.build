@@ -12,7 +12,7 @@ else
 endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
-	friend_typename_test = '''
+	friendTypenameTest = '''
 		template <typename U>
 		auto foo(U u)
 		{
@@ -34,10 +34,12 @@ if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 			::foo(X<int>{});
 		}
 	'''
+	friendTypenameTemplate = cxx.compiles(
+		friendTypenameTest,
+		name: 'accepts friend declarations for auto functions (LLVM #31852, #33222)'
+	)
 
-	friend_typename_template = cxx.compiles(friend_typename_test, name: 'accepts friend declarations for auto functions (LLVM #31852, #33222)')
-
-	std_variant_gcc_test = '''
+	stdVariantGCCTest = '''
 		#include <tuple>
 		#include <variant>
 		int main() {
@@ -48,9 +50,12 @@ if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 		}
 	'''
 
-	std_variant_gcc = cxx.compiles(std_variant_gcc_test, name: 'has a working std::variant implementation (GCC #80165)')
+	stdVariantGCC = cxx.compiles(
+		stdVariantGCCTest,
+		name: 'has a working std::variant implementation (GCC #80165)'
+	)
 
-	if friend_typename_template and std_variant_gcc
+	if friendTypenameTemplate and stdVariantGCC
 		subdir('command_line')
 	endif
 endif

@@ -3,9 +3,8 @@ testSrcs = [
 	'bounded_iterator.cxx', 'fixed_vector.cxx', 'string.cxx', 'managed_ptr.cxx',
 	'socket.cxx', 'console.cxx', 'advanced/fd.cxx', 'span.cxx', 'conversions.cxx',
 	'bits.cxx', 'prng.cxx', 'hash.cxx', 'index_sequence.cxx', 'indexed_iterator.cxx',
-	'buffer_utils.cxx',
-	'crypto/twofish.cxx', 'crypto/sha256.cxx', 'crypto/sha512.cxx',
-	'pointer_utils.cxx'
+	'buffer_utils.cxx', 'pointer_utils.cxx',
+	'crypto/twofish.cxx', 'crypto/sha256.cxx', 'crypto/sha512.cxx'
 ]
 
 if target_machine.system() == 'linux'
