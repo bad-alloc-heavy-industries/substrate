@@ -1,0 +1,76 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ['main', *]
+    branches-ignore:
+      - 'coverityScan'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  analyze:
+    name: Analyse
+    runs-on: ${{ matrix.os.id }}
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      matrix:
+        os:
+          - { id: ubuntu-20.04, name: focal }
+        language: ['cpp', 'python']
+        compiler: 'gcc-11'
+        cpp_std: 'c++17'
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Setup GCC
+        shell: bash
+        run: |
+          CXX=${CC/#gcc/g++}
+          sudo apt-add-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install $CC $CXX
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          lfs: true
+          submodules: true
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          sudo python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install --user meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC --version
+          $CXX --version
+          meson --version
+          ninja --version
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }}
+      - name: Build
+        run: ninja -C build
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"
