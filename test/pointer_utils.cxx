@@ -3,7 +3,7 @@
 #include <substrate/pointer_utils>
 #include <catch2/catch.hpp>
 
-#if defined SUBSTRATE_SUPPORTS_MANAGED_TUPLE
+#if defined(SUBSTRATE_SUPPORTS_MANAGED_TUPLE)
 
 TEST_CASE("managed release check through references", "[managedTuple_t]")
 {
