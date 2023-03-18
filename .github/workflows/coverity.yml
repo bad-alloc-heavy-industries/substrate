@@ -7,7 +7,7 @@ on:
 
 jobs:
   scan-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: github.repository == 'bad-alloc-heavy-industries/substrate'
     strategy:
       fail-fast: false
@@ -30,7 +30,7 @@ jobs:
           echo "CXX=$CXX" >> $GITHUB_ENV
           echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
         env:
-          CC: gcc-9
+          CC: gcc-11
       - name: Checkout substrate
         uses: actions/checkout@v3
         with:
@@ -60,7 +60,7 @@ jobs:
       - name: Run Coverity
         shell: bash
         run: |
-          meson build --prefix=$HOME/.local
+          meson build --prefix=$HOME/.local -Dcpp_std=c++17
           cov-build --dir cov-int ninja -C build
         env:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
