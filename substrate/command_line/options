@@ -59,7 +59,7 @@ namespace substrate::commandLine
 	using optionValueParser_t = std::optional<std::any> (*)(const std::string_view &) noexcept;
 
 	// A singular command line option such as a simple flag
-	struct option_t final
+	struct SUBSTRATE_CLS_API option_t final
 	{
 	private:
 		using optionHolder_t = std::variant<std::string_view, optionFlagPair_t, std::monostate>;
@@ -129,7 +129,7 @@ namespace substrate::commandLine
 	};
 
 	// A set of command line option alternations such as a set of commands
-	struct optionSet_t final
+	struct SUBSTRATE_CLS_API optionSet_t final
 	{
 	private:
 		staticVector_t<optionAlternation_t> _alternations;
@@ -178,7 +178,7 @@ namespace substrate::commandLine
 	};
 
 	// Represents a specific alternation in an optionSet_t
-	struct optionAlternation_t final
+	struct SUBSTRATE_CLS_API optionAlternation_t final
 	{
 	private:
 		std::string_view _value;
