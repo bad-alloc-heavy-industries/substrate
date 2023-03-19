@@ -110,12 +110,16 @@ namespace substrate::commandLine
 		// If the option matches, try parsing out and validating the value portion if there is one
 		if (!option.takesParameter())
 			return flag_t{argument};
-		lexer.next();
-		// Check that we have a parameter component following
-		if (token.type() != tokenType_t::equals && token.type() != tokenType_t::space)
-			// If the operation fails, use monostate to signal match-but-fail.
-			return std::monostate{};
-		lexer.next();
+		// Consume tokens to get to the value token if the option is not value-only
+		if (!option.valueOnly())
+		{
+			lexer.next();
+			// Check that we have a parameter component following
+			if (token.type() != tokenType_t::equals && token.type() != tokenType_t::space)
+				// If the operation fails, use monostate to signal match-but-fail.
+				return std::monostate{};
+			lexer.next();
+		}
 		// Try parsing that parameter component as a value for the option
 		auto value{option.parseValue(token.value())};
 		if (!value)
