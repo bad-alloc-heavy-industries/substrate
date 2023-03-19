@@ -15,7 +15,7 @@ if target_machine.system() == 'linux'
 endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
-	if friendTypenameTemplate and stdVariantGCC
+	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath
 		testSrcs += ['command_line/options.cxx']
 	endif
 endif

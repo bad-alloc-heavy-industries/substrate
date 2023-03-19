@@ -55,7 +55,25 @@ if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 		name: 'has a working std::variant implementation (GCC #80165)'
 	)
 
-	if friendTypenameTemplate and stdVariantGCC
+	stdFilesystemPathTest = '''
+		#include <filesystem>
+		#include <iostream>
+
+		using namespace std::literals::string_view_literals;
+
+		int main() {
+			std::filesystem::path p{"/bin/bash"sv};
+			std::cout << p << std::endl;
+			return 0;
+		}
+	'''
+
+	stdFilesystemPath = cxx.links(
+		stdFilesystemPathTest,
+		name: 'has a working std::filesystem::path implementation (GCC >= 8 in macOS pre 10.15)'
+	)
+
+	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath
 		subdir('command_line')
 	endif
 endif
