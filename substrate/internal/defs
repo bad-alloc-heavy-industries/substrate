@@ -127,5 +127,17 @@ namespace substrate
 }
 #endif
 
+#if __cplusplus >= 201703L || (defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L)
+#	if !defined(__APPLE__)
+#		define SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH 1
+#	else
+#		include <Availability.h>
+#		include <TargetConditionals.h>
+#		if (TARGET_OS_OSX && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101500L) || (TARGET_OS_IOS && __IPHONE_OS_VERSION_MIN_REQUIRED >= 130000L) || (TARGET_OS_WATCH && __WATCH_OS_VERSION_MIN_REQUIRED >= 60000L) || (TARGET_OS_TV && __TV_OS_VERSION_MIN_REQUIRED >= 130000L)
+#			define SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH 1
+#		endif
+#	endif
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
