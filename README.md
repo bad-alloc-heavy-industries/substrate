@@ -211,8 +211,8 @@
       </tr>
       <tr>
         <td>C++ 17</td>
-        <td>:heavy_check_mark: (1)</td>
-        <td>:heavy_check_mark: (1)</td>
+        <td>:heavy_check_mark: (1) (2)</td>
+        <td>:heavy_check_mark: (1) (2)</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -233,6 +233,7 @@
 </table>
 
 (1): Programs built on Big Sur may crash on exception handle: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=98805
+(2): Using `fd` constructors based on `std::filesystem::path` or the `command_line` module requires C++17, a minimum target OS of macOS 10.15, iOS/tvOS 13, or watchOS 6, and (if using GCC) GCC 9 or higher. The build system will detect this automatically.
 
 <table>
     <thead>
