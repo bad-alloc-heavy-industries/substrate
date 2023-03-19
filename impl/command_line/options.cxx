@@ -23,6 +23,8 @@ namespace substrate::commandLine
 
 	std::optional<std::any> option_t::parseValue(const std::string_view &value) const noexcept
 	{
+		if (!takesParameter())
+			return std::nullopt;
 		switch (_valueType)
 		{
 			case optionValueType_t::signedInt:
