@@ -172,10 +172,14 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
-      - name: Setup OpenCppCoverage
+      - name: Install OpenCppCoverage
         uses: crazy-max/ghaction-chocolatey@v2.1.0
         with:
           args: install OpenCppCoverage
+      - name: Setup OpenCppCoverage
+        shell: bash
+        run: |
+          echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
       - name: Checkout
         uses: actions/checkout@v3
         with:

@@ -98,17 +98,23 @@ if isWindows
 		add_project_arguments('-DWINVER=NTDDI_WIN10_RS5', '-D_WIN32_WINNT=NTDDI_WIN10_RS5', '-DNTDDI_VERSION=NTDDI_WIN10_RS5', language: ['c', 'cpp'])
 	endif
 
-	if coverage
+	# if MSVC, b_coverage will always return false because
+	# Meson doesn't officially support coverage
+	if cxx.get_id() == 'msvc' and get_option('buildtype') == 'debug'
 		coverageRunner = find_program('OpenCppCoverage', required: false)
-		coverageArgs = [
-			'--sources', '@0@\impl*\*'.format(meson.current_source_dir()),
-			'--sources', '@0@\substrate*\*'.format(meson.current_source_dir()),
-			'--sources', '@0@\test*\*'.format(meson.current_source_dir()),
-			'--sources', '@0@\*'.format(meson.current_build_dir()),
-			'--modules', meson.current_build_dir(),
-			'--export_type'
-		]
-		coverage = coverageRunner.found() and debug
+
+		if coverageRunner.found()
+			message('Enabling coverage under MSVC')
+			coverageArgs = [
+				'--sources', '@0@\\impl\\*'.format(meson.current_source_dir()),
+				'--sources', '@0@\\substrate\\*'.format(meson.current_source_dir()),
+				'--sources', '@0@\\test\\*'.format(meson.current_source_dir()),
+				'--sources', '@0@\\*'.format(meson.current_build_dir()),
+				'--modules', meson.current_build_dir(),
+				'--export_type'
+			]
+			coverage = true
+		endif
 	endif
 endif
 

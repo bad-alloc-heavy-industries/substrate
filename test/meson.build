@@ -47,7 +47,7 @@ tests = executable(
 	install: false,
 )
 
-if isWindows and coverage
+if cxx.get_id() == 'msvc' and coverage
 	test(
 		'substrate',
 		coverageRunner,
