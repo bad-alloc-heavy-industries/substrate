@@ -171,6 +171,9 @@ jobs:
   build-windows:
     name: '${{ matrix.os }} (msvc, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: pwsh
     strategy:
       matrix:
         os:
@@ -185,12 +188,11 @@ jobs:
       fail-fast: false
     steps:
       - name: Runtime environment
-        shell: bash
         env:
           WORKSPACE: ${{ github.workspace }}
         run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+          echo "$HOME\\.local\\bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=$(pwd)" >> $GITHUB_ENV
       - name: Setup compiler
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -215,10 +217,9 @@ jobs:
           python3 -m pip install meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
-        shell: bash
         run: |
-          $CC  || true
-          $LD  || true
+          cl /Bv
+          link
           meson --version
           ninja --version
       - name: Configure
