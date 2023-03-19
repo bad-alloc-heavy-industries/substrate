@@ -127,7 +127,7 @@ namespace substrate
 }
 #endif
 
-#if __cplusplus >= 201703L || (defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L)
+#if __cplusplus >= 201703L && defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L
 #	if !defined(__APPLE__)
 #		define SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH 1
 #	else
