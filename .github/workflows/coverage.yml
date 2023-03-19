@@ -173,12 +173,9 @@ jobs:
         with:
           arch: x86_64
       - name: Setup OpenCppCoverage
-        shell: bash
-        run: |
-          curl -L1O https://github.com/OpenCppCoverage/OpenCppCoverage/releases/download/release-0.9.9.0/OpenCppCoverageSetup-x64-0.9.9.0.exe
-          MSYS2_ARG_CONV_EXCL=/dir=\;/verysilent ./OpenCppCoverageSetup-x64-0.9.9.0 \
-            /dir="C:\Program Files\OpenCppCoverage" /verysilent
-          rm OpenCppCoverageSetup-x64-0.9.9.0.exe
+        uses: crazy-max/ghaction-chocolatey@v2.1.0
+        with:
+          args: install OpenCppCoverage
       - name: Checkout
         uses: actions/checkout@v3
         with:
