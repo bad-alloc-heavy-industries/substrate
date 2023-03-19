@@ -14,7 +14,11 @@ concurrency:
 
 jobs:
   build-linux:
+    name: '${{ matrix.os.id }} (${{ matrix.compiler }}, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os.id }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
         os:
@@ -84,7 +88,6 @@ jobs:
       fail-fast: false
     steps:
       - name: Runtime environment
-        shell: bash
         env:
           WORKSPACE: ${{ github.workspace }}
         run: |
@@ -92,31 +95,38 @@ jobs:
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
       - name: Setup GCC
         if: startsWith(matrix.compiler, 'gcc')
-        shell: bash
         run: |
           CXX=${CC/#gcc/g++}
           sudo apt-add-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install $CC $CXX
+          sudo apt-get install $CC $CXX gcovr
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.compiler }}
       - name: Setup Clang
         if: startsWith(matrix.compiler, 'clang')
-        shell: bash
         run: |
           wget https://apt.llvm.org/llvm-snapshot.gpg.key
           sudo apt-key add llvm-snapshot.gpg.key
           rm llvm-snapshot.gpg.key
           sudo apt-add-repository "deb https://apt.llvm.org/${{ matrix.os.name }}/ llvm-toolchain-${{ matrix.os.name }}${CC/#clang/} main"
           sudo apt-get update
-          sudo apt-get install $CC
+          sudo apt-get install $CC gcovr
           CXX=${CC/#clang/clang++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.compiler }}
+        working-directory: ${{ runner.temp }}
+      - name: Add coverage dependency
+        if: matrix.compiler == 'clang-14'
+        run: |
+          apt download libclang-rt-14-dev
+          PACKAGE=$(find . -name 'libclang-rt-14*.deb')
+          sudo dpkg --install --force-breaks $PACKAGE
         working-directory: ${{ runner.temp }}
       - name: Checkout
         uses: actions/checkout@v3
@@ -124,28 +134,42 @@ jobs:
           lfs: true
           submodules: true
       - name: Setup Meson + Ninja
-        shell: bash
         run: |
           sudo python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install --user meson ninja
+          sudo python3 -m pip install meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
-        shell: bash
         run: |
           $CC --version
           $CXX --version
+          $GCOV --version
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }}
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
-        run: ninja -C build
+        run: meson compile -C build
       - name: Test
-        run: ninja -C build test
+        run: meson test -C build
       - name: Install
-        run: ninja -C build install
+        run: meson install -C build 
+      - name: Run coverage build
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        # Codecov no longer parses gcov files automatically
+        run: |
+          rm -rf build
+          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson compile -C build
+          meson test -C build
+          cd build
+          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
+          gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+      - name: Codecov
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: codecov/codecov-action@v3
+
   build-windows:
-    name: 'build-windows (${{ matrix.os }}, msvc, ${{ matrix.cpp_std }})'
+    name: '${{ matrix.os }} (msvc, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -159,10 +183,6 @@ jobs:
           - os: windows-2022
             cpp_std: 'c++20'
       fail-fast: false
-    env:
-      CC: cl.exe
-      CXX: cl.exe
-      LD: link.exe
     steps:
       - name: Runtime environment
         shell: bash
@@ -175,13 +195,21 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86_64
+      - name: Install OpenCppCoverage
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: crazy-max/ghaction-chocolatey@v2.1.0
+        with:
+          args: install OpenCppCoverage
+      - name: Setup OpenCppCoverage
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        run: |
+          echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
       - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
       - name: Setup Meson + Ninja
-        shell: bash
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
           python3 -m pip install meson ninja
@@ -194,15 +222,26 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
-        run: ninja -C build
+        run: meson compile -C build
       - name: Test
-        run: ninja -C build test
+        run: meson test -C build
       - name: Install
-        run: ninja -C build install
+        run: meson install -C build
+      - name: Run coverage build
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        run: |
+          Remove-Item -Recurse build
+          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson compile -C build
+          meson test -C build
+      - name: Codecov
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: codecov/codecov-action@v3
+
   build-windows-mingw:
-    name: 'build-mingw (${{ matrix.os }}, ${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
+    name: '${{ matrix.os }} (${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -242,6 +281,7 @@ jobs:
           CXX=${CC/#gcc/g++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Setup compiler
@@ -250,6 +290,7 @@ jobs:
           CXX=${CC/#clang/clang++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=llvm-cov gcov" >> $GITHUB_ENV
         env:
           CC: ${{ matrix.sys.compiler }}
       - name: Checkout
@@ -267,18 +308,37 @@ jobs:
         run: |
           $CC --version
           $CXX --version
+          $GCOV --version
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
-        run: ninja -C build
+        run: meson compile -C build
       - name: Test
-        run: ninja -C build test
+        run: meson test -C build
       - name: Install
         run: ninja -C build install
+      - name: Run coverage build
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        # Codecov no longer parses gcov files automatically
+        run: |
+          rm -rf build
+          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson compile -C build
+          meson test -C build
+          cd build
+          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
+      - name: Codecov
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: codecov/codecov-action@v3
+
   build-macos:
+    name: '${{ matrix.os }} (${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
         os:
@@ -291,43 +351,65 @@ jobs:
       fail-fast: false
     steps:
       - name: Runtime environment
-        shell: bash
         env:
           WORKSPACE: ${{ github.workspace }}
         run: |
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Setup tools
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        run: |
+          brew install gcovr
       - name: Checkout
         uses: actions/checkout@v3
         with:
           lfs: true
           submodules: true
       - name: Setup Meson + Ninja
-        shell: bash
         run: |
           brew install meson ninja
         working-directory: ${{ runner.temp }}
       - name: Version tools
-        shell: bash
         run: |
           cc --version  || true
           ld --version || true
+          gcov --version || true
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
+        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
-        run: ninja -C build
+        run: meson compile -C build
       - name: Test
-        run: ninja -C build test
+        run: meson test -C build
       - name: Install
         run: ninja -C build install
+      - name: Run coverage build
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        # Codecov no longer parses gcov files automatically
+        run: |
+          rm -rf build
+          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson compile -C build
+          meson test -C build
+          cd build
+          gcovr -r .. -x -o coverage.xml -e ../deps -e ../test
+      - name: Codecov
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: codecov/codecov-action@v3
+
   build-macos-homebrew:
     # Apple LLD is unable to link GCC < 11 generated object files.
     # https://stackoverflow.com/questions/73714336/xcode-update-to-version-2395-ld-compile-problem-occurs-computedatomcount-m
     # rdar://FB11369327
-    runs-on: macos-11
+    name: '${{ matrix.os }} (homebrew, ${{ matrix.compiler }}, ${{ matrix.cpp_std }})'
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
+        os:
+          - macos-11
         compiler:
           ## GCC5 cannot compile anything on macOS
           # - gcc@5
@@ -345,24 +427,24 @@ jobs:
           - 'c++14'
           - 'c++17'
         include:
-          - compiler: gcc
+          - os: macos-11
+            compiler: gcc
             cpp_std: 'c++20'
       fail-fast: false
     steps:
       - name: Runtime environment
-        shell: bash
         env:
           WORKSPACE: ${{ github.workspace }}
         run: |
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
       - name: Setup compiler
-        shell: bash
         run: |
-          brew install ${{ matrix.compiler }}
+          brew install ${{ matrix.compiler }} gcovr
           CC=${COMPILER/@/-}
           CXX=${CC/#gcc/g++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
+          echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
         env:
           COMPILER: ${{ matrix.compiler }}
       - name: Checkout
@@ -371,7 +453,6 @@ jobs:
           lfs: true
           submodules: true
       - name: Setup Meson + Ninja
-        shell: bash
         run: |
           brew install meson ninja
         working-directory: ${{ runner.temp }}
@@ -380,13 +461,27 @@ jobs:
         run: |
           $CC --version
           $CXX --version
+          $GCOV --version
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} --buildtype=debug
+        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
-        run: ninja -C build
+        run: meson compile -C build
       - name: Test
-        run: ninja -C build test
+        run: meson test -C build
       - name: Install
         run: ninja -C build install
+      - name: Run coverage build
+        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        # Codecov no longer parses gcov files automatically
+        run: |
+          rm -rf build
+          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson compile -C build
+          meson test -C build
+          cd build
+          gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+      - name: Codecov
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        uses: codecov/codecov-action@v3
