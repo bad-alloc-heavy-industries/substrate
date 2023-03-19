@@ -13,7 +13,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!helpOption.matches("--version"sv));
 	REQUIRE(!helpOption.takesParameter());
 	REQUIRE(!helpOption.isRepeatable());
-	//REQUIRE(!helpOption.valueOnly());
+	REQUIRE(!helpOption.valueOnly());
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
@@ -23,14 +23,14 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(versionOption.matches("--version"sv));
 	REQUIRE(!versionOption.takesParameter());
 	REQUIRE(!versionOption.isRepeatable());
-	//REQUIRE(!versionOption.valueOnly());
+	REQUIRE(!versionOption.valueOnly());
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
 	const option_t valueOption{optionValue, "Any value you like"sv};
 	REQUIRE(valueOption.matches("funky"sv));
 	REQUIRE(valueOption.helpText() == "Any value you like"sv);
-	//REQUIRE(helpOption.valueOnly());
+	REQUIRE(valueOption.valueOnly());
 	REQUIRE(valueOption.parseValue(""sv).has_value());
 	REQUIRE(std::any_cast<std::string_view>(*valueOption.parseValue("test"sv)) == "test"sv);
 }
