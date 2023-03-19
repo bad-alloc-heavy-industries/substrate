@@ -76,7 +76,7 @@ namespace substrate::commandLine
 		constexpr option_t(const optionHolder_t &option, const std::string_view &help) noexcept :
 			_option{option}, _help{help} { }
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
-			_option{std::monostate{}}, _help{help} { }
+			_option{std::monostate{}}, _help{help}, _flags{optionFlags_t::takesParameter} { }
 
 		[[nodiscard]] constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
@@ -134,18 +134,18 @@ namespace substrate::commandLine
 	struct SUBSTRATE_CLS_API optionSet_t final
 	{
 	private:
-		staticVector_t<optionAlternation_t> _alternations;
+		staticVector_t<const optionAlternation_t> _alternations;
 
 	public:
-		optionSet_t(const staticVector_t<optionAlternation_t> &alternations) : _alternations{alternations} { }
+		optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) : _alternations{alternations} { }
 
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
 	};
 
-	template<size_t N> constexpr static inline staticVector_t<optionAlternation_t>
+	template<size_t N> constexpr static inline staticVector_t<const optionAlternation_t>
 		optionAlternations(const optionAlternation_t (&&alternations)[N]) noexcept
-			{ return {makeArray(std::move(alternations))}; }
+			{ return {substrate::make_array(std::move(alternations))}; }
 
 	// The base container for a program's command line options
 	struct options_t final
@@ -166,7 +166,7 @@ namespace substrate::commandLine
 		}
 
 	public:
-		template<typename... Options> options_t(const Options &...options) { populateOptions(options...); }
+		template<typename... Options> options_t(const Options &...options) noexcept { populateOptions(options...); }
 
 		[[nodiscard]] auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] auto end() const noexcept { return _options.end(); }
