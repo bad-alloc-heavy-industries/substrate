@@ -146,8 +146,8 @@ namespace substrate::commandLine
 	};
 
 	template<size_t N> constexpr static inline staticVector_t<const optionAlternation_t>
-		optionAlternations(const optionAlternation_t (&&alternations)[N]) noexcept
-			{ return {substrate::make_array(std::move(alternations))}; }
+		optionAlternations(optionAlternation_t (&&alternations)[N]) noexcept
+			{ return {alternations, N}; }
 
 	// The base container for a program's command line options
 	struct options_t final
