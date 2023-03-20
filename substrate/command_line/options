@@ -139,7 +139,8 @@ namespace substrate::commandLine
 		staticVector_t<const optionAlternation_t> _alternations;
 
 	public:
-		optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) : _alternations{alternations} { }
+		constexpr optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) :
+			_alternations{alternations} { }
 
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
@@ -156,24 +157,24 @@ namespace substrate::commandLine
 		using item_t = std::variant<option_t, optionSet_t>;
 		staticVector_t<const item_t> _options{};
 
-		template<size_t N> static inline staticVector_t<const item_t>
+		template<size_t N> constexpr static inline staticVector_t<const item_t>
 			buildOptions(item_t (&&options)[N]) noexcept
 				{ return {options, N}; }
 
 	public:
-		options_t() noexcept = default;
-		options_t(const options_t &) noexcept = default;
-		options_t(options_t &&) noexcept = delete;
+		constexpr options_t() noexcept = default;
+		constexpr options_t(const options_t &) noexcept = default;
+		constexpr options_t(options_t &&) noexcept = delete;
 
 		template<typename... Options, typename = std::enable_if_t<sizeof...(Options) != 0>>
-			options_t(Options &&...options) noexcept :
+			constexpr options_t(Options &&...options) noexcept :
 				_options{buildOptions({std::forward<Options>(options)...})} { }
 
-		options_t &operator =(const options_t &) noexcept = default;
-		options_t &operator =(options_t &&) noexcept = delete;
+		constexpr options_t &operator =(const options_t &) noexcept = default;
+		constexpr options_t &operator =(options_t &&) noexcept = delete;
 
-		[[nodiscard]] auto begin() const noexcept { return _options.begin(); }
-		[[nodiscard]] auto end() const noexcept { return _options.end(); }
+		[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
+		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 	};
 
 	// Represents a specific alternation in an optionSet_t
@@ -185,13 +186,13 @@ namespace substrate::commandLine
 		options_t _suboptions{};
 
 	public:
-		optionAlternation_t(const std::string_view &value, const std::string_view &help) noexcept :
+		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help) noexcept :
 			_value{value}, _help{help} { }
-		optionAlternation_t(const std::string_view &value, const std::string_view &help,
+		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
 			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
-		[[nodiscard]] const auto &suboptions() const noexcept { return _suboptions; }
+		[[nodiscard]] constexpr auto &suboptions() const noexcept { return _suboptions; }
 	};
 } // namespace substrate::commandLine
 
