@@ -40,8 +40,7 @@ namespace substrate::commandLine
 		std::string_view _longFlag{};
 	};
 
-	struct optionValue_t { };
-	constexpr static inline optionValue_t optionValue{};
+	struct optionValue_t final { };
 	struct optionAlternation_t;
 
 	struct optionSignedInt_t final

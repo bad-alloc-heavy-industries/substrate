@@ -27,7 +27,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
-	constexpr static option_t valueOption{optionValue, "Any value you like"sv};
+	constexpr static option_t valueOption{optionValue_t{}, "Any value you like"sv};
 	REQUIRE(valueOption.matches("funky"sv));
 	REQUIRE(valueOption.helpText() == "Any value you like"sv);
 	REQUIRE(valueOption.valueOnly());
