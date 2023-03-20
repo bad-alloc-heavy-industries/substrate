@@ -76,6 +76,11 @@ namespace substrate::commandLine
 			_option{option}, _help{help} { }
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help}, _flags{optionFlags_t::takesParameter} { }
+		constexpr option_t(const option_t &) noexcept = default;
+		constexpr option_t(option_t &&) noexcept = delete;
+
+		constexpr option_t &operator =(const option_t &) noexcept = default;
+		constexpr option_t &operator =(option_t &&) noexcept = delete;
 
 		[[nodiscard]] constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
@@ -140,6 +145,11 @@ namespace substrate::commandLine
 	public:
 		constexpr optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) :
 			_alternations{alternations} { }
+		constexpr optionSet_t(const optionSet_t &) noexcept = default;
+		constexpr optionSet_t(optionSet_t &&) noexcept = delete;
+
+		constexpr optionSet_t &operator =(const optionSet_t &) noexcept = default;
+		constexpr optionSet_t &operator =(optionSet_t &&) noexcept = delete;
 
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
@@ -189,6 +199,11 @@ namespace substrate::commandLine
 			_value{value}, _help{help} { }
 		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
 			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
+		constexpr optionAlternation_t(const optionAlternation_t &) noexcept = default;
+		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = delete;
+
+		constexpr optionAlternation_t &operator =(const optionAlternation_t &) noexcept = default;
+		constexpr optionAlternation_t &operator =(optionAlternation_t &&) noexcept = delete;
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] constexpr auto &suboptions() const noexcept { return _suboptions; }
