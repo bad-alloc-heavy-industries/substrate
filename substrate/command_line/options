@@ -154,31 +154,26 @@ namespace substrate::commandLine
 	{
 	private:
 		using item_t = std::variant<option_t, optionSet_t>;
-		std::vector<item_t> _options{};
+		staticVector_t<const item_t> _options{};
 
-		void populateOption(const option_t &option) { _options.emplace_back(option); }
-		void populateOption(const optionSet_t &option) { _options.emplace_back(option); }
-		void populateOptions() noexcept { }
-
-		template<typename Option, typename... Options>
-			void populateOptions(const Option &option, const Options &...options)
-		{
-			populateOption(option);
-			populateOptions(options...);
-		}
+		template<size_t N> static inline staticVector_t<const item_t>
+			buildOptions(item_t (&&options)[N]) noexcept
+				{ return {options, N}; }
 
 	public:
-		template<typename... Options> options_t(const Options &...options) noexcept { populateOptions(options...); }
+		options_t() noexcept = default;
+		options_t(const options_t &) noexcept = default;
+		options_t(options_t &&) noexcept = delete;
+
+		template<typename... Options, typename = std::enable_if_t<sizeof...(Options) != 0>>
+			options_t(Options &&...options) noexcept :
+				_options{buildOptions({std::forward<Options>(options)...})} { }
+
+		options_t &operator =(const options_t &) noexcept = default;
+		options_t &operator =(options_t &&) noexcept = delete;
 
 		[[nodiscard]] auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] auto end() const noexcept { return _options.end(); }
-
-	private:
-		void populateOption(const options_t &options)
-		{
-			for (const auto &option : options)
-				_options.emplace_back(option);
-		}
 	};
 
 	// Represents a specific alternation in an optionSet_t
