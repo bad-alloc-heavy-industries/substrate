@@ -24,7 +24,7 @@ TEST_CASE("managed release check through references", "[managedTuple_t]")
 		substrate::managedTuple_t<releaser_t> sample{releaser};
 
 		REQUIRE(sample.size() == 3);
-		sample.template get<0>() = {1};
+		sample.template get<0>() = {{1}};
 		sample.template get<1>() = {5, 1.0F};
 		sample.template get<2>() = {2};
 	}
@@ -51,7 +51,7 @@ TEST_CASE("managed release check through pointers", "[managedTuple_t]")
 		substrate::managedTuple_t<releaser_t> sample{releaser};
 
 		REQUIRE(sample.size() == 3);
-		sample.template get<0>() = {1};
+		sample.template get<0>() = {{1}};
 		sample.template get<1>() = {5, 1.0F};
 		sample.template get<2>() = {2};
 	}
@@ -76,7 +76,7 @@ TEST_CASE("managed release check through convertible values", "[managedTupleWith
 		substrate::managedTupleWithValues_t<releaser_t, std::array<int, 1>&, float&> sample{releaser};
 
 		const float a = 2.0F;
-		const std::array<int, 1> b = {1};
+		const std::array<int, 1> b{{1}};
 
 		REQUIRE(sample.size() == 2);
 		sample.template get<0>() = b;
