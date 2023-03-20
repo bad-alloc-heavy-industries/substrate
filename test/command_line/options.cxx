@@ -7,7 +7,7 @@ using namespace substrate::commandLine;
 
 TEST_CASE("building command line option descriptions", "[command_line::option_t]")
 {
-	const option_t helpOption{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv};
+	constexpr static option_t helpOption{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv};
 	REQUIRE(helpOption.matches("-h"sv));
 	REQUIRE(helpOption.matches("--help"sv));
 	REQUIRE(!helpOption.matches("--version"sv));
@@ -17,7 +17,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
-	const option_t versionOption{"--version"sv, "Display the version information and exit"sv};
+	constexpr static option_t versionOption{"--version"sv, "Display the version information and exit"sv};
 	REQUIRE(!versionOption.matches("-h"sv));
 	REQUIRE(!versionOption.matches("--help"sv));
 	REQUIRE(versionOption.matches("--version"sv));
@@ -27,7 +27,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
-	const option_t valueOption{optionValue, "Any value you like"sv};
+	constexpr static option_t valueOption{optionValue, "Any value you like"sv};
 	REQUIRE(valueOption.matches("funky"sv));
 	REQUIRE(valueOption.helpText() == "Any value you like"sv);
 	REQUIRE(valueOption.valueOnly());
