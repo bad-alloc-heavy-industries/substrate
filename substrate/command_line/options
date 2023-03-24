@@ -172,8 +172,8 @@ namespace substrate::commandLine
 
 	public:
 		constexpr options_t() noexcept = default;
-		constexpr options_t(const staticVector_t<const internal::optionsItem_t> &options) :
-			_options{options} {}
+		constexpr options_t(staticVector_t<const internal::optionsItem_t> &&options) :
+			_options{std::move(options)} { }
 		constexpr options_t(const options_t &) noexcept = default;
 		constexpr options_t(options_t &&) noexcept = default;
 
@@ -185,9 +185,9 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 	};
 
-	template<size_t N> static inline auto
-		options(internal::optionsItem_t (&&options)[N]) noexcept
-			{ return make_array<const internal::optionsItem_t>(std::move(options)); }
+	template<typename... options_t> constexpr static inline auto
+		options(options_t &&...options) noexcept -> std::array<const internal::optionsItem_t, sizeof...(options_t)>
+			{ return {{std::move(options)...}}; }
 
 	// Represents a specific alternation in an optionSet_t
 	struct SUBSTRATE_CLS_API optionAlternation_t final
@@ -200,8 +200,9 @@ namespace substrate::commandLine
 	public:
 		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help) noexcept :
 			_value{value}, _help{help} { }
-		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
-			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
+		template<size_t N> constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
+			const std::array<const internal::optionsItem_t, N> &suboptions) noexcept : _value{value}, _help{help},
+			_suboptions{suboptions} { }
 		constexpr optionAlternation_t(const optionAlternation_t &) noexcept = default;
 		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = default;
 

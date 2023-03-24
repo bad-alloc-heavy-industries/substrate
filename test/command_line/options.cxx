@@ -37,22 +37,16 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 
 TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 {
-	static const auto listOptions
-	{
-		options
-		({
-			{option_t{"--all"sv, "List everything"sv}},
-		})
-	};
+	constexpr static auto listOptions{options(option_t{"--all"sv, "List everything"sv})};
 
-	static const auto actions
+	constexpr static auto actions
 	{
 		optionAlternations
 		({
 			{
 				"list"sv,
 				"Lists things"sv,
-				{listOptions},
+				listOptions,
 			},
 			{
 				"read"sv,
@@ -64,7 +58,7 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 			},
 		})
 	};
-	static const optionSet_t programOptions{actions};
+	constexpr static optionSet_t programOptions{actions};
 
 	const auto checkMatch
 	{
