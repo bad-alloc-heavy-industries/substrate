@@ -177,7 +177,7 @@ namespace substrate::commandLine
 
 		template<typename... Options, typename = std::enable_if_t<sizeof...(Options) != 0>>
 			constexpr options_t(Options &&...options) noexcept :
-				_options{buildOptions({std::forward<Options>(options)...})} { }
+				_options{buildOptions({item_t(options)...})} { }
 
 		constexpr options_t &operator =(const options_t &) noexcept = default;
 		constexpr options_t &operator =(options_t &&) noexcept = delete;

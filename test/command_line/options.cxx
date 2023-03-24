@@ -37,9 +37,8 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 
 TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 {
-	const option_t allOption{"--all"sv, "List everything"sv};
-
-	const optionSet_t options
+	static const option_t allOption{"--all"sv, "List everything"sv};
+	static const optionSet_t options
 	{
 		optionAlternations
 		({
@@ -61,7 +60,7 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 
 	const auto checkMatch
 	{
-		[&](const std::string_view value, const bool expectingMatch)
+		[&](const std::string_view &value, const bool expectingMatch)
 		{
 			INFO("Matching against '" << value << "'");
 			const auto match{options.matches(value)};
@@ -80,9 +79,7 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 				}
 			}
 			else
-			{
 				REQUIRE(!match.has_value());
-			}
 #endif
 		}
 	};
