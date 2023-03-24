@@ -25,7 +25,8 @@ namespace substrate
 
 		constexpr staticVector_t() noexcept = default;
 		constexpr staticVector_t(const staticVector_t &) noexcept = default;
-		constexpr staticVector_t(staticVector_t &&vec) noexcept : staticVector_t{} { swap(vec); }
+		constexpr staticVector_t(staticVector_t &&vec) noexcept : _data{vec._data}, _length{vec._length}
+			{ vec._data = nullptr; vec._length = 0; }
 		template<size_t N> constexpr staticVector_t(const std::array<T, N> &data) noexcept :
 			_data{data.data()}, _length{data.size()} { }
 		constexpr staticVector_t(const T *const data, const size_t length) noexcept :
