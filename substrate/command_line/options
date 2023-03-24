@@ -7,6 +7,7 @@
 #include <vector>
 #include <variant>
 #include <any>
+#include <tuple>
 #include <optional>
 #include <string_view>
 #include <functional>
@@ -185,9 +186,51 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 	};
 
+	namespace internal
+	{
+		using substrate::internal::indexSequence_t;
+		using substrate::internal::makeIndexSequence;
+
+		template<size_t N, size_t... indices> constexpr static inline auto
+			optionArrayToTuple(const std::array<const internal::optionsItem_t, N> &options, indexSequence_t<indices...>)
+		{
+			return std::tuple<decltype(std::get<options[indices].index()>(options[indices]))...>
+				{std::get<options[indices].index()>(options[indices])...};
+		}
+
+		template<typename... options_t, size_t... indices> constexpr static inline
+			std::array<const internal::optionsItem_t, sizeof...(options_t)>
+				optionTupleToArray(const std::tuple<options_t...> &tuple, indexSequence_t<indices...>)
+			{ return {{std::get<indices>(tuple)...}}; }
+
+		template<size_t N> constexpr static inline auto
+			optionToTuple(const std::array<const internal::optionsItem_t, N> &options)
+				{ return optionArrayToTuple(options, makeIndexSequence<N>{}); }
+
+		constexpr static inline std::tuple<option_t> optionToTuple(const option_t &option) { return {option}; }
+		constexpr static inline std::tuple<optionSet_t> optionToTuple(const optionSet_t &optionSet)
+			{ return {optionSet}; }
+
+		template<typename... results_t, typename option_t, typename... options_t> constexpr static inline auto
+			buildOptionsTuple(const std::tuple<results_t...> &results, option_t &&option, options_t &&...options) noexcept
+		{
+			const auto result{std::tuple_cat(results, optionToTuple(std::forward<option_t>(option)))};
+			if constexpr (sizeof...(options_t) == 0)
+				return result;
+			else
+				return buildOptionsTuple(result, std::forward<options_t>(options)...);
+		}
+
+		template<typename... options_t> constexpr static inline auto buildOptions(options_t &&...options) noexcept
+		{
+			const auto tuple{buildOptionsTuple(std::tuple<>{}, std::forward<options_t>(options)...)};
+			return optionTupleToArray(tuple, makeIndexSequence<std::tuple_size_v<decltype(tuple)>>{});
+		}
+	} // namespace internal
+
 	template<typename... options_t> constexpr static inline auto
-		options(options_t &&...options) noexcept -> std::array<const internal::optionsItem_t, sizeof...(options_t)>
-			{ return {{std::move(options)...}}; }
+		options(options_t &&...options) noexcept
+			{ return internal::buildOptions(std::forward<options_t>(options)...); }
 
 	// Represents a specific alternation in an optionSet_t
 	struct SUBSTRATE_CLS_API optionAlternation_t final
