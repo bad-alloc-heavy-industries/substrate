@@ -37,15 +37,22 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 
 TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 {
-	static const option_t allOption{"--all"sv, "List everything"sv};
-	static const optionSet_t options
+	static const auto listOptions
+	{
+		options
+		({
+			{option_t{"--all"sv, "List everything"sv}},
+		})
+	};
+
+	static const auto actions
 	{
 		optionAlternations
 		({
 			{
 				"list"sv,
 				"Lists things"sv,
-				{allOption},
+				{listOptions},
 			},
 			{
 				"read"sv,
@@ -57,14 +64,14 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 			},
 		})
 	};
+	static const optionSet_t programOptions{actions};
 
 	const auto checkMatch
 	{
 		[&](const std::string_view &value, const bool expectingMatch)
 		{
 			INFO("Matching against '" << value << "'");
-			const auto match{options.matches(value)};
-#if 0
+			const auto match{programOptions.matches(value)};
 			if (expectingMatch)
 			{
 				REQUIRE(match.has_value());
@@ -72,15 +79,17 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 				{
 					const auto &alternation{match->get()};
 					const auto &suboptions{alternation.suboptions()};
+					REQUIRE(!suboptions.empty());
 					const auto &begin{*suboptions.begin()};
 					REQUIRE(std::holds_alternative<option_t>(begin));
 					const auto &option{std::get<option_t>(begin)};
 					REQUIRE(option.matches("--all"sv));
 				}
+				else
+					REQUIRE(match->get().suboptions().empty());
 			}
 			else
 				REQUIRE(!match.has_value());
-#endif
 		}
 	};
 

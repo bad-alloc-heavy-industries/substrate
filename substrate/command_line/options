@@ -77,10 +77,10 @@ namespace substrate::commandLine
 		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
 			_option{std::monostate{}}, _help{help}, _flags{optionFlags_t::takesParameter} { }
 		constexpr option_t(const option_t &) noexcept = default;
-		constexpr option_t(option_t &&) noexcept = delete;
+		constexpr option_t(option_t &&) noexcept = default;
 
 		constexpr option_t &operator =(const option_t &) noexcept = default;
-		constexpr option_t &operator =(option_t &&) noexcept = delete;
+		constexpr option_t &operator =(option_t &&) noexcept = default;
 
 		[[nodiscard]] constexpr option_t &valueType(const optionValueType_t type = optionValueType_t::string,
 			const optionValueParser_t valueParserFn = nullptr) noexcept
@@ -146,45 +146,48 @@ namespace substrate::commandLine
 		constexpr optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) :
 			_alternations{alternations} { }
 		constexpr optionSet_t(const optionSet_t &) noexcept = default;
-		constexpr optionSet_t(optionSet_t &&) noexcept = delete;
+		constexpr optionSet_t(optionSet_t &&) noexcept = default;
 
 		constexpr optionSet_t &operator =(const optionSet_t &) noexcept = default;
-		constexpr optionSet_t &operator =(optionSet_t &&) noexcept = delete;
+		constexpr optionSet_t &operator =(optionSet_t &&) noexcept = default;
 
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
 	};
 
-	template<size_t N> constexpr static inline staticVector_t<const optionAlternation_t>
+	template<size_t N> constexpr static inline auto
 		optionAlternations(optionAlternation_t (&&alternations)[N]) noexcept
-			{ return {alternations, N}; }
+			{ return make_array<const optionAlternation_t>(std::move(alternations)); }
+
+	namespace internal
+	{
+		using optionsItem_t = std::variant<option_t, optionSet_t>;
+	}
 
 	// The base container for a program's command line options
 	struct options_t final
 	{
 	private:
-		using item_t = std::variant<option_t, optionSet_t>;
-		staticVector_t<const item_t> _options{};
-
-		template<size_t N> constexpr static inline staticVector_t<const item_t>
-			buildOptions(item_t (&&options)[N]) noexcept
-				{ return {options, N}; }
+		staticVector_t<const internal::optionsItem_t> _options{};
 
 	public:
 		constexpr options_t() noexcept = default;
+		constexpr options_t(const staticVector_t<const internal::optionsItem_t> &options) :
+			_options{options} {}
 		constexpr options_t(const options_t &) noexcept = default;
-		constexpr options_t(options_t &&) noexcept = delete;
-
-		template<typename... Options, typename = std::enable_if_t<sizeof...(Options) != 0>>
-			constexpr options_t(Options &&...options) noexcept :
-				_options{buildOptions({item_t(options)...})} { }
+		constexpr options_t(options_t &&) noexcept = default;
 
 		constexpr options_t &operator =(const options_t &) noexcept = default;
-		constexpr options_t &operator =(options_t &&) noexcept = delete;
+		constexpr options_t &operator =(options_t &&) noexcept = default;
 
+		[[nodiscard]] constexpr auto empty() const noexcept { return _options.empty(); }
 		[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 	};
+
+	template<size_t N> static inline auto
+		options(internal::optionsItem_t (&&options)[N]) noexcept
+			{ return make_array<const internal::optionsItem_t>(std::move(options)); }
 
 	// Represents a specific alternation in an optionSet_t
 	struct SUBSTRATE_CLS_API optionAlternation_t final
@@ -200,10 +203,10 @@ namespace substrate::commandLine
 		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
 			const options_t &suboptions) noexcept : _value{value}, _help{help}, _suboptions{suboptions} { }
 		constexpr optionAlternation_t(const optionAlternation_t &) noexcept = default;
-		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = delete;
+		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = default;
 
 		constexpr optionAlternation_t &operator =(const optionAlternation_t &) noexcept = default;
-		constexpr optionAlternation_t &operator =(optionAlternation_t &&) noexcept = delete;
+		constexpr optionAlternation_t &operator =(optionAlternation_t &&) noexcept = default;
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] constexpr auto &suboptions() const noexcept { return _suboptions; }
