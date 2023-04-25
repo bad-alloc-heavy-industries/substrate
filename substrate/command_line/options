@@ -191,22 +191,13 @@ namespace substrate::commandLine
 		using substrate::internal::indexSequence_t;
 		using substrate::internal::makeIndexSequence;
 
-		template<size_t N, size_t... indices> constexpr static inline auto
-			optionArrayToTuple(const std::array<const internal::optionsItem_t, N> &options, indexSequence_t<indices...>)
-		{
-			return std::tuple<decltype(std::get<options[indices].index()>(options[indices]))...>
-				{std::get<options[indices].index()>(options[indices])...};
-		}
-
 		template<typename... options_t, size_t... indices> constexpr static inline
-			std::array<const internal::optionsItem_t, sizeof...(options_t)>
+			std::array<const optionsItem_t, sizeof...(options_t)>
 				optionTupleToArray(const std::tuple<options_t...> &tuple, indexSequence_t<indices...>)
 			{ return {{std::get<indices>(tuple)...}}; }
 
-		template<size_t N> constexpr static inline auto
-			optionToTuple(const std::array<const internal::optionsItem_t, N> &options)
-				{ return optionArrayToTuple(options, makeIndexSequence<N>{}); }
-
+		template<typename... options_t> constexpr static inline auto
+			optionToTuple(const std::tuple<options_t...> &tuple) { return tuple; }
 		constexpr static inline std::tuple<option_t> optionToTuple(const option_t &option) { return {option}; }
 		constexpr static inline std::tuple<optionSet_t> optionToTuple(const optionSet_t &optionSet)
 			{ return {optionSet}; }
@@ -222,15 +213,16 @@ namespace substrate::commandLine
 		}
 
 		template<typename... options_t> constexpr static inline auto buildOptions(options_t &&...options) noexcept
-		{
-			const auto tuple{buildOptionsTuple(std::tuple<>{}, std::forward<options_t>(options)...)};
-			return optionTupleToArray(tuple, makeIndexSequence<std::tuple_size_v<decltype(tuple)>>{});
-		}
+			{ return buildOptionsTuple(std::tuple<>{}, std::forward<options_t>(options)...); }
 	} // namespace internal
 
 	template<typename... options_t> constexpr static inline auto
 		options(options_t &&...options) noexcept
 			{ return internal::buildOptions(std::forward<options_t>(options)...); }
+
+	template<typename... options_t> constexpr static inline auto
+		optionsArray(const std::tuple<options_t...> &tuple)
+			{ return internal::optionTupleToArray(tuple, internal::makeIndexSequence<sizeof...(options_t)>{}); }
 
 	// Represents a specific alternation in an optionSet_t
 	struct SUBSTRATE_CLS_API optionAlternation_t final
@@ -245,7 +237,7 @@ namespace substrate::commandLine
 			_value{value}, _help{help} { }
 		template<size_t N> constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
 			const std::array<const internal::optionsItem_t, N> &suboptions) noexcept : _value{value}, _help{help},
-			_suboptions{suboptions} { }
+				_suboptions{suboptions} { }
 		constexpr optionAlternation_t(const optionAlternation_t &) noexcept = default;
 		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = default;
 
