@@ -126,6 +126,13 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 	REQUIRE(boundedUIntOption.parseValue("11"sv) == std::nullopt);
 	checkValue<uint64_t>(unboundedUIntOption, "1"sv, 1U);
 	checkValue<uint64_t>(unboundedUIntOption, "10"sv, 10U);
+
+	constexpr static auto boolOption{option_t{""sv, ""sv}.takesParameter(optionValueType_t::boolean)};
+	REQUIRE(boolOption.parseValue("0"sv) == std::nullopt);
+	REQUIRE(boolOption.parseValue("a"sv) == std::nullopt);
+	REQUIRE(boolOption.parseValue("1"sv) == std::nullopt);
+	checkValue(boolOption, "true"sv, true);
+	checkValue(boolOption, "false"sv, false);
 }
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
