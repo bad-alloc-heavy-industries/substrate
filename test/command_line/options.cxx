@@ -91,6 +91,8 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 	checkMatch("read"sv, true);
 	checkMatch("write"sv, true);
 	checkMatch("test"sv, false);
+
+	REQUIRE_THROWS_AS(*actions[0].suboptions().end(), std::out_of_range);
 }
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

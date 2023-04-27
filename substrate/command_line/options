@@ -214,7 +214,7 @@ namespace substrate::commandLine
 			constexpr optionsIterator_t(const optionsIterator_t &) noexcept = default;
 			constexpr optionsIterator_t &operator =(const optionsIterator_t &) noexcept = default;
 			constexpr void operator ++() noexcept { ++_index; }
-			constexpr optionsItem_t operator *() const noexcept { return _indexFn(_index, _storage); }
+			constexpr optionsItem_t operator *() const { return _indexFn(_index, _storage); }
 
 			constexpr bool operator ==(const optionsIterator_t &other) const noexcept
 				{ return _storage == other._storage && _index == other._index; }
