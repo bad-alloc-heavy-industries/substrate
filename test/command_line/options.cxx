@@ -113,7 +113,7 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 
 	REQUIRE(unboundedUIntOption.parseValue("-1"sv) == std::nullopt);
 	checkValue<uint64_t>(unboundedUIntOption, "0"sv, 0U);
-	checkValue<uint64_t>(unboundedUIntOption, "18446744073709551615"sv, UINT64_MAX);
+	checkValue<uint64_t>(unboundedUIntOption, "18446744073709551615"sv, UINT64_C(18446744073709551615));
 
 	constexpr static auto boundedUIntOption
 	{
@@ -126,6 +126,28 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 	REQUIRE(boundedUIntOption.parseValue("11"sv) == std::nullopt);
 	checkValue<uint64_t>(unboundedUIntOption, "1"sv, 1U);
 	checkValue<uint64_t>(unboundedUIntOption, "10"sv, 10U);
+
+	constexpr static auto unboundedIntOption
+	{
+		option_t{""sv, ""sv}
+			.takesParameter(optionValueType_t::signedInt)
+	};
+
+	checkValue<int64_t>(unboundedIntOption, "-9223372036854775808"sv, INT64_C(-9223372036854775807) -1);
+	checkValue<int64_t>(unboundedIntOption, "0"sv, 0);
+	checkValue<int64_t>(unboundedIntOption, "9223372036854775807"sv, INT64_C(9223372036854775807));
+
+	constexpr static auto boundedIntOption
+	{
+		option_t{""sv, ""sv}
+			.takesParameter(optionValueType_t::signedInt)
+			.valueRange(-10, 10)
+	};
+	REQUIRE(boundedIntOption.parseValue("-11"sv) == std::nullopt);
+	REQUIRE(boundedIntOption.parseValue("11"sv) == std::nullopt);
+	checkValue<int64_t>(unboundedIntOption, "-10"sv, -10);
+	checkValue<int64_t>(unboundedIntOption, "0"sv, 0);
+	checkValue<int64_t>(unboundedIntOption, "10"sv, 10);
 
 	constexpr static auto boolOption{option_t{""sv, ""sv}.takesParameter(optionValueType_t::boolean)};
 	REQUIRE(boolOption.parseValue("0"sv) == std::nullopt);
