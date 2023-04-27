@@ -268,6 +268,35 @@ namespace substrate::commandLine
 			constexpr bool operator !=(const optionsIterator_t &other) const noexcept
 				{ return _storage != other._storage || _index != other._index; }
 		};
+
+		// In order to create a clean split interface, we have to take the options tuple here, generate
+		// a type erased pointer to it, generate functions that then turn it back into its real type
+		// and assign those functions to pointers in the holder that then act as a go-between.
+		struct optionsHolder_t final
+		{
+		private:
+			const void *storage{nullptr};
+			size_t length{0U};
+			optionsIterator_t::indexFn_t indexFn{nullptr};
+
+			template<typename... options_t>
+				static constexpr optionsItem_t index(const size_t index, const void *const storage)
+			{
+				const auto &options{*static_cast<const optionsStorage_t<options_t...> *>(storage)};
+				return options[index];
+			}
+
+		public:
+			constexpr optionsHolder_t() noexcept = default;
+			template<typename... options_t>
+				constexpr optionsHolder_t(const optionsStorage_t<options_t...> &options) noexcept :
+					storage{static_cast<const void *>(&options)}, length{sizeof...(options_t)},
+					indexFn{index<options_t...>} { }
+
+			constexpr auto empty() const noexcept { return storage == nullptr; }
+			constexpr auto begin() const noexcept { return optionsIterator_t{storage, 0U, indexFn}; }
+			constexpr auto end() const noexcept { return optionsIterator_t{storage, length, indexFn}; }
+		};
 	} // namespace internal
 
 	template<typename... options_t> constexpr static inline auto
