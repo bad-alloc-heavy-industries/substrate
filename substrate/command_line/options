@@ -167,10 +167,10 @@ namespace substrate::commandLine
 		template<size_t offset, typename... options_t>
 			constexpr optionsItem_t optionAt(const size_t index, const std::tuple<options_t...> &tuple)
 		{
-			if constexpr (offset + 1U == sizeof...(options_t))
-				throw std::out_of_range{"index into options out of range"};
-			else if (index == offset)
+			if (index == offset)
 				return std::get<offset>(tuple);
+			else if constexpr (offset + 1U == sizeof...(options_t))
+				throw std::out_of_range{"index into options out of range"};
 			else
 				return optionAt<offset + 1U>(index, tuple);
 		}
