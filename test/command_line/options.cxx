@@ -95,4 +95,37 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 	REQUIRE_THROWS_AS(*actions[0].suboptions().end(), std::out_of_range);
 }
 
+template<typename T> void checkValue(const option_t &option, const std::string_view &inputValue, const T expectedValue)
+{
+	const auto result{option.parseValue(inputValue)};
+	REQUIRE(result.has_value());
+	const auto value{std::any_cast<T>(*result)};
+	REQUIRE(value == expectedValue);
+}
+
+TEST_CASE("command line option value parsing", "[command_line::option_t::parseValue]")
+{
+	constexpr static auto unboundedUIntOption
+	{
+		option_t{""sv, ""sv}
+			.takesParameter(optionValueType_t::unsignedInt)
+	};
+
+	REQUIRE(unboundedUIntOption.parseValue("-1"sv) == std::nullopt);
+	checkValue<uint64_t>(unboundedUIntOption, "0"sv, 0U);
+	checkValue<uint64_t>(unboundedUIntOption, "18446744073709551615"sv, UINT64_MAX);
+
+	constexpr static auto boundedUIntOption
+	{
+		option_t{""sv, ""sv}
+			.takesParameter(optionValueType_t::unsignedInt)
+			.valueRange(1U, 10U)
+	};
+
+	REQUIRE(boundedUIntOption.parseValue("0"sv) == std::nullopt);
+	REQUIRE(boundedUIntOption.parseValue("11"sv) == std::nullopt);
+	checkValue<uint64_t>(unboundedUIntOption, "1"sv, 1U);
+	checkValue<uint64_t>(unboundedUIntOption, "10"sv, 10U);
+}
+
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
