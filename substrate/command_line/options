@@ -111,10 +111,11 @@ namespace substrate::commandLine
 
 		template<typename T> [[nodiscard]] constexpr option_t &valueRange(T min, T max) noexcept
 		{
+			// These perform casts only to silence conversion warnings
 			if (_valueType == optionValueType_t::signedInt)
-				_valueAllowedRange = {optionSignedInt_t{min, max}};
+				_valueAllowedRange = {optionSignedInt_t{int64_t(min), int64_t(max)}};
 			else if (_valueType == optionValueType_t::unsignedInt)
-				_valueAllowedRange = {optionUnsignedInt_t{min, max}};
+				_valueAllowedRange = {optionUnsignedInt_t{uint64_t(min), uint64_t(max)}};
 			return *this;
 		}
 
