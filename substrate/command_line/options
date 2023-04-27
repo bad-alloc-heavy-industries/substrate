@@ -214,6 +214,32 @@ namespace substrate::commandLine
 
 		template<typename... options_t> constexpr static inline auto buildOptions(options_t &&...options) noexcept
 			{ return buildOptionsTuple(std::tuple<>{}, std::forward<options_t>(options)...); }
+
+		template<size_t offset, typename... options_t>
+			constexpr optionsItem_t optionAt(const size_t index, const std::tuple<options_t...> &tuple)
+		{
+			if constexpr (offset + 1U == sizeof...(options_t))
+				throw std::out_of_range{"index into options out of range"};
+			else if (index == offset)
+				return std::get<offset>(tuple);
+			else
+				return optionAt<offset + 1U>(index, tuple);
+		}
+
+		template<typename... options_t> struct optionsStorage_t final
+		{
+		private:
+			std::tuple<options_t...> _options;
+
+		public:
+			constexpr optionsStorage_t(const std::tuple<options_t...> &options) noexcept : _options{options} { }
+			constexpr optionsItem_t operator [](const size_t index)
+				{ return optionAt<0U>(index, _options); }
+			constexpr auto &options() const noexcept { return _options; }
+		};
+
+		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
+			optionsStorage_t<options_t...>;
 	} // namespace internal
 
 	template<typename... options_t> constexpr static inline auto
