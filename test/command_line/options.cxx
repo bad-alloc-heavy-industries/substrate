@@ -37,7 +37,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 
 TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 {
-	constexpr static auto listOptions{optionsArray(options(option_t{"--all"sv, "List everything"sv}))};
+	constexpr static auto listOptions{options(option_t{"--all"sv, "List everything"sv})};
 
 	constexpr static auto actions
 	{

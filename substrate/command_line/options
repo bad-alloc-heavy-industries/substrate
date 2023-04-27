@@ -185,12 +185,16 @@ namespace substrate::commandLine
 
 		public:
 			constexpr optionsStorage_t(const std::tuple<options_t...> &options) noexcept : _options{options} { }
-			constexpr optionsItem_t operator [](const size_t index)
-				{ return optionAt<0U>(index, _options); }
+			constexpr optionsStorage_t(std::tuple<options_t...> &&options) noexcept : _options{std::move(options)} { }
+			constexpr optionsStorage_t(const optionsStorage_t &) noexcept = default;
+			constexpr optionsStorage_t &operator =(const optionsStorage_t &) noexcept = default;
+			constexpr optionsItem_t operator [](const size_t index) const { return optionAt<0U>(index, _options); }
 			constexpr auto &options() const noexcept { return _options; }
 		};
 
 		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
+			optionsStorage_t<options_t...>;
+		template<typename... options_t> optionsStorage_t(std::tuple<options_t...> &&) ->
 			optionsStorage_t<options_t...>;
 
 		// Type-erased options iterator
@@ -252,12 +256,11 @@ namespace substrate::commandLine
 	struct options_t final
 	{
 	private:
-		staticVector_t<const internal::optionsItem_t> _options{};
+		internal::optionsHolder_t _options{};
 
 	public:
 		constexpr options_t() noexcept = default;
-		constexpr options_t(staticVector_t<const internal::optionsItem_t> &&options) :
-			_options{std::move(options)} { }
+		constexpr options_t(const internal::optionsHolder_t &options) : _options{options} { }
 		constexpr options_t(const options_t &) noexcept = default;
 		constexpr options_t(options_t &&) noexcept = default;
 
@@ -280,7 +283,7 @@ namespace substrate::commandLine
 			{ return {{std::get<indices>(tuple)...}}; }
 
 		template<typename... options_t> constexpr static inline auto
-			optionToTuple(const std::tuple<options_t...> &tuple) { return tuple; }
+			optionToTuple(const optionsStorage_t<options_t...> &tuple) { return tuple.options(); }
 		constexpr static inline std::tuple<option_t> optionToTuple(const option_t &option) { return {option}; }
 		constexpr static inline std::tuple<optionSet_t> optionToTuple(const optionSet_t &optionSet)
 			{ return {optionSet}; }
@@ -299,13 +302,8 @@ namespace substrate::commandLine
 			{ return buildOptionsTuple(std::tuple<>{}, std::forward<options_t>(options)...); }
 	} // namespace internal
 
-	template<typename... options_t> constexpr static inline auto
-		options(options_t &&...options) noexcept
-			{ return internal::buildOptions(std::forward<options_t>(options)...); }
-
-	template<typename... options_t> constexpr static inline auto
-		optionsArray(const std::tuple<options_t...> &tuple)
-			{ return internal::optionTupleToArray(tuple, internal::makeIndexSequence<sizeof...(options_t)>{}); }
+	template<typename... options_t> constexpr static inline auto options(options_t &&...options) noexcept
+		{ return internal::optionsStorage_t{internal::buildOptions(std::forward<options_t>(options)...)}; }
 
 	// Represents a specific alternation in an optionSet_t
 	struct SUBSTRATE_CLS_API optionAlternation_t final
@@ -318,9 +316,9 @@ namespace substrate::commandLine
 	public:
 		constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help) noexcept :
 			_value{value}, _help{help} { }
-		template<size_t N> constexpr optionAlternation_t(const std::string_view &value, const std::string_view &help,
-			const std::array<const internal::optionsItem_t, N> &suboptions) noexcept : _value{value}, _help{help},
-				_suboptions{suboptions} { }
+		template<typename... options_t> constexpr optionAlternation_t(const std::string_view &value,
+			const std::string_view &help, const internal::optionsStorage_t<options_t...> &suboptions) noexcept :
+				_value{value}, _help{help}, _suboptions{suboptions} { }
 		constexpr optionAlternation_t(const optionAlternation_t &) noexcept = default;
 		constexpr optionAlternation_t(optionAlternation_t &&) noexcept = default;
 
