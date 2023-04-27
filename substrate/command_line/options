@@ -226,6 +226,9 @@ namespace substrate::commandLine
 				return optionAt<offset + 1U>(index, tuple);
 		}
 
+		// This type exists to store an options tuple, allow it to be accessed by the builder,
+		// and provide safe access to the held options. This is used by the optionsHolder_t
+		// to help provide the go-between
 		template<typename... options_t> struct optionsStorage_t final
 		{
 		private:
@@ -240,6 +243,31 @@ namespace substrate::commandLine
 
 		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
 			optionsStorage_t<options_t...>;
+
+		// Type-erased options iterator
+		struct optionsIterator_t final
+		{
+		public:
+			using indexFn_t = optionsItem_t (*)(size_t index, const void *storage);
+
+		private:
+			const void *_storage;
+			size_t _index;
+			indexFn_t _indexFn;
+
+		public:
+			constexpr optionsIterator_t(const void *storage, const size_t index, indexFn_t indexFn) noexcept :
+				_storage{storage}, _index{index}, _indexFn{indexFn} { }
+			constexpr optionsIterator_t(const optionsIterator_t &) noexcept = default;
+			constexpr optionsIterator_t &operator =(const optionsIterator_t &) noexcept = default;
+			constexpr void operator ++() noexcept { ++_index; }
+			constexpr optionsItem_t operator *() const noexcept { return _indexFn(_index, _storage); }
+
+			constexpr bool operator ==(const optionsIterator_t &other) const noexcept
+				{ return _storage == other._storage && _index == other._index; }
+			constexpr bool operator !=(const optionsIterator_t &other) const noexcept
+				{ return _storage != other._storage || _index != other._index; }
+		};
 	} // namespace internal
 
 	template<typename... options_t> constexpr static inline auto
