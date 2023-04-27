@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <filesystem>
 #include <substrate/command_line/options>
 #include <catch2/catch.hpp>
 
 using namespace std::literals::string_view_literals;
+using std::filesystem::path;
 using namespace substrate::commandLine;
 
 TEST_CASE("building command line option descriptions", "[command_line::option_t]")
@@ -112,6 +114,7 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 	};
 
 	REQUIRE(unboundedUIntOption.parseValue("-1"sv) == std::nullopt);
+	REQUIRE(unboundedUIntOption.parseValue("a"sv) == std::nullopt);
 	checkValue<uint64_t>(unboundedUIntOption, "0"sv, 0U);
 	checkValue<uint64_t>(unboundedUIntOption, "18446744073709551615"sv, UINT64_C(18446744073709551615));
 
@@ -122,6 +125,7 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 			.valueRange(1U, 10U)
 	};
 
+	REQUIRE(boundedUIntOption.parseValue("a"sv) == std::nullopt);
 	REQUIRE(boundedUIntOption.parseValue("0"sv) == std::nullopt);
 	REQUIRE(boundedUIntOption.parseValue("11"sv) == std::nullopt);
 	checkValue<uint64_t>(unboundedUIntOption, "1"sv, 1U);
@@ -133,6 +137,7 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 			.takesParameter(optionValueType_t::signedInt)
 	};
 
+	REQUIRE(unboundedIntOption.parseValue("a"sv) == std::nullopt);
 	checkValue<int64_t>(unboundedIntOption, "-9223372036854775808"sv, INT64_C(-9223372036854775807) -1);
 	checkValue<int64_t>(unboundedIntOption, "0"sv, 0);
 	checkValue<int64_t>(unboundedIntOption, "9223372036854775807"sv, INT64_C(9223372036854775807));
@@ -143,6 +148,7 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 			.takesParameter(optionValueType_t::signedInt)
 			.valueRange(-10, 10)
 	};
+	REQUIRE(boundedIntOption.parseValue("a"sv) == std::nullopt);
 	REQUIRE(boundedIntOption.parseValue("-11"sv) == std::nullopt);
 	REQUIRE(boundedIntOption.parseValue("11"sv) == std::nullopt);
 	checkValue<int64_t>(unboundedIntOption, "-10"sv, -10);
@@ -155,6 +161,9 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 	REQUIRE(boolOption.parseValue("1"sv) == std::nullopt);
 	checkValue(boolOption, "true"sv, true);
 	checkValue(boolOption, "false"sv, false);
+
+	constexpr static auto pathOption{option_t{""sv, ""sv}.takesParameter(optionValueType_t::path)};
+	checkValue(pathOption, "."sv, path{"."sv});
 }
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
