@@ -11,11 +11,11 @@
         <tr>
             <th rowspan="3">Platform</th>
             <th rowspan="3">C++ Standard</th>
-            <th colspan="20">Compiler</th>
+            <th colspan="12">Compiler</th>
         </tr>
         <tr>
             <th colspan="5" style="border-right: 1px solid !important;">G++</th>
-            <th colspan="11" style="border-right: 1px solid !important;">Clang</th>
+            <th colspan="7" style="border-right: 1px solid !important;">Clang</th>
         </tr>
         <tr>
             <th>7</th>
@@ -23,10 +23,6 @@
             <th>9</th>
             <th>10</th>
             <th>11</th>
-            <th>5</th>
-            <th>6</th>
-            <th>7</th>
-            <th>8</th>
             <th>9</th>
             <th>10</th>
             <th>11</th>
@@ -40,10 +36,6 @@
       <tr>
         <td rowspan="4">Linux</td>
         <td>C++ 11</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -71,17 +63,9 @@
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
       </tr>
       <tr>
         <td>C++ 17</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
-        <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
         <td>:heavy_check_mark:</td>
@@ -108,10 +92,6 @@
         <td>:x:</td>
         <td>:x:</td>
         <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
-        <td>:x:</td>
         <td>:heavy_check_mark:</td>
       </tr>
       <tr>
@@ -120,7 +100,6 @@
         <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:heavy_check_mark:</td>
-        <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:grey_question:</td>
@@ -144,7 +123,6 @@
         <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:grey_question:</td>
-        <td>:grey_question:</td>
         <td>:x:</td>
       </tr>
       <tr>
@@ -152,7 +130,6 @@
         <td>:x:</td>
         <td>:grey_question:</td>
         <td>:heavy_check_mark:</td>
-        <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:grey_question:</td>
         <td>:grey_question:</td>

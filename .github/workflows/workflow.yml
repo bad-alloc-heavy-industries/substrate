@@ -41,50 +41,12 @@ jobs:
           - 'c++14'
           - 'c++17'
         include:
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-6.0'
-            cpp_std: 'c++11'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-6.0'
-            cpp_std: 'c++14'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-6.0'
-            cpp_std: 'c++17'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-7'
-            cpp_std: 'c++11'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-7'
-            cpp_std: 'c++14'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-7'
-            cpp_std: 'c++17'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-8'
-            cpp_std: 'c++11'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-8'
-            cpp_std: 'c++14'
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'clang-8'
-            cpp_std: 'c++17'
           - os: { id: ubuntu-20.04, name: focal }
             compiler: 'clang-15'
             cpp_std: 'c++20'
           - os: { id: ubuntu-20.04, name: focal }
             compiler: 'gcc-11'
             cpp_std: 'c++20'
-          ## GCC6 cannot handle constexpr-ness of mmap_t
-          ## See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
-          # - os: { id: ubuntu-18.04, name: bionic }
-          #   compiler: 'gcc-6'
-          #   cpp_std: 'c++11'
-          # - os: { id: ubuntu-18.04, name: bionic }
-          #   compiler: 'gcc-6'
-          #   cpp_std: 'c++14'
-          # - os: { id: ubuntu-18.04, name: bionic }
-          #   compiler: 'gcc-6'
-          #   cpp_std: 'c++17'
       fail-fast: false
     steps:
       - name: Runtime environment
