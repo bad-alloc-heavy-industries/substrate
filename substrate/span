@@ -25,13 +25,14 @@ namespace substrate
 {
 	template<typename...> using void_t = void;
 
-	template<typename C> constexpr auto data(C &c) -> decltype(c.data());
-	template<typename C> constexpr auto data(const C &c) -> decltype(c.data());
-	template<typename T, std::size_t N> constexpr T *data(T (&array)[N]) noexcept;
-	template<typename E> constexpr const E *data(std::initializer_list<E> il) noexcept;
-	template<typename C> constexpr auto size(const C &c) -> decltype(c.size());
-	template<typename T, std::size_t N> constexpr std::size_t size(const T (&array)[N]) noexcept;
-	template<typename T, std::size_t N> constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept;
+	template<typename C> constexpr auto data(C &c) { return c.data(); }
+	template<typename C> constexpr auto data(const C &c) { return c.data(); }
+	template<typename T, std::size_t N> constexpr T *data(T (&array)[N]) noexcept { return array; }
+	template<typename E> constexpr const E *data(std::initializer_list<E> il) noexcept { return il.data(); }
+	template<typename C> constexpr auto size(const C &c) { return c.size(); }
+	template<typename T, std::size_t N> constexpr std::size_t size(const T (&array)[N]) noexcept { return N; }
+	template<typename T, std::size_t N> constexpr std::ptrdiff_t ssize(const T (&array)[N]) noexcept
+		{ return static_cast<std::ptrdiff_t>(N); }
 	template<bool B> using bool_constant = std::integral_constant<bool, B>;
 
 	enum class byte : unsigned char { };
