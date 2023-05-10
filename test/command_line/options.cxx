@@ -1,11 +1,27 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <filesystem>
+#include <substrate/conversions>
 #include <substrate/command_line/options>
 #include <catch2/catch.hpp>
 
 using namespace std::literals::string_view_literals;
 using std::filesystem::path;
 using namespace substrate::commandLine;
+
+enum class chipBus_t
+{
+	internal,
+	external,
+};
+
+struct chip_t
+{
+	chipBus_t bus;
+	uint8_t index;
+
+	constexpr bool operator ==(const chip_t &other) const noexcept
+		{ return bus == other.bus && index == other.index; }
+};
 
 TEST_CASE("building command line option descriptions", "[command_line::option_t]")
 {
@@ -164,6 +180,54 @@ TEST_CASE("command line option value parsing", "[command_line::option_t::parseVa
 
 	constexpr static auto pathOption{option_t{""sv, ""sv}.takesParameter(optionValueType_t::path)};
 	checkValue(pathOption, "."sv, path{"."sv});
+}
+
+static inline std::optional<std::any> chipSelectionParser(const std::string_view &value) noexcept
+{
+	// Check if we have enough characters to form a valid chip selector
+	if (value.length() < 5)
+		return std::nullopt;
+	// If we do, check that the start of the string is one of "int" or "ext"
+	const auto bus{value.substr(0, 3)};
+	if (bus != "int"sv && bus != "ext"sv)
+		return std::nullopt;
+	// Check that the 4th character is a ':'
+	if (value[3] != ':')
+		return std::nullopt;
+	// Now convert the final part as an unsigned integer
+	substrate::toInt_t<uint64_t> index{value.substr(4).data()};
+	if (!index.isDec())
+		return std::nullopt;
+	const auto number{index.fromDec()};
+	// And check that it's in the range [0,256)
+	if (number > 255U)
+		return std::nullopt;
+	// Construct and return the chip selection state
+	return chip_t{bus[0] == 'i' ? chipBus_t::internal : chipBus_t::external, static_cast<uint8_t>(number)};
+}
+
+TEST_CASE("command line option user-defined value parsing", "[command_line::option_t::parseValue]")
+{
+	constexpr static auto userDefinedOption
+	{
+		option_t
+		{
+			"--chip"sv,
+			"Specifies what Flash chip on which bus you want to target.\n"
+			"The chip specification works as follows:\n"
+			"'bus' can be one of 'int' or 'ext' representing the internal (on-chip)\n"
+			"and external (8-pin Flash connector) SPI busses.\n"
+			"N is a number from 0 to 255 which specifies a detected Flash chip as given by the\n"
+			"listDevices operation"sv,
+		}.takesParameter(optionValueType_t::userDefined, chipSelectionParser)
+	};
+
+	REQUIRE(userDefinedOption.parseValue(""sv) == std::nullopt);
+	REQUIRE(userDefinedOption.parseValue("out:0"sv) == std::nullopt);
+	REQUIRE(userDefinedOption.parseValue("int#0"sv) == std::nullopt);
+	REQUIRE(userDefinedOption.parseValue("ext:256"sv) == std::nullopt);
+	checkValue<chip_t>(userDefinedOption, "int:0"sv, {chipBus_t::internal, 0U});
+	checkValue<chip_t>(userDefinedOption, "ext:20"sv, {chipBus_t::external, 20U});
 }
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
