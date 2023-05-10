@@ -15,33 +15,39 @@
 namespace substrate
 {
 	template<typename T>
-	struct rwlock final {
+	struct rwlock_t final
+	{
 	private:
 		template<typename U, template<typename> typename lock_t>
-		struct lock_result final {
+		struct lockResult_t final
+		{
 		private:
 			lock_t<std::shared_mutex> _lock;
-			U& _obj;
+			U &_obj;
+
 		public:
-			constexpr lock_result(std::shared_mutex& mut, U& obj) noexcept :
+			constexpr lockResult_t(std::shared_mutex &mut, U &obj) noexcept :
 				_lock{mut}, _obj{obj} { }
 
-			SUBSTRATE_NO_DISCARD(U* operator->() noexcept { return &_obj; })
-			SUBSTRATE_NO_DISCARD(U& operator*() noexcept { return _obj; })
+			SUBSTRATE_NO_DISCARD(U *operator ->() noexcept) { return &_obj; }
+			SUBSTRATE_NO_DISCARD(U &operator *() noexcept) { return _obj; }
 		};
 		std::shared_mutex _mutex{};
 		T _obj;
+
 	public:
 		template<typename ...args_t>
-		constexpr rwlock(args_t&&... args) noexcept :
+		constexpr rwlock_t(args_t &&...args) noexcept :
 			_obj{std::forward<args_t>(args)...} { }
 
-		SUBSTRATE_NO_DISCARD(lock_result<const T, std::shared_lock> read() noexcept {
+		SUBSTRATE_NO_DISCARD(lockResult_t<const T, std::shared_lock> read() noexcept)
+		{
 			return {_mutex, _obj};
-		})
-		SUBSTRATE_NO_DISCARD(lock_result<T, std::unique_lock> write() noexcept {
+		}
+		SUBSTRATE_NO_DISCARD(lockResult_t<T, std::unique_lock> write() noexcept)
+		{
 			return {_mutex, _obj};
-		})
+		}
 	};
 }
 
