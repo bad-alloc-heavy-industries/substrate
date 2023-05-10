@@ -16,7 +16,8 @@ endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath
-		testSrcs += ['command_line/options.cxx']
+		testSrcs += ['command_line/options.cxx', 'command_line/tokeniser.cxx']
+		testSrcs += files('../impl/command_line/tokeniser.cxx')
 	endif
 endif
 
@@ -38,9 +39,7 @@ deps += catch2
 tests = executable(
 	'tests',
 	testSrcs,
-	include_directories: include_directories(
-		'..'
-	),
+	include_directories: include_directories('..'),
 	dependencies: deps + [substrate_dep],
 	gnu_symbol_visibility: 'inlineshidden',
 	implicit_include_directories: false,
