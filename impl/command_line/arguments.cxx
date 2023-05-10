@@ -88,7 +88,7 @@ namespace substrate::commandLine
 				{
 					// We got a match and parsing it succeeded?
 					[this]([[maybe_unused]] const auto &result) -> std::optional<bool>
-						{ return true; /*add(result);*/ },
+						{ return add(result); },
 					// Match but inner parsing failed
 					[](std::monostate) -> std::optional<bool>
 						{ return std::nullopt; },
@@ -99,6 +99,14 @@ namespace substrate::commandLine
 		lexer.next();
 		return true;
 	}
+
+	bool arguments_t::add(item_t argument) noexcept try
+	{
+		_arguments.push_back(std::move(argument));
+		return true;
+	}
+	catch (std::exception &)
+		{ return false; }
 
 	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
 		const std::string_view &argument) noexcept

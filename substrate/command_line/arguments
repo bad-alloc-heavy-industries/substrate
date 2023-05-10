@@ -36,6 +36,7 @@ namespace substrate::commandLine
 		std::vector<item_t> _arguments{};
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options);
+		[[nodiscard]] bool add(item_t argument) noexcept;
 
 	public:
 		arguments_t() noexcept = default;
