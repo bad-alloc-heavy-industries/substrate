@@ -25,8 +25,8 @@ namespace substrate::commandLine
 		std::any _value{};
 
 	public:
-		flag_t(const std::string_view &name) : _name{name} { }
-		flag_t(const std::string_view &name, std::any &&value) : _name{name}, _value{std::move(value)} { }
+		flag_t(const std::string_view &name) noexcept : _name{name} { }
+		flag_t(const std::string_view &name, std::any &&value) noexcept : _name{name}, _value{std::move(value)} { }
 	};
 
 	struct arguments_t
@@ -47,7 +47,11 @@ namespace substrate::commandLine
 	{
 	private:
 		std::string_view _value;
-		arguments_t _arguments{};
+		arguments_t _arguments;
+
+	public:
+		choice_t(const std::string_view &value, arguments_t &&arguments) noexcept :
+			_value{value}, _arguments{std::move(arguments)} { }
 	};
 
 	SUBSTRATE_API std::optional<arguments_t>

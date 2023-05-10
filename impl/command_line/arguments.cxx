@@ -144,7 +144,7 @@ namespace substrate::commandLine
 			if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
 				// If the operation fails, use monostate to signal match-but-fail.
 				return std::monostate{};
-			return choice_t{};
+			return choice_t{argument, std::move(subarguments)};
 		}
 		return std::nullopt;
 	}
