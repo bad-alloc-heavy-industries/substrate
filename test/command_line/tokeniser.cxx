@@ -17,6 +17,7 @@ constexpr static auto commandLine
 		"--option=value",
 		"--other-option",
 		"second value",
+		nullptr,
 	})
 };
 
@@ -80,6 +81,10 @@ TEST_CASE("command line tokenisation", "[command_line::internal::tokeniser_t]")
 	REQUIRE(token.valid());
 	REQUIRE(token.type() == tokenType_t::arg);
 	REQUIRE(token.value() == "second value"sv);
+
+	tokeniser.next();
+	REQUIRE(!token.valid());
+	REQUIRE(token.type() == tokenType_t::unknown);
 
 	tokeniser.next();
 	REQUIRE(!token.valid());
