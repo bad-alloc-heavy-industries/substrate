@@ -143,7 +143,7 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void formatHex(span<char> &result, const bool upperCase) const noexcept
+		void formatHex(span<char> result, const bool upperCase) const noexcept
 #else
 		void formatHex(std::string &result, const bool upperCase) const noexcept
 #endif
@@ -168,7 +168,7 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void formatOctal(span<char> &result) const noexcept
+		void formatOctal(span<char> result) const noexcept
 #else
 		void formatOctal(std::string &result) const noexcept
 #endif
