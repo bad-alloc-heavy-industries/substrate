@@ -12,13 +12,13 @@ namespace substrate::commandLine::internal
 		{
 			_arg = nullptr;
 			_offset = nullptr;
-			_length = 0;
+			_length = 0U;
 		}
 		else
 		{
 			_arg = _args[_currentArg++];
 			_offset = _arg;
-			_length = strlen(_arg);
+			_length = _arg ? strlen(_arg) : 0U;
 		}
 	}
 
