@@ -16,7 +16,10 @@ endif
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath
-		testSrcs += ['command_line/options.cxx', 'command_line/tokeniser.cxx']
+		testSrcs += [
+			'command_line/options.cxx', 'command_line/tokeniser.cxx',
+			'command_line/arguments.cxx',
+		]
 		testSrcs += files('../impl/command_line/tokeniser.cxx')
 	endif
 endif

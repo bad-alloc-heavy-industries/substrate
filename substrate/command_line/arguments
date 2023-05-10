@@ -50,7 +50,8 @@ namespace substrate::commandLine
 		arguments_t _arguments{};
 	};
 
-	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options);
+	 SUBSTRATE_API std::optional<arguments_t>
+	 	parseArguments(size_t argCount, const char *const *argList, const options_t &options);
 } // namespace substrate::commandLine
 
 #endif /* SUBSTRATE_COMMAND_LINE_ARGUMENTS */
