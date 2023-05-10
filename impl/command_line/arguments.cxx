@@ -26,7 +26,7 @@ namespace substrate::commandLine
 		tokeniser_t lexer{argCount - 1U, argList + 1};
 		arguments_t result{};
 		// Try to parse all available arguments against the options tree for the program
-		if (result.parseFrom(lexer, options))
+		if (!result.parseFrom(lexer, options))
 			return std::nullopt;
 		return result;
 	}
