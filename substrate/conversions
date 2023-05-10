@@ -9,6 +9,9 @@
 #include <substrate/utility>
 #include <substrate/internal/defs>
 #include <substrate/promotion_helpers>
+#if __cplusplus >= 201703L
+#include <substrate/span>
+#endif
 
 namespace substrate
 {
@@ -139,7 +142,11 @@ namespace substrate
 				formatFixed(buffer, uint_t(value));
 		}
 
+#if __cplusplus >= 201703L
+		void formatHex(span<char> &result, const bool upperCase) const noexcept
+#else
 		void formatHex(std::string &result, const bool upperCase) const noexcept
+#endif
 		{
 			auto value{valueAsInt(_value)};
 			auto digit{result.rbegin() + 1};
@@ -160,7 +167,11 @@ namespace substrate
 			std::fill_n(result.begin(), result.rend() - digit, padding);
 		}
 
+#if __cplusplus >= 201703L
+		void formatOctal(span<char> &result) const noexcept
+#else
 		void formatOctal(std::string &result) const noexcept
+#endif
 		{
 			auto value{valueAsInt(_value)};
 			auto digit{result.rbegin() + 1};
@@ -271,6 +282,30 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t octalLength() const noexcept)
 			{ return _length == npos ? octalDigits(valueAsInt(_value)) + 1U : _length + 1U; }
 		SUBSTRATE_CXX14_CONSTEXPR void formatTo(char *const buffer) const noexcept { format(buffer); }
+
+#if __cplusplus >= 201703L
+		SUBSTRATE_CXX14_CONSTEXPR bool formatToHex(span<char> buffer, const bool upper = true) const noexcept
+		{
+			// Check there's enough buffer in the provided string view
+			const auto length{hexLength()};
+			if (length > buffer.size_bytes())
+				return false;
+			// If there is, then format the value into the buffer
+			formatHex(buffer, upper);
+			return true;
+		}
+
+		SUBSTRATE_CXX14_CONSTEXPR bool formatToOctal(span<char> buffer) const noexcept
+		{
+			// Check there's enough buffer in the provided string view
+			const auto length{octalLength()};
+			if (length > buffer.size_bytes())
+				return false;
+			// If there is, then format the value into the buffer
+			formatOctal(buffer);
+			return true;
+		}
+#endif
 
 		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		SUBSTRATE_NO_DISCARD(std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept)
