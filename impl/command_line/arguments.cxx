@@ -138,8 +138,10 @@ namespace substrate::commandLine
 			// Check which alternation matched, recurse and parse all further options from the
 			// alternation's perspective
 			const auto &alternation{match->get()};
+			lexer.next();
 			arguments_t subarguments{};
-			if (!subarguments.parseFrom(lexer, alternation.suboptions()))
+			const auto &suboptions{alternation.suboptions()};
+			if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
 				// If the operation fails, use monostate to signal match-but-fail.
 				return std::monostate{};
 			return choice_t{};
