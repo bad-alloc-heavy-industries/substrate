@@ -13,7 +13,7 @@ namespace substrate::commandLine
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
 	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
 
-	// This implemnts a recursive descent parser that efficiently matches the current token from argv against
+	// This implements a recursive descent parser that efficiently matches the current token from argv against
 	// the set of allowed arguments at the current parsing level, and returns an AST of the results for
 	// later easier exploration by the caller
 	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options)
@@ -23,6 +23,7 @@ namespace substrate::commandLine
 		if (!argCount || (argCount & (1U << intBits)) || !argList)
 			return std::nullopt;
 		// The first argument is the name of the program, so skip that at least and start at the second.
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 		tokeniser_t lexer{argCount - 1U, argList + 1};
 		arguments_t result{};
 		// Try to parse all available arguments against the options tree for the program
