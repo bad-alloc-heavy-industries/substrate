@@ -101,7 +101,8 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	{
 		options
 		(
-			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv}
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{"--version"sv, "Display the version information for flashprog and exit"sv}
 		)
 	};
 
@@ -133,4 +134,19 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	const auto &argsB{checkResult(resultHelpB, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsB.begin()));
 	const auto &helpB{std::get<flag_t>(*argsB.begin())};
+
+	// Check that parsing correctly steps over non-matching flags
+	constexpr static auto argsVersion
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"--version",
+			nullptr,
+		})
+	};
+	const auto resultVersion{parseArguments(argsVersion.size(), argsVersion.data(), programOptions)};
+	const auto &argsVers{checkResult(resultVersion, 1U)};
+	REQUIRE(std::holds_alternative<flag_t>(*argsVers.begin()));
+	const auto &version{std::get<flag_t>(*argsVers.begin())};
 }
