@@ -27,6 +27,9 @@ namespace substrate::commandLine
 	public:
 		flag_t(const std::string_view &name) noexcept : _name{name} { }
 		flag_t(const std::string_view &name, std::any &&value) noexcept : _name{name}, _value{std::move(value)} { }
+
+		[[nodiscard]] auto &name() const noexcept { return _name; }
+		[[nodiscard]] auto &value() const noexcept { return _value; }
 	};
 
 	struct SUBSTRATE_CLS_API arguments_t

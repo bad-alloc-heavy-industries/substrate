@@ -120,6 +120,8 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	const auto &argsA{checkResult(resultHelpA, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsA.begin()));
 	const auto &helpA{std::get<flag_t>(*argsA.begin())};
+	REQUIRE(helpA.name() == "--help"sv);
+	REQUIRE(!helpA.value().has_value());
 
 	constexpr static auto argsHelpB
 	{
@@ -134,6 +136,8 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	const auto &argsB{checkResult(resultHelpB, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsB.begin()));
 	const auto &helpB{std::get<flag_t>(*argsB.begin())};
+	REQUIRE(helpB.name() == "-h"sv);
+	REQUIRE(!helpB.value().has_value());
 
 	// Check that parsing correctly steps over non-matching flags
 	constexpr static auto argsVersion
@@ -149,4 +153,6 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	const auto &argsVers{checkResult(resultVersion, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsVers.begin()));
 	const auto &version{std::get<flag_t>(*argsVers.begin())};
+	REQUIRE(version.name() == "--version"sv);
+	REQUIRE(!version.value().has_value());
 }
