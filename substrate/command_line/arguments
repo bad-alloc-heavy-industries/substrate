@@ -42,12 +42,12 @@ namespace substrate::commandLine
 		vector_t _arguments;
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options);
-		[[nodiscard]] bool add(item_t argument) noexcept;
 
 	public:
 		arguments_t() noexcept;
 
 		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
+		[[nodiscard]] bool add(item_t argument) noexcept;
 
 		[[nodiscard]] size_t count() const noexcept;
 		[[nodiscard]] iterator_t begin() const noexcept;

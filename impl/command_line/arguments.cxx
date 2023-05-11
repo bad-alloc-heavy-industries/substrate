@@ -93,6 +93,7 @@ namespace substrate::commandLine
 		const std::string_view &argument) noexcept;
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
 		const std::string_view &argument);
+	static std::optional<bool> handleResult(arguments_t &arguments, const optionMatch_t &match) noexcept;
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument);
 
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
@@ -106,8 +107,22 @@ namespace substrate::commandLine
 			return false;
 		// Next, grab the argument string and start trying to match it to an option
 		const auto argument{token.value()};
+		// Initialise look-aside for optionValue_t{} options
+		std::optional<option_t> valueOption{};
 		for (const auto &option : options)
 		{
+			// Check if this option is an option_t that is valueOnly() (optionValue_t{})
+			if (std::holds_alternative<option_t>(option))
+			{
+				const auto &value{std::get<option_t>(option)};
+				if (value.valueOnly())
+				{
+					valueOption = value;
+					continue;
+				}
+			}
+
+			// Otherwise, process the option normally
 			const auto match
 			{
 				// Dispatch based on the option type
@@ -120,15 +135,15 @@ namespace substrate::commandLine
 
 			// If we got a valid match, use the result
 			if (match)
-			{
-				return std::visit(match_t
-				{
-					// We got a match and parsing it succeeded?
-					[this]([[maybe_unused]] const auto &result) -> std::optional<bool> { return add(result); },
-					// Match but inner parsing failed
-					[](std::monostate) -> std::optional<bool> { return std::nullopt; },
-				}, *match);
-			}
+				return handleResult(*this, *match);
+		}
+		// If there's an optionValue_t{} and we got no match so far, try matching on it
+		if (valueOption)
+		{
+			const auto match{matchOption(lexer, *valueOption, argument)};
+			// If we got a valid match, use the result
+			if (match)
+				return handleResult(*this, *match);
 		}
 		// After trying to match, if we got nothing, pass it through the unrecognised argument machinary
 		handleUnrecognised(lexer, argument);
@@ -194,6 +209,17 @@ namespace substrate::commandLine
 			return choice_t{argument, std::move(subarguments)};
 		}
 		return std::nullopt;
+	}
+
+	static std::optional<bool> handleResult(arguments_t &arguments, const optionMatch_t &match) noexcept
+	{
+		return std::visit(match_t
+		{
+			// We got a match and parsing it succeeded?
+			[&]([[maybe_unused]] const auto &result) -> std::optional<bool> { return arguments.add(result); },
+			// Match but inner parsing failed
+			[](std::monostate) -> std::optional<bool> { return std::nullopt; },
+		}, match);
 	}
 
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument)
