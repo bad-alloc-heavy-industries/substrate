@@ -17,6 +17,14 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 	REQUIRE(parseArguments(static_cast<size_t>(-1), dummyArgs.data(), dummyOptions) == std::nullopt);
 }
 
+static const auto &checkResult(const std::optional<arguments_t> &result, const size_t expectedCount)
+{
+	REQUIRE(result.has_value());
+	const auto &args{*result};
+	REQUIRE(args.count() == expectedCount);
+	return args;
+}
+
 TEST_CASE("parse command line argument choice", "[command_line::parseArguments]")
 {
 	constexpr static auto actions
@@ -47,7 +55,9 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 		})
 	};
 	const auto resultA{parseArguments(argsChoiceA.size(), argsChoiceA.data(), programOptions)};
-	REQUIRE(resultA != std::nullopt);
+	const auto &argsA{checkResult(resultA, 1U)};
+	REQUIRE(std::holds_alternative<choice_t>(*argsA.begin()));
+	const auto &choiceA{std::get<choice_t>(*argsA.begin())};
 
 	// Check if parsing the second works
 	constexpr static auto argsChoiceB
@@ -60,7 +70,9 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 		})
 	};
 	const auto resultB{parseArguments(argsChoiceB.size(), argsChoiceB.data(), programOptions)};
-	REQUIRE(resultB != std::nullopt);
+	const auto &argsB{checkResult(resultA, 1U)};
+	REQUIRE(std::holds_alternative<choice_t>(*argsB.begin()));
+	const auto &choiceB{std::get<choice_t>(*argsB.begin())};
 
 	// Check that parsing a non-existant choice value fails
 	constexpr static auto argsChoiceC

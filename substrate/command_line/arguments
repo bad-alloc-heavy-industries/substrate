@@ -42,6 +42,10 @@ namespace substrate::commandLine
 		arguments_t() noexcept = default;
 
 		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
+
+		[[nodiscard]] auto count() const noexcept { return _arguments.size(); }
+		[[nodiscard]] auto begin() const noexcept { return _arguments.begin(); }
+		[[nodiscard]] auto end() const noexcept { return _arguments.end(); }
 	};
 
 	struct choice_t
