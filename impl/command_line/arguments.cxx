@@ -13,14 +13,16 @@ namespace substrate::commandLine
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
 	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
 
+	static bool validateOptions(const options_t &options) noexcept;
+
 	// This implements a recursive descent parser that efficiently matches the current token from argv against
 	// the set of allowed arguments at the current parsing level, and returns an AST of the results for
 	// later easier exploration by the caller
 	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options)
 	{
 		constexpr static auto intBits{std::numeric_limits<int>::digits - 1U};
-		// Check if we even got any arguments or if argv was negative
-		if (!argCount || (argCount & (1U << intBits)) || !argList)
+		// Check if we even got any arguments or if argv was negative, or if the options input is malformed in any way
+		if (!argCount || (argCount & (1U << intBits)) || !argList || !validateOptions(options))
 			return std::nullopt;
 		// The first argument is the name of the program, so skip that at least and start at the second.
 		// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -30,6 +32,39 @@ namespace substrate::commandLine
 		if (!result.parseFrom(lexer, options))
 			return std::nullopt;
 		return result;
+	}
+
+	static bool validateOptions(const optionSet_t &optionSet) noexcept
+	{
+		for (const auto &alternation : optionSet)
+		{
+			if (!validateOptions(alternation.suboptions()))
+				return false;
+		}
+		return true;
+	}
+
+	static bool validateOptions(const options_t &options) noexcept
+	{
+		size_t valueOptions{};
+		for (const auto &option : options)
+		{
+			if (!std::visit(match_t
+				{
+					[&](const option_t &value)
+					{
+						valueOptions += value.valueOnly() ? 1U : 0U;
+						return true;
+					},
+					[](const optionSet_t &value) { return validateOptions(value); }
+				}, option)
+			)
+				return false;
+		}
+		if (valueOptions > 1U)
+			console.error("Command line options define multiple value-only options, only at most one is allowed, got "sv,
+				valueOptions);
+		return valueOptions < 2U;
 	}
 
 	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
