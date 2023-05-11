@@ -114,10 +114,10 @@ namespace substrate::commandLine
 	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
 		const std::string_view &argument) noexcept
 	{
-		const auto &token{lexer.token()};
 		// Check if we're parsing a "simple" option
 		if (!option.matches(argument))
 			return std::nullopt;
+		const auto &token{lexer.next()};
 		// If the option matches, try parsing out and validating the value portion if there is one
 		if (!option.takesParameter())
 			return flag_t{argument};
