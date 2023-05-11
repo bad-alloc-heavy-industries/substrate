@@ -14,9 +14,22 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 	constexpr std::array<const char *, 1U> dummyArgs{{nullptr}};
 	constexpr static options_t dummyOptions{};
 
+	// Check the handling of the various combinations of invalid argc/argv inputs
 	REQUIRE(parseArguments(0U, dummyArgs.data(), dummyOptions) == std::nullopt);
 	REQUIRE(parseArguments(dummyArgs.size(), nullptr, dummyOptions) == std::nullopt);
 	REQUIRE(parseArguments(static_cast<size_t>(-1), dummyArgs.data(), dummyOptions) == std::nullopt);
+
+	// Check that the options validator works correctly in detecting an options_t with multiple option_t's
+	// that are set up as optionValue_t{}'s
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionValue_t{}, "meow"sv},
+			option_t{optionValue_t{}, "gao"sv}
+		)
+	};
+	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptions) == std::nullopt);
 }
 
 static const auto &checkResult(const std::optional<arguments_t> &result, const size_t expectedCount)
