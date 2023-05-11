@@ -11,6 +11,7 @@ using namespace substrate::commandLine;
 
 TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]")
 {
+	console = {stdout, stderr};
 	constexpr std::array<const char *, 1U> dummyArgs{{nullptr}};
 	constexpr static options_t dummyOptions{};
 
@@ -136,6 +137,7 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 
 TEST_CASE("parse command line argument simple flag", "[command_line::parseArguments]")
 {
+	console = {stdout, stderr};
 	constexpr static auto programOptions
 	{
 		options
@@ -198,6 +200,7 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 
 TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 {
+	console = {stdout, stderr};
 	constexpr static auto programOptions
 	{
 		options
