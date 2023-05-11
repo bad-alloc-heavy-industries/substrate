@@ -118,9 +118,11 @@ namespace substrate::commandLine
 
 	bool arguments_t::add(item_t argument) noexcept try
 	{
+		// Try to push back the new parsed item
 		_arguments.push_back(std::move(argument));
 		return true;
 	}
+	// Catch any falure and turn that into a clean error result
 	catch (std::exception &)
 		{ return false; }
 
