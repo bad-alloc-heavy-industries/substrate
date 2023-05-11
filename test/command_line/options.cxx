@@ -225,6 +225,7 @@ TEST_CASE("command line option user-defined value parsing", "[command_line::opti
 	REQUIRE(userDefinedOption.parseValue(""sv) == std::nullopt);
 	REQUIRE(userDefinedOption.parseValue("out:0"sv) == std::nullopt);
 	REQUIRE(userDefinedOption.parseValue("int#0"sv) == std::nullopt);
+	REQUIRE(userDefinedOption.parseValue("ext:a"sv) == std::nullopt);
 	REQUIRE(userDefinedOption.parseValue("ext:256"sv) == std::nullopt);
 	checkValue<chip_t>(userDefinedOption, "int:0"sv, {chipBus_t::internal, 0U});
 	checkValue<chip_t>(userDefinedOption, "ext:20"sv, {chipBus_t::external, 20U});
