@@ -122,6 +122,12 @@ namespace substrate::commandLine
 		}
 		return std::nullopt;
 	}
+
+	// Implementation of the innards of optionSet_t as otherwise we get compile errors
+	const optionAlternation_t *optionSet_t::begin() const noexcept
+		{ return _alternations.begin(); }
+	const optionAlternation_t *optionSet_t::end() const noexcept
+		{ return _alternations.end(); }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

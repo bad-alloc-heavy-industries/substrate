@@ -155,8 +155,8 @@ namespace substrate::commandLine
 
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
-		[[nodiscard]] auto begin() const noexcept { return _alternations.begin(); }
-		[[nodiscard]] auto end() const noexcept { return _alternations.end(); }
+		[[nodiscard]] const optionAlternation_t *begin() const noexcept;
+		[[nodiscard]] const optionAlternation_t *end() const noexcept;
 	};
 
 	template<size_t N> constexpr static inline auto
