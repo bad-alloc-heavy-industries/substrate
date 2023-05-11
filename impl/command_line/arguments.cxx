@@ -81,23 +81,39 @@ namespace substrate::commandLine
 				}, option)
 			};
 
-			// If we got a valid match, us the result
+			// If we got a valid match, use the result
 			if (match)
 			{
 				return std::visit(match_t
 				{
 					// We got a match and parsing it succeeded?
-					[this]([[maybe_unused]] const auto &result) -> std::optional<bool>
-						{ return add(result); },
+					[this]([[maybe_unused]] const auto &result) -> std::optional<bool> { return add(result); },
 					// Match but inner parsing failed
-					[](std::monostate) -> std::optional<bool>
-						{ return std::nullopt; },
+					[](std::monostate) -> std::optional<bool> { return std::nullopt; },
 				}, *match);
 			}
 		}
-		// XXX: Need to handle the no-match situation.
+		// After trying to match, if we got nothing, pass it through the unrecognised argument machinary
 		lexer.next();
-		return true;
+		// If the argument is followed by an '=', grab both parts of it for display
+		if (token.type() == tokenType_t::equals)
+		{
+			lexer.next();
+			// If there's nothing after the '=', display what we've got
+			if (token.type() == tokenType_t::space)
+				console.error("Unrecognised command line argument '"sv, argument, "='"sv);
+			else
+			{
+				const auto value{token.value()};
+				console.error("Unrecognised command line argument '"sv, argument, '=', value, "'"sv);
+				lexer.next();
+			}
+		}
+		else
+			console.error("Unrecognised command line argument '"sv, argument, "'"sv);
+		// We should now be one token past the end of the unrecognised argument,
+		// but turn this into a failure return all the same
+		return false;
 	}
 
 	bool arguments_t::add(item_t argument) noexcept try
