@@ -198,6 +198,19 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 	const auto &version{std::get<flag_t>(*argsVers.begin())};
 	REQUIRE(version.name() == "--version"sv);
 	REQUIRE(!version.value().has_value());
+
+	// Check that parsing an invalid option fails
+	constexpr static auto argsV
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v",
+			nullptr,
+		})
+	};
+	const auto resultV{parseArguments(argsV.size(), argsV.data(), programOptions)};
+	REQUIRE(resultV == std::nullopt);
 }
 
 TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
