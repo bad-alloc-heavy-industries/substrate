@@ -168,10 +168,13 @@ namespace substrate::commandLine
 		// Check if we're parsing a "simple" option
 		if (!option.matches(argument))
 			return std::nullopt;
-		const auto &token{lexer.next()};
 		// If the option matches, try parsing out and validating the value portion if there is one
 		if (!option.takesParameter())
+		{
+			lexer.next();
 			return flag_t{argument};
+		}
+		const auto &token{lexer.token()};
 		// Consume tokens to get to the value token if the option is not value-only
 		if (!option.valueOnly())
 		{
@@ -184,6 +187,7 @@ namespace substrate::commandLine
 		}
 		// Try parsing that parameter component as a value for the option
 		auto value{option.parseValue(token.value())};
+		lexer.next();
 		if (!value)
 			// If the operation fails, use monostate to signal match-but-fail.
 			return std::monostate{};
