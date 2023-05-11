@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <substrate/command_line/options>
 #include <substrate/command_line/arguments>
+#include <substrate/console>
 #include <substrate/utility>
 #include <catch2/catch.hpp>
 
 using namespace std::literals::string_view_literals;
+using substrate::console;
 using namespace substrate::commandLine;
 
 TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]")
@@ -27,6 +29,7 @@ static const auto &checkResult(const std::optional<arguments_t> &result, const s
 
 TEST_CASE("parse command line argument choice", "[command_line::parseArguments]")
 {
+	console = {stdout, stderr};
 	constexpr static auto actions
 	{
 		optionAlternations
@@ -58,6 +61,8 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	const auto &argsA{checkResult(resultA, 1U)};
 	REQUIRE(std::holds_alternative<choice_t>(*argsA.begin()));
 	const auto &choiceA{std::get<choice_t>(*argsA.begin())};
+	REQUIRE(choiceA.value() == "choiceA"sv);
+	REQUIRE(choiceA.arguments().count() == 0U);
 
 	// Check if parsing the second works
 	constexpr static auto argsChoiceB
@@ -70,9 +75,11 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 		})
 	};
 	const auto resultB{parseArguments(argsChoiceB.size(), argsChoiceB.data(), programOptions)};
-	const auto &argsB{checkResult(resultA, 1U)};
+	const auto &argsB{checkResult(resultB, 1U)};
 	REQUIRE(std::holds_alternative<choice_t>(*argsB.begin()));
 	const auto &choiceB{std::get<choice_t>(*argsB.begin())};
+	REQUIRE(choiceB.value() == "choiceB"sv);
+	REQUIRE(choiceB.arguments().count() == 0U);
 
 	// Check that parsing a non-existant choice value fails
 	constexpr static auto argsChoiceC

@@ -57,6 +57,8 @@ namespace substrate::commandLine
 	public:
 		choice_t(const std::string_view &value, arguments_t &&arguments) noexcept :
 			_value{value}, _arguments{std::move(arguments)} { }
+		[[nodiscard]] auto &value() const noexcept { return _value; }
+		[[nodiscard]] auto &arguments() const noexcept { return _arguments; }
 	};
 
 	SUBSTRATE_API std::optional<arguments_t>
