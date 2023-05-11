@@ -94,3 +94,43 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	const auto resultC{parseArguments(argsChoiceC.size(), argsChoiceC.data(), programOptions)};
 	REQUIRE(resultC == std::nullopt);
 }
+
+TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
+{
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv}
+		)
+	};
+
+	// Check to see if parsing a simple flag works right
+	constexpr static auto argsHelpA
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"--help",
+			nullptr,
+		})
+	};
+	const auto resultHelpA{parseArguments(argsHelpA.size(), argsHelpA.data(), programOptions)};
+	const auto &argsA{checkResult(resultHelpA, 1U)};
+	REQUIRE(std::holds_alternative<flag_t>(*argsA.begin()));
+	const auto &helpA{std::get<flag_t>(*argsA.begin())};
+
+	constexpr static auto argsHelpB
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-h",
+			nullptr,
+		})
+	};
+	const auto resultHelpB{parseArguments(argsHelpB.size(), argsHelpB.data(), programOptions)};
+	const auto &argsB{checkResult(resultHelpB, 1U)};
+	REQUIRE(std::holds_alternative<flag_t>(*argsB.begin()));
+	const auto &helpB{std::get<flag_t>(*argsB.begin())};
+}
