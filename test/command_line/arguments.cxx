@@ -256,4 +256,17 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	REQUIRE(workingDir.name() == "/some/path"sv);
 	REQUIRE(workingDir.value().has_value());
 	REQUIRE(std::any_cast<path>(workingDir.value()) == path{"/some/path"sv});
+
+	// Check that parsing a truncated valued option fails as intended
+	constexpr static auto argsTruncated
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"--verbosity",
+			nullptr,
+		})
+	};
+	const auto resultTruncated{parseArguments(argsTruncated.size(), argsTruncated.data(), programOptions)};
+	REQUIRE(resultTruncated == std::nullopt);
 }
