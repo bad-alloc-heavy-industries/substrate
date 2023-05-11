@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <filesystem>
 #include <substrate/command_line/options>
 #include <substrate/command_line/arguments>
 #include <substrate/console>
@@ -6,6 +7,7 @@
 #include <catch2/catch.hpp>
 
 using namespace std::literals::string_view_literals;
+using std::filesystem::path;
 using substrate::console;
 using namespace substrate::commandLine;
 
@@ -228,4 +230,30 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	};
 	const auto resultValues{parseArguments(argsValues.size(), argsValues.data(), programOptions)};
 	const auto &args{checkResult(resultValues, 4U)};
+
+	REQUIRE(std::holds_alternative<flag_t>(args[0]));
+	const auto &verbosity{std::get<flag_t>(args[0])};
+	REQUIRE(verbosity.name() == "-v"sv);
+	REQUIRE(verbosity.value().has_value());
+	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 10U);
+
+	REQUIRE(std::holds_alternative<flag_t>(args[1]));
+	const auto &optionA{std::get<flag_t>(args[1])};
+	REQUIRE(optionA.name() == "--option"sv);
+	REQUIRE(optionA.value().has_value());
+	REQUIRE(std::any_cast<std::string_view>(optionA.value()) == "A"sv);
+
+	REQUIRE(std::holds_alternative<flag_t>(args[3]));
+	const auto &optionB{std::get<flag_t>(args[3])};
+	REQUIRE(optionB.name() == "--option"sv);
+	REQUIRE(optionB.value().has_value());
+	REQUIRE(std::any_cast<std::string_view>(optionB.value()) == "B"sv);
+
+	REQUIRE(std::holds_alternative<flag_t>(args[2]));
+	const auto &workingDir{std::get<flag_t>(args[2])};
+	// XXX: optionValue_t{} needs to be given the ability to hold a meta name for the value so
+	// these can be looked up sensibly
+	REQUIRE(workingDir.name() == "/some/path"sv);
+	REQUIRE(workingDir.value().has_value());
+	REQUIRE(std::any_cast<path>(workingDir.value()) == path{"/some/path"sv});
 }

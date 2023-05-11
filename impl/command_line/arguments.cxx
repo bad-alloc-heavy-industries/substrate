@@ -255,6 +255,8 @@ namespace substrate::commandLine
 		{ return _arguments.begin(); }
 	[[nodiscard]] arguments_t::iterator_t arguments_t::end() const noexcept
 		{ return _arguments.end(); }
+	[[nodiscard]] const arguments_t::item_t &arguments_t::operator [](size_t index) const noexcept
+		{ return _arguments[index]; }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

@@ -52,6 +52,7 @@ namespace substrate::commandLine
 		[[nodiscard]] size_t count() const noexcept;
 		[[nodiscard]] iterator_t begin() const noexcept;
 		[[nodiscard]] iterator_t end() const noexcept;
+		[[nodiscard]] const item_t &operator [](size_t index) const noexcept;
 	};
 
 	struct choice_t
