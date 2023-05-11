@@ -21,7 +21,7 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 
 	// Check that the options validator works correctly in detecting an options_t with multiple option_t's
 	// that are set up as optionValue_t{}'s
-	constexpr static auto programOptions
+	constexpr static auto programOptionsA
 	{
 		options
 		(
@@ -29,7 +29,33 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 			option_t{optionValue_t{}, "gao"sv}
 		)
 	};
-	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptions) == std::nullopt);
+	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptionsA) == std::nullopt);
+
+	// Check that the options validator works correctly in detecting the same as the above, but embedded
+	// inside an optionSet_t option alternation
+	constexpr static auto actionOptions
+	{
+		options
+		(
+			option_t{optionValue_t{}, "meow"sv},
+			option_t{optionValue_t{}, "gao"sv}
+		)
+	};
+
+	constexpr static auto actions
+	{
+		optionAlternations
+		({
+			{
+				"action"sv,
+				"help text"sv,
+				actionOptions,
+			}
+		})
+	};
+
+	constexpr static auto programOptionsB{options(optionSet_t{actions})};
+	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptionsB) == std::nullopt);
 }
 
 static const auto &checkResult(const std::optional<arguments_t> &result, const size_t expectedCount)
