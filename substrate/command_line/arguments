@@ -29,23 +29,26 @@ namespace substrate::commandLine
 		flag_t(const std::string_view &name, std::any &&value) noexcept : _name{name}, _value{std::move(value)} { }
 	};
 
-	struct arguments_t
+	struct SUBSTRATE_CLS_API arguments_t
 	{
 	private:
 		using item_t = std::variant<flag_t, choice_t>;
-		std::vector<item_t> _arguments{};
+		using vector_t = std::vector<item_t>;
+		using iterator_t = typename vector_t::const_iterator;
+
+		vector_t _arguments;
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options);
 		[[nodiscard]] bool add(item_t argument) noexcept;
 
 	public:
-		arguments_t() noexcept = default;
+		arguments_t() noexcept;
 
 		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
 
-		[[nodiscard]] auto count() const noexcept { return _arguments.size(); }
-		[[nodiscard]] auto begin() const noexcept { return _arguments.begin(); }
-		[[nodiscard]] auto end() const noexcept { return _arguments.end(); }
+		[[nodiscard]] size_t count() const noexcept;
+		[[nodiscard]] iterator_t begin() const noexcept;
+		[[nodiscard]] iterator_t end() const noexcept;
 	};
 
 	struct choice_t

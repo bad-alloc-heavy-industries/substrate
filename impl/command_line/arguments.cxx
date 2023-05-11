@@ -180,6 +180,15 @@ namespace substrate::commandLine
 		else
 			console.error("Unrecognised command line argument '"sv, argument, "'"sv);
 	}
+
+	// Implementation of the innards of arguments_t as otherwise we get compile errors
+	arguments_t::arguments_t() noexcept : _arguments{} { }
+	[[nodiscard]] size_t arguments_t::count() const noexcept
+		{ return _arguments.size(); }
+	[[nodiscard]] arguments_t::iterator_t arguments_t::begin() const noexcept
+		{ return _arguments.begin(); }
+	[[nodiscard]] arguments_t::iterator_t arguments_t::end() const noexcept
+		{ return _arguments.end(); }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
