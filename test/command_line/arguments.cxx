@@ -269,4 +269,17 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	};
 	const auto resultTruncated{parseArguments(argsTruncated.size(), argsTruncated.data(), programOptions)};
 	REQUIRE(resultTruncated == std::nullopt);
+
+	// Check that parsing a valued option with a bad value fails as intended
+	constexpr static auto argsBad
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "a",
+			nullptr,
+		})
+	};
+	const auto resultBad{parseArguments(argsBad.size(), argsBad.data(), programOptions)};
+	REQUIRE(resultBad == std::nullopt);
 }
