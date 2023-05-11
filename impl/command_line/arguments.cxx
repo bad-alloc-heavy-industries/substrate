@@ -57,6 +57,7 @@ namespace substrate::commandLine
 		const std::string_view &argument) noexcept;
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
 		const std::string_view &argument);
+	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument);
 
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
 	{
@@ -94,23 +95,7 @@ namespace substrate::commandLine
 			}
 		}
 		// After trying to match, if we got nothing, pass it through the unrecognised argument machinary
-		lexer.next();
-		// If the argument is followed by an '=', grab both parts of it for display
-		if (token.type() == tokenType_t::equals)
-		{
-			lexer.next();
-			// If there's nothing after the '=', display what we've got
-			if (token.type() == tokenType_t::space)
-				console.error("Unrecognised command line argument '"sv, argument, "='"sv);
-			else
-			{
-				const auto value{token.value()};
-				console.error("Unrecognised command line argument '"sv, argument, '=', value, "'"sv);
-				lexer.next();
-			}
-		}
-		else
-			console.error("Unrecognised command line argument '"sv, argument, "'"sv);
+		handleUnrecognised(lexer, argument);
 		// We should now be one token past the end of the unrecognised argument,
 		// but turn this into a failure return all the same
 		return false;
@@ -173,6 +158,27 @@ namespace substrate::commandLine
 			return choice_t{argument, std::move(subarguments)};
 		}
 		return std::nullopt;
+	}
+
+	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument)
+	{
+		const auto &token{lexer.next()};
+		// If the argument is followed by an '=', grab both parts of it for display
+		if (token.type() == tokenType_t::equals)
+		{
+			lexer.next();
+			// If there's nothing after the '=', display what we've got
+			if (token.type() == tokenType_t::space)
+				console.error("Unrecognised command line argument '"sv, argument, "='"sv);
+			else
+			{
+				const auto value{token.value()};
+				console.error("Unrecognised command line argument '"sv, argument, '=', value, "'"sv);
+				lexer.next();
+			}
+		}
+		else
+			console.error("Unrecognised command line argument '"sv, argument, "'"sv);
 	}
 } // namespace substrate::commandLine
 
