@@ -134,7 +134,7 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	REQUIRE(resultC == std::nullopt);
 }
 
-TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
+TEST_CASE("parse command line argument simple flag", "[command_line::parseArguments]")
 {
 	constexpr static auto programOptions
 	{
@@ -194,4 +194,35 @@ TEST_CASE("parse command line argument flag", "[command_line::parseArguments]")
 	const auto &version{std::get<flag_t>(*argsVers.begin())};
 	REQUIRE(version.name() == "--version"sv);
 	REQUIRE(!version.value().has_value());
+}
+
+TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
+{
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
+				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
+			option_t{optionValue_t{}, "Working directory"sv}.valueType(optionValueType_t::path),
+			option_t{"--option", "Operation-specific options"sv}.takesParameter().repeatable()
+		)
+	};
+
+	// Check that valued options work as intended
+	constexpr static auto argsValues
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "10",
+			"--option=A",
+			"/some/path",
+			"--option", "B",
+			nullptr,
+		})
+	};
+	const auto resultValues{parseArguments(argsValues.size(), argsValues.data(), programOptions)};
+	const auto &args{checkResult(resultValues, 4U)};
 }
