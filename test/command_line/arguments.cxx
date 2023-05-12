@@ -300,6 +300,8 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 TEST_CASE("parse bad command line argument flags", "[command_line::parseArguments]")
 {
 	console = {stdout, stderr};
+	constexpr static auto valueOptions
+		{options(option_t{optionValue_t{}, "value"sv}.valueType(optionValueType_t::unsignedInt))};
 	constexpr static auto choiceAOptions{options(option_t{"--test"sv, "Run action in test mode"sv})};
 
 	constexpr static auto actions
@@ -367,4 +369,16 @@ TEST_CASE("parse bad command line argument flags", "[command_line::parseArgument
 	};
 	const auto resultInvalidC{parseArguments(argsInvalidC.size(), argsInvalidC.data(), programOptions)};
 	REQUIRE(resultInvalidC == std::nullopt);
+
+	constexpr static auto argsInvalidD
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"value",
+			nullptr,
+		})
+	};
+	const auto resultInvalidD{parseArguments(argsInvalidD.size(), argsInvalidD.data(), valueOptions)};
+	REQUIRE(resultInvalidD == std::nullopt);
 }
