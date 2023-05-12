@@ -70,7 +70,7 @@ namespace substrate::commandLine
 	struct SUBSTRATE_CLS_API option_t final
 	{
 	private:
-		using optionHolder_t = std::variant<std::string_view, optionFlagPair_t, std::monostate>;
+		using optionHolder_t = std::variant<std::string_view, optionFlagPair_t, optionValue_t>;
 		using flagsHolder_t = bitFlags_t<uint8_t, optionFlags_t>;
 
 		optionHolder_t _option;
@@ -83,8 +83,8 @@ namespace substrate::commandLine
 	public:
 		constexpr option_t(const optionHolder_t &option, const std::string_view &help) noexcept :
 			_option{option}, _help{help} { }
-		constexpr option_t(const optionValue_t &, const std::string_view &help) noexcept :
-			_option{std::monostate{}}, _help{help}, _flags{optionFlags_t::takesParameter} { }
+		constexpr option_t(const optionValue_t &option, const std::string_view &help) noexcept :
+			_option{option}, _help{help}, _flags{optionFlags_t::takesParameter} { }
 		constexpr option_t(const option_t &) noexcept = default;
 		constexpr option_t(option_t &&) noexcept = default;
 
@@ -135,7 +135,7 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr bool isRepeatable() const noexcept
 			{ return _flags.includes(optionFlags_t::repeatable); }
 		[[nodiscard]] constexpr bool valueOnly() const noexcept
-			{ return std::holds_alternative<std::monostate>(_option); }
+			{ return std::holds_alternative<optionValue_t>(_option); }
 
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 
@@ -153,7 +153,7 @@ namespace substrate::commandLine
 			if (std::holds_alternative<optionFlagPair_t>(_option))
 				return std::get<optionFlagPair_t>(_option)._shortFlag <
 					std::get<optionFlagPair_t>(other._option)._shortFlag;
-			// If the alternative is std::monostate, always return false
+			// If the alternative is optionValue_t, always return false
 			return false;
 		}
 

@@ -17,7 +17,7 @@ namespace substrate::commandLine
 			[&](const std::string_view &option) { return argument == option; },
 			[&](const optionFlagPair_t &options)
 				{ return argument == options._shortFlag || argument == options._longFlag; },
-			[](const std::monostate &) { return true; }
+			[](const optionValue_t &) { return true; }
 		}, _option);
 	}
 
