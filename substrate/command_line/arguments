@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <optional>
 #include <vector>
+#include <set>
 #include <variant>
 #include <any>
 #include <substrate/command_line/options>
@@ -38,10 +39,12 @@ namespace substrate::commandLine
 		using item_t = std::variant<flag_t, choice_t>;
 		using vector_t = std::vector<item_t>;
 		using iterator_t = typename vector_t::const_iterator;
+		using optionsVisited_t = std::set<internal::optionsItem_t>;
 
 		vector_t _arguments;
 
-		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options);
+		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options,
+			optionsVisited_t &optionsVisited);
 
 	public:
 		arguments_t() noexcept;

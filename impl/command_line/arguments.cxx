@@ -87,9 +87,10 @@ namespace substrate::commandLine
 	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
 	{
 		const auto &token{lexer.token()};
+		optionsVisited_t optionsVisited{};
 		while (token.valid())
 		{
-			const auto result{parseArgument(lexer, options)};
+			const auto result{parseArgument(lexer, options, optionsVisited)};
 			// If the result is a nullopt, we're unwinding an inner failure
 			if (!result)
 				return false;
@@ -110,10 +111,13 @@ namespace substrate::commandLine
 		const std::string_view &argument) noexcept;
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
 		const std::string_view &argument);
-	static std::optional<bool> handleResult(arguments_t &arguments, const optionMatch_t &match) noexcept;
+	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited);
+	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
+		set_t &optionsVisited, const optionMatch_t &match) noexcept;
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument);
 
-	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options)
+	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options,
+		optionsVisited_t &optionsVisited)
 	{
 		// Start by checking we're in a suitable state
 		const auto &token{lexer.token()};
@@ -152,7 +156,7 @@ namespace substrate::commandLine
 
 			// If we got a valid match, use the result
 			if (match)
-				return handleResult(*this, *match);
+				return handleResult(*this, option, optionsVisited, *match);
 		}
 		// If there's an optionValue_t{} and we got no match so far, try matching on it
 		if (valueOption)
@@ -160,7 +164,7 @@ namespace substrate::commandLine
 			const auto match{matchOption(lexer, *valueOption, argument)};
 			// If we got a valid match, use the result
 			if (match)
-				return handleResult(*this, *match);
+				return handleResult(*this, *valueOption, optionsVisited, *match);
 		}
 		// After trying to match, if we got nothing, pass it through the unrecognised argument machinary
 		handleUnrecognised(lexer, argument);
@@ -232,8 +236,31 @@ namespace substrate::commandLine
 		return std::nullopt;
 	}
 
-	static std::optional<bool> handleResult(arguments_t &arguments, const optionMatch_t &match) noexcept
+	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited)
 	{
+		// Look for the option in the set
+		const auto &count{optionsVisited.find(option)};
+		if (count != optionsVisited.end())
+		{
+			// if this is an optionSet_t, those are never allowed to repeat.
+			if (!std::holds_alternative<option_t>(option))
+				return false;
+			// Otherwise, check if the argument is allowed to repeat
+			const auto &value{std::get<option_t>(option)};
+			return value.isRepeatable();
+		}
+		// This is our first time seeing this one, so allow it and add it to the map
+		optionsVisited.insert(option);
+		return true;
+	}
+
+	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
+		set_t &optionsVisited, const optionMatch_t &match) noexcept
+	{
+		// First check if the match is allowed by the option
+		if (!checkMatchValid(option, optionsVisited))
+			return false;
+		// If the check succeeds, run with it
 		return std::visit(match_t
 		{
 			// We got a match and parsing it succeeded?
