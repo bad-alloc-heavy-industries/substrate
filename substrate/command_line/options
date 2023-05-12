@@ -12,6 +12,7 @@
 #include <string_view>
 #include <functional>
 #include <type_traits>
+#include <iterator>
 #include <substrate/static_vector>
 #include <substrate/index_sequence>
 #include <substrate/flags>
@@ -253,6 +254,12 @@ namespace substrate::commandLine
 				{ return _storage == other._storage && _index == other._index; }
 			constexpr bool operator !=(const optionsIterator_t &other) const noexcept
 				{ return _storage != other._storage || _index != other._index; }
+
+			using difference_type = size_t;
+			using value_type = optionsItem_t;
+			using pointer = optionsItem_t;
+			using reference = optionsItem_t;
+			using iterator_category = std::forward_iterator_tag;
 		};
 
 		// In order to create a clean split interface, we have to take the options tuple here, generate
