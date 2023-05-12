@@ -296,3 +296,75 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	const auto resultBad{parseArguments(argsBad.size(), argsBad.data(), programOptions)};
 	REQUIRE(resultBad == std::nullopt);
 }
+
+TEST_CASE("parse bad command line argument flags", "[command_line::parseArguments]")
+{
+	console = {stdout, stderr};
+	constexpr static auto choiceAOptions{options(option_t{"--test"sv, "Run action in test mode"sv})};
+
+	constexpr static auto actions
+	{
+		optionAlternations
+		({
+			{
+				"choiceA"sv,
+				"First action choice"sv,
+				choiceAOptions,
+			},
+			{
+				"choiceB"sv,
+				"Second action choice"sv,
+			},
+		})
+	};
+
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
+				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
+			option_t{"--option", "Operation-specific options"sv}.takesParameter().repeatable(),
+			optionSet_t{actions}
+		)
+	};
+
+	constexpr static auto argsInvalidA
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"--test=value",
+			nullptr,
+		})
+	};
+	const auto resultInvalidA{parseArguments(argsInvalidA.size(), argsInvalidA.data(), programOptions)};
+	REQUIRE(resultInvalidA == std::nullopt);
+
+	constexpr static auto argsInvalidB
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"--test=",
+			"--option=A",
+			nullptr,
+		})
+	};
+	const auto resultInvalidB{parseArguments(argsInvalidB.size(), argsInvalidB.data(), programOptions)};
+	REQUIRE(resultInvalidB == std::nullopt);
+
+	constexpr static auto argsInvalidC
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"choiceA",
+			"--param",
+			nullptr,
+		})
+	};
+	const auto resultInvalidC{parseArguments(argsInvalidC.size(), argsInvalidC.data(), programOptions)};
+	REQUIRE(resultInvalidC == std::nullopt);
+}
