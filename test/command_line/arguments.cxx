@@ -248,7 +248,7 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	REQUIRE(std::holds_alternative<flag_t>(args[0]));
 	const auto &verbosity{std::get<flag_t>(args[0])};
-	REQUIRE(verbosity.name() == "-v"sv);
+	REQUIRE(verbosity.name() == "--verbosity"sv);
 	REQUIRE(verbosity.value().has_value());
 	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 10U);
 

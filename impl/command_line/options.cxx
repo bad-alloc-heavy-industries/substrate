@@ -134,6 +134,16 @@ namespace substrate::commandLine
 	bool optionSet_t::operator <(const optionSet_t &other) const noexcept
 		{ return _alternations.data() < other._alternations.data(); }
 
+	[[nodiscard]] const std::string_view &option_t::metaName() const noexcept
+	{
+		return std::visit(match_t
+		{
+			[](const std::string_view &option) -> const std::string_view & { return option; },
+			[](const optionFlagPair_t &option) -> const std::string_view & { return option._longFlag; },
+			[](const optionValue_t &option) -> const std::string_view & { return option.metaName(); },
+		}, _option);
+	}
+
 	void option_t::displayHelp() const noexcept
 	{
 		const auto optionText
