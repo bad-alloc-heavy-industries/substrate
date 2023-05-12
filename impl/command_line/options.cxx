@@ -2,8 +2,11 @@
 #include <filesystem>
 #include <substrate/command_line/options>
 #include <substrate/conversions>
+#include <substrate/console>
 
+using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
+using substrate::console;
 
 namespace substrate::commandLine
 {
@@ -130,6 +133,21 @@ namespace substrate::commandLine
 		{ return _alternations.end(); }
 	bool optionSet_t::operator <(const optionSet_t &other) const noexcept
 		{ return _alternations.data() < other._alternations.data(); }
+
+	void option_t::displayHelp() const noexcept
+	{
+		const auto optionText
+		{
+			std::visit(match_t
+			{
+				[](const std::string_view &option) { return std::string{option}; },
+				[](const optionFlagPair_t &option)
+					{ return std::string{option._shortFlag} + ", "s + std::string{option._longFlag}; },
+				[](const optionValue_t &option) { return std::string{option.metaName()}; },
+			}, _option)
+		};
+		console.writeln('\t', optionText, ' ', _help);
+	}
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
