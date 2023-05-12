@@ -268,7 +268,7 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	const auto &workingDir{std::get<flag_t>(args[2])};
 	// XXX: optionValue_t{} needs to be given the ability to hold a meta name for the value so
 	// these can be looked up sensibly
-	REQUIRE(workingDir.name() == "/some/path"sv);
+	REQUIRE(workingDir.name() == "workingDir"sv);
 	REQUIRE(workingDir.value().has_value());
 	REQUIRE(std::any_cast<path>(workingDir.value()) == path{"/some/path"sv});
 

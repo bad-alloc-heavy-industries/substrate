@@ -212,6 +212,10 @@ namespace substrate::commandLine
 		if (!value)
 			// If the operation fails, use monostate to signal match-but-fail.
 			return std::monostate{};
+		// If it succeeds, and this is a value-only option, grab the meta name to use as the flag name
+		if (option.valueOnly())
+			return flag_t{option.metaName(), std::move(*value)};
+		// Otherwise return the option as the flag name with the parsed value
 		return flag_t{argument, std::move(*value)};
 	}
 
