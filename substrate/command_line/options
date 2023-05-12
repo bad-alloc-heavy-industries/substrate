@@ -131,6 +131,24 @@ namespace substrate::commandLine
 
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 
+		[[nodiscard]] constexpr bool operator <(const option_t &other) const noexcept
+		{
+			// Check if the alternative held is numerically <
+			if (_option.index() < other._option.index())
+				return true;
+			// Check if the alternative held is numerically >
+			if (_option.index() > other._option.index())
+				return false;
+			// Both are the same index, so compare on what's held
+			if (std::holds_alternative<std::string_view>(_option))
+				return std::get<std::string_view>(_option) < std::get<std::string_view>(other._option);
+			if (std::holds_alternative<optionFlagPair_t>(_option))
+				return std::get<optionFlagPair_t>(_option)._shortFlag <
+					std::get<optionFlagPair_t>(other._option)._shortFlag;
+			// If the alternative is std::monostate, always return false
+			return false;
+		}
+
 	private:
 		[[nodiscard]] std::optional<std::any> parseSignedValue(const std::string_view &value) const noexcept;
 		[[nodiscard]] std::optional<std::any> parseUnsignedValue(const std::string_view &value) const noexcept;
@@ -157,6 +175,8 @@ namespace substrate::commandLine
 			matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] const optionAlternation_t *begin() const noexcept;
 		[[nodiscard]] const optionAlternation_t *end() const noexcept;
+
+		[[nodiscard]] bool operator <(const optionSet_t &other) const noexcept;
 	};
 
 	template<size_t N> constexpr static inline auto

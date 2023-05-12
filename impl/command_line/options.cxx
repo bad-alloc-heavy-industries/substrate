@@ -128,6 +128,8 @@ namespace substrate::commandLine
 		{ return _alternations.begin(); }
 	const optionAlternation_t *optionSet_t::end() const noexcept
 		{ return _alternations.end(); }
+	bool optionSet_t::operator <(const optionSet_t &other) const noexcept
+		{ return _alternations.data() < other._alternations.data(); }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

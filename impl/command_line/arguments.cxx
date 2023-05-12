@@ -13,6 +13,23 @@ namespace substrate::commandLine
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
 	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
 
+	bool operator <(const optionsItem_t &lhs, const optionsItem_t &rhs) noexcept
+	{
+		// First, if the alternative held is numerically < then sort on that
+		if (lhs.index() < rhs.index())
+			return true;
+		// Check if the alternatives are instead numerically >
+		if (lhs.index() > rhs.index())
+			return false;
+
+		// Next, both are the same index.. convert to the held alternative and do < on those
+		if (std::holds_alternative<option_t>(lhs))
+			return std::get<option_t>(lhs) < std::get<option_t>(rhs);
+		if (std::holds_alternative<optionSet_t>(lhs))
+			return std::get<optionSet_t>(lhs) < std::get<optionSet_t>(rhs);
+		return false;
+	}
+
 	static bool validateOptions(const options_t &options) noexcept;
 
 	// This implements a recursive descent parser that efficiently matches the current token from argv against
