@@ -41,8 +41,15 @@ namespace substrate::commandLine
 		std::string_view _longFlag{};
 	};
 
-	struct optionValue_t final { };
-	struct optionAlternation_t;
+	struct optionValue_t final
+	{
+	private:
+		std::string_view _metaName{};
+
+	public:
+		constexpr explicit optionValue_t(const std::string_view &metaName) noexcept : _metaName{metaName} { }
+		constexpr auto &metaName() const noexcept { return _metaName; }
+	};
 
 	struct optionSignedInt_t final
 	{
@@ -56,6 +63,7 @@ namespace substrate::commandLine
 		uint64_t max{UINT64_MAX};
 	};
 
+	struct optionAlternation_t;
 	using optionValueParser_t = std::optional<std::any> (*)(const std::string_view &) noexcept;
 
 	// A singular command line option such as a simple flag

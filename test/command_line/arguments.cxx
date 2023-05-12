@@ -28,8 +28,8 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 	{
 		options
 		(
-			option_t{optionValue_t{}, "meow"sv},
-			option_t{optionValue_t{}, "gao"sv}
+			option_t{optionValue_t{"meow"sv}, "meow"sv},
+			option_t{optionValue_t{"gao"sv}, "gao"sv}
 		)
 	};
 	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptionsA) == std::nullopt);
@@ -40,8 +40,8 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 	{
 		options
 		(
-			option_t{optionValue_t{}, "meow"sv},
-			option_t{optionValue_t{}, "gao"sv}
+			option_t{optionValue_t{"meow"sv}, "meow"sv},
+			option_t{optionValue_t{"gao"sv}, "gao"sv}
 		)
 	};
 
@@ -225,7 +225,7 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
 			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
 				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
-			option_t{optionValue_t{}, "Working directory"sv}.valueType(optionValueType_t::path),
+			option_t{optionValue_t{"workingDir"sv}, "Working directory"sv}.valueType(optionValueType_t::path),
 			option_t{"--option", "Operation-specific options"sv}.takesParameter().repeatable()
 		)
 	};
@@ -303,7 +303,7 @@ TEST_CASE("parse bad command line argument flags", "[command_line::parseArgument
 {
 	console = {stdout, stderr};
 	constexpr static auto valueOptions
-		{options(option_t{optionValue_t{}, "value"sv}.valueType(optionValueType_t::unsignedInt))};
+		{options(option_t{optionValue_t{"value"sv}, "value"sv}.valueType(optionValueType_t::unsignedInt))};
 	constexpr static auto choiceAOptions{options(option_t{"--test"sv, "Run action in test mode"sv})};
 
 	constexpr static auto actions
