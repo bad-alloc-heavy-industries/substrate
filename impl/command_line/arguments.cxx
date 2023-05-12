@@ -113,7 +113,7 @@ namespace substrate::commandLine
 		const std::string_view &argument);
 	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited);
 	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
-		set_t &optionsVisited, const optionMatch_t &match) noexcept;
+		set_t &optionsVisited, const std::string_view &argument, const optionMatch_t &match) noexcept;
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument);
 
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options,
@@ -156,7 +156,7 @@ namespace substrate::commandLine
 
 			// If we got a valid match, use the result
 			if (match)
-				return handleResult(*this, option, optionsVisited, *match);
+				return handleResult(*this, option, optionsVisited, argument, *match);
 		}
 		// If there's an optionValue_t{} and we got no match so far, try matching on it
 		if (valueOption)
@@ -164,7 +164,7 @@ namespace substrate::commandLine
 			const auto match{matchOption(lexer, *valueOption, argument)};
 			// If we got a valid match, use the result
 			if (match)
-				return handleResult(*this, *valueOption, optionsVisited, *match);
+				return handleResult(*this, *valueOption, optionsVisited, argument, *match);
 		}
 		// After trying to match, if we got nothing, pass it through the unrecognised argument machinary
 		handleUnrecognised(lexer, argument);
@@ -255,11 +255,15 @@ namespace substrate::commandLine
 	}
 
 	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
-		set_t &optionsVisited, const optionMatch_t &match) noexcept
+		set_t &optionsVisited, const std::string_view &argument, const optionMatch_t &match) noexcept
 	{
 		// First check if the match is allowed by the option
 		if (!checkMatchValid(option, optionsVisited))
+		{
+			console.error("Command line argument '"sv, argument,
+				"' already seen on command line, and repetitions are not allowed"sv);
 			return false;
+		}
 		// If the check succeeds, run with it
 		return std::visit(match_t
 		{
