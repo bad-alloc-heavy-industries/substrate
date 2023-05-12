@@ -90,3 +90,24 @@ TEST_CASE("command line tokenisation", "[command_line::internal::tokeniser_t]")
 	REQUIRE(!token.valid());
 	REQUIRE(token.type() == tokenType_t::unknown);
 }
+
+TEST_CASE("command line tokenisation termination", "[command_line::internal::tokeniser_t]")
+{
+	constexpr static auto args
+	{
+		substrate::make_array<const char *>(
+		{
+			"arg",
+		})
+	};
+	tokeniser_t tokeniser{args.size(), args.data()};
+	const auto &token{tokeniser.token()};
+
+	REQUIRE(token.valid());
+	REQUIRE(token.type() == tokenType_t::arg);
+	REQUIRE(token.value() == "arg"sv);
+
+	tokeniser.next();
+	REQUIRE(!token.valid());
+	REQUIRE(token.type() == tokenType_t::unknown);
+}
