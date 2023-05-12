@@ -105,6 +105,8 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	const auto &choiceA{std::get<choice_t>(*argsA.begin())};
 	REQUIRE(choiceA.value() == "choiceA"sv);
 	REQUIRE(choiceA.arguments().count() == 0U);
+	REQUIRE(argsA.begin() != argsA.end());
+	REQUIRE(&*argsA.begin() == &argsA[0]);
 
 	// Check if parsing the second works
 	constexpr static auto argsChoiceB
