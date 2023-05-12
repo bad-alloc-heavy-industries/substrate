@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <limits>
+#include <algorithm>
 #include <substrate/console>
 #include <substrate/command_line/arguments>
 #include <substrate/command_line/tokeniser>
@@ -53,12 +54,11 @@ namespace substrate::commandLine
 
 	static bool validateOptions(const optionSet_t &optionSet) noexcept
 	{
-		for (const auto &alternation : optionSet)
-		{
-			if (!validateOptions(alternation.suboptions()))
-				return false;
-		}
-		return true;
+		// Check that every alternation in the set is valid
+		return std::all_of(optionSet.begin(), optionSet.end(),
+			[](const optionAlternation_t &alternation)
+				{ return validateOptions(alternation.suboptions()); }
+		);
 	}
 
 	static bool validateOptions(const options_t &options) noexcept
@@ -300,6 +300,7 @@ namespace substrate::commandLine
 	}
 
 	// Implementation of the innards of arguments_t as otherwise we get compile errors
+	// NOLINTNEXTLINE(modernize-use-equals-default)
 	arguments_t::arguments_t() noexcept : _arguments{} { }
 	[[nodiscard]] size_t arguments_t::count() const noexcept
 		{ return _arguments.size(); }
