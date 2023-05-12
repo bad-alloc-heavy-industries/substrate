@@ -5,9 +5,11 @@
 #include <substrate/internal/defs>
 #include <catch2/catch.hpp>
 
-using namespace std::literals::string_literals;
 using substrate::fixedVector_t;
 using substrate::vectorStateException_t;
+
+static inline std::string operator ""_s(const char *const string, const size_t length)
+	{ return std::string{string, length}; }
 
 template<typename T, typename E> void testThrowsExcept(T &vec, const std::string &errorText)
 {
@@ -50,8 +52,8 @@ TEST_CASE("fixed vector invalid", "[fixedVector_t]")
 	REQUIRE(vec.length() == 0);
 	REQUIRE(vec.size() == 0);
 	REQUIRE(vec.count() == 0);
-	testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"s);
-	testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"s);
+	testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"_s);
+	testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"_s);
 	testIterEqual<fixedVector_t<int>>(vec);
 	testIterEqual<const fixedVector_t<int>>(vec);
 }
@@ -70,8 +72,8 @@ TEST_CASE("fixed vector indexing", "[fixedVector_t]") try
 	index<fixedVec>(vec, 1) = 5;
 	REQUIRE(index<constFixedVec>(vec, 1) == 5);
 
-	testThrowsExcept<fixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"s);
-	testThrowsExcept<constFixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"s);
+	testThrowsExcept<fixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"_s);
+	testThrowsExcept<constFixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"_s);
 }
 catch (const std::out_of_range &)
 	{ FAIL("Unexpected exception thrown during normal fixedVector_t<> access"); }
