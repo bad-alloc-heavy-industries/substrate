@@ -384,3 +384,74 @@ TEST_CASE("parse bad command line argument flags", "[command_line::parseArgument
 	const auto resultInvalidD{parseArguments(argsInvalidD.size(), argsInvalidD.data(), valueOptions)};
 	REQUIRE(resultInvalidD == std::nullopt);
 }
+
+TEST_CASE("parse duplicated command line arguments", "[command_line::parseArguments]")
+{
+	constexpr static auto actions
+	{
+		optionAlternations
+		({
+			{
+				"choiceA"sv,
+				"First action choice"sv,
+			},
+			{
+				"choiceB"sv,
+				"Second action choice"sv,
+			},
+		})
+	};
+
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
+				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
+			option_t{optionValue_t{"workingDir"sv}, "Working directory"sv}.valueType(optionValueType_t::path),
+			optionSet_t{actions}
+		)
+	};
+
+	constexpr static auto argsInvalidA
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-h",
+			"--help",
+			nullptr,
+		})
+	};
+	const auto resultInvalidA{parseArguments(argsInvalidA.size(), argsInvalidA.data(), programOptions)};
+	REQUIRE(resultInvalidA == std::nullopt);
+
+	constexpr static auto argsInvalidB
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "10",
+			"choiceA",
+			"choiceB",
+			nullptr,
+		})
+	};
+	const auto resultInvalidB{parseArguments(argsInvalidB.size(), argsInvalidB.data(), programOptions)};
+	REQUIRE(resultInvalidB == std::nullopt);
+
+	constexpr static auto argsInvalidC
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "10",
+			"choiceA",
+			"-v", "63",
+			nullptr,
+		})
+	};
+	const auto resultInvalidC{parseArguments(argsInvalidC.size(), argsInvalidC.data(), programOptions)};
+	REQUIRE(resultInvalidC == std::nullopt);
+}
