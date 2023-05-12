@@ -454,4 +454,17 @@ TEST_CASE("parse duplicated command line arguments", "[command_line::parseArgume
 	};
 	const auto resultInvalidC{parseArguments(argsInvalidC.size(), argsInvalidC.data(), programOptions)};
 	REQUIRE(resultInvalidC == std::nullopt);
+
+	constexpr static auto argsInvalidD
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"/bin",
+			"/usr/bin",
+			nullptr,
+		})
+	};
+	const auto resultInvalidD{parseArguments(argsInvalidD.size(), argsInvalidD.data(), programOptions)};
+	REQUIRE(resultInvalidD == std::nullopt);
 }
