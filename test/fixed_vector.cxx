@@ -1,21 +1,23 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
+#include <string>
 #include <substrate/fixed_vector>
+#include <substrate/internal/defs>
 #include <catch2/catch.hpp>
 
+using namespace std::literals::string_literals;
 using substrate::fixedVector_t;
 using substrate::vectorStateException_t;
 
-template<typename T, typename E> void testThrowsExcept(T &vec, const char *const errorText)
+template<typename T, typename E> void testThrowsExcept(T &vec, const std::string &errorText)
 {
 	try
 	{
-		int value = vec[2];
-		(void)value;
+		SUBSTRATE_NOWARN_UNUSED(int value) = vec[2];
 		FAIL("fixedVector_t<> failed to throw exception when expected");
 	}
 	catch (const E &except)
-		{ REQUIRE(memcmp(except.what(), errorText, strlen(errorText)) == 0); }
+		{ REQUIRE(memcmp(except.what(), errorText.c_str(), errorText.length()) == 0); }
 }
 
 template<typename T> struct typeOfVector;
@@ -48,8 +50,8 @@ TEST_CASE("fixed vector invalid", "[fixedVector_t]")
 	REQUIRE(vec.length() == 0);
 	REQUIRE(vec.size() == 0);
 	REQUIRE(vec.count() == 0);
-	testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state");
-	testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state");
+	testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"s);
+	testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(vec, "fixedVector_t in invalid state"s);
 	testIterEqual<fixedVector_t<int>>(vec);
 	testIterEqual<const fixedVector_t<int>>(vec);
 }
@@ -68,8 +70,8 @@ TEST_CASE("fixed vector indexing", "[fixedVector_t]") try
 	index<fixedVec>(vec, 1) = 5;
 	REQUIRE(index<constFixedVec>(vec, 1) == 5);
 
-	testThrowsExcept<fixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds");
-	testThrowsExcept<constFixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds");
+	testThrowsExcept<fixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"s);
+	testThrowsExcept<constFixedVec, std::out_of_range>(vec, "Index into fixedVector_t out of bounds"s);
 }
 catch (const std::out_of_range &)
 	{ FAIL("Unexpected exception thrown during normal fixedVector_t<> access"); }
