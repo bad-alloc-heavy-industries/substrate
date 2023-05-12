@@ -309,6 +309,20 @@ namespace substrate::commandLine
 		{ return _arguments.end(); }
 	[[nodiscard]] const arguments_t::item_t &arguments_t::operator [](size_t index) const noexcept
 		{ return _arguments[index]; }
+
+	[[nodiscard]] arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
+	{
+		return std::find_if(_arguments.begin(), _arguments.end(),
+			[&](const item_t &argument)
+			{
+				return std::visit(match_t
+				{
+					[&](const flag_t &value) { return value.name() == option; },
+					[&](const choice_t &value) { return value.value() == option; },
+				}, argument);
+			}
+		);
+	}
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
