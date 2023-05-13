@@ -57,6 +57,7 @@ namespace substrate::commandLine
 		[[nodiscard]] iterator_t end() const noexcept;
 		[[nodiscard]] iterator_t find(const std::string_view &option) const noexcept;
 		[[nodiscard]] const item_t &operator [](size_t index) const noexcept;
+		[[nodiscard]] const item_t *operator [](const std::string_view &option) const noexcept;
 	};
 
 	struct choice_t

@@ -299,16 +299,16 @@ namespace substrate::commandLine
 	// Implementation of the innards of arguments_t as otherwise we get compile errors
 	// NOLINTNEXTLINE(modernize-use-equals-default)
 	arguments_t::arguments_t() noexcept : _arguments{} { }
-	[[nodiscard]] size_t arguments_t::count() const noexcept
+	size_t arguments_t::count() const noexcept
 		{ return _arguments.size(); }
-	[[nodiscard]] arguments_t::iterator_t arguments_t::begin() const noexcept
+	arguments_t::iterator_t arguments_t::begin() const noexcept
 		{ return _arguments.begin(); }
-	[[nodiscard]] arguments_t::iterator_t arguments_t::end() const noexcept
+	arguments_t::iterator_t arguments_t::end() const noexcept
 		{ return _arguments.end(); }
-	[[nodiscard]] const arguments_t::item_t &arguments_t::operator [](size_t index) const noexcept
+	const arguments_t::item_t &arguments_t::operator [](size_t index) const noexcept
 		{ return _arguments[index]; }
 
-	[[nodiscard]] arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
+	arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
 	{
 		return std::find_if(_arguments.begin(), _arguments.end(),
 			[&](const item_t &argument)
@@ -320,6 +320,14 @@ namespace substrate::commandLine
 				}, argument);
 			}
 		);
+	}
+
+	const arguments_t::item_t *arguments_t::operator [](const std::string_view &option) const noexcept
+	{
+		const auto &argument{find(option)};
+		if (argument == end())
+			return nullptr;
+		return &*argument;
 	}
 } // namespace substrate::commandLine
 
