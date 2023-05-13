@@ -68,12 +68,57 @@ if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 		}
 	'''
 
+	# GCC < 9.1 splits the filesystem module into a separate library
+	libstdcppFS = cxx.find_library('stdc++fs', required: false)
+
 	stdFilesystemPath = cxx.links(
 		stdFilesystemPathTest,
-		name: 'has a working std::filesystem::path implementation (GCC >= 8 in macOS pre 10.15)'
+		name: 'has a working std::filesystem::path implementation (GCC >= 8 in macOS pre 10.15)',
+		dependencies: libstdcppFS,
 	)
 
-	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath
+	initializerListTest = '''
+		#include <array>
+		#include <cstdint>
+
+		using size_t = std::size_t;
+
+		namespace internal
+		{
+		template<std::size_t... seq> using indexSequence_t = std::index_sequence<seq...>;
+		template<std::size_t N> using makeIndexSequence = std::make_index_sequence<N>;
+
+		template<typename T, size_t N, size_t... index> constexpr std::array<T, N>
+			makeArray(T (&&elems)[N], indexSequence_t<index...>)
+		{
+			return {{elems[index]...}};
+		}
+		} // namespace internal
+
+		template<typename T, size_t N> constexpr std::array<T, N>
+			make_array(T (&&elems)[N]) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+		{
+			return internal::makeArray(std::move(elems), internal::makeIndexSequence<N>{});
+		}
+
+		int main()
+		{
+			auto test = make_array<const char *>({
+				"program",
+				"choiceC",
+				nullptr,
+			});
+		}
+	'''
+
+	initializerList = cxx.compiles(
+		initializerListTest,
+		name: 'accepts nullptr as part of CTAD with pointer type values (GCC #85977)'
+	)
+
+	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
+		deps += [libstdcppFS]
+
 		subdir('command_line')
 	endif
 endif
