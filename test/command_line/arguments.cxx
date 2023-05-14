@@ -468,3 +468,69 @@ TEST_CASE("parse duplicated command line arguments", "[command_line::parseArgume
 	const auto resultInvalidD{parseArguments(argsInvalidD.size(), argsInvalidD.data(), programOptions)};
 	REQUIRE(resultInvalidD == std::nullopt);
 }
+
+TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::find]")
+{
+	constexpr static auto choiceAOptions{options(option_t{"--test"sv, "Run action in test mode"sv})};
+
+	constexpr static auto actions
+	{
+		optionAlternations
+		({
+			{
+				"choiceA"sv,
+				"First action choice"sv,
+				choiceAOptions,
+			},
+			{
+				"choiceB"sv,
+				"Second action choice"sv,
+			},
+		})
+	};
+
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{"--version"sv, "Display the version information and exit"sv},
+			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
+				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
+			optionSet_t{actions}
+		)
+	};
+
+	constexpr static auto commandLine
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "63",
+			"choiceA",
+			"--test",
+			nullptr,
+		})
+	};
+	const auto result{parseArguments(commandLine.size(), commandLine.data(), programOptions)};
+	const auto &args{checkResult(result, 2U)};
+	REQUIRE(args["--help"sv] == nullptr);
+
+	const auto verbosityFlag{args["--verbosity"sv]};
+	REQUIRE(verbosityFlag != nullptr);
+	REQUIRE(std::holds_alternative<flag_t>(*verbosityFlag));
+	const auto &verbosity{std::get<flag_t>(*verbosityFlag)};
+	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 63U);
+
+	const auto actionChoice{args["choiceA"sv]};
+	REQUIRE(actionChoice != nullptr);
+	REQUIRE(std::holds_alternative<choice_t>(*actionChoice));
+	const auto &action{std::get<choice_t>(*actionChoice)};
+	REQUIRE(action.arguments().count() == 1U);
+
+	const auto &testFlag{action.arguments().find("--test"sv)};
+	REQUIRE(testFlag != action.arguments().end());
+	REQUIRE(std::holds_alternative<flag_t>(*testFlag));
+	const auto &test{std::get<flag_t>(*testFlag)};
+	REQUIRE(!test.value().has_value());
+}
