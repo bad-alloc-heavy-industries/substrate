@@ -2,6 +2,7 @@
 #ifndef SUBSTRATE_BITS
 #define SUBSTRATE_BITS
 
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -51,12 +52,16 @@ namespace substrate
 		);
 	}
 
-	/* TODO: Determin if we can drop this and abstract rotl/rotr to shift by the fixed nybble amount */
+	/* TODO: Determine if we can drop this and abstract rotl/rotr to shift by the fixed nibble amount */
 	template<typename T> SUBSTRATE_NO_DISCARD(typename std::enable_if<std::is_integral<T>::value ,T>::type
-		constexpr inline shift_nibble(const T v, const std::size_t shift) noexcept)
+		SUBSTRATE_CXX14_CONSTEXPR inline shift_nibble(const T value, const size_t shift) noexcept)
 	{
-		return (((v | 0x00U) << ((shift & ((sizeof(T) << 1) + ~0x00U)) << 2)) |
-			((v | 0x00U) >> ((sizeof(T) << 3) + 0x01U + ~((shift & ((sizeof(T) << 1) + ~0x00U)) << 2))));
+		constexpr size_t width{sizeof(T) << 0x03U};
+		const size_t left{(shift & ((sizeof(T) << 0x01U) + ~0x00U)) << 0x02U};
+		const size_t right{(sizeof(T) << 0x03U) + 0x01U + ~((shift & ((sizeof(T) << 0x01U) + ~0x00U)) << 0x02U)};
+		if (left >= width || right >= width)
+			return value;
+		return (((value | 0x00U) << left) | ((value | 0x00U) >> right));
 	}
 
 	template<typename T>
