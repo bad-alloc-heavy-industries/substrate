@@ -32,6 +32,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!helpOption.takesParameter());
 	REQUIRE(!helpOption.isRepeatable());
 	REQUIRE(!helpOption.valueOnly());
+	REQUIRE(helpOption.metaName() == "--help"sv);
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
@@ -42,6 +43,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!versionOption.takesParameter());
 	REQUIRE(!versionOption.isRepeatable());
 	REQUIRE(!versionOption.valueOnly());
+	REQUIRE(versionOption.metaName() == "--version"sv);
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
@@ -49,6 +51,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(valueOption.matches("funky"sv));
 	REQUIRE(valueOption.helpText() == "Any value you like"sv);
 	REQUIRE(valueOption.valueOnly());
+	REQUIRE(valueOption.metaName() == "any"sv);
 	REQUIRE(valueOption.parseValue(""sv).has_value());
 	REQUIRE(std::any_cast<std::string_view>(*valueOption.parseValue("test"sv)) == "test"sv);
 }
@@ -76,7 +79,7 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 			},
 		})
 	};
-	constexpr static optionSet_t programOptions{actions};
+	constexpr static optionSet_t programOptions{"actions"sv, actions};
 
 	const auto checkMatch
 	{
@@ -105,6 +108,7 @@ TEST_CASE("building command line option sets", "[command_line::optionSet_t]")
 		}
 	};
 
+	REQUIRE(programOptions.metaName() == "actions"sv);
 	checkMatch("list"sv, true);
 	checkMatch("read"sv, true);
 	checkMatch("write"sv, true);

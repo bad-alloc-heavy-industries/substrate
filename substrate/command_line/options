@@ -49,7 +49,7 @@ namespace substrate::commandLine
 
 	public:
 		constexpr explicit optionValue_t(const std::string_view &metaName) noexcept : _metaName{metaName} { }
-		constexpr auto &metaName() const noexcept { return _metaName; }
+		[[nodiscard]] constexpr auto &metaName() const noexcept { return _metaName; }
 	};
 
 	struct optionSignedInt_t final
@@ -171,17 +171,20 @@ namespace substrate::commandLine
 	struct SUBSTRATE_CLS_API optionSet_t final
 	{
 	private:
+		std::string_view _metaName{};
 		staticVector_t<const optionAlternation_t> _alternations;
 
 	public:
-		constexpr optionSet_t(const staticVector_t<const optionAlternation_t> &alternations) :
-			_alternations{alternations} { }
+		constexpr optionSet_t(const std::string_view &metaName,
+			const staticVector_t<const optionAlternation_t> &alternations) :
+				_metaName{metaName}, _alternations{alternations} { }
 		constexpr optionSet_t(const optionSet_t &) noexcept = default;
 		constexpr optionSet_t(optionSet_t &&) noexcept = default;
 
 		constexpr optionSet_t &operator =(const optionSet_t &) noexcept = default;
 		constexpr optionSet_t &operator =(optionSet_t &&) noexcept = default;
 
+		[[nodiscard]] constexpr auto &metaName() const noexcept { return _metaName; }
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] const optionAlternation_t *begin() const noexcept;

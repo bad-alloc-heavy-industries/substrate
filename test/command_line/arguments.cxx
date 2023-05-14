@@ -57,7 +57,7 @@ TEST_CASE("parseArguments invalid invocations", "[command_line::parseArguments]"
 		})
 	};
 
-	constexpr static auto programOptionsB{options(optionSet_t{actions})};
+	constexpr static auto programOptionsB{options(optionSet_t{"actions"sv, actions})};
 	REQUIRE(parseArguments(dummyArgs.size(), dummyArgs.data(), programOptionsB) == std::nullopt);
 }
 
@@ -87,7 +87,7 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 		})
 	};
 
-	constexpr static auto programOptions{options(optionSet_t{actions})};
+	constexpr static auto programOptions{options(optionSet_t{"actions"sv, actions})};
 
 	// Check if parsing the first alternation works
 	constexpr static auto argsChoiceA
@@ -330,7 +330,7 @@ TEST_CASE("parse bad command line argument flags", "[command_line::parseArgument
 			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
 				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
 			option_t{"--option", "Operation-specific options"sv}.takesParameter().repeatable(),
-			optionSet_t{actions}
+			optionSet_t{"actions"sv, actions}
 		)
 	};
 
@@ -410,7 +410,7 @@ TEST_CASE("parse duplicated command line arguments", "[command_line::parseArgume
 			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
 				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
 			option_t{optionValue_t{"workingDir"sv}, "Working directory"sv}.valueType(optionValueType_t::path),
-			optionSet_t{actions}
+			optionSet_t{"actions"sv, actions}
 		)
 	};
 
@@ -497,7 +497,7 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 			option_t{"--version"sv, "Display the version information and exit"sv},
 			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
 				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U),
-			optionSet_t{actions}
+			optionSet_t{"actions"sv, actions}
 		)
 	};
 
