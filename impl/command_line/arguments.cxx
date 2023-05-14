@@ -232,7 +232,7 @@ namespace substrate::commandLine
 			if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
 				// If the operation fails, use monostate to signal match-but-fail.
 				return std::monostate{};
-			return choice_t{argument, std::move(subarguments)};
+			return choice_t{option.metaName(), argument, std::move(subarguments)};
 		}
 		return std::nullopt;
 	}
@@ -316,7 +316,7 @@ namespace substrate::commandLine
 				return std::visit(match_t
 				{
 					[&](const flag_t &value) { return value.name() == option; },
-					[&](const choice_t &value) { return value.value() == option; },
+					[&](const choice_t &value) { return value.name() == option; },
 				}, argument);
 			}
 		);

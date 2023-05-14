@@ -63,12 +63,15 @@ namespace substrate::commandLine
 	struct choice_t
 	{
 	private:
+		std::string_view _name;
 		std::string_view _value;
 		arguments_t _arguments;
 
 	public:
-		choice_t(const std::string_view &value, arguments_t &&arguments) noexcept :
-			_value{value}, _arguments{std::move(arguments)} { }
+		choice_t(const std::string_view &name, const std::string_view &value, arguments_t &&arguments) noexcept :
+			_name{name}, _value{value}, _arguments{std::move(arguments)} { }
+
+		[[nodiscard]] auto &name() const noexcept { return _name; }
 		[[nodiscard]] auto &value() const noexcept { return _value; }
 		[[nodiscard]] auto &arguments() const noexcept { return _arguments; }
 	};

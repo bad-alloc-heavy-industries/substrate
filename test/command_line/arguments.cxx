@@ -522,10 +522,11 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 	const auto &verbosity{std::get<flag_t>(*verbosityFlag)};
 	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 63U);
 
-	const auto actionChoice{args["choiceA"sv]};
+	const auto actionChoice{args["actions"sv]};
 	REQUIRE(actionChoice != nullptr);
 	REQUIRE(std::holds_alternative<choice_t>(*actionChoice));
 	const auto &action{std::get<choice_t>(*actionChoice)};
+	REQUIRE(action.value() == "choiceA"sv);
 	REQUIRE(action.arguments().count() == 1U);
 
 	const auto &testFlag{action.arguments().find("--test"sv)};
