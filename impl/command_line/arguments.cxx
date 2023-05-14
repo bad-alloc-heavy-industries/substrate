@@ -305,7 +305,7 @@ namespace substrate::commandLine
 		{ return _arguments.begin(); }
 	arguments_t::iterator_t arguments_t::end() const noexcept
 		{ return _arguments.end(); }
-	const arguments_t::item_t &arguments_t::operator [](size_t index) const noexcept
+	const item_t &arguments_t::operator [](size_t index) const noexcept
 		{ return _arguments[index]; }
 
 	arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
@@ -322,7 +322,7 @@ namespace substrate::commandLine
 		);
 	}
 
-	const arguments_t::item_t *arguments_t::operator [](const std::string_view &option) const noexcept
+	const item_t *arguments_t::operator [](const std::string_view &option) const noexcept
 	{
 		const auto &argument{find(option)};
 		if (argument == end())

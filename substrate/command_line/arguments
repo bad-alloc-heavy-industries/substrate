@@ -33,10 +33,11 @@ namespace substrate::commandLine
 		[[nodiscard]] auto &value() const noexcept { return _value; }
 	};
 
+	using item_t = std::variant<flag_t, choice_t>;
+
 	struct SUBSTRATE_CLS_API arguments_t
 	{
 	private:
-		using item_t = std::variant<flag_t, choice_t>;
 		using vector_t = std::vector<item_t>;
 		using iterator_t = typename vector_t::const_iterator;
 		using optionsVisited_t = std::set<internal::optionsItem_t>;
