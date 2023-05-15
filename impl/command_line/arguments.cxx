@@ -2,6 +2,7 @@
 #include <limits>
 #include <algorithm>
 #include <substrate/console>
+#include <substrate/iteration_range>
 #include <substrate/command_line/arguments>
 #include <substrate/command_line/tokeniser>
 
@@ -383,6 +384,16 @@ namespace substrate::commandLine
 		{ return _arguments.end(); }
 	arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
 		{ return _arguments.find(option); }
+
+	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
+	std::vector<const item_t *> arguments_t::findAll(const std::string_view &option) const noexcept
+	{
+		const auto arguments{_arguments.equal_range(option)};
+		std::vector<const item_t *> result{};
+		for (const auto &argument : iterationRange_t{arguments})
+			result.emplace_back(&argument);
+		return result;
+	}
 
 	const item_t *arguments_t::operator [](const std::string_view &option) const noexcept
 	{

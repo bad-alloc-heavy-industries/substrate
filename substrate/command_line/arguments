@@ -59,6 +59,7 @@ namespace substrate::commandLine
 		[[nodiscard]] iterator_t begin() const noexcept;
 		[[nodiscard]] iterator_t end() const noexcept;
 		[[nodiscard]] iterator_t find(const std::string_view &option) const noexcept;
+		[[nodiscard]] std::vector<const item_t *> findAll(const std::string_view &option) const noexcept;
 		[[nodiscard]] const item_t *operator [](const std::string_view &option) const noexcept;
 	};
 
