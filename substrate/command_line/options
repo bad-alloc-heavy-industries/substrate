@@ -149,6 +149,7 @@ namespace substrate::commandLine
 			{ return std::holds_alternative<optionValue_t>(_option); }
 
 		[[nodiscard]] std::string_view metaName() const noexcept;
+		[[nodiscard]] std::string displayName() const noexcept;
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 
 		[[nodiscard]] constexpr bool operator <(const option_t &other) const noexcept

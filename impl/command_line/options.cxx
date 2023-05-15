@@ -154,20 +154,19 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
-	void option_t::displayHelp() const noexcept
+	[[nodiscard]] std::string option_t::displayName() const noexcept
 	{
-		const auto optionText
+		return std::visit(match_t
 		{
-			std::visit(match_t
-			{
-				[](const std::string_view &option) { return std::string{option}; },
-				[](const optionFlagPair_t &option)
-					{ return std::string{option._shortFlag} + ", "s + std::string{option._longFlag}; },
-				[](const optionValue_t &option) { return std::string{option.metaName()}; },
-			}, _option)
-		};
-		console.writeln('\t', optionText, ' ', _help);
+			[](const std::string_view &option) { return std::string{option}; },
+			[](const optionFlagPair_t &option)
+				{ return std::string{option._shortFlag} + ", "s + std::string{option._longFlag}; },
+			[](const optionValue_t &option) { return std::string{option.metaName()}; },
+		}, _option);
 	}
+
+	void option_t::displayHelp() const noexcept
+		{ console.writeln('\t', displayName(), ' ', _help); }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
