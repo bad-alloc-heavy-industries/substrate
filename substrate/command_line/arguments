@@ -55,6 +55,7 @@ namespace substrate::commandLine
 		[[nodiscard]] bool add(item_t argument) noexcept;
 
 		[[nodiscard]] size_t count() const noexcept;
+		[[nodiscard]] size_t countMatching(const std::string_view &option) const noexcept;
 		[[nodiscard]] iterator_t begin() const noexcept;
 		[[nodiscard]] iterator_t end() const noexcept;
 		[[nodiscard]] iterator_t find(const std::string_view &option) const noexcept;

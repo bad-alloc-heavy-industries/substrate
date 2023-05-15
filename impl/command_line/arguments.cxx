@@ -375,6 +375,8 @@ namespace substrate::commandLine
 	arguments_t::arguments_t() noexcept : _arguments{} { }
 	size_t arguments_t::count() const noexcept
 		{ return _arguments.size(); }
+	size_t arguments_t::countMatching(const std::string_view &option) const noexcept
+		{ return _arguments.count(option); }
 	arguments_t::iterator_t arguments_t::begin() const noexcept
 		{ return _arguments.begin(); }
 	arguments_t::iterator_t arguments_t::end() const noexcept
