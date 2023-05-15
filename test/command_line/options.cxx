@@ -32,7 +32,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!helpOption.takesParameter());
 	REQUIRE(!helpOption.isRepeatable());
 	REQUIRE(!helpOption.valueOnly());
-	REQUIRE(helpOption.metaName() == "--help"sv);
+	REQUIRE(helpOption.metaName() == "help"sv);
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
@@ -43,7 +43,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!versionOption.takesParameter());
 	REQUIRE(!versionOption.isRepeatable());
 	REQUIRE(!versionOption.valueOnly());
-	REQUIRE(versionOption.metaName() == "--version"sv);
+	REQUIRE(versionOption.metaName() == "version"sv);
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 

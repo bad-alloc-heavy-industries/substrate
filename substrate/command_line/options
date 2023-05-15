@@ -139,7 +139,7 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr bool valueOnly() const noexcept
 			{ return std::holds_alternative<optionValue_t>(_option); }
 
-		[[nodiscard]] const std::string_view &metaName() const noexcept;
+		[[nodiscard]] std::string_view metaName() const noexcept;
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 
 		[[nodiscard]] constexpr bool operator <(const option_t &other) const noexcept

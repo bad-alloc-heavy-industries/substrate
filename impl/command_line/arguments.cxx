@@ -193,7 +193,7 @@ namespace substrate::commandLine
 		if (!option.takesParameter())
 		{
 			lexer.next();
-			return flag_t{argument};
+			return flag_t{option.metaName()};
 		}
 		const auto &token{lexer.token()};
 		// Consume tokens to get to the value token if the option is not value-only

@@ -165,7 +165,7 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 	const auto &argsA{checkResult(resultHelpA, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsA.begin()));
 	const auto &helpA{std::get<flag_t>(*argsA.begin())};
-	REQUIRE(helpA.name() == "--help"sv);
+	REQUIRE(helpA.name() == "help"sv);
 	REQUIRE(!helpA.value().has_value());
 
 	constexpr static auto argsHelpB
@@ -181,7 +181,7 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 	const auto &argsB{checkResult(resultHelpB, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsB.begin()));
 	const auto &helpB{std::get<flag_t>(*argsB.begin())};
-	REQUIRE(helpB.name() == "-h"sv);
+	REQUIRE(helpB.name() == "help"sv);
 	REQUIRE(!helpB.value().has_value());
 
 	// Check that parsing correctly steps over non-matching flags
@@ -198,7 +198,7 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 	const auto &argsVers{checkResult(resultVersion, 1U)};
 	REQUIRE(std::holds_alternative<flag_t>(*argsVers.begin()));
 	const auto &version{std::get<flag_t>(*argsVers.begin())};
-	REQUIRE(version.name() == "--version"sv);
+	REQUIRE(version.name() == "version"sv);
 	REQUIRE(!version.value().has_value());
 
 	// Check that parsing an invalid option fails
@@ -248,19 +248,19 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	REQUIRE(std::holds_alternative<flag_t>(args[0]));
 	const auto &verbosity{std::get<flag_t>(args[0])};
-	REQUIRE(verbosity.name() == "--verbosity"sv);
+	REQUIRE(verbosity.name() == "verbosity"sv);
 	REQUIRE(verbosity.value().has_value());
 	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 10U);
 
 	REQUIRE(std::holds_alternative<flag_t>(args[1]));
 	const auto &optionA{std::get<flag_t>(args[1])};
-	REQUIRE(optionA.name() == "--option"sv);
+	REQUIRE(optionA.name() == "option"sv);
 	REQUIRE(optionA.value().has_value());
 	REQUIRE(std::any_cast<std::string_view>(optionA.value()) == "A"sv);
 
 	REQUIRE(std::holds_alternative<flag_t>(args[3]));
 	const auto &optionB{std::get<flag_t>(args[3])};
-	REQUIRE(optionB.name() == "--option"sv);
+	REQUIRE(optionB.name() == "option"sv);
 	REQUIRE(optionB.value().has_value());
 	REQUIRE(std::any_cast<std::string_view>(optionB.value()) == "B"sv);
 
@@ -514,9 +514,9 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 	};
 	const auto result{parseArguments(commandLine.size(), commandLine.data(), programOptions)};
 	const auto &args{checkResult(result, 2U)};
-	REQUIRE(args["--help"sv] == nullptr);
+	REQUIRE(args["help"sv] == nullptr);
 
-	const auto verbosityFlag{args["--verbosity"sv]};
+	const auto verbosityFlag{args["verbosity"sv]};
 	REQUIRE(verbosityFlag != nullptr);
 	REQUIRE(std::holds_alternative<flag_t>(*verbosityFlag));
 	const auto &verbosity{std::get<flag_t>(*verbosityFlag)};
@@ -529,7 +529,7 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 	REQUIRE(action.value() == "choiceA"sv);
 	REQUIRE(action.arguments().count() == 1U);
 
-	const auto &testFlag{action.arguments().find("--test"sv)};
+	const auto &testFlag{action.arguments().find("test"sv)};
 	REQUIRE(testFlag != action.arguments().end());
 	REQUIRE(std::holds_alternative<flag_t>(*testFlag));
 	const auto &test{std::get<flag_t>(*testFlag)};

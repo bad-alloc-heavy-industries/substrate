@@ -134,13 +134,23 @@ namespace substrate::commandLine
 	bool optionSet_t::operator <(const optionSet_t &other) const noexcept
 		{ return _alternations.data() < other._alternations.data(); }
 
-	[[nodiscard]] const std::string_view &option_t::metaName() const noexcept
+	[[nodiscard]] static inline auto unprefix(const std::string_view &flag) noexcept
+	{
+		auto name = flag;
+		// Remove hyphens from the front until either the string's empty or we've got no more
+		while (!name.empty() && name[0] == '-')
+			name = name.substr(1);
+		// Make sure we return something that's not ""sv if possible
+		return name.empty() ? flag : name;
+	}
+
+	[[nodiscard]] std::string_view option_t::metaName() const noexcept
 	{
 		return std::visit(match_t
 		{
-			[](const std::string_view &option) -> const std::string_view & { return option; },
-			[](const optionFlagPair_t &option) -> const std::string_view & { return option._longFlag; },
-			[](const optionValue_t &option) -> const std::string_view & { return option.metaName(); },
+			[](const std::string_view &option) { return unprefix(option); },
+			[](const optionFlagPair_t &option) { return unprefix(option._longFlag); },
+			[](const optionValue_t &option) { return option.metaName(); },
 		}, _option);
 	}
 
