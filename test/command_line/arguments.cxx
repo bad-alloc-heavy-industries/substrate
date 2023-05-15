@@ -106,7 +106,6 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	REQUIRE(choiceA.value() == "choiceA"sv);
 	REQUIRE(choiceA.arguments().count() == 0U);
 	REQUIRE(argsA.begin() != argsA.end());
-	REQUIRE(&*argsA.begin() == &argsA[0]);
 
 	// Check if parsing the second works
 	constexpr static auto argsChoiceB
@@ -245,32 +244,43 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	};
 	const auto resultValues{parseArguments(argsValues.size(), argsValues.data(), programOptions)};
 	const auto &args{checkResult(resultValues, 4U)};
+	auto argsIterator{args.begin()};
 
-	REQUIRE(std::holds_alternative<flag_t>(args[0]));
-	const auto &verbosity{std::get<flag_t>(args[0])};
-	REQUIRE(verbosity.name() == "verbosity"sv);
-	REQUIRE(verbosity.value().has_value());
-	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 10U);
-
-	REQUIRE(std::holds_alternative<flag_t>(args[1]));
-	const auto &optionA{std::get<flag_t>(args[1])};
+	REQUIRE(argsIterator != args.end());
+	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
+	const auto &optionA{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionA.name() == "option"sv);
 	REQUIRE(optionA.value().has_value());
 	REQUIRE(std::any_cast<std::string_view>(optionA.value()) == "A"sv);
 
-	REQUIRE(std::holds_alternative<flag_t>(args[3]));
-	const auto &optionB{std::get<flag_t>(args[3])};
+	++argsIterator;
+	REQUIRE(argsIterator != args.end());
+	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
+	const auto &optionB{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionB.name() == "option"sv);
 	REQUIRE(optionB.value().has_value());
 	REQUIRE(std::any_cast<std::string_view>(optionB.value()) == "B"sv);
 
-	REQUIRE(std::holds_alternative<flag_t>(args[2]));
-	const auto &workingDir{std::get<flag_t>(args[2])};
+	++argsIterator;
+	REQUIRE(argsIterator != args.end());
+	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
+	const auto &verbosity{std::get<flag_t>(*argsIterator)};
+	REQUIRE(verbosity.name() == "verbosity"sv);
+	REQUIRE(verbosity.value().has_value());
+	REQUIRE(std::any_cast<uint64_t>(verbosity.value()) == 10U);
+
+	++argsIterator;
+	REQUIRE(argsIterator != args.end());
+	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
+	const auto &workingDir{std::get<flag_t>(*argsIterator)};
 	// XXX: optionValue_t{} needs to be given the ability to hold a meta name for the value so
 	// these can be looked up sensibly
 	REQUIRE(workingDir.name() == "workingDir"sv);
 	REQUIRE(workingDir.value().has_value());
 	REQUIRE(std::any_cast<path>(workingDir.value()) == path{"/some/path"sv});
+
+	++argsIterator;
+	REQUIRE(argsIterator == args.end());
 
 	// Check that parsing a truncated valued option fails as intended
 	constexpr static auto argsTruncated

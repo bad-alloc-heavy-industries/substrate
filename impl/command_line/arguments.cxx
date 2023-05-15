@@ -14,7 +14,7 @@ namespace substrate::commandLine
 	template<typename... Ts> struct match_t : Ts... { using Ts::operator()...; };
 	template<typename... Ts> match_t(Ts...) -> match_t<Ts...>;
 
-	bool operator <(const optionsItem_t &lhs, const optionsItem_t &rhs) noexcept
+	static bool operator <(const optionsItem_t &lhs, const optionsItem_t &rhs) noexcept
 	{
 		// First, if the alternative held is numerically < then sort on that
 		if (lhs.index() < rhs.index())
@@ -29,6 +29,36 @@ namespace substrate::commandLine
 		if (std::holds_alternative<optionSet_t>(lhs))
 			return std::get<optionSet_t>(lhs) < std::get<optionSet_t>(rhs);
 		return false;
+	}
+
+	static const std::string_view &itemName(const item_t &item) noexcept
+	{
+		return std::visit(match_t
+		{
+			[&](const flag_t &value) -> const std::string_view & { return value.name(); },
+			[&](const choice_t &value) -> const std::string_view & { return value.name(); },
+		}, item);
+	}
+
+	static bool operator <(const item_t &lhs, const item_t &rhs) noexcept
+	{
+		// First extract the item name values
+		const auto lhsName{itemName(lhs)};
+		const auto rhsName{itemName(rhs)};
+		// Then compare them to generate the sorting
+		return lhsName < rhsName;
+	}
+
+	static bool operator <(const item_t &lhs, const std::string_view &rhsName) noexcept
+	{
+		const auto lhsName{itemName(lhs)};
+		return lhsName < rhsName;
+	}
+
+	static bool operator <(const std::string_view &lhsName, const item_t &rhs) noexcept
+	{
+		const auto rhsName{itemName(rhs)};
+		return lhsName < rhsName;
 	}
 
 	static bool validateOptions(const options_t &options) noexcept;
@@ -114,6 +144,7 @@ namespace substrate::commandLine
 		}, item);
 	}
 
+	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
 	{
 		const auto &token{lexer.token()};
@@ -215,10 +246,11 @@ namespace substrate::commandLine
 		return false;
 	}
 
+	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 	bool arguments_t::add(item_t argument) noexcept try
 	{
 		// Try to push back the new parsed item
-		_arguments.push_back(std::move(argument));
+		_arguments.emplace(std::move(argument));
 		return true;
 	}
 	// Catch any falure and turn that into a clean error result
@@ -347,22 +379,8 @@ namespace substrate::commandLine
 		{ return _arguments.begin(); }
 	arguments_t::iterator_t arguments_t::end() const noexcept
 		{ return _arguments.end(); }
-	const item_t &arguments_t::operator [](size_t index) const noexcept
-		{ return _arguments[index]; }
-
 	arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
-	{
-		return std::find_if(_arguments.begin(), _arguments.end(),
-			[&](const item_t &argument)
-			{
-				return std::visit(match_t
-				{
-					[&](const flag_t &value) { return value.name() == option; },
-					[&](const choice_t &value) { return value.name() == option; },
-				}, argument);
-			}
-		);
-	}
+		{ return _arguments.find(option); }
 
 	const item_t *arguments_t::operator [](const std::string_view &option) const noexcept
 	{

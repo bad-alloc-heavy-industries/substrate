@@ -26,8 +26,9 @@ namespace substrate::commandLine
 		std::any _value{};
 
 	public:
-		flag_t(const std::string_view &name) noexcept : _name{name} { }
-		flag_t(const std::string_view &name, std::any &&value) noexcept : _name{name}, _value{std::move(value)} { }
+		explicit flag_t(const std::string_view &name) noexcept : _name{name} { }
+		explicit flag_t(const std::string_view &name, std::any &&value) noexcept :
+			_name{name}, _value{std::move(value)} { }
 
 		[[nodiscard]] auto &name() const noexcept { return _name; }
 		[[nodiscard]] auto &value() const noexcept { return _value; }
@@ -38,11 +39,11 @@ namespace substrate::commandLine
 	struct SUBSTRATE_CLS_API arguments_t
 	{
 	private:
-		using vector_t = std::vector<item_t>;
-		using iterator_t = typename vector_t::const_iterator;
+		using storage_t = std::multiset<item_t, std::less<void>>;
+		using iterator_t = typename storage_t::const_iterator;
 		using optionsVisited_t = std::set<internal::optionsItem_t>;
 
-		vector_t _arguments;
+		storage_t _arguments;
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options,
 			optionsVisited_t &optionsVisited);
@@ -57,7 +58,6 @@ namespace substrate::commandLine
 		[[nodiscard]] iterator_t begin() const noexcept;
 		[[nodiscard]] iterator_t end() const noexcept;
 		[[nodiscard]] iterator_t find(const std::string_view &option) const noexcept;
-		[[nodiscard]] const item_t &operator [](size_t index) const noexcept;
 		[[nodiscard]] const item_t *operator [](const std::string_view &option) const noexcept;
 	};
 
@@ -69,7 +69,7 @@ namespace substrate::commandLine
 		arguments_t _arguments;
 
 	public:
-		choice_t(const std::string_view &name, const std::string_view &value, arguments_t &&arguments) noexcept :
+		explicit choice_t(const std::string_view &name, const std::string_view &value, arguments_t &&arguments) noexcept :
 			_name{name}, _value{value}, _arguments{std::move(arguments)} { }
 
 		[[nodiscard]] auto &name() const noexcept { return _name; }
