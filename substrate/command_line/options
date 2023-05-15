@@ -23,7 +23,8 @@ namespace substrate::commandLine
 	enum class optionFlags_t
 	{
 		repeatable,
-		takesParameter
+		takesParameter,
+		required,
 	};
 
 	enum class optionValueType_t
@@ -118,6 +119,12 @@ namespace substrate::commandLine
 			return *this;
 		}
 
+		[[nodiscard]] constexpr option_t &required() noexcept
+		{
+			_flags.set(optionFlags_t::required);
+			return *this;
+		}
+
 		template<typename T> [[nodiscard]] constexpr option_t &valueRange(T min, T max) noexcept
 		{
 			// These perform casts only to silence conversion warnings
@@ -136,6 +143,8 @@ namespace substrate::commandLine
 			{ return _flags.includes(optionFlags_t::takesParameter); }
 		[[nodiscard]] constexpr bool isRepeatable() const noexcept
 			{ return _flags.includes(optionFlags_t::repeatable); }
+		[[nodiscard]] constexpr bool isRequired() const noexcept
+			{ return _flags.includes(optionFlags_t::required); }
 		[[nodiscard]] constexpr bool valueOnly() const noexcept
 			{ return std::holds_alternative<optionValue_t>(_option); }
 
