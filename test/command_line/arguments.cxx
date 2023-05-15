@@ -469,6 +469,32 @@ TEST_CASE("parse duplicated command line arguments", "[command_line::parseArgume
 	REQUIRE(resultInvalidD == std::nullopt);
 }
 
+TEST_CASE("handle missing required command line arguments", "[command_line::parseArguments]")
+{
+	constexpr static auto programOptions
+	{
+		options
+		(
+			option_t{optionFlagPair_t{"-h"sv, "--help"sv}, "Display this help message and exit"sv},
+			option_t{optionFlagPair_t{"-v"sv, "--verbosity"sv}, "Set the log output verbosity"sv}
+				.takesParameter(optionValueType_t::unsignedInt).valueRange(0U, 63U).required(),
+			option_t{optionValue_t{"workingDir"sv}, "Working directory"sv}.valueType(optionValueType_t::path).required()
+		)
+	};
+
+	constexpr static auto argsInvalidA
+	{
+		substrate::make_array<const char *>
+		({
+			"program",
+			"-v", "10",
+			nullptr,
+		})
+	};
+	const auto resultInvalidA{parseArguments(argsInvalidA.size(), argsInvalidA.data(), programOptions)};
+	REQUIRE(resultInvalidA == std::nullopt);
+}
+
 TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::find]")
 {
 	constexpr static auto choiceAOptions{options(option_t{"--test"sv, "Run action in test mode"sv})};
