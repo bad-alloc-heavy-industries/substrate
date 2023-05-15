@@ -31,6 +31,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!helpOption.matches("--version"sv));
 	REQUIRE(!helpOption.takesParameter());
 	REQUIRE(!helpOption.isRepeatable());
+	REQUIRE(!helpOption.isRequired());
 	REQUIRE(!helpOption.valueOnly());
 	REQUIRE(helpOption.metaName() == "help"sv);
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
@@ -42,6 +43,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(versionOption.matches("--version"sv));
 	REQUIRE(!versionOption.takesParameter());
 	REQUIRE(!versionOption.isRepeatable());
+	REQUIRE(!versionOption.isRequired());
 	REQUIRE(!versionOption.valueOnly());
 	REQUIRE(versionOption.metaName() == "version"sv);
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
@@ -49,9 +51,12 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 
 	constexpr static option_t valueOption{optionValue_t{"any"sv}, "Any value you like"sv};
 	REQUIRE(valueOption.matches("funky"sv));
-	REQUIRE(valueOption.helpText() == "Any value you like"sv);
+	REQUIRE(valueOption.takesParameter());
+	REQUIRE(!valueOption.isRepeatable());
+	REQUIRE(!valueOption.isRequired());
 	REQUIRE(valueOption.valueOnly());
 	REQUIRE(valueOption.metaName() == "any"sv);
+	REQUIRE(valueOption.helpText() == "Any value you like"sv);
 	REQUIRE(valueOption.parseValue(""sv).has_value());
 	REQUIRE(std::any_cast<std::string_view>(*valueOption.parseValue("test"sv)) == "test"sv);
 }
