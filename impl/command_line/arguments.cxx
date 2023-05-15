@@ -84,6 +84,36 @@ namespace substrate::commandLine
 		return valueOptions < 2U;
 	}
 
+	[[nodiscard]] static auto collectRequiredOptions(const options_t &options) noexcept
+	{
+		// Build a set of all the required options defined in this options_t
+		std::set<internal::optionsItem_t> requiredOptions{};
+		for (const auto &option : options)
+		{
+			std::visit(match_t
+			{
+				// If it's an option_t, and it's required, then add it to the set
+				[&](const option_t &value)
+				{
+					if (value.isRequired())
+						requiredOptions.insert(option);
+				},
+				// Ignore optionSet_t's for now as they don't have the isRequired property
+				[](const auto &) { },
+			}, option);
+		}
+		return requiredOptions;
+	}
+
+	static auto displayName(const optionsItem_t &item)
+	{
+		return std::visit(match_t
+		{
+			[](const option_t &option) { return option.displayName(); },
+			[](const optionSet_t &option) { return std::string{option.metaName()}; }
+		}, item);
+	}
+
 	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
 	{
 		const auto &token{lexer.token()};
@@ -103,7 +133,19 @@ namespace substrate::commandLine
 				return false;
 			}
 		}
-		return true;
+		// Having parsed as many options as we can, collect all the required options into a set
+		const auto requiredOptions{collectRequiredOptions(options)};
+		optionsVisited_t missingOptions{};
+		// Compute which options are in the required options set but not in the visited options set
+		std::set_difference(requiredOptions.begin(), requiredOptions.end(), optionsVisited.begin(),
+			optionsVisited.end(), std::inserter(missingOptions, missingOptions.begin()));
+		// For each option that was not given but which is defined as required, display an error line
+		for (const auto &option : missingOptions)
+			console.error("Option '"sv, displayName(option), "' is required but not specified"sv);
+		// Then follow it up with a message summarising how many were missing
+		if (!missingOptions.empty())
+			console.error(missingOptions.size(), " required options were missing from the command line"sv);
+		return missingOptions.empty();
 	}
 
 	using optionMatch_t = std::variant<flag_t, choice_t, std::monostate>;
