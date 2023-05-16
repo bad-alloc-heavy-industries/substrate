@@ -83,10 +83,10 @@ namespace substrate::commandLine
 		[[nodiscard]] bool operator !=(const choice_t &other) const noexcept;
 	};
 
-	SUBSTRATE_API std::optional<arguments_t>
+	[[nodiscard]] SUBSTRATE_API std::optional<arguments_t>
 		parseArguments(size_t argCount, const char *const *argList, const options_t &options);
 
-	std::optional<arguments_t>
+	[[nodiscard]] inline std::optional<arguments_t>
 		parseArguments(size_t argCount, const char *const *argList, const internal::optionsHolder_t &options)
 	{
 		const options_t programOptions{options};
