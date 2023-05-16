@@ -246,9 +246,11 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	const auto &args{checkResult(resultValues, 4U)};
 
 	REQUIRE(args.countMatching("option"sv) == 2U);
+	const auto options{args.findAll("option"sv)};
 
 	auto argsIterator{args.begin()};
 	REQUIRE(argsIterator != args.end());
+	REQUIRE(*argsIterator == *options[0]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &optionA{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionA.name() == "option"sv);
@@ -257,6 +259,7 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	++argsIterator;
 	REQUIRE(argsIterator != args.end());
+	REQUIRE(*argsIterator == *options[1]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &optionB{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionB.name() == "option"sv);

@@ -402,6 +402,32 @@ namespace substrate::commandLine
 			return nullptr;
 		return &*argument;
 	}
+
+	// Best we can do for a flag_t is check if the names match and the std::any's both do or don't contain a value
+	// plus if the type_info's for the two agree, which should at least mean they contain the same type of value
+	bool flag_t::operator ==(const flag_t &other) const noexcept
+	{
+		return _name == other._name &&
+			_value.has_value() == other._value.has_value() &&
+			_value.type() == other._value.type();
+	}
+
+	// A choice_t, however, we can properly get a match on name and value
+	bool choice_t::operator ==(const choice_t &other) const noexcept
+		{ return _name == other._name && _value == other._value; }
+
+	bool operator ==(const item_t &lhs, const item_t &rhs) noexcept
+	{
+		// Check if the items hold the same type, if not they can't be equal
+		if (lhs.index() != rhs.index())
+			return false;
+		// Now convert them to their underlying type and compare those
+		if (std::holds_alternative<flag_t>(lhs))
+			return std::get<flag_t>(lhs) == std::get<flag_t>(rhs);
+		if (std::holds_alternative<choice_t>(lhs))
+			return std::get<choice_t>(lhs) == std::get<choice_t>(rhs);
+		return false; // Should be unreachable.
+	}
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
