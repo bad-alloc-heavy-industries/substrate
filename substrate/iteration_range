@@ -14,9 +14,16 @@ namespace substrate
 		iterator_t end_;
 
 	public:
-		constexpr iterationRange_t(const iterator_t &begin, const iterator_t &end) : begin_{begin}, end_{end} { }
-		constexpr iterationRange_t(const std::pair<iterator_t, iterator_t> &iterators) :
+		constexpr iterationRange_t(const iterator_t &begin, const iterator_t &end) noexcept :
+			begin_{begin}, end_{end} { }
+		constexpr iterationRange_t(const std::pair<iterator_t, iterator_t> &iterators) noexcept :
 			iterationRange_t{iterators.first, iterators.second} { }
+
+		constexpr iterationRange_t &operator =(const std::pair<iterator_t, iterator_t> &iterators) noexcept
+		{
+			*this = {iterators.first, iterators.second};
+			return *this;
+		}
 
 		SUBSTRATE_NO_DISCARD(constexpr bool empty() const noexcept) { return begin_ == end_; }
 		SUBSTRATE_NO_DISCARD(constexpr const iterator_t &begin() const noexcept) { return begin_; }
