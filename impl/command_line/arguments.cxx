@@ -412,9 +412,13 @@ namespace substrate::commandLine
 			_value.type() == other._value.type();
 	}
 
+	bool flag_t::operator !=(const flag_t &other) const noexcept
+		{ return !(*this == other); }
 	// A choice_t, however, we can properly get a match on name and value
 	bool choice_t::operator ==(const choice_t &other) const noexcept
 		{ return _name == other._name && _value == other._value; }
+	bool choice_t::operator !=(const choice_t &other) const noexcept
+		{ return !(*this == other); }
 
 	bool operator ==(const item_t &lhs, const item_t &rhs) noexcept
 	{
@@ -428,6 +432,9 @@ namespace substrate::commandLine
 			return std::get<choice_t>(lhs) == std::get<choice_t>(rhs);
 		return false; // Should be unreachable.
 	}
+
+	bool operator !=(const item_t &lhs, const item_t &rhs) noexcept
+		{ return !(lhs == rhs); }
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

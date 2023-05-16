@@ -19,7 +19,7 @@ namespace substrate::commandLine
 
 	struct choice_t;
 
-	struct flag_t
+	struct SUBSTRATE_CLS_API flag_t
 	{
 	private:
 		std::string_view _name;
@@ -33,6 +33,7 @@ namespace substrate::commandLine
 		[[nodiscard]] auto &name() const noexcept { return _name; }
 		[[nodiscard]] auto &value() const noexcept { return _value; }
 		[[nodiscard]] bool operator ==(const flag_t &other) const noexcept;
+		[[nodiscard]] bool operator !=(const flag_t &other) const noexcept;
 	};
 
 	using item_t = std::variant<flag_t, choice_t>;
@@ -64,7 +65,7 @@ namespace substrate::commandLine
 		[[nodiscard]] const item_t *operator [](const std::string_view &option) const noexcept;
 	};
 
-	struct choice_t
+	struct SUBSTRATE_CLS_API choice_t
 	{
 	private:
 		std::string_view _name;
@@ -79,6 +80,7 @@ namespace substrate::commandLine
 		[[nodiscard]] auto &value() const noexcept { return _value; }
 		[[nodiscard]] auto &arguments() const noexcept { return _arguments; }
 		[[nodiscard]] bool operator ==(const choice_t &other) const noexcept;
+		[[nodiscard]] bool operator !=(const choice_t &other) const noexcept;
 	};
 
 	SUBSTRATE_API std::optional<arguments_t>
@@ -92,6 +94,7 @@ namespace substrate::commandLine
 	}
 
 	[[nodiscard]] SUBSTRATE_API bool operator ==(const item_t &lhs, const item_t &rhs) noexcept;
+	[[nodiscard]] SUBSTRATE_API bool operator !=(const item_t &lhs, const item_t &rhs) noexcept;
 } // namespace substrate::commandLine
 
 #endif /* SUBSTRATE_COMMAND_LINE_ARGUMENTS */

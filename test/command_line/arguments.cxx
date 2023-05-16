@@ -251,6 +251,9 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 	auto argsIterator{args.begin()};
 	REQUIRE(argsIterator != args.end());
 	REQUIRE(*argsIterator == *options[0]);
+	REQUIRE(*argsIterator == *options[1]);
+	REQUIRE(*argsIterator != *args["verbosity"sv]);
+	REQUIRE(*argsIterator != *args["workingDir"sv]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &optionA{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionA.name() == "option"sv);
@@ -259,7 +262,10 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	++argsIterator;
 	REQUIRE(argsIterator != args.end());
+	REQUIRE(*argsIterator == *options[0]);
 	REQUIRE(*argsIterator == *options[1]);
+	REQUIRE(*argsIterator != *args["verbosity"sv]);
+	REQUIRE(*argsIterator != *args["workingDir"sv]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &optionB{std::get<flag_t>(*argsIterator)};
 	REQUIRE(optionB.name() == "option"sv);
@@ -268,6 +274,10 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	++argsIterator;
 	REQUIRE(argsIterator != args.end());
+	REQUIRE(*argsIterator != *options[0]);
+	REQUIRE(*argsIterator != *options[1]);
+	REQUIRE(*argsIterator == *args["verbosity"sv]);
+	REQUIRE(*argsIterator != *args["workingDir"sv]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &verbosity{std::get<flag_t>(*argsIterator)};
 	REQUIRE(verbosity.name() == "verbosity"sv);
@@ -276,6 +286,10 @@ TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
 
 	++argsIterator;
 	REQUIRE(argsIterator != args.end());
+	REQUIRE(*argsIterator != *options[0]);
+	REQUIRE(*argsIterator != *options[1]);
+	REQUIRE(*argsIterator != *args["verbosity"sv]);
+	REQUIRE(*argsIterator == *args["workingDir"sv]);
 	REQUIRE(std::holds_alternative<flag_t>(*argsIterator));
 	const auto &workingDir{std::get<flag_t>(*argsIterator)};
 	// XXX: optionValue_t{} needs to be given the ability to hold a meta name for the value so
