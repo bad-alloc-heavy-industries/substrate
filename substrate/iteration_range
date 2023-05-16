@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_ITERATION_RANGE
+#define SUBSTRATE_ITERATION_RANGE
+
+#include <utility>
+#include <substrate/internal/defs>
+
+namespace substrate
+{
+	template<typename iterator_t> struct iterationRange_t final
+	{
+	private:
+		iterator_t begin_;
+		iterator_t end_;
+
+	public:
+		constexpr iterationRange_t(const iterator_t &begin, const iterator_t &end) : begin_{begin}, end_{end} { }
+		constexpr iterationRange_t(const std::pair<iterator_t, iterator_t> &iterators) :
+			iterationRange_t{iterators.first, iterators.second} { }
+
+		SUBSTRATE_NO_DISCARD(constexpr bool empty() const noexcept) { return begin_ == end_; }
+		SUBSTRATE_NO_DISCARD(constexpr const iterator_t &begin() const noexcept) { return begin_; }
+		SUBSTRATE_NO_DISCARD(constexpr const iterator_t &end() const noexcept) { return end_; }
+	};
+} // namespace substrate
+
+#endif /* SUBSTRATE_ITERATION_RANGE */
+/* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
