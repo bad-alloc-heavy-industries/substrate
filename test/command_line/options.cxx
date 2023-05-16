@@ -35,6 +35,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!helpOption.valueOnly());
 	REQUIRE(helpOption.metaName() == "help"sv);
 	REQUIRE(helpOption.helpText() == "Display this help message and exit"sv);
+	REQUIRE(helpOption.displayName() == "-h, --help"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
 	constexpr static option_t versionOption{"--version"sv, "Display the version information and exit"sv};
@@ -47,6 +48,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(!versionOption.valueOnly());
 	REQUIRE(versionOption.metaName() == "version"sv);
 	REQUIRE(versionOption.helpText() == "Display the version information and exit"sv);
+	REQUIRE(versionOption.displayName() == "--version"sv);
 	REQUIRE(!helpOption.parseValue(""sv).has_value());
 
 	constexpr static option_t valueOption{optionValue_t{"any"sv}, "Any value you like"sv};
@@ -57,6 +59,7 @@ TEST_CASE("building command line option descriptions", "[command_line::option_t]
 	REQUIRE(valueOption.valueOnly());
 	REQUIRE(valueOption.metaName() == "any"sv);
 	REQUIRE(valueOption.helpText() == "Any value you like"sv);
+	REQUIRE(valueOption.displayName() == "any"sv);
 	REQUIRE(valueOption.parseValue(""sv).has_value());
 	REQUIRE(std::any_cast<std::string_view>(*valueOption.parseValue("test"sv)) == "test"sv);
 }
