@@ -589,4 +589,7 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 	REQUIRE(std::holds_alternative<flag_t>(*testFlag));
 	const auto &test{std::get<flag_t>(*testFlag)};
 	REQUIRE(!test.value().has_value());
+
+	REQUIRE(*args["verbosity"sv] != *args["actions"sv]);
+	REQUIRE(*args["actions"sv] == *args["actions"sv]);
 }
