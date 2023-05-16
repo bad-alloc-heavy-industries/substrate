@@ -136,6 +136,7 @@ TEST_CASE("parse command line argument choice", "[command_line::parseArguments]"
 	};
 	const auto resultC{parseArguments(argsChoiceC.size(), argsChoiceC.data(), programOptions)};
 	REQUIRE(resultC == std::nullopt);
+	REQUIRE(choiceA != choiceB);
 }
 
 TEST_CASE("parse command line argument simple flag", "[command_line::parseArguments]")
