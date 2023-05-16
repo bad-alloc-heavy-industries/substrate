@@ -21,6 +21,13 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr bool empty() const noexcept) { return begin_ == end_; }
 		SUBSTRATE_NO_DISCARD(constexpr const iterator_t &begin() const noexcept) { return begin_; }
 		SUBSTRATE_NO_DISCARD(constexpr const iterator_t &end() const noexcept) { return end_; }
+
+		constexpr void operator ++() noexcept
+		{
+			if (begin_ == end_)
+				return;
+			++begin_;
+		}
 	};
 } // namespace substrate
 
