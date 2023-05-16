@@ -213,6 +213,8 @@ TEST_CASE("parse command line argument simple flag", "[command_line::parseArgume
 	};
 	const auto resultV{parseArguments(argsV.size(), argsV.data(), programOptions)};
 	REQUIRE(resultV == std::nullopt);
+	REQUIRE(helpA == helpB);
+	REQUIRE(helpA != version);
 }
 
 TEST_CASE("parse command line argument flags", "[command_line::parseArguments]")
@@ -591,6 +593,8 @@ TEST_CASE("command line post-parsing interaction", "[command_line::arguments_t::
 	const auto &test{std::get<flag_t>(*testFlag)};
 	REQUIRE(!test.value().has_value());
 
-	REQUIRE(*args["verbosity"sv] != *args["actions"sv]);
-	REQUIRE(*args["actions"sv] == *args["actions"sv]);
+	REQUIRE(*verbosityFlag != *actionChoice);
+	REQUIRE(verbosity != test);
+	REQUIRE(*actionChoice == *actionChoice);
+	REQUIRE(action == action);
 }
