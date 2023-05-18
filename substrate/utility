@@ -542,6 +542,9 @@ namespace substrate
 	template<typename T> struct is_duration : public std::false_type { };
 	template<typename R, typename P> struct is_duration<std::chrono::duration<R, P>> : public std::true_type { };
 
+	template<typename T> struct is_pod : public std::integral_constant<bool,
+		std::is_trivial<T>::value && std::is_standard_layout<T>::value> { };
+
 #if !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
 	SUBSTRATE_NOWARN_UNUSED(static inline std::string decode_typename(const char *const mangled_name))
