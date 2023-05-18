@@ -394,13 +394,13 @@ TEST_CASE("Hexadecimal conversion from uint8_t", "[conversions]")
 {
 	testFromInt_t<uint8_t>::testHexConversions(
 	{
-		{{0, "0", "000"}, true},
-		{{127, "7F", "07F"}, true},
-		{{128, "80", "080"}, true},
-		{{255, "FF", "0FF"}, true},
-		{{127, "7f", "07f"}, false},
-		{{170, "aa", "0aa"}, false},
-		{{255, "ff", "0ff"}, false}
+		{{u8(0), "0", "000"}, true},
+		{{u8(127), "7F", "07F"}, true},
+		{{u8(128), "80", "080"}, true},
+		{{u8(255), "FF", "0FF"}, true},
+		{{u8(127), "7f", "07f"}, false},
+		{{u8(170), "aa", "0aa"}, false},
+		{{u8(255), "ff", "0ff"}, false}
 	});
 }
 
@@ -408,14 +408,14 @@ TEST_CASE("Hexadecimal conversion from uint16_t", "[conversions]")
 {
 	testFromInt_t<uint16_t>::testHexConversions(
 	{
-		{{0, "0", "00000"}, true},
-		{{256, "100", "00100"}, true},
-		{{32767, "7FFF", "07FFF"}, true},
-		{{32768, "8000", "08000"}, true},
-		{{65535, "FFFF", "0FFFF"}, true},
-		{{32767, "7fff", "07fff"}, false},
-		{{43690, "aaaa", "0aaaa"}, false},
-		{{65535, "ffff", "0ffff"}, false}
+		{{u64(0), "0", "00000"}, true},
+		{{u64(256), "100", "00100"}, true},
+		{{u64(32767), "7FFF", "07FFF"}, true},
+		{{u64(32768), "8000", "08000"}, true},
+		{{u64(65535), "FFFF", "0FFFF"}, true},
+		{{u64(32767), "7fff", "07fff"}, false},
+		{{u64(43690), "aaaa", "0aaaa"}, false},
+		{{u64(65535), "ffff", "0ffff"}, false}
 	});
 }
 
@@ -423,14 +423,14 @@ TEST_CASE("Hexadecimal conversion from uint32_t", "[conversions]")
 {
 	testFromInt_t<uint32_t>::testHexConversions(
 	{
-		{{0, "0", "000000000"}, true},
-		{{65536, "10000", "000010000"}, true},
-		{{2147483647, "7FFFFFFF", "07FFFFFFF"}, true},
-		{{2147483648, "80000000", "080000000"}, true},
-		{{4294967295, "FFFFFFFF", "0FFFFFFFF"}, true},
-		{{2147483647, "7fffffff", "07fffffff"}, false},
-		{{2863311530, "aaaaaaaa", "0aaaaaaaa"}, false},
-		{{4294967295, "ffffffff", "0ffffffff"}, false}
+		{{u32(0), "0", "000000000"}, true},
+		{{u32(65536), "10000", "000010000"}, true},
+		{{u32(2147483647), "7FFFFFFF", "07FFFFFFF"}, true},
+		{{u32(2147483648), "80000000", "080000000"}, true},
+		{{u32(4294967295), "FFFFFFFF", "0FFFFFFFF"}, true},
+		{{u32(2147483647), "7fffffff", "07fffffff"}, false},
+		{{u32(2863311530), "aaaaaaaa", "0aaaaaaaa"}, false},
+		{{u32(4294967295), "ffffffff", "0ffffffff"}, false}
 	});
 }
 
@@ -438,18 +438,18 @@ TEST_CASE("Hexadecimal conversion from uint64_t", "[conversions]")
 {
 	testFromInt_t<uint64_t>::testHexConversions(
 	{
-		{{0, "0", "00000000000000000"}, true},
-		{{4294967296, "100000000", "00000000100000000"}, true},
-		{{140737488355327, "7FFFFFFFFFFF", "000007FFFFFFFFFFF"}, true},
-		{{140737488355328, "800000000000", "00000800000000000"}, true},
-		{{281474976710655, "FFFFFFFFFFFF", "00000FFFFFFFFFFFF"}, true},
-		{{9223372036854775807, "7FFFFFFFFFFFFFFF", "07FFFFFFFFFFFFFFF"}, true},
+		{{u64(0), "0", "00000000000000000"}, true},
+		{{u64(4294967296), "100000000", "00000000100000000"}, true},
+		{{u64(140737488355327), "7FFFFFFFFFFF", "000007FFFFFFFFFFF"}, true},
+		{{u64(140737488355328), "800000000000", "00000800000000000"}, true},
+		{{u64(281474976710655), "FFFFFFFFFFFF", "00000FFFFFFFFFFFF"}, true},
+		{{u64(9223372036854775807), "7FFFFFFFFFFFFFFF", "07FFFFFFFFFFFFFFF"}, true},
 		{{u64(9223372036854775808), "8000000000000000", "08000000000000000"}, true},
 		{{u64(18446744073709551615), "FFFFFFFFFFFFFFFF", "0FFFFFFFFFFFFFFFF"}, true},
-		{{140737488355327, "7fffffffffff", "000007fffffffffff"}, false},
-		{{187649984473770, "aaaaaaaaaaaa", "00000aaaaaaaaaaaa"}, false},
-		{{281474976710655, "ffffffffffff", "00000ffffffffffff"}, false},
-		{{9223372036854775807, "7fffffffffffffff", "07fffffffffffffff"}, false},
+		{{u64(140737488355327), "7fffffffffff", "000007fffffffffff"}, false},
+		{{u64(187649984473770), "aaaaaaaaaaaa", "00000aaaaaaaaaaaa"}, false},
+		{{u64(281474976710655), "ffffffffffff", "00000ffffffffffff"}, false},
+		{{u64(9223372036854775807), "7fffffffffffffff", "07fffffffffffffff"}, false},
 		{{u64(12297829382473034410), "aaaaaaaaaaaaaaaa", "0aaaaaaaaaaaaaaaa"}, false},
 		{{u64(18446744073709551615), "ffffffffffffffff", "0ffffffffffffffff"}, false}
 	});
