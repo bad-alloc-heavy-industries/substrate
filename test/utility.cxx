@@ -2071,7 +2071,7 @@ using substrate::has_nullable_ctor;
 
 TEST_CASE("has_nullable_ctor", "[utility]")
 {
-	REQUIRE_FALSE(std::is_pod<test::AK>::value);
+	REQUIRE_FALSE(substrate::is_pod<test::AK>::value);
 	REQUIRE(has_nullable_ctor<test::AK>::value);
 }
 
