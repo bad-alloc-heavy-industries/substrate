@@ -12,14 +12,14 @@ using substrate::toInt_t;
 template<typename int_t> struct testOkValue_t
 {
 	int_t inputNumber;
-	const char *const variableResult;
-	const char *const fixedResult;
+	const char *variableResult;
+	const char *fixedResult;
 };
 
 template<typename int_t> struct testOkHexValue_t
 {
 	testOkValue_t<int_t> data;
-	const bool upperCase;
+	bool upperCase;
 };
 
 template<typename int_t> using testOkPair_t = std::pair<int_t, const char *const>;
@@ -656,7 +656,7 @@ TEST_CASE("Octal conversion to int64_t", "[conversions] ")
 template<typename toInt_t> struct testOctShouldFail_t
 {
 private:
-	const char *const test;
+	const char *test;
 
 public:
 	testOctShouldFail_t(const char *const test_) noexcept : test{test_} { }
@@ -817,7 +817,7 @@ TEST_CASE("Decimal conversion to int64_t", "[conversions]")
 template<typename toInt_t> struct testDecShouldFail_t
 {
 private:
-	const char *const test;
+	const char *test;
 
 public:
 	testDecShouldFail_t(const char *const test_) noexcept : test{test_} { }
@@ -983,7 +983,7 @@ TEST_CASE("Hexadecimal conversion to int64_t", "[conversions]")
 template<typename toInt_t> struct testHexShouldFail_t
 {
 private:
-	const char *const test;
+	const char *test;
 
 public:
 	testHexShouldFail_t(const char *const test_) noexcept : test{test_} { }
