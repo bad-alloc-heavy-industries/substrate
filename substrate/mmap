@@ -53,8 +53,8 @@ namespace substrate
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()}, _fd{-1} { }
 
-		template<typename T> substrate::enable_if_t<std::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
-			index(const std::size_t idx) const
+		template<typename T> substrate::enable_if_t<substrate::is_pod<T>::value && !has_nullable_ctor<T>::value &&
+			!std::is_same<T, void*>::value, T *> index(const std::size_t idx) const
 		{
 			if (idx < _len)
 			{
