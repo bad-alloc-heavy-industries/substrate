@@ -291,7 +291,7 @@ namespace substrate
 	constexpr inline bool is_empty_v = std::is_empty_v<T>;
 
 	template<class T>
-	constexpr inline bool is_pod_v = std::is_pod_v<T>;
+	constexpr inline bool is_pod_v = std::is_trivial_v<T> && std::is_standard_layout_v<T>;
 
 	template<class T>
 	constexpr inline bool is_standard_layout_v = std::is_standard_layout_v<T>;
@@ -487,7 +487,7 @@ namespace substrate
 	constexpr bool is_empty_v = std::is_empty<T>::value;
 
 	template<class T>
-	constexpr bool is_pod_v = std::is_pod<T>::value;
+	constexpr bool is_pod_v = std::is_trivial<T>::value && std::is_standard_layout<T>::value;
 
 	template<class T>
 	constexpr bool is_standard_layout_v = std::is_standard_layout<T>::value;
