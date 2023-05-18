@@ -56,9 +56,9 @@ ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
 	{ return ::read(socket, bufferPtr, len); }
 #else
 ssize_t socket_t::write(const void *const bufferPtr, const size_t len) const noexcept
-	{ return ::send(socket, static_cast<const char *const>(bufferPtr), int32_t(len), 0); }
+	{ return ::send(socket, static_cast<const char *>(bufferPtr), int32_t(len), 0); }
 ssize_t socket_t::read(void *const bufferPtr, const size_t len) const noexcept
-	{ return ::recv(socket, static_cast<char *const>(bufferPtr), int32_t(len), 0); }
+	{ return ::recv(socket, static_cast<char *>(bufferPtr), int32_t(len), 0); }
 #endif
 
 ssize_t socket_t::writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept
