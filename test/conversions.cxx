@@ -31,14 +31,14 @@ using testFailStr_t = std::vector<const char *>;
 using str_t = std::char_traits<char>;
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define u8(n)		static_cast<uint8_t>(n)
-#define i8(n)		static_cast<int8_t>(n)
-#define u16(n)		static_cast<uint16_t>(n)
-#define i16(n)		static_cast<int16_t>(n)
-#define u32(n)      UINT32_C(n)
-#define i32(n)      INT32_C(n)
-#define u64(n)		UINT64_C(n)
-#define i64(n)		INT64_C(n)
+#define u8(n)  static_cast<uint8_t>(n)
+#define i8(n)  static_cast<int8_t>(n)
+#define u16(n) static_cast<uint16_t>(n)
+#define i16(n) static_cast<int16_t>(n)
+#define u32(n) UINT32_C(n)
+#define i32(n) INT32_C(n)
+#define u64(n) UINT64_C(n)
+#define i64(n) INT64_C(n)
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
 template<typename> constexpr inline size_t typeToOctalLength() noexcept { return static_cast<std::size_t>(-1); }
