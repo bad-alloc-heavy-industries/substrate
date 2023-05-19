@@ -1,0 +1,300 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_ZIP_CONTAINER
+#define SUBSTRATE_ZIP_CONTAINER
+
+#include <algorithm>
+#include <iterator>
+#include <stdexcept>
+#include <tuple>
+
+#include "internal/defs"
+#include "utility"
+
+namespace substrate
+{
+	template<typename...> struct zipContainer_t;
+
+	namespace internal
+	{
+		template<typename... Iterators> struct zipIterator_t final
+		{
+		public:
+			using iterator_category = std::random_access_iterator_tag;
+			using difference_type = ssize_t;
+			using reference = std::tuple<typename std::iterator_traits<Iterators>::reference...>;
+			using value_type = std::tuple<typename std::iterator_traits<Iterators>::value_type...>;
+			using const_reference = std::tuple<add_const_t<typename std::iterator_traits<Iterators>::reference>...>;
+			using pointer = std::tuple<typename std::iterator_traits<Iterators>::pointer...>;
+
+		private:
+			static constexpr size_t length = sizeof...(Iterators);
+			size_t index;
+			size_t containerLength;
+			std::tuple<Iterators...> iterators;
+
+			zipIterator_t(const zipIterator_t &) noexcept = default;
+			zipIterator_t &operator=(const zipIterator_t &) noexcept = default;
+
+			template<size_t I> inline typename std::tuple_element<I, reference>::type get() const noexcept
+				{ return std::get<I>(iterators)[index]; }
+
+			template<size_t I> inline bool lt(const zipIterator_t<Iterators...> &rhs) const noexcept
+				{ return get<I>() < rhs.template get<I>(); }
+
+#if __cplusplus >= 201703L
+			template<size_t... Is>
+				inline bool lt(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+				{ return (lt<Is>(rhs) && ...); }
+#else
+			template<size_t... Is>
+				inline bool lt(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+			{
+				const std::array<bool, length> equals = {{lt<Is...>(rhs)}};
+				return std::all_of(equals.begin(), equals.end(), [](const bool &value) { return value; });
+			}
+#endif
+
+			template<size_t I> inline bool gt(const zipIterator_t<Iterators...> &rhs) const noexcept
+				{ return get<I>() > rhs.template get<I>(); }
+
+#if __cplusplus >= 201703L
+			template<size_t... Is>
+				inline bool gt(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+				{ return (gt<Is>(rhs) && ...); }
+#else
+			template<size_t... Is>
+				inline bool gt(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+			{
+				const std::array<bool, length> equals = {{gt<Is...>(rhs)}};
+				return std::all_of(equals.begin(), equals.end(), [](const bool &value) { return value; });
+			}
+#endif
+
+			template<size_t I> inline bool le(const zipIterator_t<Iterators...> &rhs) const noexcept
+				{ return get<I>() < rhs.template get<I>(); }
+
+#if __cplusplus >= 201703L
+			template<size_t... Is>
+				inline bool le(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+				{ return (le<Is>(rhs) && ...); }
+#else
+			template<size_t... Is>
+				inline bool le(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+			{
+				const std::array<bool, length> equals = {{le<Is...>(rhs)}};
+				return std::all_of(equals.begin(), equals.end(), [](const bool &value) { return value; });
+			}
+#endif
+
+			template<size_t I> inline bool ge(const zipIterator_t<Iterators...> &rhs) const noexcept
+				{ return get<I>() >= rhs.template get<I>(); }
+
+#if __cplusplus >= 201703L
+			template<size_t... Is>
+				inline bool ge(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+				{ return (ge<Is>(rhs) && ...); }
+#else
+			template<size_t... Is>
+				inline bool ge(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+			{
+				const std::array<bool, length> equals = {{eq<Is...>(rhs)}};
+				return std::all_of(equals.begin(), equals.end(), [](const bool &value) { return value; });
+			}
+#endif
+
+			template<size_t I> inline bool eq(const zipIterator_t<Iterators...> &rhs) const noexcept
+				{ return rhs.template get<I>() == get<I>(); }
+
+#if __cplusplus >= 201703L
+			template<size_t... Is>
+				inline bool eq(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+				{ return (eq<Is>(rhs) && ...); }
+#else
+			template<size_t... Is>
+				inline bool eq(const zipIterator_t<Iterators...> &rhs, indexSequence_t<Is...>) const noexcept
+			{
+				const std::array<bool, length> equals = {{eq<Is>(rhs)...}};
+				return std::all_of(equals.begin(), equals.end(), [](const bool &value) { return value; });
+			}
+#endif
+
+			template<size_t... Is> inline reference getAll(indexSequence_t<Is...>) noexcept
+#if __cplusplus >= 201703L
+				{ return {(get<Is>())...}; }
+#else
+				{ return {get<Is>()...}; }
+#endif
+
+			template<size_t... Is> inline const_reference getAll(indexSequence_t<Is...>) const noexcept
+#if __cplusplus >= 201703L
+				{ return {(get<Is>())...}; }
+#else
+				{ return {get<Is>()...}; }
+#endif
+
+		public:
+			// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+			zipIterator_t(Iterators &&...its, size_t index, size_t containerLength) :
+				index(index), containerLength(containerLength), iterators(std::forward<Iterators>(its)...)
+			{
+				if (containerLength > static_cast<size_t>(std::numeric_limits<difference_type>::max()))
+					throw std::out_of_range("Accessing iterators beyond PTRDIFF_MAX is undefined behaviour");
+
+				if (index > containerLength)
+					throw std::out_of_range("Accessing iterators beyond boundaries is undefined behaviour");
+			}
+
+			zipIterator_t(zipIterator_t &&) noexcept = default;
+			zipIterator_t &operator=(zipIterator_t &&) noexcept = default;
+
+			~zipIterator_t() noexcept = default;
+
+			SUBSTRATE_NO_DISCARD(inline zipIterator_t operator+(const size_t value) const noexcept)
+			{
+				zipIterator_t<Iterators...> result{*this};
+				result += value;
+				return result;
+			}
+
+			SUBSTRATE_NO_DISCARD(inline zipIterator_t operator-(const size_t value) const noexcept)
+			{
+				zipIterator_t<Iterators...> result{*this};
+				result -= value;
+				return result;
+			}
+
+			inline zipIterator_t &operator+=(const size_t value)
+			{
+				if (index > std::numeric_limits<size_t>::max() - value)
+					index = std::numeric_limits<size_t>::max();
+				else
+					index = std::max<size_t>(std::min(index + value, containerLength), 0U);
+				return *this;
+			}
+
+			inline zipIterator_t &operator-=(const size_t value)
+			{
+				if (value > index)
+					index = 0;
+				else
+					index = std::max<size_t>(std::min(index - value, containerLength), 0U);
+				return *this;
+			}
+
+			inline zipIterator_t &operator++() noexcept { return *this += 1; }
+
+			// NOLINTNEXTLINE(readability-const-return-type)
+			inline const zipIterator_t operator++(int value) noexcept
+			{
+				zipIterator_t<Iterators...> result{*this};
+				if (value != 0)
+					*this += static_cast<size_t>(value);
+				else
+					*this += 1;
+				return result;
+			}
+
+			inline zipIterator_t &operator--() noexcept { return *this -= 1; }
+
+			// NOLINTNEXTLINE(readability-const-return-type)
+			inline const zipIterator_t operator--(int value) noexcept
+			{
+				zipIterator_t<Iterators...> result{*this};
+				if (value != 0)
+					*this -= static_cast<size_t>(value);
+				else
+					*this -= 1;
+				return result;
+			}
+
+			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR inline reference operator*() noexcept)
+				{ return getAll(makeIndexSequence<length>{});}
+
+			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR inline const_reference operator*() const noexcept)
+			 	{ return getAll(makeIndexSequence<length>{});}
+
+			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR inline reference operator[](size_t idx) noexcept)
+			{
+				zipIterator_t<Iterators...> inc{*this + idx};
+				return inc.getAll(makeIndexSequence<length>{});
+			}
+
+			SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR inline const_reference operator[](size_t idx) const noexcept)
+			{
+				const zipIterator_t<Iterators...> inc = *this + idx;
+				return inc.getAll(makeIndexSequence<length>{});
+			}
+
+			SUBSTRATE_NO_DISCARD(inline bool operator==(const zipIterator_t<Iterators...> &rhs) const noexcept)
+				{ return eq(rhs, makeIndexSequence<length>{}); }
+
+			SUBSTRATE_NO_DISCARD(inline bool operator<(const zipIterator_t<Iterators...> &rhs) const noexcept)
+				{ return lt(rhs, makeIndexSequence<length>{}); }
+
+			SUBSTRATE_NO_DISCARD(inline bool operator<=(const zipIterator_t<Iterators...> &rhs) const noexcept)
+				{ return le(rhs, makeIndexSequence<length>{}); }
+
+			SUBSTRATE_NO_DISCARD(inline bool operator>(const zipIterator_t<Iterators...> &rhs) const noexcept)
+				{ return gt(rhs, makeIndexSequence<length>{}); }
+
+			SUBSTRATE_NO_DISCARD(inline bool operator>=(const zipIterator_t<Iterators...> &rhs) const noexcept)
+				{ return ge(rhs, makeIndexSequence<length>{}); }
+		};
+	} // namespace internal
+
+	template<typename... Ts> struct zipContainer_t final
+	{
+	private:
+		static constexpr size_t tupleLength = sizeof...(Ts);
+		size_t containerLength;
+		std::tuple<Ts...> _containers;
+
+		using iterator = internal::zipIterator_t<
+			conditional_t<std::is_const<Ts>::value, typename Ts::const_iterator, typename Ts::iterator>...>;
+		using value_type = typename iterator::reference;
+
+		template<size_t... Is> inline iterator createBeginIterator(internal::indexSequence_t<Is...>) const noexcept
+			{ return {(std::get<Is>(_containers).begin())..., 0, containerLength}; }
+
+		template<size_t... Is> inline iterator createEndIterator(internal::indexSequence_t<Is...>) const noexcept
+			{ return {(std::get<Is>(_containers).begin())..., containerLength, containerLength}; }
+
+		template<typename T> static inline bool containerMatchesLength(T &container, size_t containerLength) noexcept
+			{ return substrate::size(container) == containerLength; }
+
+	public:
+		zipContainer_t(Ts &...containers) : _containers(containers...)
+		{
+			containerLength = substrate::size(std::get<0>(_containers));
+#if __cplusplus >= 201703L
+			if ((!containerMatchesLength(containers, containerLength) || ...))
+#else
+			const std::array<size_t, tupleLength> results{{substrate::size(containers)...}};
+			if (std::any_of(results.begin(), results.end(),
+					[&](const size_t &value) noexcept { return value != containerLength; }))
+#endif
+				throw std::out_of_range("mismatching containers length");
+		}
+
+		zipContainer_t(Ts &&...containers) : _containers(containers...)
+		{
+			containerLength = substrate::size(std::get<0>(_containers));
+#if __cplusplus >= 201703L
+			if ((!containerMatchesLength(containers, containerLength) && ...))
+#else
+			const std::array<size_t, tupleLength> results{{substrate::size(containers)...}};
+			if (std::any_of(results.begin(), results.end(),
+					[&](const size_t &value) noexcept { return value != containerLength; }))
+#endif
+				throw std::out_of_range("mismatching containers length");
+		}
+
+		SUBSTRATE_NO_DISCARD(iterator begin() const noexcept)
+			{ return createBeginIterator(internal::makeIndexSequence<tupleLength>()); }
+
+		SUBSTRATE_NO_DISCARD(iterator end() const noexcept)
+			{ return createEndIterator(internal::makeIndexSequence<tupleLength>()); }
+	};
+} // namespace substrate
+
+#endif // SUBSTRATE_ZIP_CONTAINER3
