@@ -745,6 +745,49 @@ namespace substrate
 		}
 		return static_cast<T>(enc);
 	}
+
+#if __cplusplus >= 201902L
+	template<typename C>
+		[[nodiscard]] inline constexpr auto ssize(const C &c) noexcept -> decltype(std::ssize(c))
+		{ return std::ssize(c); }
+#elif _cplusplus >= 201402L
+	template<typename C>
+		SUBSTRATE_NO_DISCARD(inline constexpr auto ssize(const C &c) noexcept -> std::common_type_t<std::ptrdiff_t,
+						  std::make_signed_t<decltype(c.size())>>)
+		{ return c.size(); }
+#else
+	template<typename C>
+		SUBSTRATE_NO_DISCARD(inline std::ptrdiff_t ssize(const C &c) noexcept)
+		{ return static_cast<std::ptrdiff_t>(c.size()); }
+#endif
+
+// Otherwise covered by the clause above
+#if __cplusplus < 201902L
+	template<typename T, std::size_t N>
+		SUBSTRATE_NO_DISCARD(inline constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept)
+		{ return static_cast<std::ptrdiff_t>(N); }
+#endif
+
+#if __cplusplus >= 201411L
+	template<typename C>
+		SUBSTRATE_NO_DISCARD(inline constexpr auto size(const C &c) noexcept -> decltype(std::size(c)))
+		{ return std::size(c); }
+#elif __cplusplus >= 201402L
+	template<typename C>
+		SUBSTRATE_NO_DISCARD(inline constexpr auto size(const C &c) noexcept -> decltype(c.size()))
+		{ return c.size(); }
+#else
+	template<typename C>
+		SUBSTRATE_NO_DISCARD(inline std::size_t size(const C &c) noexcept)
+		{ return c.size(); }
+#endif
+
+// Otherwise covered by the clause above
+#if __cplusplus < 201411L
+	template<typename T, std::size_t N>
+		SUBSTRATE_NO_DISCARD(inline constexpr std::size_t size(const T (&)[N]) noexcept)
+		{ return N; }
+#endif
 } // namespace substrate
 
 #endif /* SUBSTRATE_UTILITIES */
