@@ -24,6 +24,12 @@ namespace substrate
 			index += step;
 			return *this;
 		}
+
+		SUBSTRATE_CXX14_CONSTEXPR indexIterator_t &operator --() noexcept
+		{
+			index -= step;
+			return *this;
+		}
 	};
 
 	SUBSTRATE_NO_DISCARD(constexpr inline bool operator ==
