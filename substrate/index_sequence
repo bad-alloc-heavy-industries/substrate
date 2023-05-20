@@ -12,14 +12,16 @@ namespace substrate
 	{
 	private:
 		std::size_t index;
+		std::size_t step;
 
 	public:
-		constexpr indexIterator_t(const std::size_t value) noexcept : index{value} { }
+		constexpr indexIterator_t(const std::size_t value, const std::size_t stepValue) noexcept :
+			index{value}, step{stepValue} { }
 		SUBSTRATE_NO_DISCARD(constexpr std::size_t operator *() const noexcept) { return index; }
 
 		SUBSTRATE_CXX14_CONSTEXPR indexIterator_t &operator ++() noexcept
 		{
-			++index;
+			index += step;
 			return *this;
 		}
 	};
@@ -35,16 +37,28 @@ namespace substrate
 	struct indexSequence_t final
 	{
 	private:
-		std::size_t begin_;
+		std::size_t begin_{0};
 		std::size_t end_;
+		std::size_t step_{1};
 
 	public:
-		constexpr indexSequence_t(const std::size_t end) noexcept : begin_{0}, end_{end} { }
+		constexpr indexSequence_t(const std::size_t end) noexcept : end_{end} { }
 		constexpr indexSequence_t(const std::size_t begin, const std::size_t end) noexcept :
 			begin_{begin}, end_{end} { }
 
-		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t begin() const noexcept) { return {begin_}; }
-		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t end() const noexcept) { return {end_}; }
+		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t begin() const noexcept) { return {begin_, step_}; }
+		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t end() const noexcept) { return {end_, step_}; }
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR indexSequence_t &step(const size_t step) noexcept)
+		{
+			// If this has already been run on this sequence, or the new step size is 0, do nothing
+			if (step_ != 1U || !step)
+				return *this;
+			step_ = step;
+			// Adjust end_ so the problem always properly terminates
+			end_ += step_ - ((end_ - begin_) % step_);
+			return *this;
+		}
 	};
 } // namespace substrate
 
