@@ -149,7 +149,7 @@ namespace substrate
 #endif
 		{
 			auto value{valueAsInt(_value)};
-			auto digit{result.rbegin() + 1};
+			auto digit{result.rbegin()};
 			while (digit != result.rend())
 			{
 				auto hex{arithUint_t(value & 0x0FU)};
@@ -174,7 +174,7 @@ namespace substrate
 #endif
 		{
 			auto value{valueAsInt(_value)};
-			auto digit{result.rbegin() + 1};
+			auto digit{result.rbegin()};
 			while (digit != result.rend())
 			{
 				auto hex{arithUint_t(value & 0x07U)};
@@ -287,7 +287,7 @@ namespace substrate
 		SUBSTRATE_CXX14_CONSTEXPR bool formatToHex(span<char> buffer, const bool upper = true) const noexcept
 		{
 			// Check there's enough buffer in the provided string view
-			const auto length{hexLength()};
+			const auto length{hexLength() - 1U};
 			if (length > buffer.size_bytes())
 				return false;
 			// If there is, then format the value into the buffer
@@ -298,7 +298,7 @@ namespace substrate
 		SUBSTRATE_CXX14_CONSTEXPR bool formatToOctal(span<char> buffer) const noexcept
 		{
 			// Check there's enough buffer in the provided string view
-			const auto length{octalLength()};
+			const auto length{octalLength() - 1U};
 			if (length > buffer.size_bytes())
 				return false;
 			// If there is, then format the value into the buffer
