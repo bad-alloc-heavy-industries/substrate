@@ -14,21 +14,25 @@
 
 namespace substrate
 {
-	namespace {
-		enum struct signedness : std::uint8_t {
+	namespace
+	{
+		enum struct signedness : std::uint8_t
+		{
 			Unsigned      = 0,
 			Signed        = 1,
 			NotApplicable = 2,
 		};
 
-		enum struct endianness : std::uint8_t {
+		enum struct endianness : std::uint8_t
+		{
 			Big    = 0,
 			Little = 1,
 			NotApplicable = 2,
 		};
 
 		template<std::size_t type_size, signedness _sign, endianness _endian, typename T>
-		struct element final {
+			struct element final
+		{
 			using element_type = T;
 			static constexpr std::size_t size{type_size};
 			static constexpr signedness sign{_sign};
@@ -36,39 +40,27 @@ namespace substrate
 		};
 
 
-		template<std::size_t, typename...>
-		struct type_at_index_t;
+		template<std::size_t, typename...> struct type_at_index_t;
 
 		template<std::size_t N, typename T, typename... U>
-		struct type_at_index_t<N, T, U...> {
-			using type = typename type_at_index_t<N - 1, U...>::type;
-		};
+			struct type_at_index_t<N, T, U...>
+				{ using type = typename type_at_index_t<N - 1, U...>::type; };
 
 		template<typename T, typename... U>
-		struct type_at_index_t<0, T, U...> {
-			using type = T;
-		};
+			struct type_at_index_t<0, T, U...>
+				{ using type = T; };
 
-		template<typename>
-		struct struct_size_t;
+		template<typename> struct struct_size_t;
 
-		template<typename>
-		struct is_std_vector : std::false_type {};
+		template<typename> struct is_std_vector : std::false_type {};
+		template<typename T> struct is_std_vector<std::vector<T>> : std::true_type {};
 
-		template<typename T>
-		struct is_std_vector<std::vector<T>> : std::true_type {};
+		template<typename T> constexpr inline bool is_std_vector_v = is_std_vector<T>::value;
 
-		template<typename T>
-		constexpr inline bool is_std_vector_v = is_std_vector<T>::value;
+		template<typename> struct is_std_array : std::false_type {};
+		template<typename T, std::size_t len> struct is_std_array<std::array<T, len>> : std::true_type {};
 
-		template<typename>
-		struct is_std_array : std::false_type {};
-
-		template<typename T, std::size_t len>
-		struct is_std_array<std::array<T, len>> : std::true_type {};
-
-		template<typename T>
-		constexpr inline bool is_std_array_v = is_std_array<T>::value;
+		template<typename T> constexpr inline bool is_std_array_v = is_std_array<T>::value;
 	}
 
 	/* 1-byte type alias */
@@ -94,18 +86,20 @@ namespace substrate
 
 
 #if __cplusplus >= 202002L
-	namespace {
-		template<std::size_t len>
-		struct template_name_literal final {
+	namespace
+	{
+		template<std::size_t len> struct template_name_literal final
+		{
 			char literal[len];
-			constexpr template_name_literal(const char (&string)[len]) {
-				std::copy_n(string, len, literal);
-			}
+
+			constexpr template_name_literal(const char (&string)[len])
+				{ std::copy_n(string, len, literal); }
 		};
 	}
 
 	template<typename T, template_name_literal name = "">
-	struct member final {
+		struct member final
+	{
 		using member_type = T;
 		static constexpr std::string_view member_name{name.literal};
 		static constexpr std::size_t size = T::size;
@@ -114,7 +108,8 @@ namespace substrate
 	};
 #else
 	template<typename T, const char name[] = nullptr>
-	struct member final {
+		struct member final
+	{
 		using member_type = T;
 		static constexpr std::string_view member_name{name};
 		static constexpr std::size_t size = T::size;
@@ -124,10 +119,10 @@ namespace substrate
 #endif
 
 	template<typename... Ts>
-	struct structure final {
-		static_assert(sizeof... (Ts) > 0, "substrate::flex_struct::structure must contain at least one member");
+		struct structure final
+	{
+		static_assert(sizeof...(Ts) > 0, "substrate::flex_struct::structure must contain at least one member");
 	private:
-
 
 	public:
 		static constexpr std::size_t member_count{sizeof... (Ts)};
@@ -135,56 +130,46 @@ namespace substrate
 		static constexpr signedness sign{signedness::NotApplicable};
 		static constexpr endianness endian{endianness::NotApplicable};
 
-
-		[[nodiscard]]
-		static auto from_bytes(const void* data, const std::size_t len) {
+		[[nodiscard]] static auto from_bytes(const void* data, const std::size_t len)
+		{
 			(void)len;
 			return data;
 		}
 
 		template<typename T>
-		[[nodiscard]]
-		static auto from_container(const T& container) {
-			if constexpr (is_std_array_v<T>) {
+			[[nodiscard]] static auto from_container(const T& container)
+		{
+			if constexpr (is_std_array_v<T>)
 				return from_array(container);
-			} else if constexpr (is_std_vector_v<T>) {
+			if constexpr (is_std_vector_v<T>)
 				return from_vector(container);
-			} else {
-				return;
-			}
 		}
 
 		template<typename T, std::size_t len>
-		[[nodiscard]]
-		static auto from_array(const std::array<T, len>& data) {
-			return data;
-		}
+			[[nodiscard]] static auto from_array(const std::array<T, len>& data)
+				{ return data; }
 
 		template<typename T>
-		[[nodiscard]]
-		static auto from_vector(const std::vector<T>& data) {
-			return data;
-		}
+			[[nodiscard]] static auto from_vector(const std::vector<T>& data)
+				{ return data; }
 
 		template<std::size_t len>
-		[[nodiscard]]
-		constexpr auto operator[](const char name[len]) {
-			return operator[](std::string_view{name});
-		}
-		[[nodiscard]]
-		constexpr auto operator[](const std::string_view& name) {
+			[[nodiscard]] constexpr auto operator [](const char name[len])
+				{ return operator[](std::string_view{name}); }
 
-		}
+		[[nodiscard]] constexpr auto operator[](const std::string_view& name)
+			{ }
 	};
 
-	namespace {
+	namespace
+	{
 		template<typename... Ts>
-		struct struct_size_t<structure<Ts...>> final {
+			struct struct_size_t<structure<Ts...>> final
+		{
 			static constexpr auto size{(Ts::size + ...)};
 		};
 	}
 }
-
 
 #endif /* SUBSTRATE_FLEX_STRUCT */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
