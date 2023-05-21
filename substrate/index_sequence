@@ -55,7 +55,7 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t begin() const noexcept) { return {begin_, step_}; }
 		SUBSTRATE_NO_DISCARD(constexpr indexIterator_t end() const noexcept) { return {end_, step_}; }
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR indexSequence_t &step(const size_t step) noexcept)
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR indexSequence_t step(const size_t step) noexcept)
 		{
 			// If this has already been run on this sequence, or the new step size is 0, do nothing
 			if (step_ != 1U || !step)
