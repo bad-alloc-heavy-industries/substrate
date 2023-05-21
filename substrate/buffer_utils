@@ -7,6 +7,7 @@
 #include <array>
 #include <utility>
 #include <substrate/promotion_helpers>
+#include <substrate/span>
 
 namespace substrate
 {
@@ -17,15 +18,25 @@ namespace substrate
 			template<typename T, size_t = sizeof(T)> struct helper_t;
 		}
 
-		template<typename T> static inline T readLE(const void *const buffer) noexcept
+		template<typename T> inline T readLE(const void *const buffer) noexcept
 			{ return internal::helper_t<T>::readLE(buffer); }
-		template<typename T> static inline void writeLE(const T value, void *const buffer) noexcept
+		template<typename T> inline void writeLE(const T value, void *const buffer) noexcept
 			{ internal::helper_t<T>::writeLE(value, buffer); }
 
-		template<typename T> static inline T readBE(const void *const buffer) noexcept
+		template<typename T> inline T readBE(const void *const buffer) noexcept
 			{ return internal::helper_t<T>::readBE(buffer); }
-		template<typename T> static inline void writeBE(const T value, void *const buffer) noexcept
+		template<typename T> inline void writeBE(const T value, void *const buffer) noexcept
 			{ internal::helper_t<T>::writeBE(value, buffer); }
+
+		template<typename T> inline T readLE(const span<const uint8_t> buffer) noexcept
+			{ return readLE<T>(buffer.data()); }
+		template<typename T> inline void writeLE(const T value, span<uint8_t> buffer) noexcept
+			{ return writeLE(value, buffer.data()); }
+
+		template<typename T> inline T readBE(const span<const uint8_t> buffer) noexcept
+			{ return readBE<T>(buffer.data()); }
+		template<typename T> inline void writeBE(const T value, span<uint8_t> buffer) noexcept
+			{ return writeBE(value, buffer.data()); }
 
 		namespace internal
 		{
