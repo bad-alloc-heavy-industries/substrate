@@ -62,7 +62,9 @@ namespace substrate
 				return *this;
 			step_ = step;
 			// Adjust end_ so the problem always properly terminates
-			end_ += step_ - ((end_ - begin_) % step_);
+			const auto adjustment{step_ - ((end_ - begin_) % step_)};
+			if (adjustment != step_)
+				end_ += adjustment;
 			return *this;
 		}
 	};
