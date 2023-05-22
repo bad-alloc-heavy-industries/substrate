@@ -78,24 +78,40 @@ public:
 		{
 			const auto inputNumber{test.inputNumber};
 			const auto result{test.variableResult};
-			REQUIRE_NOTHROW([&]()
+			const auto value
 			{
-				const auto value{fromInt{inputNumber}.toOctal()};
-				REQUIRE(!value.empty());
-				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
-			}());
+				[&]()
+				{
+					std::string resultValue{};
+					REQUIRE_NOTHROW([&]()
+					{
+						resultValue = fromInt{inputNumber}.toOctal();
+					}());
+					return resultValue;
+				}()
+			};
+			REQUIRE(!value.empty());
+			REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
 		}
 
 		for (const auto &test : tests)
 		{
 			const auto inputNumber{test.inputNumber};
 			const auto result{test.fixedResult};
-			REQUIRE_NOTHROW([&]()
+			const auto value
 			{
-				const auto value{toOctalFixed{inputNumber}.toOctal()};
-				REQUIRE(!value.empty());
-				REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
-			}());
+				[&]()
+				{
+					std::string resultValue{};
+					REQUIRE_NOTHROW([&]()
+					{
+						resultValue = toOctalFixed{inputNumber}.toOctal();
+					}());
+					return resultValue;
+				}()
+			};
+			REQUIRE(!value.empty());
+			REQUIRE(memcmp(value.data(), result, str_t::length(result)) == 0);
 		}
 	}
 
