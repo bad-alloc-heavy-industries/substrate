@@ -143,13 +143,13 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void formatHex(span<char> result, const bool upperCase) const noexcept
+		void formatHex(span<char> result, const bool upperCase, const ptrdiff_t offset) const noexcept
 #else
-		void formatHex(std::string &result, const bool upperCase) const noexcept
+		void formatHex(std::string &result, const bool upperCase, const ptrdiff_t offset) const noexcept
 #endif
 		{
 			auto value{valueAsInt(_value)};
-			auto digit{result.rbegin()};
+			auto digit{result.rbegin() + offset};
 			while (digit != result.rend())
 			{
 				auto hex{arithUint_t(value & 0x0FU)};
@@ -168,13 +168,13 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void formatOctal(span<char> result) const noexcept
+		void formatOctal(span<char> result, const ptrdiff_t offset const noexcept
 #else
-		void formatOctal(std::string &result) const noexcept
+		void formatOctal(std::string &result, const ptrdiff_t offset) const noexcept
 #endif
 		{
 			auto value{valueAsInt(_value)};
-			auto digit{result.rbegin()};
+			auto digit{result.rbegin() + offset};
 			while (digit != result.rend())
 			{
 				auto hex{arithUint_t(value & 0x07U)};
@@ -261,7 +261,7 @@ namespace substrate
 			std::string> toHex(const bool upper = true) const noexcept
 		{
 			std::string number(hexLength(), '\0');
-			formatHex(number, upper);
+			formatHex(number, upper, 1);
 			return number;
 		}
 
@@ -269,7 +269,7 @@ namespace substrate
 			std::string> toOctal() const noexcept
 		{
 			std::string number(octalLength(), '\0');
-			formatOctal(number);
+			formatOctal(number, 1);
 			return number;
 		}
 
@@ -291,7 +291,7 @@ namespace substrate
 			if (length > buffer.size_bytes())
 				return false;
 			// If there is, then format the value into the buffer
-			formatHex(buffer, upper);
+			formatHex(buffer, upper, 0);
 			return true;
 		}
 
@@ -302,7 +302,7 @@ namespace substrate
 			if (length > buffer.size_bytes())
 				return false;
 			// If there is, then format the value into the buffer
-			formatOctal(buffer);
+			formatOctal(buffer, 0);
 			return true;
 		}
 #endif
