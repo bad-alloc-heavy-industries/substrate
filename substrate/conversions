@@ -168,7 +168,7 @@ namespace substrate
 		}
 
 #if __cplusplus >= 201703L
-		void formatOctal(span<char> result, const ptrdiff_t offset const noexcept
+		void formatOctal(span<char> result, const ptrdiff_t offset) const noexcept
 #else
 		void formatOctal(std::string &result, const ptrdiff_t offset) const noexcept
 #endif
