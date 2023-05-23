@@ -7,27 +7,50 @@
 #include <limits>
 #include <type_traits>
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <cstdlib>
+#include <intrin.h>
+#endif
+
 #include <substrate/internal/defs>
 
 namespace substrate
 {
 	/* endian swapping facilities */
+	// https://developercommunity.visualstudio.com/t/Missed-optimization:-bswap-uint64_t-and-/10352419#T-N10372694
+	#if defined(_MSC_VER) && !defined(__clang__)
+	SUBSTRATE_NO_DISCARD(inline uint8_t swap8(const uint8_t x) noexcept)
+	{
+		return _rotr8(x, 4);
+	#else
 	SUBSTRATE_NO_DISCARD(inline constexpr uint8_t swap8(const uint8_t x) noexcept)
 	{
 		return uint8_t(
 			((x & 0x0FU) << 4U) |
 			((x & 0xF0U) >> 4U)
 		);
+	#endif
 	}
 
+	#if defined(_MSC_VER) && !defined(__clang__) && _MSC_VER < 1934
+	SUBSTRATE_NO_DISCARD(inline uint16_t swap16(const uint16_t x) noexcept)
+	{
+		return _byteswap_ushort(x);
+	#else
 	SUBSTRATE_NO_DISCARD(inline constexpr uint16_t swap16(const uint16_t x) noexcept)
 	{
 		return uint16_t(
 			((x & 0x00FFU) << 8U) |
 			((x & 0xFF00U) >> 8U)
 		);
+	#endif
 	}
 
+	#if defined(_MSC_VER) && !defined(__clang__) && _MSC_VER < 1934
+	SUBSTRATE_NO_DISCARD(inline uint32_t swap32(const uint32_t x) noexcept)
+	{
+		return _byteswap_ulong(x);
+	#else
 	SUBSTRATE_NO_DISCARD(inline constexpr uint32_t swap32(const uint32_t x) noexcept)
 	{
 		return uint32_t(
@@ -36,8 +59,15 @@ namespace substrate
 			((x & 0x00FF0000U) >> 8U ) |
 			((x & 0xFF000000U) >> 24U)
 		);
+	#endif
 	}
 
+	// https://developercommunity.visualstudio.com/t/Missed-optimization:-bswap-uint64_t-and-/10352419#T-N10372694
+	#if defined(_MSC_VER) && !defined(__clang__)
+	SUBSTRATE_NO_DISCARD(inline uint64_t swap64(const uint64_t x) noexcept)
+	{
+		return _byteswap_uint64(x);
+	#else
 	SUBSTRATE_NO_DISCARD(inline constexpr uint64_t swap64(const uint64_t x) noexcept)
 	{
 		return uint64_t(
@@ -50,6 +80,7 @@ namespace substrate
 			((x & 0x00FF000000000000U) >> 40U) |
 			((x & 0xFF00000000000000U) >> 56U)
 		);
+	#endif
 	}
 
 	/* TODO: Determine if we can drop this and abstract rotl/rotr to shift by the fixed nibble amount */
