@@ -1,7 +1,6 @@
 # substrate
 [![GitHub Actions](https://github.com/bad-alloc-heavy-industries/substrate/workflows/GitHub%20Actions/badge.svg)](https://github.com/bad-alloc-heavy-industries/substrate/actions)
 [![codecov](https://codecov.io/gh/bad-alloc-heavy-industries/substrate/branch/master/graph/badge.svg)](https://codecov.io/gh/bad-alloc-heavy-industries/substrate)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/bad-alloc-heavy-industries/substrate.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/bad-alloc-heavy-industries/substrate/alerts/)
 [![Coverity Status](https://scan.coverity.com/projects/20662/badge.svg)](https://scan.coverity.com/projects/substrate)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg)](code_of_conduct.md)
 
