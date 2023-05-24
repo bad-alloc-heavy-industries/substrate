@@ -55,14 +55,6 @@
 #	define SUBSTRATE_NOINLINE 
 #endif
 
-#if __cplusplus >= 201103L
-#	define ALIGN(X) alignas(x)
-#elif defined(__GNUC__)
-#	define SUBSTRATE_ALIGN(X) __attribute__ ((aligned (X)))
-#else
-#	define SUBSTRATE_ALIGN(X)
-#endif
-
 #ifdef _MSC_VER
 #	if defined(SUBSTRATE_BUILD_STATIC)
 #		define SUBSTRATE_CLS_API
