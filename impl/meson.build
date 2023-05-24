@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 libSubstrateSrcs = [
-	'socket.cxx', 'console.cxx'
+	'socket.cxx', 'console.cxx', 'affinity.cxx'
 ]
 
 deps = []
@@ -10,6 +10,8 @@ if target_machine.system() == 'windows'
 else
 	libSubstrateSrcs += 'pty.cxx'
 endif
+
+deps += dependency('threads')
 
 if cxx.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 	friendTypenameTest = '''

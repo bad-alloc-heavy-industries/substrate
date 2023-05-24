@@ -1,0 +1,49 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
+#ifndef SUBSTRATE_AFFINITY
+#define SUBSTRATE_AFFINITY
+
+#include <iterator>
+#include <thread>
+#include <vector>
+
+#include "index_sequence"
+
+namespace substrate
+{
+	struct SUBSTRATE_CLS_API affinity_t final
+	{
+	private:
+		#if defined(_WIN32)
+		using processorList_t = std::vector<std::pair<uint16_t, uint8_t>>;
+		#else
+		using processorList_t = std::vector<uint32_t>;
+		#endif
+		processorList_t processors;
+
+		void pinTo(std::thread::native_handle_type thread, std::size_t index) const;
+
+	public:
+		using iterator = processorList_t::iterator;
+		using const_iterator = processorList_t::const_iterator;
+		using difference_type = processorList_t::difference_type;
+
+		affinity_t(std::size_t threadCount = 0, const std::vector<uint32_t> &pinning = {});
+		~affinity_t() noexcept = default;
+		affinity_t(const affinity_t&) noexcept = default;
+		affinity_t& operator=(const affinity_t&) noexcept = default;
+		affinity_t(affinity_t&&) noexcept = default;
+		affinity_t& operator=(affinity_t&&) noexcept = default;
+
+		SUBSTRATE_NO_DISCARD(std::size_t numProcessors() const noexcept) { return processors.size(); }
+		SUBSTRATE_NO_DISCARD(const_iterator begin() const noexcept) { return processors.begin(); }
+		SUBSTRATE_NO_DISCARD(const_iterator end() const noexcept) { return processors.end(); }
+		SUBSTRATE_NO_DISCARD(indexSequence_t indexSequence() const noexcept) { return {0, numProcessors()}; }
+
+		void pinThreadTo(std::thread &thread, const std::size_t index) const
+			{ pinTo(thread.native_handle(), index); }
+		void pinThreadTo(std::size_t index) const;
+	};
+} // namespace substrate
+
+#endif /*SUBSTRATE_AFFINITY*/
