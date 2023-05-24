@@ -9,6 +9,14 @@
 
 #include "index_sequence"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// (20): warning C4251: 'substrate::affinity_t::processors': class
+// 'std::vector<std::pair<uint16_t,uint8_t>,std::allocator<std::pair<uint16_t,uint8_t>>>'
+// needs to have dll-interface to be used by clients of struct 'substrate::affinity_t'
+#pragma warning(disable: 4251)
+#endif
+
 namespace substrate
 {
 	struct SUBSTRATE_CLS_API affinity_t final
@@ -45,5 +53,9 @@ namespace substrate
 		void pinThreadTo(std::size_t index) const;
 	};
 } // namespace substrate
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 #endif /*SUBSTRATE_AFFINITY*/

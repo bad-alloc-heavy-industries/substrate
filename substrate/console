@@ -20,6 +20,13 @@
 #include <substrate/internal/defs>
 #include <substrate/utility>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// (87): warning C4251: 'substrate::console_t::consoleMutex': class 'std::mutex'
+// needs to have dll-interface to be used by clients of struct 'substrate::console_t'
+#pragma warning(disable: 4251)
+#endif
+
 namespace substrate
 {
 	inline std::string operator ""_s(const char *str, const size_t len) noexcept { return {str, len}; }
@@ -335,5 +342,10 @@ namespace substrate
 
 	SUBSTRATE_API console_t console;
 } // namespace substrate
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 #endif /*SUBSTRATE_CONSOLE*/
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
