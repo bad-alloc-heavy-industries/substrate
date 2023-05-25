@@ -69,9 +69,9 @@ namespace substrate
 			result_t result{};
 			while (!results.empty())
 			{
-				const auto thisResult = results.pop();
+				auto thisResult = results.pop();
 				if (!result)
-					result = thisResult;
+					std::swap(result, thisResult);
 			}
 			return result;
 		}
@@ -79,9 +79,9 @@ namespace substrate
 	public:
 		threadPool_t(const workFunc_t function) : workerFunction{function}
 		{
-			for (const auto processor : affinity.indexSequence())
-				threads.emplace_back(std::thread{[this](const std::size_t processor) -> void
-					{ workerThread(processor); }, processor});
+			for (const auto &processor : affinity.indexSequence())
+				threads.emplace_back(std::thread{[this](const std::size_t currentProcessor) -> void
+					{ workerThread(currentProcessor); }, processor});
 			while (!ready())
 				std::this_thread::sleep_for(std::chrono::microseconds(1));
 		}
