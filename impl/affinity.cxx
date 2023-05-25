@@ -138,6 +138,11 @@ affinity_t::affinity_t(std::size_t threadCount, const std::vector<uint32_t>& pin
 #endif
 }
 
+affinity_t::affinity_t(std::size_t threadCount, std::initializer_list<uint32_t> pinning) :
+	affinity_t(threadCount, std::vector<uint32_t>{pinning}) { }
+
+affinity_t::affinity_t(std::size_t threadCount) : affinity_t(threadCount, {}) { }
+
 void affinity_t::pinTo(std::thread::native_handle_type thread, std::size_t index) const
 {
 	if (index >= processors.size())
