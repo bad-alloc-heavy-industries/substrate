@@ -24,7 +24,9 @@
 #endif
 
 #include "substrate/affinity"
+#ifdef _WIN32
 #include "substrate/fixed_vector"
+#endif
 
 namespace substrate
 {
@@ -98,9 +100,9 @@ affinity_t::affinity_t(std::size_t threadCount, const std::vector<uint32_t>& pin
 	};
 	for (uint32_t i{}; i < coreCount; ++i)
 	{
-		if ((!threadCount || processors.size() < threadCount) &&
+		if ((threadCount == 0 || processors.size() < threadCount) &&
 			(pinning.empty() || std::find(pinning.cbegin(), pinning.cend(), i) != pinning.cend()))
-			processors.emplace_back(i);
+			processors.push_back(i);
 	}
 #elif defined(_WIN32)
 	const auto processorInfo{retrieveProcessorInfo()};
