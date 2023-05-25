@@ -30,7 +30,7 @@ namespace substrate
 		std::atomic<bool> finished{false};
 		threadedQueue_t<result_t> results{};
 		std::vector<std::thread> threads{};
-		affinity_t affinity;
+		affinity_t affinity{};
 		workFunc_t workerFunction;
 
 		std::pair<bool, std::tuple<args_t...>> waitWork() noexcept
@@ -50,16 +50,24 @@ namespace substrate
 			internal::indexSequence_t<indicies...>))
 			{ return workerFunction(std::get<indicies>(std::move(args))...); }
 
+		template<std::size_t I, substrate::enable_if_t<I == 0, void>* = nullptr>
+			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&))
+			{ return workerFunction(); }
+
+		template<std::size_t I, typename substrate::enable_if_t<I != 0, void>* = nullptr>
+			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&args))
+			{ return invoke(std::move(args), internal::makeIndexSequence<I>{}); }
+
 		void workerThread(const std::size_t processor) noexcept
 		{
 			affinity.pinThreadTo(processor);
 			while (!(finished && work.empty()))
 			{
-				auto task = waitWork();
+				auto tuple = waitWork();
 				// This checks for both if we don't have something to do and if we're supposed to be finishing up
-				if (finished && !task.first)
+				if (finished && !tuple.first)
 					break;
-				auto result = invoke(std::move(task.second), internal::indexSequence_t<sizeof...(args_t)>());
+				auto result = ctad_invoke<sizeof...(args_t)>(std::move(tuple.second));
 				results.push(std::move(result));
 			}
 		}
