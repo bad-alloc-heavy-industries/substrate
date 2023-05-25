@@ -87,6 +87,9 @@ affinity_t::affinity_t(std::size_t threadCount, const std::vector<uint32_t>& pin
 		else if (!CPU_COUNT(&affinity))
 			break;
 	}
+
+	if (processors.empty())
+		throw std::runtime_error("At least one core should be available and pinned");
 #elif defined(_POSIX_THREADS) && defined(__APPLE__)
 	const auto coreCount
 	{
@@ -133,6 +136,9 @@ affinity_t::affinity_t(std::size_t threadCount, const std::vector<uint32_t>& pin
 			}
 		}
 	}
+
+	if (processors.empty())
+		throw std::runtime_error("At least one core should be available and pinned");
 #else
 	(void)threadCount;
 	(void)pinning;
