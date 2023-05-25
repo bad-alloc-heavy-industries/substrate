@@ -226,19 +226,19 @@ namespace substrate
 			}
 
 			SUBSTRATE_NO_DISCARD(inline bool operator==(const zipIterator_t<Iterators...> &rhs) const noexcept)
-				{ return eq(rhs, makeIndexSequence<length>{}); }
+				{ return containerLength == rhs.containerLength && index == rhs.index; }
 
 			SUBSTRATE_NO_DISCARD(inline bool operator<(const zipIterator_t<Iterators...> &rhs) const noexcept)
-				{ return lt(rhs, makeIndexSequence<length>{}); }
+				{ return containerLength == rhs.containerLength && index < rhs.index; }
 
 			SUBSTRATE_NO_DISCARD(inline bool operator<=(const zipIterator_t<Iterators...> &rhs) const noexcept)
-				{ return le(rhs, makeIndexSequence<length>{}); }
+				{ return containerLength == rhs.containerLength && index <= rhs.index; }
 
 			SUBSTRATE_NO_DISCARD(inline bool operator>(const zipIterator_t<Iterators...> &rhs) const noexcept)
-				{ return gt(rhs, makeIndexSequence<length>{}); }
+				{ return containerLength == rhs.containerLength && index > rhs.index; }
 
 			SUBSTRATE_NO_DISCARD(inline bool operator>=(const zipIterator_t<Iterators...> &rhs) const noexcept)
-				{ return ge(rhs, makeIndexSequence<length>{}); }
+				{ return containerLength == rhs.containerLength && index >= rhs.index; }
 		};
 	} // namespace internal
 
