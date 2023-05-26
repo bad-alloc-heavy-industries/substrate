@@ -22,7 +22,7 @@ namespace substrate
 		std::atomic<size_t> queueLength{0};
 
 	public:
-		template<typename... args_t> void emplace(args_t &&...args) noexcept
+		template<typename... args_t> inline void emplace(args_t &&...args) noexcept
 		{
 			std::lock_guard<std::mutex> lock{queueMutex};
 			queue.emplace(std::forward<args_t>(args)...);
@@ -30,7 +30,7 @@ namespace substrate
 			haveData.notify_one();
 		}
 
-		void push(T &&value) noexcept
+		inline void push(T &&value) noexcept
 		{
 			std::lock_guard<std::mutex> lock{queueMutex};
 			queue.push(std::move(value));
@@ -38,7 +38,7 @@ namespace substrate
 			haveData.notify_one();
 		}
 
-		SUBSTRATE_NO_DISCARD(T pop() noexcept)
+		SUBSTRATE_NO_DISCARD(inline T pop() noexcept)
 		{
 			std::unique_lock<std::mutex> lock{queueMutex};
 			if (!queueLength)
@@ -49,8 +49,8 @@ namespace substrate
 			return result;
 		}
 
-		SUBSTRATE_NO_DISCARD(bool empty() const noexcept) { return !queueLength; }
-		SUBSTRATE_NO_DISCARD(std::size_t size() const noexcept) { return queueLength; }
+		SUBSTRATE_NO_DISCARD(inline bool empty() const noexcept) { return !queueLength; }
+		SUBSTRATE_NO_DISCARD(inline std::size_t size() const noexcept) { return queueLength; }
 	};
 } // namespace substrate
 

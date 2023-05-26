@@ -21,13 +21,13 @@ namespace substrate
 		explicit latch_t(std::size_t expected) : count{expected} { }
 		~latch_t() = default;
 
-		void countDown() noexcept
+		inline void countDown() noexcept
 		{
 			if (count)
 				--count;
 		}
 
-		void wait() const noexcept
+		inline void wait() const noexcept
 		{
 			if (!count)
 				waitZero.notify_all();
@@ -38,7 +38,7 @@ namespace substrate
 			}
 		}
 
-		void arriveAndWait() noexcept
+		inline void arriveAndWait() noexcept
 		{
 			countDown();
 			wait();
