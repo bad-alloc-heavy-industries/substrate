@@ -87,7 +87,7 @@ namespace substrate
 		}
 		threadPool_t(const threadPool_t &) = delete;
 		threadPool_t(threadPool_t &&) = delete;
-		~threadPool_t() noexcept { [[maybe_unused]] const auto result = finish(); }
+		~threadPool_t() noexcept { SUBSTRATE_NOWARN_UNUSED(const auto result) = finish(); }
 		threadPool_t &operator =(const threadPool_t &) = delete;
 		threadPool_t &operator =(threadPool_t &&) = delete;
 
