@@ -164,13 +164,6 @@ TEST_CASE("pinning", "[affinity_t]")
 		REQUIRE(result != -1);
 		REQUIRE(result == static_cast<int32_t>(processor));
 	}
-
-	REQUIRE(std::async(std::launch::async, [&]() noexcept -> bool
-	{
-		try { affinity->pinThreadTo(affinity->numProcessors()); }
-		catch (const std::out_of_range &) { return true; }
-		return false;
-	}).get());
 #elif defined(_WIN32)
 	std::size_t count{0};
 	for (const auto &processor : *affinity)
@@ -187,6 +180,7 @@ TEST_CASE("pinning", "[affinity_t]")
 		REQUIRE(result.Mask == UINT64_C(1) << processor.second);
 		REQUIRE(result.Group == processor.first);
 	}
+#endif
 
 	REQUIRE(std::async(std::launch::async, [&]() noexcept -> bool
 	{
@@ -194,7 +188,6 @@ TEST_CASE("pinning", "[affinity_t]")
 		catch (const std::out_of_range &) { return true; }
 		return false;
 	}).get());
-#endif
 }
 
 TEST_CASE("thread cap", "[affinity_t]")
