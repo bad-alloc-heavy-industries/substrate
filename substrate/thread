@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: BSD-3-Clause
+#ifndef SUBSTRATE_THREAD
+#define SUBSTRATE_THREAD
+
+#include <thread>
+
+#include "substrate/internal/defs"
+
+namespace substrate
+{
+	namespace thread
+	{
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CLS_API std::thread::native_handle_type currentThread());
+	} // namespace thread
+} // namespace substrate
+
+#endif // SUBSTRATE_THREAD

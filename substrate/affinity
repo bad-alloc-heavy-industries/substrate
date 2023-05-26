@@ -4,10 +4,10 @@
 #define SUBSTRATE_AFFINITY
 
 #include <iterator>
-#include <thread>
 #include <vector>
 
-#include "index_sequence"
+#include "substrate/index_sequence"
+#include "substrate/thread"
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -50,9 +50,10 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(inline const_iterator end() const noexcept) { return processors.end(); }
 		SUBSTRATE_NO_DISCARD(inline indexSequence_t indexSequence() const noexcept) { return {0, numProcessors()}; }
 
-		void pinThreadTo(std::thread &thread, const std::size_t index) const
+		inline void pinThreadTo(std::thread &thread, const std::size_t index) const
 			{ pinTo(thread.native_handle(), index); }
-		void pinThreadTo(std::size_t index) const;
+		inline void pinThreadTo(std::size_t index) const
+			{ pinTo(substrate::thread::currentThread(), index); }
 	};
 } // namespace substrate
 

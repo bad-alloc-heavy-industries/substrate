@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <system_error>
 #include <stdexcept>
-#include <thread>
 
 #ifdef _WIN32 
 #define WIN32_LEAN_AND_MEAN
@@ -179,18 +178,6 @@ void affinity_t::pinTo(std::thread::native_handle_type thread, std::size_t index
 	SetThreadGroupAffinity(nativeThread, &affinity, nullptr);
 #else
 	(void)thread;
-	throw std::runtime_error("not implemented");
-#endif
-}
-
-void affinity_t::pinThreadTo(const std::size_t index) const
-{
-#ifdef _POSIX_THREADS
-	pinTo(pthread_self(), index);
-#elif defined(_WIN32)
-	pinTo(GetCurrentThread(), index);
-#else
-	(void)index;
 	throw std::runtime_error("not implemented");
 #endif
 }
