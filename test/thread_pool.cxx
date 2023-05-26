@@ -12,6 +12,7 @@
 
 namespace
 {
+std::atomic<std::size_t> activeWorkers;
 std::mutex workMutex;
 std::condition_variable workCond;
 
@@ -25,13 +26,14 @@ SUBSTRATE_NOINLINE bool dummyWork()
 
 SUBSTRATE_NOINLINE bool busyWork(const std::size_t iterations)
 {
-	volatile std::size_t counter{};
+	std::atomic<size_t> counter{};
 	for (size_t i{}; i < iterations; ++i)
 	{
 		for (size_t j{}; j < totalLoopIterations; ++j)
 			++counter;
 	}
 	std::this_thread::sleep_for(std::chrono::milliseconds(25));
+	--activeWorkers;
 	workCond.notify_all();
 	return counter == size_t(iterations * totalLoopIterations);
 }
@@ -73,6 +75,8 @@ TEST_CASE("queue wait", "[threadPool_t]")
 	REQUIRE(pool.ready());
 	const auto threads{pool.numProcessors()};
 	REQUIRE(threads != 0);
+	// prime atomic
+	activeWorkers = threads + 1;
 	// burst queue
 	for (std::size_t i{}; i < threads; ++i)
 		SUBSTRATE_NOWARN_UNUSED(const auto result) = pool.queue(threads - i);
@@ -83,7 +87,7 @@ TEST_CASE("queue wait", "[threadPool_t]")
 	[]() noexcept
 	{
 		std::unique_lock<std::mutex> lock{workMutex};
-		workCond.wait(lock);
+		workCond.wait(lock, [&]() -> bool {return activeWorkers == 0; });
 	}();
 	REQUIRE(pool.queue(threads));
 	// finish
