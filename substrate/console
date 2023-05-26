@@ -236,7 +236,7 @@ namespace substrate
 			if (maxDigits < paddedWidth)
 			{
 				// Put out the excess padding early to keep the logic simple.
-				for (uint8_t i{0}; i < paddedWidth - maxDigits; ++i)
+				for (size_t i{0}; i < paddedWidth - maxDigits; ++i)
 					stream.write(paddingChar);
 			}
 		}
