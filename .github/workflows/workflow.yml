@@ -126,6 +126,13 @@ jobs:
           cd build
           find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
           gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-${{ matrix.os.id }}-${{ matrix.cpp_std }}
+          path: ${{ github.workspace }}/build/meson-logs/*
+          retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
@@ -199,6 +206,13 @@ jobs:
           meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-${{ matrix.os }}-${{ matrix.cpp_std }}
+          path: ${{ github.workspace }}/build/meson-logs/*
+          retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
@@ -292,6 +306,13 @@ jobs:
           meson test -C build
           cd build
           find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-${{ matrix.os }}-${{ matrix.sys.abi }}-${{ matrix.cpp_std }}
+          path: ${{ github.workspace }}/build/meson-logs/*
+          retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
@@ -356,6 +377,13 @@ jobs:
           meson test -C build
           cd build
           gcovr -r .. -x -o coverage.xml -e ../deps -e ../test
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-${{ matrix.os }}-${{ matrix.cpp_std }}
+          path: ${{ github.workspace }}/build/meson-logs/*
+          retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
@@ -445,6 +473,13 @@ jobs:
           meson test -C build
           cd build
           gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs-${{ matrix.os }}-homebrew-${{ matrix.compiler }}-${{ matrix.cpp_std }}
+          path: ${{ github.workspace }}/build/meson-logs/*
+          retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
