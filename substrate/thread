@@ -2,6 +2,7 @@
 #ifndef SUBSTRATE_THREAD
 #define SUBSTRATE_THREAD
 
+#include <cstdint>
 #include <thread>
 
 #include "substrate/internal/defs"
@@ -11,6 +12,8 @@ namespace substrate
 	namespace thread
 	{
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CLS_API std::thread::native_handle_type currentThread());
+
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CLS_API uint32_t currentCPU());
 	} // namespace thread
 } // namespace substrate
 
