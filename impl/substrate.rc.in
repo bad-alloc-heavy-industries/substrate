@@ -1,0 +1,32 @@
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @VER_FILEVERSION@
+PRODUCTVERSION  @VER_PRODUCTVERSION@
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904E4"
+		BEGIN
+			VALUE "CompanyName",      "bad_alloc heavy industries"
+			VALUE "FileDescription",  @VER_FILEDESCRIPTION_STR@
+			VALUE "FileVersion",      @VER_FILEVERSION_STR@
+			VALUE "InternalName",     ""
+			VALUE "LegalCopyright",   "Copyright (c) 2020-2023 Rachel Mant, Aki Van Ness. All rights reserved. SPDX-License-Ref: @license@"
+			VALUE "LegalTrademarks1", ""
+			VALUE "LegalTrademarks2", ""
+			VALUE "OriginalFilename", @VER_ORIGINALFILENAME_STR@
+			VALUE "ProductName",      @VER_PRODUCTNAME_STR@
+			VALUE "ProductVersion",   @VER_PRODUCTVERSION_STR@
+		END
+	END
+
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200 // en-US.UTF-8
+	END
+END

@@ -148,6 +148,31 @@ if library_type == 'static' and isWindows
 	libSubstrateArgs = ['-DSUBSTRATE_BUILD_STATIC']
 endif
 
+if isWindows
+	rcCfg = configuration_data()
+	if cxx.get_id() == 'msvc' or cxx.get_id() == 'clang-cl'
+		rcCfg.set_quoted('VER_ORIGINALFILENAME_STR', 'substrate.dll')
+	else
+		rcCfg.set_quoted('VER_ORIGINALFILENAME_STR', 'libsubstrate.dll')
+	endif
+	rcCfg.set_quoted('VER_FILEDESCRIPTION_STR', 'A collection of headers containing useful tools and gadgets for building C++ programs')
+	rcCfg.set_quoted('VER_PRODUCTNAME_STR', meson.project_name())
+	projectVersion = '@0@,0'.format(meson.project_version().replace('.', ','))
+	rcCfg.set('VER_FILEVERSION', projectVersion)
+	rcCfg.set('VER_PRODUCTVERSION', projectVersion)
+	rcCfg.set_quoted('VER_FILEVERSION_STR', meson.project_version())
+	rcCfg.set_quoted('VER_PRODUCTVERSION_STR', meson.project_version())
+	rcCfg.set('license', ' OR '.join(meson.project_license()))
+
+	windows = import('windows')
+	substrateRc = configure_file(
+		input: 'substrate.rc.in',
+		output: 'substrate.rc',
+		configuration: rcCfg
+	)
+	libSubstrateSrcs += windows.compile_resources(substrateRc)
+endif
+
 if targetLibraryBuildable
 	libSubstrate = library(
 		'substrate',
