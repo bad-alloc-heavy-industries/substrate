@@ -149,13 +149,13 @@ namespace substrate
 			}
 
 			template<typename T, std::size_t len>
-			void round(const std::array<T, len>& msg) noexcept {
+			inline void round(const std::array<T, len>& msg) noexcept {
 				_len += 64;
 				round(_state, msg);
 			}
 
 			template<typename T>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 32> hash(const T* data, std::size_t len) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 32> hash(const T* data, std::size_t len) noexcept) {
 				std::array<uint8_t, 32> _hash{{}};
 				std::array<uint32_t, 16> block{{}};
 
@@ -193,17 +193,17 @@ namespace substrate
 			}
 
 			template<typename T>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 32> hash(const span<T>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 32> hash(const span<T>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 32> hash(const std::array<T, len>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 32> hash(const std::array<T, len>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 32> operator()(const std::array<T, len>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 32> operator()(const std::array<T, len>& msg) noexcept) {
 				uint64_t bidx{};
 				std::array<uint32_t, 16> buf{};
 

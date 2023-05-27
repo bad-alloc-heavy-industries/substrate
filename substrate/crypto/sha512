@@ -106,7 +106,7 @@ namespace substrate
 					}
 				}
 
-				SUBSTRATE_NO_DISCARD(uint64_t operator[](const size_t i) noexcept) {
+				SUBSTRATE_NO_DISCARD(inline uint64_t operator[](const size_t i) noexcept) {
 					if (i < 16) {
 						return W(i);
 					}
@@ -117,7 +117,7 @@ namespace substrate
 				}
 			};
 
-			void reset_state() noexcept {
+			inline void reset_state() noexcept {
 				_state[0] = UINT64_C(0x6A09E667F3BCC908);
 				_state[1] = UINT64_C(0xBB67AE8584CAA73B);
 				_state[2] = UINT64_C(0x3C6EF372FE94F82B);
@@ -129,7 +129,7 @@ namespace substrate
 			}
 
 			template<typename T, std::size_t len>
-			void round(std::array<uint64_t, 8>& i_state, const std::array<T, len>& msg) noexcept {
+			inline void round(std::array<uint64_t, 8>& i_state, const std::array<T, len>& msg) noexcept {
 				ext_msg_t W(msg);
 				auto state{i_state};
 
@@ -158,13 +158,13 @@ namespace substrate
 			}
 
 			template<typename T, std::size_t len>
-			void round(const std::array<T, len>& msg) noexcept {
+			inline void round(const std::array<T, len>& msg) noexcept {
 				_len += 128;
 				round(_state, msg);
 			}
 
 			template<typename T>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const T* data, std::size_t len) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 64> hash(const T* data, std::size_t len) noexcept) {
 				std::array<uint8_t, 64> _hash{{}};
 				std::array<uint64_t, 16> block{{}};
 
@@ -202,17 +202,17 @@ namespace substrate
 			}
 
 			template<typename T>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const span<T>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 64> hash(const span<T>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 64> hash(const std::array<T, len>& msg) noexcept) {
 				return hash(msg.data(), msg.size());
 			}
 
 			template<typename T, std::size_t len>
-			SUBSTRATE_NO_DISCARD(std::array<uint8_t, 64> operator()(const std::array<T, len>& msg) noexcept) {
+			SUBSTRATE_NO_DISCARD(inline std::array<uint8_t, 64> operator()(const std::array<T, len>& msg) noexcept) {
 				uint64_t bidx{};
 				std::array<uint64_t, 16> buf{};
 
