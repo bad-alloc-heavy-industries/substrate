@@ -88,6 +88,9 @@ if isWindows
 		language: ['c', 'cpp']
 	)
 
+	add_project_arguments(cxx.get_supported_arguments('-guard:cf'), language: ['cpp'])
+	add_project_link_arguments(cxx.get_supported_link_arguments('-guard:cf', '-Wl,-guard:cf'), language: ['cpp'])
+
 	if target_machine.cpu_family() == 'x86_64' or target_machine.cpu_family() == 'aarch64'
 		add_project_arguments('-D_WIN64', language: ['c', 'cpp'])
 	endif
