@@ -161,10 +161,8 @@ namespace substrate
 
 				std::memcpy(block.data(), data, len);
 				std::memset(
-					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-					reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
-						block.data()
-					) + len,
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+					reinterpret_cast<uint8_t*>(block.data()) + len,
 					0x80U,
 					1
 				);
@@ -181,13 +179,10 @@ namespace substrate
 
 				round(_state, block);
 
-				for (uint8_t i{}; i < _state.size(); ++i){
+				for (size_t i{}; i < _state.size(); ++i){
 					bu::writeBE(
-						_state[i],
-						// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-						reinterpret_cast<uint8_t*>( // lgtm[cpp/reinterpret-cast]
-							_hash.data()
-						) + (i * sizeof(uint32_t))
+						_state.at(i),
+						&_hash.at(i * sizeof(uint32_t))
 					);
 				}
 
