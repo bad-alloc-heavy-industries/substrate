@@ -360,7 +360,7 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
@@ -456,7 +456,7 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
