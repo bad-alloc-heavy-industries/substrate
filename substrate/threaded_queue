@@ -41,8 +41,12 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(inline T pop() noexcept)
 		{
 			std::unique_lock<std::mutex> lock{queueMutex};
+			const auto dataReceived
+			{
+				[&]() noexcept -> bool { return queueLength; }
+			};
 			if (!queueLength)
-				haveData.wait(lock, [this]() noexcept -> bool { return queueLength; });
+				haveData.wait(lock, dataReceived);
 			--queueLength;
 			const auto result{queue.front()};
 			queue.pop();

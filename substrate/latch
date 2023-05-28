@@ -8,6 +8,8 @@
 #include <cstddef>
 #include <mutex>
 
+#include "internal/defs"
+
 namespace substrate
 {
 	struct latch_t final
@@ -29,13 +31,15 @@ namespace substrate
 
 		inline void wait() const noexcept
 		{
+			const auto isAvailable 
+			{
+				[&]() noexcept -> bool { return !count; }
+			};
+			std::unique_lock<std::mutex> lock{latchMutex};
 			if (!count)
 				waitZero.notify_all();
 			else
-			{
-				std::unique_lock<std::mutex> lock{latchMutex};
-				waitZero.wait(lock, [this]() noexcept -> bool { return !count; });
-			}
+				waitZero.wait(lock, isAvailable);
 		}
 
 		inline void arriveAndWait() noexcept

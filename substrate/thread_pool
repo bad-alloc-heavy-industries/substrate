@@ -33,12 +33,16 @@ namespace substrate
 		affinity_t affinity{};
 		workFunc_t workerFunction;
 
-		inline std::pair<bool, std::tuple<args_t...>> waitWork() noexcept
+		std::pair<bool, std::tuple<args_t...>> waitWork() noexcept
 		{
 			std::unique_lock<std::mutex> lock{workMutex};
 			++waitingThreads;
 			// wait, but protect ourselves from accidental wake-ups..
-			haveWork.wait(lock, [this]() noexcept -> bool { return finished || !work.empty(); });
+			const auto workReceived
+			{
+				[&]() noexcept -> bool { return finished || !work.empty(); }
+			};
+			haveWork.wait(lock, workReceived);
 			--waitingThreads;
 			if (!work.empty())
 				return {true, work.pop()};
@@ -46,19 +50,19 @@ namespace substrate
 		}
 
 		template<std::size_t... indicies>
-			SUBSTRATE_NO_DISCARD(inline result_t invoke(std::tuple<args_t...> &&args,
+			SUBSTRATE_NO_DISCARD(result_t invoke(std::tuple<args_t...> &&args,
 			internal::indexSequence_t<indicies...>))
 			{ return workerFunction(std::get<indicies>(std::move(args))...); }
 
 		template<std::size_t I, substrate::enable_if_t<I == 0, void>* = nullptr>
-			SUBSTRATE_NO_DISCARD(inline result_t ctad_invoke(std::tuple<args_t...> &&))
+			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&))
 			{ return workerFunction(); }
 
 		template<std::size_t I, typename substrate::enable_if_t<I != 0, void>* = nullptr>
-			SUBSTRATE_NO_DISCARD(inline result_t ctad_invoke(std::tuple<args_t...> &&args))
+			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&args))
 			{ return invoke(std::move(args), internal::makeIndexSequence<I>{}); }
 
-		inline void workerThread(const std::size_t processor) noexcept
+		void workerThread(const std::size_t processor) noexcept
 		{
 			affinity.pinThreadTo(processor);
 			while (!(finished && work.empty()))
@@ -72,7 +76,7 @@ namespace substrate
 			}
 		}
 
-		inline result_t clearResultQueue() noexcept
+		result_t clearResultQueue() noexcept
 		{
 			result_t result{};
 			while (!results.empty())
@@ -99,23 +103,27 @@ namespace substrate
 		threadPool_t &operator =(const threadPool_t &) = delete;
 		threadPool_t &operator =(threadPool_t &&) = delete;
 
-		SUBSTRATE_NO_DISCARD(inline size_t numProcessors() const noexcept) { return affinity.numProcessors(); }
-		SUBSTRATE_NO_DISCARD(inline bool valid() const noexcept) { return !threads.empty(); }
-		SUBSTRATE_NO_DISCARD(inline bool ready() const noexcept) { return waitingThreads == affinity.numProcessors(); }
+		SUBSTRATE_NO_DISCARD(size_t numProcessors() const noexcept) { return affinity.numProcessors(); }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return !threads.empty(); }
+		SUBSTRATE_NO_DISCARD(bool ready() const noexcept) { return waitingThreads == affinity.numProcessors(); }
 
-		SUBSTRATE_NO_DISCARD(inline result_t queue(args_t ...args) noexcept)
+		SUBSTRATE_NO_DISCARD(result_t queue(args_t ...args) noexcept)
 		{
+			std::lock_guard<std::mutex> lock{workMutex};
 			work.emplace(std::forward<args_t>(args)...);
 			haveWork.notify_one();
 			return clearResultQueue();
 		}
 
-		SUBSTRATE_NO_DISCARD(inline result_t finish() noexcept)
+		SUBSTRATE_NO_DISCARD(result_t finish() noexcept)
 		{
 			if (threads.empty())
 				return {};
-			finished = true;
-			haveWork.notify_all();
+			{
+				std::lock_guard<std::mutex> lock{workMutex};
+				finished = true;
+				haveWork.notify_all();
+			}
 			for (auto &thread : threads)
 				thread.join();
 			threads.clear();
