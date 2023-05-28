@@ -57,14 +57,24 @@ TEST_CASE("unused", "[threadPool_t]")
 TEST_CASE("once", "[threadPool_t]")
 {
 	auto pool{substrate::make_unique_nothrow<substrate::threadPool_t<decltype(dummyWork)>>(dummyWork)};
+	std::atomic<uint32_t> fence{};
 	REQUIRE(pool);
+	fence++;
 	REQUIRE(pool->valid());
+	fence++;
 	REQUIRE(pool->ready());
+	fence++;
 	REQUIRE(!pool->queue());
+	fence++;
 	REQUIRE(pool->valid());
+	fence++;
 	REQUIRE(pool->finish());
+	fence++;
 	REQUIRE(!pool->valid());
+	fence++;
 	REQUIRE(!pool->finish());
+	fence++;
+	REQUIRE(fence == 8);
 }
 
 // NOLINTNEXTLINE(readability-function-cognitive-complexity)
