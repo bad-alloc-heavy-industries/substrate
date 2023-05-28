@@ -6,12 +6,15 @@
 #ifndef _WINDOWS
 #	include <unistd.h>
 #else
+#	ifndef NOMINMAX
+#	define NOMINMAX
+#	endif
+#	ifndef WIN32_LEAN_AND_MEAN
 #	define WIN32_LEAN_AND_MEAN
+#	endif
 #	include <windows.h>
-#	include <stringapiset.h>
 #	include <fcntl.h>
 #	include <io.h>
-#	undef WIN32_LEAN_AND_MEAN
 #	include <substrate/utility>
 #endif
 #include <substrate/console>

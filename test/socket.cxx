@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #else
+#define NOMINMAX
 #include <Winsock2.h>
 #endif
 #include <cstring>

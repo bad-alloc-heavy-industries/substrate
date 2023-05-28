@@ -8,12 +8,10 @@
 #	include <unistd.h>
 #	include <sys/mman.h>
 #else
-#	include <io.h>
+#	define NOMINMAX
 #	define WIN32_LEAN_AND_MEAN
+#	include <io.h>
 #	include <windows.h>
-#	undef WIN32_LEAN_AND_MEAN
-#	undef min
-#	undef max
 #endif
 #include <stdexcept>
 #include <cstring>
