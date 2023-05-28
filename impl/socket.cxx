@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: BSD-3-Clause
+
+// https://sonarsource.atlassian.net/browse/CPP-2561
+#ifndef _CRT_USE_BUILTIN_OFFSETOF
+#define _CRT_USE_BUILTIN_OFFSETOF
+#endif
+
 #include <cstring>
 #ifndef _WIN32
 #	include <sys/socket.h>
