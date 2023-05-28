@@ -52,6 +52,7 @@ namespace substrate
 			const auto cpu{sched_getcpu()};
 			if (cpu == -1)
 				throw std::system_error{errno, std::system_category()};
+			return static_cast<uint32_t>(cpu);
 #elif defined(__APPLE__)
 #if defined(__arm__)
 			// Apple XNU stores the CPU id in the lowest three bits of
