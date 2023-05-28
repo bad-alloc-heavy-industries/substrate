@@ -5,7 +5,7 @@
 #include <substrate/latch>
 #include <substrate/threaded_queue>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 TEST_CASE("empty", "[threadedQueue_t]")
 {

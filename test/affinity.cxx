@@ -8,8 +8,12 @@
 #include <substrate/fixed_vector>
 
 #ifdef _WIN32 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #endif
 #if !defined(_WIN32) || defined(__WINPTHREADS_VERSION)
@@ -26,7 +30,7 @@
 #include <sched.h>
 #endif
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #if defined(_WIN32)
 using processorVector_t = substrate::fixedVector_t<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX>;

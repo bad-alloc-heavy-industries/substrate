@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <array>
 #include <substrate/indexed_iterator>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::indexedIterator_t;
 

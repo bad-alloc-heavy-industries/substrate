@@ -5,12 +5,14 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #else
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <Winsock2.h>
 #endif
 #include <cstring>
 #include <substrate/socket>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::socket_t;
 using substrate::socketType_t;

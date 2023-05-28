@@ -5,7 +5,7 @@
 #include <substrate/fixed_vector>
 #include <substrate/fd>
 #include <substrate/utility>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::fd_t;
 using substrate::make_unique;
@@ -191,7 +191,7 @@ TEST_CASE("fd_t read", "[fd_t]")
 	REQUIRE(file.isEOF());
 }
 
-ANON_TEST_CASE()
+TEST_CASE()
 {
 	unlink("fd.test");
 	SUCCEED();

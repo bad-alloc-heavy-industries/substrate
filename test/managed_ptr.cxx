@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <substrate/managed_ptr>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::managedPtr_t;
 using substrate::make_managed;

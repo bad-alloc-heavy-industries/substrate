@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstdint>
 #include <substrate/buffer_utils>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 constexpr static std::array<uint8_t, 2> x16LE{{0xF5U, 0xFFU}};
 constexpr static std::array<uint8_t, 4> x32LE{{0xFAU, 0xFFU, 0xFFU, 0xFFU}};

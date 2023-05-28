@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <array>
 #include <substrate/pointer_utils>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #if defined(SUBSTRATE_SUPPORTS_MANAGED_TUPLE)
 

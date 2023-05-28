@@ -121,6 +121,8 @@ if isWindows
 	endif
 endif
 
+cxxVersion = cxx.get_define('__cplusplus').substring(0, -1)
+
 subdir('substrate')
 if get_option('build_library')
 	subdir('impl')
@@ -171,7 +173,11 @@ substrate_dep = declare_dependency(
 )
 
 if get_option('build_tests') and targetLibraryBuildable
-	subdir('test')
+	if cxxVersion.version_compare('>=201402')
+		subdir('test')
+	else
+		warning('Catch2 requires C++14 to build the tests, skipping')
+	endif
 endif
 
 # When we're in a cross-build environment, also declare the native version of the library

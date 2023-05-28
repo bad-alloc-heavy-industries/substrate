@@ -6,7 +6,7 @@
 #include <substrate/fd>
 #include <substrate/pty>
 #include <substrate/pipe>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #ifndef _WINDOWS
 constexpr static const char *defaultTTY = "/dev/ptmx";

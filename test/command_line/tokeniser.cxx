@@ -2,7 +2,7 @@
 #include <array>
 #include <substrate/command_line/tokeniser>
 #include <substrate/utility>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std::literals::string_view_literals;
 using substrate::commandLine::internal::tokeniser_t;

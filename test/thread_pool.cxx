@@ -8,7 +8,7 @@
 #include <substrate/utility>
 #include <substrate/thread_pool>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 namespace
 {

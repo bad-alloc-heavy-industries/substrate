@@ -4,7 +4,7 @@
 #include <array>
 #include <substrate/advanced/fd>
 #include <substrate/utility>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::advanced::fd_t;
 using substrate::make_unique;
@@ -190,7 +190,7 @@ TEST_CASE("advanced::advanced::fd_t read", "[advanced::fd_t]")
 	REQUIRE(file.isEOF());
 }
 
-ANON_TEST_CASE()
+TEST_CASE()
 {
 	unlink("fd.test");
 	SUCCEED();

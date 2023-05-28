@@ -4,7 +4,7 @@
 #include <chrono>
 #include <substrate/conversions>
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using substrate::fromInt_t;
 using substrate::toInt_t;

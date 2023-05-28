@@ -2,7 +2,7 @@
 #include <filesystem>
 #include <substrate/conversions>
 #include <substrate/command_line/options>
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace std::literals::string_view_literals;
 using std::filesystem::path;
