@@ -1,12 +1,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 libSubstrateSrcs = [
 	'socket.cxx', 'console.cxx', 'affinity.cxx', 'thread.cxx',
+	'utility.cxx',
 ]
 
 deps = []
 
 if target_machine.system() == 'windows'
-	deps += cxx.find_library('ws2_32')
+	deps += cxx.find_library('ws2_32', required: true)
+	deps += cxx.find_library('dbghelp', required: true)
 else
 	libSubstrateSrcs += 'pty.cxx'
 endif

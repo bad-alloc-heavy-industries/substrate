@@ -1951,6 +1951,13 @@ TEST_CASE("C++ typename decoding", "[utility]")
 	REQUIRE(decode_typename<I>() == "int* const volatile");
 	REQUIRE(decode_typename<Iu>() == "unsigned int* const volatile");
 #endif
+
+#ifdef _WIN32
+	REQUIRE(decode_typename("?decode_typename@substrate@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEBD@Z") == "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > __cdecl substrate::decode_typename(char const * __ptr64)");
+#endif
+#ifndef _MSC_VER
+	REQUIRE(decode_typename("_ZN9substrate15decode_typenameEPKc") == "substrate::decode_typename(char const*)");
+#endif
 }
 
 using substrate::leb128_decode;

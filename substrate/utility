@@ -15,10 +15,6 @@
 #include <substrate/internal/defs>
 #include <substrate/promotion_helpers>
 
-#ifndef _MSC_VER
-#include <cxxabi.h>
-#endif
-
 namespace substrate
 {
 /* C++ 14 helpers */
@@ -545,18 +541,9 @@ namespace substrate
 	template<typename T> struct is_pod : public std::integral_constant<bool,
 		std::is_trivial<T>::value && std::is_standard_layout<T>::value> { };
 
-#if !defined(__GNUC__) || defined(__GXX_RTTI)
+#if defined(_MSC_VER) || !defined(__GNU__) || defined(__GXX_RTTI)
 	/* typename decoding */
-	SUBSTRATE_NOWARN_UNUSED(static inline std::string decode_typename(const char *const mangled_name))
-	{
-#ifndef _MSC_VER
-		auto * const demangler = abi::__cxa_demangle(mangled_name, nullptr, nullptr, nullptr);
-#else
-		const auto demangler = nullptr;
-#endif
-		std::unique_ptr<char, void(*)(void*)> _demangle{demangler, std::free};
-		return {_demangle ? _demangle.get() : mangled_name};
-	}
+	SUBSTRATE_NOWARN_UNUSED(SUBSTRATE_CLS_API std::string decode_typename(const char *mangledName));
 
 	template<typename T> static std::string decode_typename()
 	{
