@@ -33,7 +33,7 @@ namespace substrate
 		affinity_t affinity{};
 		workFunc_t workerFunction;
 
-		std::pair<bool, std::tuple<args_t...>> waitWork() noexcept
+		inline std::pair<bool, std::tuple<args_t...>> waitWork() noexcept
 		{
 			std::unique_lock<std::mutex> lock{workMutex};
 			++waitingThreads;
@@ -50,16 +50,16 @@ namespace substrate
 		}
 
 		template<std::size_t... indicies>
-			SUBSTRATE_NO_DISCARD(result_t invoke(std::tuple<args_t...> &&args,
+			SUBSTRATE_NO_DISCARD(inline result_t invoke(std::tuple<args_t...> &&args,
 			internal::indexSequence_t<indicies...>))
 			{ return workerFunction(std::get<indicies>(std::move(args))...); }
 
 		template<std::size_t I, substrate::enable_if_t<I == 0, void>* = nullptr>
-			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&))
+			SUBSTRATE_NO_DISCARD(inline result_t ctad_invoke(std::tuple<args_t...> &&))
 			{ return workerFunction(); }
 
 		template<std::size_t I, typename substrate::enable_if_t<I != 0, void>* = nullptr>
-			SUBSTRATE_NO_DISCARD(result_t ctad_invoke(std::tuple<args_t...> &&args))
+			SUBSTRATE_NO_DISCARD(inline result_t ctad_invoke(std::tuple<args_t...> &&args))
 			{ return invoke(std::move(args), internal::makeIndexSequence<I>{}); }
 
 		void workerThread(const std::size_t processor) noexcept
@@ -76,14 +76,14 @@ namespace substrate
 			}
 		}
 
-		result_t clearResultQueue() noexcept
+		inline result_t clearResultQueue() noexcept
 		{
 			result_t result{};
 			while (!results.empty())
 			{
 				auto thisResult = results.pop();
 				if (!result)
-					std::swap(result, thisResult);
+					result = std::move(thisResult);
 			}
 			return result;
 		}
@@ -103,9 +103,9 @@ namespace substrate
 		threadPool_t &operator =(const threadPool_t &) = delete;
 		threadPool_t &operator =(threadPool_t &&) = delete;
 
-		SUBSTRATE_NO_DISCARD(size_t numProcessors() const noexcept) { return affinity.numProcessors(); }
-		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return !threads.empty(); }
-		SUBSTRATE_NO_DISCARD(bool ready() const noexcept) { return waitingThreads == affinity.numProcessors(); }
+		SUBSTRATE_NO_DISCARD(inline size_t numProcessors() const noexcept) { return affinity.numProcessors(); }
+		SUBSTRATE_NO_DISCARD(inline bool valid() const noexcept) { return !threads.empty(); }
+		SUBSTRATE_NO_DISCARD(inline bool ready() const noexcept) { return waitingThreads == affinity.numProcessors(); }
 
 		SUBSTRATE_NO_DISCARD(result_t queue(args_t ...args) noexcept)
 		{
