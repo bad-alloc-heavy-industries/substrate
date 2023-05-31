@@ -167,6 +167,7 @@ endif
 substrate_dep = declare_dependency(
 	dependencies: deps,
 	include_directories: include_directories('.'),
+	compile_args: variablesCompileArgs,
 	link_with: libSubstrate,
 	variables: variables,
 	version: meson.project_version()
@@ -182,12 +183,14 @@ endif
 
 # When we're in a cross-build environment, also declare the native version of the library
 if meson.is_cross_build()
+	substrateNativeArgs = ' '.join(['-I@0@'.format(meson.current_source_dir())] + libSubstrateArgs)
 	substrate_native_dep = declare_dependency(
 		dependencies: deps,
 		include_directories: include_directories('.'),
+		compile_args: substrateNativeArgs,
 		link_with: libSubstrateNative,
 		variables: {
-			'compile_args': ' '.join(['-I@0@'.format(meson.current_source_dir())] + libSubstrateArgs),
+			'compile_args': substrateNativeArgs,
 			'link_args': libSubstrateNative.full_path()
 		},
 		version: meson.project_version()
