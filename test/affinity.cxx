@@ -70,13 +70,13 @@ static void nextProcessor(const processorVector_t &processorInfo,
 		for (; groupIndex < processor.Group.ActiveGroupCount; ++groupIndex)
 		{
 			const auto &group{processor.Group.GroupInfo[groupIndex]};
-			for (; maskOffset < sizeof(KAFFINITY) * 8; ++maskOffset)
+			for (; maskOffset < sizeof(KAFFINITY) * 8U; ++maskOffset)
 			{
 				const auto mask{group.ActiveProcessorMask >> maskOffset};
-				if (mask & 1)
+				if (mask & 0x1U)
 					return;
 			}
-			maskOffset = 0;
+			maskOffset = 0U;
 		}
 		++info;
 	}
@@ -170,7 +170,7 @@ TEST_CASE("pinning", "[affinity_t]")
 		REQUIRE(result == static_cast<int32_t>(processor));
 	}
 #elif defined(_WIN32)
-	std::size_t count{0};
+	uint32_t count{0};
 	for (const auto &processor : *affinity)
 	{
 		const auto result = std::async(std::launch::async,
