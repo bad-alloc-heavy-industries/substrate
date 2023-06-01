@@ -183,8 +183,11 @@ namespace substrate
 		return std::uint16_t(chksum);
 	}
 
-	template<std::size_t N> std::uint16_t bsd_checksum(std::array<std::uint8_t, N> bytes) noexcept
-		{ return bsd_checksum(bytes.data(), N); }
+	template<typename Sized> inline uint16_t bsd_checksum(const Sized &data) noexcept
+	{
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+		return bsd_checksum(reinterpret_cast<const uint8_t *>(substrate::data(data)), substrate::size(data));
+	}
 }
 
 #endif /* SUBSTRATE_HASH */
