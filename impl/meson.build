@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 libSubstrateSrcs = [
 	'socket.cxx', 'console.cxx', 'affinity.cxx', 'thread.cxx',
-	'utility.cxx',
+	'utility.cxx', 'hash.cxx',
 ]
 
 deps = []

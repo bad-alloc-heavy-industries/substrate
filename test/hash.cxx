@@ -57,4 +57,18 @@ TEST_CASE("sysv", "[hash]")
 	REQUIRE(substrate::sysv_checksum(example2) == 0x1007);
 }
 
+TEST_CASE("crc32", "[hash]")
+{
+	// https://github.com/emn178/js-crc/blob/master/README.md
+	const std::string empty{};
+	const std::array<uint8_t, 1> zero{{0x0}};
+	const std::string example{"The quick brown fox jumps over the lazy dog"};
+	const std::string example2{"The quick brown fox jumps over the lazy dog."};
+
+	REQUIRE(substrate::crc32(empty) == UINT32_C(0x00000000));
+	REQUIRE(substrate::crc32(zero) == UINT32_C(0xD202EF8D));
+	REQUIRE(substrate::crc32(example) == UINT32_C(0x414FA339));
+	REQUIRE(substrate::crc32(example2) == UINT32_C(0x519025E9));
+}
+
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
