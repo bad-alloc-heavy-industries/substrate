@@ -280,7 +280,7 @@ namespace substrate
 		{
 			containerLength = substrate::size(std::get<0>(_containers));
 #if __cplusplus >= 201703L
-			if ((!containerMatchesLength(containers, containerLength) && ...))
+			if ((!containerMatchesLength(containers, containerLength) || ...))
 #else
 			const std::array<size_t, tupleLength> results{{substrate::size(containers)...}};
 			if (std::any_of(results.begin(), results.end(),
