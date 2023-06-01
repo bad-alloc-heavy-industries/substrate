@@ -31,6 +31,19 @@ TEST_CASE("murmur128", "[hash]")
 	REQUIRE(pair4.second == UINT64_C(0x9041FFD456E73DE0));
 }
 
+TEST_CASE("bsd", "[hash]")
+{
+	const std::string empty{};
+	const std::array<uint8_t, 1> zero{{0x0}};
+	const std::string example{"The quick brown fox jumps over the lazy dog"};
+	const std::string example2{"The quick brown fox jumps over the lazy dog."};
+
+	REQUIRE(substrate::bsd_checksum(empty) == 0x0);
+	REQUIRE(substrate::bsd_checksum(zero) == 0x0);
+	REQUIRE(substrate::bsd_checksum(example) == 0xC56E);
+	REQUIRE(substrate::bsd_checksum(example2) == 0x62E5);
+}
+
 TEST_CASE("sysv", "[hash]")
 {
 	const std::string empty{};
