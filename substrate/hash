@@ -8,10 +8,10 @@
 #include <cstring>
 #include <limits>
 #include <type_traits>
-#include <utility>
 
-#include <substrate/internal/defs>
-#include <substrate/bits>
+#include "substrate/internal/defs"
+#include "substrate/bits"
+#include "substrate/utility"
 
 namespace substrate
 {
@@ -30,11 +30,11 @@ namespace substrate
 		}
 	}
 
-	template<typename T, size_t N> std::pair<std::uint64_t, std::uint64_t>
-		murmur128(const std::array<T, N>& input, const uint32_t seed)
+	template<typename Sized> std::pair<std::uint64_t, std::uint64_t>
+		murmur128(const Sized& input, const uint32_t seed)
 	{
-		constexpr std::uint64_t len{sizeof(T) * N};
-		constexpr size_t blk_count{len / 16};
+		SUBSTRATE_CXX14_CONSTEXPR std::uint64_t len{sizeof(typename Sized::value_type) * substrate::size(input)};
+		SUBSTRATE_CXX14_CONSTEXPR size_t blk_count{len / 16};
 		constexpr std::uint64_t c1 = 0x87C37B91114253D5ULL;
 		constexpr std::uint64_t c2 = 0x4CF5AD432745937FULL;
 		const auto data{static_cast<const uint8_t*>(static_cast<const void*>(input.data()))};
