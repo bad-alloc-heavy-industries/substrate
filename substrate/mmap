@@ -245,7 +245,12 @@ namespace substrate
 			return {*this, len, prot, flags, addr};
 		}
 
-		SUBSTRATE_NO_DISCARD(bool chperm(const int32_t prot) noexcept) { return mprotect(_addr, _len, prot) == 0; }
+		SUBSTRATE_NO_DISCARD(bool chperm(const int32_t prot) noexcept)
+#ifdef _WIN32
+			{ return VirtualProtect(_addr, _len, prot, nullptr) == 0; }
+#else
+			{ return mprotect(_addr, _len, prot) == 0; }
+#endif
 
 		template<typename T> T *address() noexcept { return static_cast<T *>(_addr); }
 		template<typename T> const T *address() const noexcept { return static_cast<const T *>(_addr); }
