@@ -18,9 +18,7 @@
 #	include <substrate/utility>
 #endif
 
-#ifndef _WINDOWS
-#	include <substrate/mmap>
-#endif
+#include <substrate/mmap>
 
 #if defined(SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH)
 #include <filesystem>
@@ -387,7 +385,6 @@ namespace substrate
 			return seek(offset, SEEK_CUR) == currentPos + offset;
 		}
 
-#ifndef _WINDOWS
 		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept)
 		{
 			const auto len{length()};
@@ -404,7 +401,6 @@ namespace substrate
 			invalidate();
 			return {file, len, prot, flags, map_addr};
 		}
-#endif
 
 		fd_t(const fd_t &) = delete;
 		fd_t &operator =(const fd_t &) = delete;
