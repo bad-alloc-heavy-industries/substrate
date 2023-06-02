@@ -136,6 +136,8 @@ jobs:
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-windows:
     name: '${{ matrix.os }} (msvc, ${{ matrix.cpp_std }})'
@@ -216,6 +218,8 @@ jobs:
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-windows-mingw:
     name: '${{ matrix.os }} (${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
@@ -316,6 +320,8 @@ jobs:
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-macos:
     name: '${{ matrix.os }} (${{ matrix.cpp_std }})'
@@ -387,6 +393,8 @@ jobs:
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   build-macos-homebrew:
     # Apple LLD is unable to link GCC < 11 generated object files.
@@ -483,3 +491,5 @@ jobs:
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
