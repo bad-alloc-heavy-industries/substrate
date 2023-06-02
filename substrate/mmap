@@ -224,6 +224,8 @@ namespace substrate
 #endif
 		mmap_t(const mmap_t &) = delete;
 		mmap_t &operator =(const mmap_t &) = delete;
+		mmap_t(mmap_t &&) noexcept = default;
+		mmap_t& operator=(mmap_t &&) noexcept = default;
 
 		void swap(mmap_t &map) noexcept
 		{
