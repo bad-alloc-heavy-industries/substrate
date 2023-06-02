@@ -124,9 +124,7 @@ jobs:
           meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
-          cd build
-          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
-          gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+          ninja -C build coverage-xml
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@v3
@@ -138,6 +136,8 @@ jobs:
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
+          directory: ./build/meson-logs/
+          files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build-windows:
@@ -276,7 +276,7 @@ jobs:
         shell: bash
         run: |
           python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install meson ninja
+          python3 -m pip install meson ninja gcovr
         working-directory: ${{ runner.temp }}
       - name: Version tools
         run: |
@@ -302,8 +302,7 @@ jobs:
           meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
-          cd build
-          find . -type f -name '*.gcda' -exec $GCOV -p {} + > /dev/null
+          ninja -C build coverage-xml
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@v3
@@ -315,6 +314,8 @@ jobs:
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
+          directory: ./build/meson-logs/
+          files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build-macos:
@@ -376,8 +377,7 @@ jobs:
           meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
-          cd build
-          gcovr -r .. -x -o coverage.xml -e ../deps -e ../test
+          ninja -C build coverage-xml
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@v3
@@ -389,6 +389,8 @@ jobs:
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
+          directory: ./build/meson-logs/
+          files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build-macos-homebrew:
@@ -475,8 +477,7 @@ jobs:
           meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
-          cd build
-          gcovr -r .. -x -o coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
+          ninja -C build coverage-xml
       - name: Upload failure logs
         if: failure()
         uses: actions/upload-artifact@v3
@@ -488,4 +489,6 @@ jobs:
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
+          directory: ./build/meson-logs/
+          files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
