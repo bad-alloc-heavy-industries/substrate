@@ -48,12 +48,14 @@ namespace substrate
 		void *_addr{nullptr};
 		int32_t _fd{-1};
 
+#ifndef _WINDOWS
 		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
 				const auto ptr = ::mmap(addr, len, prot, flags, map._fd, 0);
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()}, _fd{-1} { }
+#endif
 
 		template<typename T> substrate::enable_if_t<substrate::is_pod<T>::value && !has_nullable_ctor<T>::value &&
 			!std::is_same<T, void*>::value, T *> index(const std::size_t idx) const
