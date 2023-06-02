@@ -37,16 +37,16 @@ jobs:
           - 'gcc-10'
           - 'gcc-11'
         cpp_std:
-          - 'c++11'
-          - 'c++14'
-          - 'c++17'
+          - 11
+          - 14
+          - 17
         include:
           - os: { id: ubuntu-20.04, name: focal }
             compiler: 'clang-15'
-            cpp_std: 'c++20'
+            cpp_std: 20
           - os: { id: ubuntu-20.04, name: focal }
             compiler: 'gcc-11'
-            cpp_std: 'c++20'
+            cpp_std: 20
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -108,19 +108,20 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
+        if: matrix.cpp_std > 11
         run: meson test -C build
       - name: Install
         run: meson install -C build 
       - name: Run coverage build
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         # Codecov no longer parses gcov files automatically
         run: |
           rm -rf build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
           cd build
@@ -134,7 +135,7 @@ jobs:
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
-        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -151,11 +152,11 @@ jobs:
           - windows-2019
           - windows-2022
         cpp_std:
-          - 'c++14'
-          - 'c++17'
+          - 14
+          - 17
         include:
           - os: windows-2022
-            cpp_std: 'c++20'
+            cpp_std: 20
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -174,7 +175,7 @@ jobs:
         with:
           args: install OpenCppCoverage
       - name: Setup OpenCppCoverage
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         run: |
           echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
       - name: Checkout
@@ -194,18 +195,19 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
+        if: matrix.cpp_std > 11
         run: meson test -C build
       - name: Install
         run: meson install -C build
       - name: Run coverage build
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         run: |
           Remove-Item -Recurse build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
       - name: Upload failure logs
@@ -216,7 +218,7 @@ jobs:
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
-        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -236,10 +238,10 @@ jobs:
           - ucrt64
           - clang64
         cpp_std:
-          - 'c++11'
-          - 'c++14'
-          - 'c++17'
-          - 'c++20'
+          - 11
+          - 14
+          - 17
+          - 20
       fail-fast: false
     steps:
       - name: Use MinGW from MSYS
@@ -284,19 +286,20 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
+        if: matrix.cpp_std > 11
         run: meson test -C build
       - name: Install
         run: ninja -C build install
       - name: Run coverage build
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         # Codecov no longer parses gcov files automatically
         run: |
           rm -rf build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
           cd build
@@ -309,7 +312,7 @@ jobs:
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
-        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -326,9 +329,9 @@ jobs:
           - macos-12
           - macos-11
         cpp_std:
-          - 'c++11'
-          - 'c++14'
-          - 'c++17'
+          - 11
+          - 14
+          - 17
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -357,19 +360,20 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
+        if: matrix.cpp_std > 11
         run: meson test -C build
       - name: Install
         run: ninja -C build install
       - name: Run coverage build
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         # Codecov no longer parses gcov files automatically
         run: |
           rm -rf build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
           cd build
@@ -382,7 +386,7 @@ jobs:
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
-        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -413,13 +417,13 @@ jobs:
           - gcc@11
           - gcc
         cpp_std:
-          - 'c++11'
-          - 'c++14'
-          - 'c++17'
+          - 11
+          - 14
+          - 17
         include:
           - os: macos-11
             compiler: gcc
-            cpp_std: 'c++20'
+            cpp_std: 20
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -455,19 +459,20 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
       - name: Build
         run: meson compile -C build
       - name: Test
+        if: matrix.cpp_std > 11
         run: meson test -C build
       - name: Install
         run: ninja -C build install
       - name: Run coverage build
-        if: github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         # Codecov no longer parses gcov files automatically
         run: |
           rm -rf build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
           meson compile -C build
           meson test -C build
           cd build
@@ -480,7 +485,7 @@ jobs:
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
-        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate'
+        if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
