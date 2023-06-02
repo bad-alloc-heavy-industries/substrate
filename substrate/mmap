@@ -29,10 +29,15 @@
 namespace substrate
 {
 #ifdef _WIN32
+	static constexpr DWORD PROT_READ{PAGE_READONLY};
+	static constexpr DWORD PROT_WRITE{PAGE_READWRITE};
+	static constexpr int32_t MAP_PRIVATE{0};
+	static constexpr int32_t MAP_FAILED{-1};
+	static constexpr int32_t MAP_SHARED{0};
 
-	const auto MADV_SEQUENTIAL{0};
-	const auto MADV_WILLNEED{0};
-	const auto MADV_DONTDUMP{0};
+	static constexpr auto MADV_SEQUENTIAL{0};
+	static constexpr auto MADV_WILLNEED{0};
+	static constexpr auto MADV_DONTDUMP{0};
 #endif
 
 	struct mmap_t final
