@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <cstdio>
 #include <substrate/mmap>
 #include <substrate/memfd>
 #include <substrate/fd>
@@ -103,7 +104,6 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 		// REQUIRE(std::memcmp(_d, &d, sizeof(foo)) == 0);
 	}
 
-
-
+	static_cast<void>(remove("mmap_t.serialized"));
 }
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
