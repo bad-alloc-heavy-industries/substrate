@@ -162,8 +162,6 @@ namespace substrate
 				const auto ptr = ::mmap(addr, len, prot, flags, fd, 0);
 				return ptr == MAP_FAILED ? nullptr : ptr;
 			}()}, _fd{fd} { }
-		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
-		void operator =(mmap_t &&map) noexcept { swap(map); }
 
 		~mmap_t() noexcept
 		{
@@ -224,6 +222,8 @@ namespace substrate
 #endif
 		mmap_t(const mmap_t &) = delete;
 		mmap_t &operator =(const mmap_t &) = delete;
+		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
+		void operator =(mmap_t &&map) noexcept { swap(map); }
 
 		void swap(mmap_t &map) noexcept
 		{
