@@ -6,12 +6,12 @@ testSrcs = [
 	'buffer_utils.cxx', 'pointer_utils.cxx',
 	'crypto/twofish.cxx', 'crypto/sha256.cxx', 'crypto/sha512.cxx',
 	'zip_container.cxx', 'affinity.cxx', 'threaded_queue.cxx', 'thread_pool.cxx',
+	'mmap.cxx'
 ]
 
 if target_machine.system() == 'linux'
 	testSrcs += [
-		'memfd.cxx',
-		'mmap.cxx'
+		'memfd.cxx'
 	]
 endif
 

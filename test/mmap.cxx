@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cstdio>
 #include <substrate/mmap>
+#if !defined(__APPLE__) && !defined(_WIN32)
 #include <substrate/memfd>
+#endif
 #include <substrate/fd>
 #include <substrate/pointer_utils>
 
@@ -9,16 +11,20 @@
 #include <cstring>
 
 using substrate::mmap_t;
+#if !defined(__APPLE__) && !defined(_WIN32)
 using substrate::memfd_t;
+#endif
 using substrate::fd_t;
 using substrate::nicePtr_t;
 
+#if !defined(__APPLE__) && !defined(_WIN32)
 TEST_CASE("Anonymous map test", "[mmap_t]")
 {
 	memfd_t<4096> mapfd{"mapfd", O_RDWR};
 	mmap_t map{mapfd, mapfd.length(), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS};
 	REQUIRE(map.valid());
 }
+#endif
 
 struct foo final
 {
@@ -60,7 +66,7 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 
 	SECTION("Serialization")
 	{
-		fd_t file{"mmap_t.serialized", O_RDWR | O_CREAT, substrate::normalMode};
+		fd_t file{"mmap_t.serialized", O_RDWR | O_CREAT | O_NOCTTY, substrate::normalMode};
 		REQUIRE(file.valid());
 		REQUIRE(file.resize(sizeof(foo) * 4));
 		for (size_t s{}; s < sizeof(foo) * 4; ++s)
@@ -92,7 +98,7 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 
 	SECTION("De-serialization")
 	{
-		fd_t file{"mmap_t.serialized", O_RDONLY, substrate::normalMode};
+		fd_t file{"mmap_t.serialized", O_RDONLY | O_NOCTTY};
 		REQUIRE(file.valid());
 		REQUIRE(file.length() == sizeof(foo) * 4);
 
