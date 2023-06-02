@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
+#include <cstdio>
 #include <substrate/mmap>
 #include <substrate/memfd>
 #include <substrate/fd>
+#include <substrate/pointer_utils>
 
 #include <catch2/catch_test_macros.hpp>
 #include <cstring>
@@ -9,6 +11,7 @@
 using substrate::mmap_t;
 using substrate::memfd_t;
 using substrate::fd_t;
+using substrate::nicePtr_t;
 
 TEST_CASE("Anonymous map test", "[mmap_t]")
 {
@@ -41,6 +44,12 @@ public:
 	void quxx(const uint64_t quxx) noexcept { _quxx = quxx; }
 	uint64_t quxx() const noexcept { return _quxx; }
 };
+
+void cleanup(mmap_t *map)
+{
+	*map = {};
+	static_cast<void>(unlink("mmap_t.serialized"));
+}
 
 TEST_CASE("Structure serialization and loading", "[mmap_t]")
 {
@@ -87,23 +96,20 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 		REQUIRE(file.valid());
 		REQUIRE(file.length() == sizeof(foo) * 4);
 
-		auto mp = file.map(PROT_READ);
-		REQUIRE(mp.valid());
+		nicePtr_t<decltype(&cleanup), &cleanup> mp{new mmap_t{file.map(PROT_READ)}};
+		REQUIRE(mp->valid());
 		REQUIRE(!file.valid());
-		REQUIRE(mp.length() == sizeof(foo) * 4);
+		REQUIRE(mp->length() == sizeof(foo) * 4);
 
-		SUBSTRATE_NOWARN_UNUSED(auto _a) = mp.at<foo>(0);
-		SUBSTRATE_NOWARN_UNUSED(auto _b) = mp.at<foo>(1);
-		SUBSTRATE_NOWARN_UNUSED(auto _c) = mp.at<foo>(2);
-		SUBSTRATE_NOWARN_UNUSED(auto _d) = mp.at<foo>(3);
+		SUBSTRATE_NOWARN_UNUSED(auto _a) = mp->at<foo>(0);
+		SUBSTRATE_NOWARN_UNUSED(auto _b) = mp->at<foo>(1);
+		SUBSTRATE_NOWARN_UNUSED(auto _c) = mp->at<foo>(2);
+		SUBSTRATE_NOWARN_UNUSED(auto _d) = mp->at<foo>(3);
 
 		// REQUIRE(std::memcmp(_a, &a, sizeof(foo)) == 0);
 		// REQUIRE(std::memcmp(_b, &b, sizeof(foo)) == 0);
 		// REQUIRE(std::memcmp(_c, &c, sizeof(foo)) == 0);
 		// REQUIRE(std::memcmp(_d, &d, sizeof(foo)) == 0);
 	}
-
-
-
 }
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

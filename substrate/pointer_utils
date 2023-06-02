@@ -104,7 +104,7 @@ namespace substrate
 		struct naughtyPtr_t : public std::shared_ptr<ValueType>
 	{
 	private:
-		static void deleter(ValueType* value)
+		static void deleter(ValueType *value)
 		{
 			if (value != nullptr)
 				Deleter(value);
@@ -125,8 +125,7 @@ namespace substrate
 	};
 
 	template<typename T, T t, typename D = deleter_type<T>>
-	struct nicePtr_t : public naughtyPtr_t<typename D::value_type, 
-		typename D::return_type, t>
+		struct nicePtr_t : public naughtyPtr_t<typename D::value_type, typename D::return_type, t>
 	{
 	public:
 		nicePtr_t() = default;
