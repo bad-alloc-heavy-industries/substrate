@@ -33,8 +33,8 @@ namespace substrate
 	template<typename Sized> std::pair<std::uint64_t, std::uint64_t>
 		murmur128(const Sized& input, const uint32_t seed) noexcept
 	{
-		SUBSTRATE_CXX14_CONSTEXPR std::uint64_t len{sizeof(typename Sized::value_type) * substrate::size(input)};
-		SUBSTRATE_CXX14_CONSTEXPR size_t blk_count{len / 16};
+		const std::uint64_t len{sizeof(typename Sized::value_type) * substrate::size(input)};
+		const size_t blk_count{len / 16};
 		static constexpr std::uint64_t c1{UINT64_C(0x87C37B91114253D5)};
 		static constexpr std::uint64_t c2{UINT64_C(0x4CF5AD432745937F)};
 		const auto *const data{static_cast<const uint8_t*>(static_cast<const void*>(input.data()))};
