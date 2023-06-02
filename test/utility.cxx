@@ -1954,10 +1954,14 @@ TEST_CASE("C++ typename decoding", "[utility]")
 
 #ifdef _WIN32
 	REQUIRE(decode_typename("?decode_typename@substrate@@YA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PEBD@Z") == "class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > __cdecl substrate::decode_typename(char const * __ptr64)");
+	REQUIRE(decode_typename("?crcTable@crc32_t@substrate@@0V?$array@$$CBI$0BAA@@std@@B") == "private: static class std::array<unsigned int const ,256> const substrate::crc32_t::crcTable");
 #endif
-#ifndef _MSC_VER
+#ifndef _MSC_VER // Itanium
 	REQUIRE(decode_typename("_ZN9substrate15decode_typenameEPKc") == "substrate::decode_typename(char const*)");
+	REQUIRE(decode_typename("_ZN9substrate7crc32_t8crcTableE") == "substrate::crc32_t::crcTable");
 #endif
+
+	REQUIRE(decode_typename("hello world") == "hello world");
 }
 
 using substrate::leb128_decode;
