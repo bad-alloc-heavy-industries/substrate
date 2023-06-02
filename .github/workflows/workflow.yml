@@ -222,7 +222,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   build-windows-mingw:
-    name: '${{ matrix.os }} (${{ matrix.sys.abi }}, ${{ matrix.cpp_std }})'
+    name: '${{ matrix.os }} (${{ matrix.sys }}, ${{ matrix.cpp_std }})'
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -232,9 +232,9 @@ jobs:
         os:
           - windows-2019
         sys:
-          - { abi: mingw64, env: x86_64,       compiler: gcc }
-          - { abi: ucrt64,  env: ucrt-x86_64,  compiler: gcc }
-          - { abi: clang64, env: clang-x86_64, compiler: clang }
+          - mingw64
+          - ucrt64
+          - clang64
         cpp_std:
           - 'c++11'
           - 'c++14'
@@ -245,11 +245,12 @@ jobs:
       - name: Use MinGW from MSYS
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{matrix.sys.abi}}
+          msystem: ${{ matrix.sys }}
           update: true
           path-type: inherit
-          install: >-
-            mingw-w64-${{matrix.sys.env}}-toolchain
+          pacboy: >-
+            toolchain:p
+            lcov:p
       - name: Runtime environment
         env:
           WORKSPACE: ${{ github.workspace }}
@@ -257,23 +258,13 @@ jobs:
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
       - name: Setup compiler
-        if: startsWith(matrix.sys.abi, 'mingw64') || startsWith(matrix.sys.abi, 'ucrt64')
+        if: startsWith(matrix.sys, 'mingw') || startsWith(matrix.sys, 'ucrt64')
         run: |
-          CXX=${CC/#gcc/g++}
-          echo "CC=$CC" >> $GITHUB_ENV
-          echo "CXX=$CXX" >> $GITHUB_ENV
           echo "GCOV=gcov" >> $GITHUB_ENV
-        env:
-          CC: ${{ matrix.sys.compiler }}
       - name: Setup compiler
-        if: startsWith(matrix.sys.abi, 'clang64')
+        if: startsWith(matrix.sys, 'clang')
         run: |
-          CXX=${CC/#clang/clang++}
-          echo "CC=$CC" >> $GITHUB_ENV
-          echo "CXX=$CXX" >> $GITHUB_ENV
           echo "GCOV=llvm-cov gcov" >> $GITHUB_ENV
-        env:
-          CC: ${{ matrix.sys.compiler }}
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -287,8 +278,8 @@ jobs:
         working-directory: ${{ runner.temp }}
       - name: Version tools
         run: |
-          $CC --version
-          $CXX --version
+          cc --version
+          c++ --version
           $GCOV --version
           meson --version
           ninja --version
@@ -314,7 +305,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v3
         with:
-          name: logs-${{ matrix.os }}-${{ matrix.sys.abi }}-${{ matrix.cpp_std }}
+          name: logs-${{ matrix.os }}-${{ matrix.sys }}-${{ matrix.cpp_std }}
           path: ${{ github.workspace }}/build/meson-logs/*
           retention-days: 5
       - name: Codecov
