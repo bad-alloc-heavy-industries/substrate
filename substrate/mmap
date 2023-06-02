@@ -116,19 +116,15 @@ namespace substrate
 #ifdef _WIN32
 		SUBSTRATE_CXX14_CONSTEXPR static DWORD cleanProt(const DWORD prot) noexcept
 		{
-			if (prot & PAGE_READWRITE)
-				return prot & ~PAGE_READONLY;
-			return prot;
+			return (prot & PAGE_READWRITE) ? prot & ~PAGE_READONLY : prot;
 		}
 
 		SUBSTRATE_CXX14_CONSTEXPR static DWORD protToAccess(const DWORD prot) noexcept
 		{
-			if (prot & PAGE_READWRITE)
+			if ((prot & PAGE_READWRITE) || (prot & PAGE_WRITECOPY))
 				return FILE_MAP_WRITE;
 			else if (prot & PAGE_READONLY)
 				return FILE_MAP_READ;
-			else if (prot & PAGE_WRITECOPY)
-				return FILE_MAP_WRITE;
 			return {};
 		}
 #endif
