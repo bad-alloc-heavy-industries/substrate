@@ -175,11 +175,10 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _addr; }
 #else
-		mmap_t(const int32_t fd, const std::size_t len, const DWORD prot, const int32_t = 0,
+		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t = 0,
 			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
 			{
-				const auto file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
-				static_assert(sizeof(DWORD) == 4);
+				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
 				return CreateFileMappingA(file, nullptr, cleanProt(prot), DWORD(len >> 32U),
 					DWORD(len), nullptr);
 			}()}, _addr{[&]() noexcept -> void *
@@ -193,8 +192,7 @@ namespace substrate
 			const int32_t = 0, void * = nullptr) noexcept : _len{length},
 			_mapping{[&]() noexcept -> HANDLE
 			{
-				const auto file = reinterpret_cast<HANDLE>(_get_osfhandle(fd));
-				static_assert(sizeof(DWORD) == 4);
+				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
 #if 0
 				return CreateFileMappingA(file, nullptr, cleanProt(prot), DWORD(length >> 32U),
 					DWORD(length), nullptr);
@@ -208,7 +206,7 @@ namespace substrate
 #if 0
 				return MapViewOfFile(_mapping, protToAccess(prot), DWORD(offset >> 32U), DWORD(offset), 0);
 #else
-				if (DWORD(length >> 32U))
+				if (length > std::numeric_limits<uint32_t>::max())
 					return nullptr;
 				return MapViewOfFile(_mapping, protToAccess(prot), DWORD(offset >> 32U), DWORD(offset), SIZE_T(length));
 #endif
