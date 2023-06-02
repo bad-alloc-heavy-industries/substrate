@@ -4,10 +4,7 @@
 
 #include <cstdint>
 #include <substrate/internal/defs>
-#ifndef _WINDOWS
-#	include <unistd.h>
-#	include <sys/mman.h>
-#else
+#ifdef _WIN32
 #	ifndef NOMINMAX
 #		define NOMINMAX
 #	endif
@@ -16,6 +13,9 @@
 #	endif
 #	include <io.h>
 #	include <windows.h>
+#else
+#	include <unistd.h>
+#	include <sys/mman.h>
 #endif
 #include <stdexcept>
 #include <cstring>
@@ -28,10 +28,7 @@
 
 namespace substrate
 {
-#ifdef _WINDOWS
-	const DWORD PROT_READ{PAGE_READONLY};
-	const DWORD PROT_WRITE{PAGE_READWRITE};
-	const int32_t MAP_PRIVATE{0};
+#ifdef _WIN32
 
 	const auto MADV_SEQUENTIAL{0};
 	const auto MADV_WILLNEED{0};
@@ -42,13 +39,13 @@ namespace substrate
 	{
 	private:
 		std::size_t _len{0};
-#ifdef _WINDOWS
+#ifdef _WIN32
 		HANDLE _mapping{INVALID_HANDLE_VALUE};
 #endif
 		void *_addr{nullptr};
 		int32_t _fd{-1};
 
-#ifndef _WINDOWS
+#ifdef _WIN32
 		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
@@ -97,7 +94,7 @@ namespace substrate
 			throw std::out_of_range("mmap_t index out of range");
 		}
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 		SUBSTRATE_CXX14_CONSTEXPR static DWORD cleanProt(const DWORD prot) noexcept
 		{
 			if (prot & PAGE_READWRITE)
@@ -119,7 +116,7 @@ namespace substrate
 
 	public:
 		constexpr mmap_t() noexcept = default;
-#ifndef _WINDOWS
+#ifndef _WIN32
 		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
@@ -195,7 +192,7 @@ namespace substrate
 		{
 			std::swap(_fd, map._fd);
 			std::swap(_addr, map._addr);
-#ifdef _WINDOWS
+#ifdef _WIN32
 			std::swap(_mapping, map._mapping);
 #endif
 			std::swap(_len, map._len);
@@ -274,7 +271,7 @@ namespace substrate
 		}
 #endif
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 		SUBSTRATE_NO_DISCARD(bool sync(const int flags = MS_SYNC | MS_INVALIDATE) const noexcept)
 			{ return sync(_len, flags); }
 
