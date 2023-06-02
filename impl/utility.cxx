@@ -37,7 +37,9 @@ namespace substrate
 		const auto result{UnDecorateSymbolName(mangledName, buffer.data(), 2048U, UNDNAME_COMPLETE)};
 		if (result != 0)
 			return {buffer.data()};
-		throw std::system_error(static_cast<int>(GetLastError()), std::system_category());
+		else
+			throw std::system_error(static_cast<int>(GetLastError()), std::system_category());
 #endif
+		return mangledName;
 	}
 } // namespace substrate
