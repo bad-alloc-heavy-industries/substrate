@@ -53,21 +53,28 @@ namespace substrate
 		fd_t(const std::filesystem::path &fileName, const int flags, const mode_t mode = 0) noexcept :
 			fd{internal::fdopen(fileName.c_str(), flags, mode)} { }
 #endif
-		fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
-		~fd_t() noexcept { if (fd != -1) close(fd); }
-		void operator =(fd_t &&fd_) noexcept { swap(fd_); }
+		fd_t(fd_t &&other) noexcept : fd_t{}
+			{ *this = std::move(other); }
+
+		~fd_t() noexcept
+		{
+			if (fd != -1)
+				close(fd);
+		}
+
+		fd_t &operator =(fd_t &&desc) noexcept
+		{
+			std::swap(fd, desc.fd);
+			std::swap(eof, desc.eof);
+			std::swap(_length, desc._length);
+			return *this;
+		}
+
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
 		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
 		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
 		SUBSTRATE_NO_DISCARD(bool isEOF() const noexcept) { return eof; }
 		void invalidate() noexcept { fd = -1; }
-
-		void swap(fd_t &desc) noexcept
-		{
-			std::swap(fd, desc.fd);
-			std::swap(eof, desc.eof);
-			std::swap(_length, desc._length);
-		}
 
 		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
 		{
@@ -406,7 +413,6 @@ namespace substrate
 		fd_t &operator =(const fd_t &) = delete;
 	};
 
-	inline void swap(fd_t &a, fd_t &b) noexcept { a.swap(b); }
 #ifndef _WINDOWS
 	// NOLINTNEXTLINE(hicpp-signed-bitwise)
 	SUBSTRATE_NOWARN_UNUSED(constexpr static mode_t normalMode) = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
