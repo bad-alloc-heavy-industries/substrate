@@ -778,7 +778,7 @@ namespace substrate
 
 #if __cplusplus >= 201711L
 	template <class C> constexpr auto data(C&& c) noexcept -> decltype(std::data(c))
-		{ return std::data(std::forward(c)); }
+		{ return std::data(std::forward<C>(c)); }
 #else
 	template<typename C> SUBSTRATE_NO_DISCARD(inline SUBSTRATE_CXX14_CONSTEXPR auto data(C &c)) -> decltype(c.data()) { return c.data(); }
 	template<typename C> SUBSTRATE_NO_DISCARD(inline SUBSTRATE_CXX14_CONSTEXPR auto data(const C &c)) -> decltype(c.data()) { return c.data(); }
