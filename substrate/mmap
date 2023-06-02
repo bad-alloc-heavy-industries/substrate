@@ -51,6 +51,20 @@ namespace substrate
 		int32_t _fd{-1};
 
 #ifdef _WIN32
+		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t = 0,
+		void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
+		{
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
+			auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(map._fd))};
+			return CreateFileMappingA(file, nullptr, cleanProt(prot), DWORD(len >> 32U),
+				DWORD(len), nullptr);
+		}()}, _addr{[&]() noexcept -> void *
+		{
+			if (!_mapping)
+				return nullptr;
+			return MapViewOfFile(_mapping, protToAccess(prot), 0, 0, 0);
+		}()} { }
+#else
 		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
 			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
 			{
