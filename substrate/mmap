@@ -291,7 +291,8 @@ namespace substrate
 			return unlock(reinterpret_cast<void *>(addr + idx), length);
 		}
 
-#ifndef __APPLE__
+// TODO: implement remap as unmap + map in these platforms
+#if !defined(__APPLE__) && !defined(_WIN32)
 		SUBSTRATE_NO_DISCARD(bool remap(const int32_t flags, const std::size_t new_length) noexcept)
 		{
 			const auto old_len = _len;
