@@ -129,6 +129,30 @@ namespace substrate
 		}
 #endif
 
+		SUBSTRATE_NO_DISCARD(static inline bool lock(void *_addr, const std::size_t length) noexcept)
+#ifdef _WIN32
+			{ return VirtualLock(_addr, length); }
+#else
+			{ return ::mlock(_addr, length) == 0; }
+#endif
+
+		SUBSTRATE_NO_DISCARD(static inline bool unlock(void *_addr, const std::size_t length) noexcept)
+#ifdef _WIN32
+			{ return VirtualUnlock(_addr, length); }
+#else
+			{ return ::munlock(_addr, length) == 0; }
+#endif
+
+		static inline bool unmap(void* _addr, const std::size_t length) noexcept
+		{
+#ifdef _WIN32
+			(void)length;
+			return UnmapViewOfFile(_addr);
+#else
+			return ::munmap(_addr, _len) == 0;
+#endif
+		}
+
 	public:
 		constexpr mmap_t() noexcept = default;
 #ifndef _WIN32
@@ -144,7 +168,7 @@ namespace substrate
 		~mmap_t() noexcept
 		{
 			if (_addr)
-				::munmap(_addr, _len);
+				unmap(_addr);
 			if (_fd != -1)
 				::close(_fd);
 		}
@@ -193,7 +217,7 @@ namespace substrate
 		~mmap_t() noexcept
 		{
 			if (_addr)
-				UnmapViewOfFile(_addr);
+				unmap(_addr, _len);
 			if (_mapping)
 				CloseHandle(_mapping);
 		}
@@ -241,27 +265,27 @@ namespace substrate
 			{ return reinterpret_cast<std::uintptr_t>(_addr); } // lgtm[cpp/reinterpret-cast]
 
 		SUBSTRATE_NO_DISCARD(bool lock() const noexcept)
-			{ return lock(_len); }
+			{ return lock(_addr, _len); }
 		SUBSTRATE_NO_DISCARD(bool lock(const std::size_t length) const noexcept)
-			{ return ::mlock(_addr, length) == 0; }
+			{ return lock(_addr, length); }
 		SUBSTRATE_NO_DISCARD(bool lock_at(const std::size_t idx, const size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+			const auto addr{reinterpret_cast<std::uintptr_t>(_addr)};
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			return ::mlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
+			return lock(reinterpret_cast<void *>(addr + idx), length);
 		}
 
 		SUBSTRATE_NO_DISCARD(bool unlock() const noexcept)
 			{ return unlock(_len); }
 		SUBSTRATE_NO_DISCARD(bool unlock(const std::size_t length) const noexcept)
-			{ return ::munlock(_addr, length) == 0; }
+			{ return unlock(_addr, length); }
 		SUBSTRATE_NO_DISCARD(bool unlock_at(const std::size_t idx, const std::size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+			const auto addr{reinterpret_cast<std::uintptr_t>(_addr)};
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			return ::munlock(reinterpret_cast<void *>(addr + idx), length) == 0; // lgtm[cpp/reinterpret-cast]
+			return unlock(reinterpret_cast<void *>(addr + idx), length);
 		}
 
 #ifndef __APPLE__
