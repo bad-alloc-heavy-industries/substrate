@@ -28,12 +28,11 @@
 
 namespace substrate
 {
+	using off_t = ::off_t;
 #ifndef _WIN32
 	using mode_t = ::mode_t;
-	using off_t = ::off_t;
 #else
 	using mode_t = int32_t;
-	using off_t = int64_t;
 #endif
 
 	namespace internal
