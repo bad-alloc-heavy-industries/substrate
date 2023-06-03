@@ -122,8 +122,9 @@ namespace substrate
 			}()}, _fd{-1} { }
 #endif
 
-		template<typename T> substrate::enable_if_t<substrate::is_pod<T>::value && !has_nullable_ctor<T>::value &&
-			!std::is_same<T, void*>::value, T *> index(const std::size_t idx) const
+		template<typename T> SUBSTRATE_NO_DISCARD(substrate::enable_if_t<
+			substrate::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void *>::value, T *>
+				index(const std::size_t idx) const)
 		{
 			if (idx < _len)
 			{
@@ -137,8 +138,9 @@ namespace substrate
 			throw std::out_of_range("mmap_t index out of range");
 		}
 
-		template<typename T> substrate::enable_if_t<has_nullable_ctor<T>::value && !std::is_same<T, void*>::value, T *>
-			index(const std::size_t idx) const
+		template<typename T> SUBSTRATE_NO_DISCARD(
+			substrate::enable_if_t<has_nullable_ctor<T>::value && !std::is_same<T, void *>::value, T *>
+				index(const std::size_t idx) const)
 		{
 			if (idx < _len)
 			{
@@ -150,8 +152,8 @@ namespace substrate
 			throw std::out_of_range("mmap_t index out of range");
 		}
 
-		template<typename T> substrate::enable_if_t<std::is_same<T, void*>::value, void*>
-			index(const std::size_t idx) const
+		template<typename T> SUBSTRATE_NO_DISCARD(substrate::enable_if_t<std::is_same<T, void *>::value, void *>
+			index(const std::size_t idx) const)
 		{
 			if (idx < _len) {
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -337,13 +339,13 @@ namespace substrate
 			return ::madvise(reinterpret_cast<void *>(addr + idx), length, advice) == 0; // lgtm[cpp/reinterpret-cast]
 		}
 #else
-		[[nodiscard]] bool sync() const noexcept { return sync(_len); }
-		[[nodiscard]] bool sync(const std::size_t length) const noexcept
+		SUBSTRATE_NO_DISCARD(bool sync() const noexcept) { return sync(_len); }
+		SUBSTRATE_NO_DISCARD(bool sync(const std::size_t length) const noexcept)
 			{ return FlushViewOfFile(_addr, length); }
 
-		[[nodiscard]] bool advise(const int32_t) const noexcept { return true; }
-		[[nodiscard]] bool advise(const int32_t, const std::size_t) const noexcept { return true; }
-		[[nodiscard]] bool advise_at(const int32_t, const std::size_t, const std::size_t) const noexcept
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t) const noexcept) { return true; }
+		SUBSTRATE_NO_DISCARD(bool advise(const int32_t, const std::size_t) const noexcept) { return true; }
+		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t, const std::size_t, const std::size_t) const noexcept)
 			{ return true; }
 #endif
 
