@@ -104,12 +104,12 @@ namespace substrate
 #ifdef _WIN32
 		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 		SUBSTRATE_NO_DISCARD(static inline HANDLE
-			createMapping(const int32_t _fd, const std::size_t len, const int32_t prot) noexcept)
+			createMapping(const int32_t _fd, const std::size_t length, const int32_t prot) noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
 			auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(_fd))};
 			return CreateFileMappingA(file, nullptr, internal::cleanProt(static_cast<DWORD>(prot)),
-				DWORD(len >> 32U), DWORD(len), nullptr);
+				DWORD(length >> 32U), DWORD(length), nullptr);
 		}
 
 		SUBSTRATE_NO_DISCARD(static inline LPVOID
@@ -131,9 +131,9 @@ namespace substrate
 		}
 #else
 		SUBSTRATE_NO_DISCARD(static inline void *
-			mapAddress(void *addr, const std::size_t len, const int32_t prot, const int32_t flags, int32_t _fd) noexcept)
+			mapAddress(void *addr, const std::size_t length, const int32_t prot, const int32_t flags, int32_t _fd) noexcept)
 		{
-			const auto ptr = ::mmap(addr, len, prot, flags, _fd, 0);
+			const auto ptr = ::mmap(addr, length, prot, flags, _fd, 0);
 			return ptr == MAP_FAILED ? nullptr : ptr;
 		}
 #endif
