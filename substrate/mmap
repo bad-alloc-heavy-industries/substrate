@@ -91,6 +91,7 @@ namespace substrate
 	{
 	private:
 		using off_t = substrate::off_t;
+		using realptr_t = substrate::conditional_t<sizeof(uint32_t *) == sizeof(void *), uint32_t *, uint64_t *>;
 
 		std::size_t _len{0};
 #ifdef _WIN32
@@ -130,11 +131,11 @@ namespace substrate
 			if (idx < _len)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
+				auto *const addr{reinterpret_cast<uint8_t *>(_addr)};
 				// XXX: Do we actually want to be multiplying by sizeof(T) here?
 				// Seems unlikely with the current index check
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				return new (reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{}; // lgtm[cpp/reinterpret-cast]
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,cppcoreguidelines-owning-memory)
+				return new (addr + (idx * sizeof(T))) T{};
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
@@ -146,9 +147,9 @@ namespace substrate
 			if (idx < _len)
 			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				return new (reinterpret_cast<void *>(addr + (idx * sizeof(T)))) T{nullptr}; // lgtm[cpp/reinterpret-cast]
+				auto *const addr{reinterpret_cast<uint8_t *>(_addr)};
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,cppcoreguidelines-owning-memory)
+				return new (addr + (idx * sizeof(T))) T{nullptr};
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
@@ -158,9 +159,9 @@ namespace substrate
 		{
 			if (idx < _len) {
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				const auto addr = reinterpret_cast<std::uintptr_t>(_addr); // lgtm[cpp/reinterpret-cast]
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-				return reinterpret_cast<void *>(addr + idx); // lgtm[cpp/reinterpret-cast]
+				auto *const addr {reinterpret_cast<realptr_t>(_addr)};
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+				return (addr + idx);
 			}
 			throw std::out_of_range("mmap_t index out of range");
 		}
@@ -284,9 +285,9 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool lock_at(const std::size_t idx, const size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			const auto addr{reinterpret_cast<std::uintptr_t>(_addr)};
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			return internal::lock(reinterpret_cast<void *>(addr + idx), length);
+			auto *const addr{reinterpret_cast<uint8_t *>(_addr)};
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+			return internal::lock(addr + idx, length);
 		}
 
 		SUBSTRATE_NO_DISCARD(bool unlock() const noexcept) { return unlock(_len); }
@@ -296,9 +297,9 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool unlock_at(const std::size_t idx, const std::size_t length) const noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			const auto addr{reinterpret_cast<std::uintptr_t>(_addr)};
-			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-			return internal::unlock(reinterpret_cast<void *>(addr + idx), length);
+			auto *const addr{reinterpret_cast<realptr_t>(_addr)};
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+			return internal::unlock(addr + idx, length);
 		}
 
 // TODO: implement remap as unmap + map in these platforms
