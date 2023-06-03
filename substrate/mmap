@@ -3,7 +3,6 @@
 #define SUBSTRATE_MMAP
 
 #include <cstdint>
-#include <substrate/internal/defs>
 #ifdef _WIN32
 #	ifndef NOMINMAX
 #		define NOMINMAX
@@ -26,8 +25,6 @@
 #endif
 #include <substrate/utility>
 
-namespace substrate
-{
 #ifdef _WIN32
 	static constexpr DWORD PROT_READ{PAGE_READONLY};
 	static constexpr DWORD PROT_WRITE{PAGE_READWRITE};
@@ -40,6 +37,9 @@ namespace substrate
 	static constexpr auto MADV_DONTDUMP{0};
 #endif
 
+
+namespace substrate
+{
 	struct mmap_t final
 	{
 	private:
