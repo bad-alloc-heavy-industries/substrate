@@ -222,10 +222,10 @@ namespace substrate
 #endif
 		mmap_t(const mmap_t &) = delete;
 		mmap_t &operator =(const mmap_t &) = delete;
-		mmap_t(mmap_t &&map) noexcept : mmap_t{} { swap(map); }
-		void operator =(mmap_t &&map) noexcept { swap(map); }
+		mmap_t(mmap_t &&other) noexcept : mmap_t{}
+			{ *this = std::move(other); }
 
-		void swap(mmap_t &map) noexcept
+		mmap_t &operator =(mmap_t &&map) noexcept
 		{
 			std::swap(_fd, map._fd);
 			std::swap(_addr, map._addr);
@@ -233,6 +233,7 @@ namespace substrate
 			std::swap(_mapping, map._mapping);
 #endif
 			std::swap(_len, map._len);
+			return *this;
 		}
 
 		SUBSTRATE_NO_DISCARD(mmap_t dup(const int32_t prot, const std::size_t len, const int32_t flags,
@@ -413,8 +414,6 @@ namespace substrate
 			{ return _fd == b._fd && _addr == b._addr && _len == b._len; }
 		bool operator !=(const mmap_t &b) const noexcept { return !(*this == b); }
 	};
-
-	inline void swap(mmap_t &a, mmap_t &b) noexcept { a.swap(b); }
 }
 
 
