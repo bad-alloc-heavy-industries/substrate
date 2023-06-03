@@ -114,6 +114,10 @@ TEST_CASE("fd_t seek", "[fd_t]")
 	REQUIRE(file.isEOF());
 	REQUIRE(file.head());
 	REQUIRE_FALSE(file.isEOF());
+
+	fd_t other{std::move(file)};
+	REQUIRE(!file.valid());
+	REQUIRE(other.valid());
 }
 
 static void readUnique(const fd_t &file, const std::string &expected)
