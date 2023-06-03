@@ -102,27 +102,52 @@ namespace substrate
 		int32_t _fd{-1};
 
 #ifdef _WIN32
-		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t = 0,
-		void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+		SUBSTRATE_NO_DISCARD(static inline HANDLE
+			createMapping(const int32_t _fd, const std::size_t len, const int32_t prot) noexcept)
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
-			auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(map._fd))};
-			return CreateFileMappingA(file, nullptr, internal::cleanProt(static_cast<DWORD>(prot)), DWORD(len >> 32U),
-				DWORD(len), nullptr);
-		}()}, _addr{[&]() noexcept -> void *
+			auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(_fd))};
+			return CreateFileMappingA(file, nullptr, internal::cleanProt(static_cast<DWORD>(prot)),
+				DWORD(len >> 32U), DWORD(len), nullptr);
+		}
+
+		SUBSTRATE_NO_DISCARD(static inline LPVOID
+			mapAddressWithOffset(HANDLE _mapping, const int32_t prot, const off_t offset, const size_t length) noexcept)
+		{
+			if (!_mapping)
+				return nullptr;
+			if (length > std::numeric_limits<uint32_t>::max())
+				return nullptr;
+			return MapViewOfFile(_mapping, internal::protToAccess(static_cast<DWORD>(prot)), DWORD(offset >> 32U),
+				DWORD(offset), SIZE_T(length));
+		}
+
+		SUBSTRATE_NO_DISCARD(static inline LPVOID mapAddress(HANDLE _mapping, const int32_t prot) noexcept)
 		{
 			if (!_mapping)
 				return nullptr;
 			return MapViewOfFile(_mapping, internal::protToAccess(static_cast<DWORD>(prot)), 0, 0, 0);
-		}()} { }
+		}
 #else
-		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
-			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
-			{
-				const auto ptr = ::mmap(addr, len, prot, flags, map._fd, 0);
-				return ptr == MAP_FAILED ? nullptr : ptr;
-			}()}, _fd{-1} { }
+		SUBSTRATE_NO_DISCARD(static inline void *
+			mapAddress(void *addr, const std::size_t len, const int32_t prot, const int32_t flags, int32_t _fd) noexcept)
+		{
+			const auto ptr = ::mmap(addr, len, prot, flags, _fd, 0);
+			return ptr == MAP_FAILED ? nullptr : ptr;
+		}
 #endif
+
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot,
+			SUBSTRATE_NOWARN_UNUSED(const int32_t flags = MAP_SHARED),
+			SUBSTRATE_NOWARN_UNUSED(void *addr = nullptr)) noexcept : _len{len},
+#ifdef _WIN32
+			_mapping{createMapping(map._fd, len, prot)}, _addr{mapAddress(_mapping, prot)}
+#else
+			_addr{mapAddress(addr, len, prot, flags, map._fd)}
+#endif
+			{ }
 
 		template<typename T> SUBSTRATE_NO_DISCARD(substrate::enable_if_t<
 			substrate::is_pod<T>::value && !has_nullable_ctor<T>::value && !std::is_same<T, void *>::value, T *>
@@ -168,66 +193,50 @@ namespace substrate
 
 	public:
 		constexpr mmap_t() noexcept = default;
-#ifndef _WIN32
-		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
-			void *addr = nullptr) noexcept : _len{len}, _addr{[&]() noexcept -> void *
-			{
-				const auto ptr = ::mmap(addr, len, prot, flags, fd, 0);
-				return ptr == MAP_FAILED ? nullptr : ptr;
-			}()}, _fd{fd} { }
 
-		~mmap_t() noexcept
-		{
-			if (_addr)
-				unmap(_addr, _len);
-			if (_fd != -1)
-				::close(_fd);
-		}
-
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _addr; }
-#else
 		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters,readability-identifier-length)
-		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t = 0,
-			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
-			{
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
-				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
-				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)),
-					DWORD(len >> 32U), DWORD(len), nullptr);
-			}()}, _addr{[&]() noexcept -> void *
-			{
-				if (!_mapping)
-					return nullptr;
-				return MapViewOfFile(_mapping, mmap_internal::protToAccess(static_cast<DWORD>(prot)), 0, 0, 0);
-			}()} { }
+		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot,
+			SUBSTRATE_NOWARN_UNUSED(const int32_t flags = MAP_SHARED),
+			SUBSTRATE_NOWARN_UNUSED(void *addr = nullptr)) noexcept :
+			_len{len},
+#ifdef _WIN32
+			_mapping{createMapping(fd, len, prot)}, _addr{mapAddress(_mapping, prot)},
+#else
+			_addr{mapAddress(addr, len, prot, flags, fd)},
+#endif
+			_fd{fd}
+		{ }
 
+#ifdef _WIN32
 		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters,readability-identifier-length)
 		mmap_t(const int32_t fd, const off_t offset, const std::size_t length, const int32_t prot,
-			const int32_t = 0, void * = nullptr) noexcept : _len{length},
-			_mapping{[&]() noexcept -> HANDLE
-			{
-				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
-				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
-				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)), 0, 0, nullptr);
-			}()}, _addr{[&]() noexcept -> void *
-			{
-				if (!_mapping)
-					return nullptr;
-				if (length > std::numeric_limits<uint32_t>::max())
-					return nullptr;
-				return MapViewOfFile(_mapping, mmap_internal::protToAccess(static_cast<DWORD>(prot)), DWORD(offset >> 32U), DWORD(offset), SIZE_T(length));
-			}()} { }
+			const int32_t = 0, void * = nullptr) noexcept :
+			_len{length},
+			_mapping{createMapping(fd, 0, prot)}, _addr{mapAddressWithOffset(_mapping, prot, offset, length)},
+			_fd{fd}
+		{ }
+#endif
 
 		~mmap_t() noexcept
 		{
 			if (_addr)
 				internal::unmap(_addr, _len);
+#ifdef _WIN32
 			if (_mapping)
 				CloseHandle(_mapping);
+#else
+			if (_fd != -1)
+				::close(_fd);
+#endif
 		}
 
-		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _mapping && _addr; }
+		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept)
+#ifdef _WIN32
+			{ return _mapping && _addr; }
+#else
+			{ return _addr; }
 #endif
+
 		mmap_t(const mmap_t &) = delete;
 		mmap_t &operator=(const mmap_t &) = delete;
 		mmap_t(mmap_t &&other) noexcept : mmap_t{} { *this = std::move(other); }
@@ -251,7 +260,7 @@ namespace substrate
 			return {*this, len, prot, flags, addr};
 		}
 
-		SUBSTRATE_NO_DISCARD(bool chperm(const int32_t prot) noexcept)
+		template<typename T> SUBSTRATE_NO_DISCARD(bool chperm(const T prot) noexcept)
 #ifdef _WIN32
 			{ return VirtualProtect(_addr, _len, prot, nullptr) == 0; }
 #else
