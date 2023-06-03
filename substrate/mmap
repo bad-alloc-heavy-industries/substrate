@@ -182,7 +182,8 @@ namespace substrate
 		template<typename T> SUBSTRATE_NO_DISCARD(substrate::enable_if_t<std::is_same<T, void *>::value, void *>
 			index(const std::size_t idx) const)
 		{
-			if (idx < _len) {
+			if (idx < _len)
+			{
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
 				auto *const addr {reinterpret_cast<realptr_t>(_addr)};
 				// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
