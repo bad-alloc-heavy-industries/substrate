@@ -253,8 +253,8 @@ namespace substrate
 			return *this;
 		}
 
-		SUBSTRATE_NO_DISCARD(mmap_t dup(const int32_t prot, const std::size_t len, const int32_t flags,
-			void *addr) const noexcept)
+		SUBSTRATE_NO_DISCARD(mmap_t
+			dup(const int32_t prot, const std::size_t len, const int32_t flags, void *addr) const noexcept)
 		{
 			if (!valid())
 				return {};
