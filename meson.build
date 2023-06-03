@@ -104,20 +104,18 @@ if isWindows
 	# if MSVC, b_coverage will always return false because
 	# Meson doesn't officially support coverage
 	if cxx.get_id() == 'msvc' and get_option('buildtype') == 'debug'
-		coverageRunner = find_program('OpenCppCoverage', required: false)
+		coverageRunner = find_program('OpenCppCoverage', required: true)
 
-		if coverageRunner.found()
-			message('Enabling coverage under MSVC')
-			coverageArgs = [
-				'--sources', '@0@\\impl\\*'.format(meson.current_source_dir()),
-				'--sources', '@0@\\substrate\\*'.format(meson.current_source_dir()),
-				'--sources', '@0@\\test\\*'.format(meson.current_source_dir()),
-				'--sources', '@0@\\*'.format(meson.current_build_dir()),
-				'--modules', meson.current_build_dir(),
-				'--export_type'
-			]
-			coverage = true
-		endif
+		message('Enabling coverage under MSVC')
+		coverageArgs = [
+			'--sources', '@0@\\impl\\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\\substrate\\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\\test\\*'.format(meson.current_source_dir()),
+			'--sources', '@0@\\*'.format(meson.current_build_dir()),
+			'--modules', meson.current_build_dir(),
+			'--export_type'
+		]
+		coverage = true
 	endif
 endif
 

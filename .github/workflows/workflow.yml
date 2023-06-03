@@ -177,7 +177,7 @@ jobs:
       - name: Setup OpenCppCoverage
         if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         run: |
-          echo "C:\Program Files\OpenCppCoverage" >> $GITHUB_PATH
+          echo "C:/Program Files/OpenCppCoverage" >> $env:GITHUB_PATH
       - name: Checkout
         uses: actions/checkout@v3
         with:
