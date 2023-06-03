@@ -2,6 +2,7 @@
 #ifndef SUBSTRATE_INTERNAL_FD_COMPAT
 #define SUBSTRATE_INTERNAL_FD_COMPAT
 
+#include <algorithm>
 #include <cstdint>
 #include <cstddef>
 #ifndef _MSC_VER
@@ -54,13 +55,23 @@ namespace substrate
 			{ return ftruncate(fd, size); }
 #else
 		inline int32_t fdopen(const char *const fileName, const int flags, const mode_t mode) noexcept
-			{ return open(fileName, flags, mode); }
+		{
+			int32_t fd{};
+			_sopen_s(&fd, fileName, flags, _SH_DENYNO, mode);
+			return fd;
+		}
+
 		inline int32_t fdopen(const wchar_t *const fileName, const int flags, const mode_t mode) noexcept
-			{ return _wopen(fileName, flags, mode); }
+		{
+			int32_t fd{};
+			_wsopen_s(&fd, fileName, flags, _SH_DENYNO, mode);
+			return fd;
+		}
+
 		inline ssize_t fdread(const int32_t fd, void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return read(fd, bufferPtr, uint32_t(bufferLen)); }
+			{ return _read(fd, bufferPtr, static_cast<uint32_t>(std::min<size_t>(bufferLen, INT_MAX))); }
 		inline ssize_t fdwrite(const int32_t fd, const void *const bufferPtr, const size_t bufferLen) noexcept
-			{ return write(fd, bufferPtr, uint32_t(bufferLen)); }
+			{ return _write(fd, bufferPtr, static_cast<uint32_t>(std::min<size_t>(bufferLen, INT_MAX))); }
 		inline int fstat(int32_t fd, stat_t *stat) noexcept { return _fstat64(fd, stat); }
 		inline off_t fdseek(const int32_t fd, const off_t offset, const int32_t whence) noexcept
 			{ return _lseeki64(fd, offset, whence); }
