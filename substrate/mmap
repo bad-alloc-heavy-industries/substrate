@@ -94,6 +94,7 @@ namespace substrate
 
 		std::size_t _len{0};
 #ifdef _WIN32
+		// NOLINTNEXTLINE(performance-no-int-to-ptr,cppcoreguidelines-pro-type-cstyle-cast)
 		HANDLE _mapping{INVALID_HANDLE_VALUE};
 #endif
 		void *_addr{nullptr};
@@ -184,9 +185,11 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _addr; }
 #else
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters,readability-identifier-length)
 		mmap_t(const int32_t fd, const std::size_t len, const int32_t prot, const int32_t = 0,
 			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
 				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
 				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)),
 					DWORD(len >> 32U), DWORD(len), nullptr);
@@ -197,10 +200,12 @@ namespace substrate
 				return MapViewOfFile(_mapping, mmap_internal::protToAccess(static_cast<DWORD>(prot)), 0, 0, 0);
 			}()} { }
 
+		// NOLINTNEXTLINE(bugprone-easily-swappable-parameters,readability-identifier-length)
 		mmap_t(const int32_t fd, const off_t offset, const std::size_t length, const int32_t prot,
 			const int32_t = 0, void * = nullptr) noexcept : _len{length},
 			_mapping{[&]() noexcept -> HANDLE
 			{
+				// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
 				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
 				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)), 0, 0, nullptr);
 			}()}, _addr{[&]() noexcept -> void *
@@ -223,11 +228,10 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(SUBSTRATE_CXX14_CONSTEXPR bool valid() const noexcept) { return _mapping && _addr; }
 #endif
 		mmap_t(const mmap_t &) = delete;
-		mmap_t &operator =(const mmap_t &) = delete;
-		mmap_t(mmap_t &&other) noexcept : mmap_t{}
-			{ *this = std::move(other); }
+		mmap_t &operator=(const mmap_t &) = delete;
+		mmap_t(mmap_t &&other) noexcept : mmap_t{} { *this = std::move(other); }
 
-		mmap_t &operator =(mmap_t &&map) noexcept
+		mmap_t &operator=(mmap_t &&map) noexcept
 		{
 			std::swap(_fd, map._fd);
 			std::swap(_addr, map._addr);
@@ -263,8 +267,11 @@ namespace substrate
 		template<typename T> T *at(const std::size_t idx) { return index<T>(idx); }
 		template<typename T> const T *at(const std::size_t idx) const { return index<const T>(idx); }
 
-		void *address(const std::size_t offset) noexcept { return index<void *>(offset); }
-		const void *address(const std::size_t offset) const noexcept { return index<const void *>(offset); }
+		// NOLINTNEXTLINE(bugprone-exception-escape)
+		SUBSTRATE_NO_DISCARD(void *address(const std::size_t offset) noexcept) { return index<void *>(offset); }
+		// NOLINTNEXTLINE(bugprone-exception-escape)
+		SUBSTRATE_NO_DISCARD(const void *address(const std::size_t offset) const noexcept)
+			{ return index<const void *>(offset); }
 
 		SUBSTRATE_NO_DISCARD(std::uintptr_t numeric_address() const noexcept)
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
@@ -343,15 +350,18 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(bool sync(const std::size_t length) const noexcept)
 			{ return FlushViewOfFile(_addr, length); }
 
+		// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 		SUBSTRATE_NO_DISCARD(bool advise(const int32_t) const noexcept) { return true; }
+		// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 		SUBSTRATE_NO_DISCARD(bool advise(const int32_t, const std::size_t) const noexcept) { return true; }
+		// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 		SUBSTRATE_NO_DISCARD(bool advise_at(const int32_t, const std::size_t, const std::size_t) const noexcept)
 			{ return true; }
 #endif
 
 		template<typename T> void copyTo(const std::size_t idx, T &value) const
 		{
-			const auto src = index<const void *>(idx);
+			const auto *const src{index<const void *>(idx)};
 			assert(sizeof(T) <= _len - idx);
 			std::memcpy(&value, src, sizeof(T));
 		}
@@ -360,30 +370,32 @@ namespace substrate
 			std::array<T, N> &value) const
 		{
 			constexpr auto length{sizeof(T) * N};
-			const auto src = index<const void *>(idx);
+			const auto *const src{index<void *>(idx)};
 			assert(length <= _len - idx);
 			std::memcpy(value.data(), src, length);
 		}
 
 		void copyTo(const std::size_t idx, std::string &value) const
 		{
-			const auto src = index<const void *>(idx);
+			const auto *const src{index<void *>(idx)};
 			assert(value.size() <= _len - idx);
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
 			std::memcpy(const_cast<char *>(value.data()), src, value.size());
 		}
 
 #if __cplusplus >= 201703L
 		void copyTo(const std::size_t idx, std::string_view &value) const
 		{
-			const auto src = index<const void *>(idx);
+			const auto *const src{index<void *>(idx)};
 			assert(value.size() <= _len - idx);
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
 			std::memcpy(const_cast<char *>(value.data()), src, value.size());
 		}
 #endif
 
 		template<typename T> void copyFrom(const std::size_t idx, const T &value) const
 		{
-			const auto dest = index<void *>(idx);
+			auto *const dest{index<void *>(idx)};
 			assert(sizeof(T) <= _len - idx);
 			std::memcpy(dest, &value, sizeof(T));
 		}
@@ -392,14 +404,14 @@ namespace substrate
 			const std::array<T, N> &value) const
 		{
 			constexpr auto length{sizeof(T) * N};
-			const auto dest = index<void *>(idx);
+			auto *const dest{index<void *>(idx)};
 			assert(length <= _len - idx);
 			std::memcpy(dest, value.data(), length);
 		}
 
 		void copyFrom(const std::size_t idx, const std::string &value) const
 		{
-			const auto dest = index<void *>(idx);
+			auto *const dest{index<void *>(idx)};
 			assert(value.size() <= _len - idx);
 			std::memcpy(dest, value.data(), value.size());
 		}
@@ -407,18 +419,18 @@ namespace substrate
 #if __cplusplus >= 201703L
 		void copyFrom(const std::size_t idx, const std::string_view &value) const
 		{
-			const auto dest = index<void *>(idx);
+			auto *const dest{index<void *>(idx)};
 			assert(value.size() <= _len - idx);
 			std::memcpy(dest, value.data(), value.size());
 		}
 #endif
 
-		bool operator ==(const mmap_t &b) const noexcept
-			{ return _fd == b._fd && _addr == b._addr && _len == b._len; }
-		bool operator !=(const mmap_t &b) const noexcept { return !(*this == b); }
+		bool operator ==(const mmap_t &rhs) const noexcept
+			{ return _fd == rhs._fd && _addr == rhs._addr && _len == rhs._len; }
+		bool operator !=(const mmap_t &rhs) const noexcept
+			{ return !(*this == rhs); }
 	};
-}
-
+} // namespace substrate
 
 #endif /* SUBSTRATE_MMAP */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
