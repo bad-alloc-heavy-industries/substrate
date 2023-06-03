@@ -11,6 +11,7 @@
 #include <cstring>
 
 using substrate::mmap_t;
+using namespace substrate::constants;
 #if !defined(__APPLE__) && !defined(_WIN32)
 using substrate::memfd_t;
 #endif

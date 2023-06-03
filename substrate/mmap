@@ -25,24 +25,30 @@
 #endif
 #include <substrate/utility>
 
-#ifdef _WIN32
-	static constexpr DWORD PROT_READ{PAGE_READONLY};
-	static constexpr DWORD PROT_WRITE{PAGE_READWRITE};
-	static constexpr int32_t MAP_PRIVATE{0};
-	static constexpr int32_t MAP_FAILED{-1};
-	static constexpr int32_t MAP_SHARED{0};
-
-	static constexpr auto MADV_SEQUENTIAL{0};
-	static constexpr auto MADV_WILLNEED{0};
-	static constexpr auto MADV_DONTDUMP{0};
-#endif
-
-
 namespace substrate
 {
+	namespace constants
+	{
+#ifdef _WIN32
+		SUBSTRATE_NOWARN_UNUSED(static constexpr DWORD PROT_READ{PAGE_READONLY});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr DWORD PROT_WRITE{PAGE_READWRITE});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr int32_t MAP_PRIVATE{0});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr int32_t MAP_FAILED{-1});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr int32_t MAP_SHARED{0});
+
+		SUBSTRATE_NOWARN_UNUSED(static constexpr auto MADV_SEQUENTIAL{0});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr auto MADV_WILLNEED{0});
+		SUBSTRATE_NOWARN_UNUSED(static constexpr auto MADV_DONTDUMP{0});
+#endif
+	} // namespace constants
+
+	using namespace constants;
+
 	struct mmap_t final
 	{
 	private:
+		using off_t = substrate::off_t;
+
 		std::size_t _len{0};
 #ifdef _WIN32
 		HANDLE _mapping{INVALID_HANDLE_VALUE};
