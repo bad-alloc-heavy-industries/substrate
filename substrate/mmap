@@ -105,13 +105,13 @@ namespace substrate
 		{
 			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,performance-no-int-to-ptr)
 			auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(map._fd))};
-			return CreateFileMappingA(file, nullptr, internal::cleanProt(prot), DWORD(len >> 32U),
+			return CreateFileMappingA(file, nullptr, internal::cleanProt(static_cast<DWORD>(prot)), DWORD(len >> 32U),
 				DWORD(len), nullptr);
 		}()}, _addr{[&]() noexcept -> void *
 		{
 			if (!_mapping)
 				return nullptr;
-			return MapViewOfFile(_mapping, internal::protToAccess(prot), 0, 0, 0);
+			return MapViewOfFile(_mapping, internal::protToAccess(static_cast<DWORD>(prot)), 0, 0, 0);
 		}()} { }
 #else
 		mmap_t(const mmap_t &map, const std::size_t len, const int32_t prot, const int32_t flags = MAP_SHARED,
@@ -186,28 +186,28 @@ namespace substrate
 			void * = nullptr) noexcept : _len{len}, _mapping{[&]() noexcept -> HANDLE
 			{
 				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
-				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(prot),
+				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)),
 					DWORD(len >> 32U), DWORD(len), nullptr);
 			}()}, _addr{[&]() noexcept -> void *
 			{
 				if (!_mapping)
 					return nullptr;
-				return MapViewOfFile(_mapping, mmap_internal::protToAccess(prot), 0, 0, 0);
+				return MapViewOfFile(_mapping, mmap_internal::protToAccess(static_cast<DWORD>(prot)), 0, 0, 0);
 			}()} { }
 
-		mmap_t(const int32_t fd, const off_t offset, const std::size_t length, const DWORD prot,
+		mmap_t(const int32_t fd, const off_t offset, const std::size_t length, const int32_t prot,
 			const int32_t = 0, void * = nullptr) noexcept : _len{length},
 			_mapping{[&]() noexcept -> HANDLE
 			{
 				auto *const file{reinterpret_cast<HANDLE>(_get_osfhandle(fd))};
-				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(prot), 0, 0, nullptr);
+				return CreateFileMappingA(file, nullptr, mmap_internal::cleanProt(static_cast<DWORD>(prot)), 0, 0, nullptr);
 			}()}, _addr{[&]() noexcept -> void *
 			{
 				if (!_mapping)
 					return nullptr;
 				if (length > std::numeric_limits<uint32_t>::max())
 					return nullptr;
-				return MapViewOfFile(_mapping, mmap_internal::protToAccess(prot), DWORD(offset >> 32U), DWORD(offset), SIZE_T(length));
+				return MapViewOfFile(_mapping, mmap_internal::protToAccess(static_cast<DWORD>(prot)), DWORD(offset >> 32U), DWORD(offset), SIZE_T(length));
 			}()} { }
 
 		~mmap_t() noexcept
