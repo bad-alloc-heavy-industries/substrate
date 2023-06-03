@@ -151,6 +151,8 @@ if library_type == 'static' and isWindows
 endif
 
 if isWindows
+	libSubstrateArgs += cxx.get_supported_arguments('/permissive-')
+
 	rcCfg = configuration_data()
 	if cxx.get_id() == 'msvc' or cxx.get_id() == 'clang-cl'
 		rcCfg.set_quoted('VER_ORIGINALFILENAME_STR', 'substrate.dll')
