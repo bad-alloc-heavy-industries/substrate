@@ -29,7 +29,6 @@ headers = [
 
 advanced_headers = [
 	'advanced/io',
-	'advanced/fd',
 	'advanced/guard_page',
 ]
 
