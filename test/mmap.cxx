@@ -71,7 +71,7 @@ TEST_CASE("Structure serialization and loading", "[mmap_t]")
 		REQUIRE(file.valid());
 		REQUIRE(file.resize(sizeof(foo_t) * 4));
 		for (size_t s{}; s < sizeof(foo_t) * 4; ++s)
-			file.write(uint8_t(0x00));
+			REQUIRE(file.write(uint8_t(0x00)));
 		REQUIRE(file.head());
 
 		auto map = file.map(PROT_READ | PROT_WRITE);

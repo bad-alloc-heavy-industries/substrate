@@ -166,42 +166,42 @@ namespace substrate
 
 			SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
 			{
-				const ssize_t result = write(value, valueLen, nullptr);
+				const auto result{write(value, valueLen, nullptr)};
 				if (result < 0)
 					return false;
 				return size_t(result) == valueLen;
 			}
 
-			template<typename T> bool write(const T &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool write(const T &value) const noexcept)
 				{ return write(&value, sizeof(T)); }
-			template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool write(const std::unique_ptr<T> &value) const noexcept)
 				{ return write(value.get(), sizeof(T)); }
 			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-			template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept)
 				{ return write(value.get(), sizeof(T) * valueCount); }
-			template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+			template<typename T, size_t N> SUBSTRATE_NO_DISCARD(bool write(const std::array<T, N> &value) const noexcept)
 				{ return write(value.data(), sizeof(T) * N); }
 
 #ifdef SUBSTRATE_MANAGED_PTR
-			template<typename T> enable_if_t<!std::is_array<T>::value, bool>
-				write(const managedPtr_t<T> &value) const noexcept { return write(value.get(), sizeof(T)); }
-			template<typename T> bool write(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(enable_if_t<!std::is_array<T>::value, bool>
+				write(const managedPtr_t<T> &value) const noexcept) { return write(value.get(), sizeof(T)); }
+			template<typename T> SUBSTRATE_NO_DISCARD(bool write(const managedPtr_t<T> &value, const size_t valueLen) const noexcept)
 				{ return write(value.get(), valueLen); }
 #endif
 
 #ifdef SUBSTRATE_FIXED_VECTOR
-			template<typename T> bool write(const fixedVector_t<T> &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool write(const fixedVector_t<T> &value) const noexcept)
 				{ return write(value.data(), sizeof(T) * value.size()); }
 #endif
 
-			bool write(const std::string &value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool write(const std::string &value) const noexcept)
 				{ return write(value.data(), value.size()); }
 #if __cplusplus >= 201703L
-			bool write(const std::string_view &value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool write(const std::string_view &value) const noexcept)
 				{ return write(value.data(), value.size()); }
 #endif
 
-			template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
+			template<size_t length, typename T, size_t N> SUBSTRATE_NO_DISCARD(bool write(const std::array<T, N> &value) const noexcept)
 			{
 				static_assert(length <= N, "Can't request to write more than the std::array<> length");
 				return write(value.data(), sizeof(T) * length);
@@ -245,11 +245,11 @@ namespace substrate
 				return write(data);
 			}
 
-			template<typename T, typename = typename std::enable_if<
+			template<typename T, typename = enable_if_t<
 				std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-				std::is_signed<T>::value && sizeof(T) >= 2>::type
+				std::is_signed<T>::value && sizeof(T) >= 2>
 			>
-			bool writeLE(const T value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool writeLE(const T value) const noexcept)
 			{
 				auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
 				return writeLE(data);
@@ -293,11 +293,11 @@ namespace substrate
 				return write(data);
 			}
 
-			template<typename T, typename = typename std::enable_if<
+			template<typename T, typename = enable_if_t<
 				std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-				std::is_signed<T>::value && sizeof(T) >= 2>::type
+				std::is_signed<T>::value && sizeof(T) >= 2>
 			>
-			bool writeBE(const T value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool writeBE(const T value) const noexcept)
 			{
 				auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
 				return writeBE(data);
