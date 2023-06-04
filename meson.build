@@ -110,7 +110,6 @@ if isWindows
 		coverageArgs = [
 			'--sources', '@0@\\impl\\*'.format(meson.current_source_dir()),
 			'--sources', '@0@\\substrate\\*'.format(meson.current_source_dir()),
-			'--sources', '@0@\\test\\*'.format(meson.current_source_dir()),
 			'--sources', '@0@\\*'.format(meson.current_build_dir()),
 			'--modules', meson.current_build_dir(),
 			'--export_type'
