@@ -2,16 +2,15 @@
 #ifndef SUBSTRATE_ADVANCED_IO
 #define SUBSTRATE_ADVANCED_IO
 
-#include <cstdint>
-#include <cstddef>
-#include <sys/types.h>
-#include <memory>
 #include <array>
+#include <cstdint>
+#include <memory>
 #include <string>
 
-#include <substrate/internal/defs>
 #include <substrate/internal/types>
+#include <substrate/utility>
 
+// NOLINTNEXTLINE(modernize-concat-nested-namespaces)
 namespace substrate
 {
 	namespace advanced
@@ -29,7 +28,7 @@ namespace substrate
 
 			SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
 			{
-				const ssize_t result = read(value, valueLen, nullptr);
+				const ssize_t result{read(value, valueLen, nullptr)};
 				if (result < 0)
 					return false;
 				resultLen = size_t(result);
@@ -38,35 +37,35 @@ namespace substrate
 
 			SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen) const noexcept)
 			{
-				size_t resultLen = 0;
+				size_t resultLen{};
 				return read(value, valueLen, resultLen);
 			}
 
-			template<typename T> bool read(T &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(T &value) const noexcept)
 				{ return read(&value, sizeof(T)); }
-			template<typename T> bool read(std::unique_ptr<T> &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(std::unique_ptr<T> &value) const noexcept)
 				{ return read(value.get(), sizeof(T)); }
-			template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(const std::unique_ptr<T> &value) const noexcept)
 				{ return read(value.get(), sizeof(T)); }
 			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-			template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept)
 				{ return read(value.get(), sizeof(T) * valueCount); }
-			template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
+			template<typename T, size_t N> SUBSTRATE_NO_DISCARD(bool read(std::array<T, N> &value) const noexcept)
 				{ return read(value.data(), sizeof(T) * N); }
 
 #ifdef SUBSTRATE_MANAGED_PTR
-			template<typename T> enable_if_t<!std::is_array<T>::value, bool>
-				read(const managedPtr_t<T> &value) const noexcept { return read(value.get(), sizeof(T)); }
-			template<typename T> bool read(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(enable_if_t<!std::is_array<T>::value, bool>
+				read(const managedPtr_t<T> &value) const noexcept) { return read(value.get(), sizeof(T)); }
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(const managedPtr_t<T> &value, const size_t valueLen) const noexcept)
 				{ return read(value.get(), valueLen); }
 #endif
 
 #ifdef SUBSTRATE_FIXED_VECTOR
-			template<typename T> bool read(const fixedVector_t<T> &value) const noexcept
+			template<typename T> SUBSTRATE_NO_DISCARD(bool read(const fixedVector_t<T> &value) const noexcept)
 				{ return read(value.data(), sizeof(T) * value.size()); }
 #endif
 
-			template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
+			template<size_t length, typename T, size_t N> SUBSTRATE_NO_DISCARD(bool read(std::array<T, N> &value) const noexcept)
 			{
 				static_assert(length <= N, "Can't request to read more than the std::array<> length");
 				return read(value.data(), sizeof(T) * length);
@@ -75,7 +74,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readLE(uint16_t &value) const noexcept)
 			{
 				std::array<uint8_t, 2> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = uint16_t((uint16_t(data[1]) << 8U) | data[0]);
 				return result;
 			}
@@ -83,7 +82,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readLE(uint32_t &value) const noexcept)
 			{
 				std::array<uint8_t, 4> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = (uint32_t(data[3]) << 24U) | (uint32_t(data[2]) << 16U) |
 					(uint32_t(data[1]) << 8U) | data[0];
 				return result;
@@ -92,7 +91,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readLE(uint64_t &value) const noexcept)
 			{
 				std::array<uint8_t, 8> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = (uint64_t(data[7]) << 56U) | (uint64_t(data[6]) << 48U) |
 					(uint64_t(data[5]) << 40U) | (uint64_t(data[4]) << 32U) |
 					(uint64_t(data[3]) << 24U) | (uint64_t(data[2]) << 16U) |
@@ -104,10 +103,10 @@ namespace substrate
 				std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 				std::is_signed<T>::value && sizeof(T) >= 2>::type
 			>
-			bool readLE(T &value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool readLE(T &value) const noexcept)
 			{
-				typename std::make_unsigned<T>::type data{};
-				const auto result = readLE(data);
+				substrate::make_unsigned_t<T> data{};
+				const auto result{readLE(data)};
 				value = static_cast<T>(data);
 				return result;
 			}
@@ -115,7 +114,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readBE(uint16_t &value) const noexcept)
 			{
 				std::array<uint8_t, 2> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = uint16_t((uint16_t(data[0]) << 8U) | data[1]);
 				return result;
 			}
@@ -123,7 +122,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readBE(uint32_t &value) const noexcept)
 			{
 				std::array<uint8_t, 4> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
 					(uint32_t(data[2]) << 8U) | data[3];
 				return result;
@@ -132,7 +131,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool readBE(uint64_t &value) const noexcept)
 			{
 				std::array<uint8_t, 8> data{};
-				const bool result = read(data);
+				const bool result{read(data)};
 				value = (uint64_t(data[0]) << 56U) | (uint64_t(data[1]) << 48U) |
 					(uint64_t(data[2]) << 40U) | (uint64_t(data[3]) << 32U) |
 					(uint64_t(data[4]) << 24U) | (uint64_t(data[5]) << 16U) |
@@ -144,10 +143,10 @@ namespace substrate
 				std::is_integral<T>::value && !std::is_same<T, bool>::value &&
 				std::is_signed<T>::value && sizeof(T) >= 2>::type
 			>
-			bool readBE(T &value) const noexcept
+			SUBSTRATE_NO_DISCARD(bool readBE(T &value) const noexcept)
 			{
-				typename std::make_unsigned<T>::type data{};
-				const auto result = readBE(data);
+				substrate::make_unsigned_t<T> data{};
+				const auto result{readBE(data)};
 				value = static_cast<T>(data);
 				return result;
 			}
