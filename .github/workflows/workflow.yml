@@ -61,7 +61,7 @@ jobs:
           CXX=${CC/#gcc/g++}
           sudo apt-add-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install $CC $CXX gcovr
+          sudo apt-get install $CC $CXX
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
           echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV
@@ -75,7 +75,7 @@ jobs:
           rm llvm-snapshot.gpg.key
           sudo apt-add-repository "deb https://apt.llvm.org/${{ matrix.os.name }}/ llvm-toolchain-${{ matrix.os.name }}${CC/#clang/} main"
           sudo apt-get update
-          sudo apt-get install $CC gcovr
+          sudo apt-get install $CC
           CXX=${CC/#clang/clang++}
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
@@ -95,10 +95,10 @@ jobs:
         with:
           lfs: true
           submodules: true
-      - name: Setup Meson + Ninja
+      - name: Setup Meson + Ninja + gcovr
         run: |
           sudo python3 -m pip install --upgrade pip setuptools wheel
-          sudo python3 -m pip install meson ninja
+          sudo python3 -m pip install meson ninja gcovr
         working-directory: ${{ runner.temp }}
       - name: Version tools
         run: |
