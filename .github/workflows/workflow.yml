@@ -215,7 +215,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: logs-${{ matrix.os }}-${{ matrix.cpp_std }}
-          path: ${{ github.workspace }}/build/meson-logs/*
+          path: |
+            ${{ github.workspace }}/build/meson-logs
+            ${{ github.workspace }}/build/test
           retention-days: 5
       - name: Codecov
         if: success() && github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
