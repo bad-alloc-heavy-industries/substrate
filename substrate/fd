@@ -121,7 +121,13 @@ namespace substrate
 		}
 
 		SUBSTRATE_NO_DISCARD(bool resize(const off_t newSize) const noexcept)
-			{ return internal::fdtruncate(fd, newSize) == 0; }
+		{
+			if (internal::fdtruncate(fd, newSize) != 0)
+				return false;
+
+			_length = newSize;
+			return true;
+		}
 
 		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept)
 		{
