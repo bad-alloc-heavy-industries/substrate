@@ -320,7 +320,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(bool head() const noexcept) { return seek(0, SEEK_SET) == 0; }
 			SUBSTRATE_NO_DISCARD(bool tail() const noexcept)
 			{
-				const auto offset = length();
+				const auto offset{length()};
 				if (offset < 0)
 					return false;
 				return seek(offset, SEEK_SET) == offset;
@@ -328,7 +328,7 @@ namespace substrate
 
 			SUBSTRATE_NO_DISCARD(bool seekRel(const off_t offset) const noexcept)
 			{
-				const off_t currentPos = tell();
+				const auto currentPos{tell()};
 				if (currentPos == -1 || currentPos + offset < 0)
 					return false;
 				return seek(offset, SEEK_CUR) == currentPos + offset;
