@@ -2,23 +2,24 @@
 #ifndef SUBSTRATE_FD
 #define SUBSTRATE_FD
 
-#include <type_traits>
-#include <fcntl.h>
-#include <utility>
-#include <memory>
 #include <array>
+#include <memory>
 #include <string>
+#include <type_traits>
+#include <utility>
 #if __cplusplus >= 201703L
 #include <string_view>
 #endif
+
+#include <fcntl.h>
 
 #include <substrate/internal/defs>
 #include <substrate/internal/fd_compat>
 #ifdef SUBSTRATE_MANAGED_PTR
 #	include <substrate/utility>
 #endif
-
 #include <substrate/mmap>
+#include <substrate/advanced/io>
 
 #if defined(SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH)
 #include <filesystem>
@@ -31,7 +32,7 @@ namespace substrate
 	* between a file descriptor and the code that uses it, due to the need to know
 	* EOF outside of just read() calls, this also holds a flag for that express purpose.
 	*/
-	struct fd_t final
+	struct fd_t final: public substrate::advanced::seekableIO_t
 	{
 	private:
 		int32_t fd{-1};
@@ -56,7 +57,7 @@ namespace substrate
 		fd_t(fd_t &&other) noexcept : fd_t{}
 			{ *this = std::move(other); }
 
-		~fd_t() noexcept
+		~fd_t() noexcept final
 		{
 			if (fd != -1)
 				close(fd);
@@ -72,11 +73,15 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(operator int32_t() const noexcept) { return fd; }
 		SUBSTRATE_NO_DISCARD(bool operator ==(const int32_t desc) const noexcept) { return fd == desc; }
-		SUBSTRATE_NO_DISCARD(bool valid() const noexcept) { return fd != -1; }
+		SUBSTRATE_NO_DISCARD(bool valid() const noexcept final) { return fd != -1; }
 		SUBSTRATE_NO_DISCARD(bool isEOF() const noexcept) { return eof; }
 		void invalidate() noexcept { fd = -1; }
 
-		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
+		using substrate::advanced::seekableIO_t::read;
+		using substrate::advanced::seekableIO_t::write;
+		using substrate::advanced::seekableIO_t::seek;
+
+		SUBSTRATE_NO_DISCARD(ssize_t read(void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept final)
 		{
 			const auto result = internal::fdread(fd, bufferPtr, bufferLen);
 			if (!result && bufferLen)
@@ -84,27 +89,18 @@ namespace substrate
 			return result;
 		}
 
-		SUBSTRATE_NO_DISCARD(off_t seek(const off_t offset, const int32_t whence) const noexcept)
+		SUBSTRATE_NO_DISCARD(off_t seek(const off_t offset, const int32_t whence) const noexcept final)
 		{
 			const auto result = internal::fdseek(fd, offset, whence);
 			eof = result == length();
 			return result;
 		}
 
-		SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept)
+		SUBSTRATE_NO_DISCARD(ssize_t write(const void *const bufferPtr, const size_t bufferLen, std::nullptr_t) const noexcept final)
 			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
-		SUBSTRATE_NO_DISCARD(off_t tell() const noexcept) { return internal::fdtell(fd); }
+		SUBSTRATE_NO_DISCARD(off_t tell() const noexcept final) { return internal::fdtell(fd); }
 
-		SUBSTRATE_NO_DISCARD(bool head() const noexcept) { return seek(0, SEEK_SET) == 0; }
 		SUBSTRATE_NO_DISCARD(fd_t dup() const noexcept) { return ::dup(fd); }
-
-		SUBSTRATE_NO_DISCARD(bool tail() const noexcept)
-		{
-			const auto offset = length();
-			if (offset < 0)
-				return false;
-			return seek(offset, SEEK_SET) == offset;
-		}
 
 		SUBSTRATE_NO_DISCARD(internal::stat_t stat() const noexcept)
 		{
@@ -114,7 +110,7 @@ namespace substrate
 			return {};
 		}
 
-		SUBSTRATE_NO_DISCARD(off_t length() const noexcept)
+		SUBSTRATE_NO_DISCARD(off_t length() const noexcept final)
 		{
 			if (_length != -1)
 				return _length;
@@ -126,271 +122,6 @@ namespace substrate
 
 		SUBSTRATE_NO_DISCARD(bool resize(const off_t newSize) const noexcept)
 			{ return internal::fdtruncate(fd, newSize) == 0; }
-
-		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen, size_t &resultLen) const noexcept)
-		{
-			const ssize_t result = read(value, valueLen, nullptr);
-			if (result < 0)
-				return false;
-			resultLen = size_t(result);
-			return resultLen == valueLen;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool read(void *const value, const size_t valueLen) const noexcept)
-		{
-			size_t resultLen = 0;
-			return read(value, valueLen, resultLen);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool write(const void *const value, const size_t valueLen) const noexcept)
-		{
-			const ssize_t result = write(value, valueLen, nullptr);
-			if (result < 0)
-				return false;
-			return size_t(result) == valueLen;
-		}
-
-		template<typename T> bool read(T &value) const noexcept
-			{ return read(&value, sizeof(T)); }
-		template<typename T> bool write(const T &value) const noexcept
-			{ return write(&value, sizeof(T)); }
-		template<typename T> bool read(std::unique_ptr<T> &value) const noexcept
-			{ return read(value.get(), sizeof(T)); }
-		template<typename T> bool read(const std::unique_ptr<T> &value) const noexcept
-			{ return read(value.get(), sizeof(T)); }
-		template<typename T> bool write(const std::unique_ptr<T> &value) const noexcept
-			{ return write(value.get(), sizeof(T)); }
-		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-		template<typename T> bool read(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
-			{ return read(value.get(), sizeof(T) * valueCount); }
-		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-		template<typename T> bool write(const std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
-			{ return write(value.get(), sizeof(T) * valueCount); }
-		template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
-			{ return read(value.data(), sizeof(T) * N); }
-		template<typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
-			{ return write(value.data(), sizeof(T) * N); }
-
-#ifdef SUBSTRATE_MANAGED_PTR
-		template<typename T> enable_if_t<!std::is_array<T>::value, bool>
-			read(const managedPtr_t<T> &value) const noexcept { return read(value.get(), sizeof(T)); }
-		template<typename T> enable_if_t<!std::is_array<T>::value, bool>
-			write(const managedPtr_t<T> &value) const noexcept { return write(value.get(), sizeof(T)); }
-		template<typename T> bool read(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
-			{ return read(value.get(), valueLen); }
-		template<typename T> bool write(const managedPtr_t<T> &value, const size_t valueLen) const noexcept
-			{ return write(value.get(), valueLen); }
-#endif
-
-#ifdef SUBSTRATE_FIXED_VECTOR
-		template<typename T> bool read(const fixedVector_t<T> &value) const noexcept
-			{ return read(value.data(), sizeof(T) * value.size()); }
-		template<typename T> bool write(const fixedVector_t<T> &value) const noexcept
-			{ return write(value.data(), sizeof(T) * value.size()); }
-#endif
-
-		bool write(const std::string &value) const noexcept
-			{ return write(value.data(), value.size()); }
-#if __cplusplus >= 201703L
-		bool write(const std::string_view &value) const noexcept
-			{ return write(value.data(), value.size()); }
-#endif
-
-		template<size_t length, typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
-		{
-			static_assert(length <= N, "Can't request to read more than the std::array<> length");
-			return read(value.data(), sizeof(T) * length);
-		}
-
-		template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
-		{
-			static_assert(length <= N, "Can't request to write more than the std::array<> length");
-			return write(value.data(), sizeof(T) * length);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readLE(uint16_t &value) const noexcept)
-		{
-			std::array<uint8_t, 2> data{};
-			const bool result = read(data);
-			value = uint16_t((uint16_t(data[1]) << 8U) | data[0]);
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeLE(const uint16_t value) const noexcept)
-		{
-			const std::array<uint8_t, 2> data
-			{{
-				uint8_t(value),
-				uint8_t(value >> 8U)
-			}};
-			return write(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readLE(uint32_t &value) const noexcept)
-		{
-			std::array<uint8_t, 4> data{};
-			const bool result = read(data);
-			value = (uint32_t(data[3]) << 24U) | (uint32_t(data[2]) << 16U) |
-				(uint32_t(data[1]) << 8U) | data[0];
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeLE(const uint32_t value) const noexcept)
-		{
-			const std::array<uint8_t, 4> data
-			{{
-				uint8_t(value),
-				uint8_t(value >> 8U),
-				uint8_t(value >> 16U),
-				uint8_t(value >> 24U)
-			}};
-			return write(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readLE(uint64_t &value) const noexcept)
-		{
-			std::array<uint8_t, 8> data{};
-			const bool result = read(data);
-			value = (uint64_t(data[7]) << 56U) | (uint64_t(data[6]) << 48U) |
-				(uint64_t(data[5]) << 40U) | (uint64_t(data[4]) << 32U) |
-				(uint64_t(data[3]) << 24U) | (uint64_t(data[2]) << 16U) |
-				(uint64_t(data[1]) << 8U) | data[0];
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeLE(const uint64_t value) const noexcept)
-		{
-			const std::array<uint8_t, 8> data
-			{{
-				uint8_t(value),
-				uint8_t(value >> 8U),
-				uint8_t(value >> 16U),
-				uint8_t(value >> 24U),
-				uint8_t(value >> 32U),
-				uint8_t(value >> 40U),
-				uint8_t(value >> 48U),
-				uint8_t(value >> 56U)
-			}};
-			return write(data);
-		}
-
-		template<typename T, typename = typename std::enable_if<
-			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-			std::is_signed<T>::value && sizeof(T) >= 2>::type
-		>
-		bool readLE(T &value) const noexcept
-		{
-			typename std::make_unsigned<T>::type data{};
-			const auto result = readLE(data);
-			value = static_cast<T>(data);
-			return result;
-		}
-
-		template<typename T, typename = typename std::enable_if<
-			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-			std::is_signed<T>::value && sizeof(T) >= 2>::type
-		>
-		bool writeLE(const T value) const noexcept
-		{
-			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
-			return writeLE(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readBE(uint16_t &value) const noexcept)
-		{
-			std::array<uint8_t, 2> data{};
-			const bool result = read(data);
-			value = uint16_t((uint16_t(data[0]) << 8U) | data[1]);
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeBE(const uint16_t value) const noexcept)
-		{
-			const std::array<uint8_t, 2> data
-			{{
-				uint8_t(value >> 8U),
-				uint8_t(value)
-			}};
-			return write(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readBE(uint32_t &value) const noexcept)
-		{
-			std::array<uint8_t, 4> data{};
-			const bool result = read(data);
-			value = (uint32_t(data[0]) << 24U) | (uint32_t(data[1]) << 16U) |
-				(uint32_t(data[2]) << 8U) | data[3];
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeBE(const uint32_t value) const noexcept)
-		{
-			const std::array<uint8_t, 4> data
-			{{
-				uint8_t(value >> 24U),
-				uint8_t(value >> 16U),
-				uint8_t(value >> 8U),
-				uint8_t(value)
-			}};
-			return write(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool readBE(uint64_t &value) const noexcept)
-		{
-			std::array<uint8_t, 8> data{};
-			const bool result = read(data);
-			value = (uint64_t(data[0]) << 56U) | (uint64_t(data[1]) << 48U) |
-				(uint64_t(data[2]) << 40U) | (uint64_t(data[3]) << 32U) |
-				(uint64_t(data[4]) << 24U) | (uint64_t(data[5]) << 16U) |
-				(uint64_t(data[6]) << 8U) | data[7];
-			return result;
-		}
-
-		SUBSTRATE_NO_DISCARD(bool writeBE(const uint64_t value) const noexcept)
-		{
-			const std::array<uint8_t, 8> data
-			{{
-				uint8_t(value >> 56U),
-				uint8_t(value >> 48U),
-				uint8_t(value >> 40U),
-				uint8_t(value >> 32U),
-				uint8_t(value >> 24U),
-				uint8_t(value >> 16U),
-				uint8_t(value >> 8U),
-				uint8_t(value)
-			}};
-			return write(data);
-		}
-
-		template<typename T, typename = typename std::enable_if<
-			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-			std::is_signed<T>::value && sizeof(T) >= 2>::type
-		>
-		bool readBE(T &value) const noexcept
-		{
-			typename std::make_unsigned<T>::type data{};
-			const auto result = readBE(data);
-			value = static_cast<T>(data);
-			return result;
-		}
-
-		template<typename T, typename = typename std::enable_if<
-			std::is_integral<T>::value && !std::is_same<T, bool>::value &&
-			std::is_signed<T>::value && sizeof(T) >= 2>::type
-		>
-		bool writeBE(const T value) const noexcept
-		{
-			auto data{static_cast<typename std::make_unsigned<T>::type>(value)};
-			return writeBE(data);
-		}
-
-		SUBSTRATE_NO_DISCARD(bool seekRel(const off_t offset) const noexcept)
-		{
-			const off_t currentPos = tell();
-			if (currentPos == -1 || currentPos + offset < 0)
-				return false;
-			return seek(offset, SEEK_CUR) == currentPos + offset;
-		}
 
 		SUBSTRATE_NO_DISCARD(mmap_t map(const int32_t prot, const int flags = MAP_SHARED) noexcept)
 		{
@@ -413,7 +144,7 @@ namespace substrate
 		fd_t &operator =(const fd_t &) = delete;
 	};
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	// NOLINTNEXTLINE(hicpp-signed-bitwise)
 	SUBSTRATE_NOWARN_UNUSED(constexpr static mode_t normalMode) = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
 #else

@@ -7,8 +7,10 @@
 #include <sys/types.h>
 #include <memory>
 #include <array>
+#include <string>
 
 #include <substrate/internal/defs>
+#include <substrate/internal/types>
 
 namespace substrate
 {
@@ -16,7 +18,6 @@ namespace substrate
 	{
 		struct readable_t
 		{
-		public:
 			readable_t() noexcept = default;
 			readable_t(const readable_t &) noexcept = delete;
 			readable_t(readable_t &&) noexcept = delete;
@@ -194,6 +195,13 @@ namespace substrate
 				{ return write(value.data(), sizeof(T) * value.size()); }
 #endif
 
+			bool write(const std::string &value) const noexcept
+				{ return write(value.data(), value.size()); }
+#if __cplusplus >= 201703L
+			bool write(const std::string_view &value) const noexcept
+				{ return write(value.data(), value.size()); }
+#endif
+
 			template<size_t length, typename T, size_t N> bool write(const std::array<T, N> &value) const noexcept
 			{
 				static_assert(length <= N, "Can't request to write more than the std::array<> length");
@@ -328,7 +336,7 @@ namespace substrate
 			}
 		};
 
-		struct io_t : readable_t, writeable_t
+		struct io_t : public readable_t, public writeable_t
 		{
 			io_t() noexcept = default;
 			io_t(const io_t &) noexcept = delete;
@@ -339,7 +347,7 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(virtual bool valid() const noexcept) = 0;
 		};
 
-		struct seekableIO_t : io_t, seekable_t { };
+		struct seekableIO_t : public io_t, public seekable_t { };
 	}
 }
 
