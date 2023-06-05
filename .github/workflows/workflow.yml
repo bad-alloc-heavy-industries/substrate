@@ -207,7 +207,7 @@ jobs:
         if: github.repository == 'bad-alloc-heavy-industries/substrate' && matrix.cpp_std > 11
         run: |
           Remove-Item -Recurse build
-          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++${{ matrix.cpp_std }} -Db_coverage=true --buildtype=debug -Ddefault_library=static
           meson compile -C build
           meson test -C build
       - name: Upload failure logs
