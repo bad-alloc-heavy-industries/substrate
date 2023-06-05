@@ -104,7 +104,7 @@ if isWindows
 	# if MSVC, b_coverage will always return false because
 	# Meson doesn't officially support coverage
 	if cxx.get_id() == 'msvc' and get_option('buildtype') == 'debug'
-		coverageRunner = find_program('OpenCppCoverage', required: true)
+		coverageRunner = find_program('OpenCppCoverage', required: false)
 
 		message('Enabling coverage under MSVC')
 		coverageArgs = [
