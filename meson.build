@@ -3,8 +3,11 @@ project(
 	'substrate',
 	'cpp',
 	default_options: [
-		'cpp_std=c++11',
-		'warning_level=3'
+		'cpp_std=c++14',
+		'warning_level=3',
+		'buildtype=release',
+		'default_library=shared',
+		'b_ndebug=if-release',
 	],
 	version: '0.0.1',
 	license: 'BSD-3-Clause',
