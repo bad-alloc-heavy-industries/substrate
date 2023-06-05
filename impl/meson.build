@@ -151,7 +151,7 @@ if library_type == 'static' and isWindows
 endif
 
 if isWindows
-	libSubstrateArgs += cxx.get_supported_arguments('/permissive-')
+	libSubstrateArgs += cxx.get_supported_arguments('/permissive-', '/Zc:inline')
 
 	rcCfg = configuration_data()
 	if cxx.get_id() == 'msvc' or cxx.get_id() == 'clang-cl'
