@@ -151,7 +151,11 @@ if library_type == 'static' and isWindows
 endif
 
 if isWindows
-	libSubstrateArgs += cxx.get_supported_arguments('/permissive-', '/Zc:inline')
+	libSubstrateArgs += cxx.get_supported_arguments(
+		'/permissive-',
+		'/Zc:inline',
+		'/wd4373' # pre-2008 overriding with mismatched const parameters
+	)
 
 	rcCfg = configuration_data()
 	if cxx.get_id() == 'msvc' or cxx.get_id() == 'clang-cl'
