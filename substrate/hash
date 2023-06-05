@@ -146,7 +146,7 @@ namespace substrate
 	}
 
 	/* Checksums */
-	std::uint16_t sysv_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
+	inline std::uint16_t sysv_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
 	{
 		constexpr auto m32 = std::numeric_limits<std::uint32_t>::max();
 		constexpr auto m16 = std::numeric_limits<std::uint16_t>::max();
@@ -167,7 +167,7 @@ namespace substrate
 		return sysv_checksum(reinterpret_cast<const uint8_t *>(substrate::data(data)), substrate::size(data));
 	}
 
-	std::uint16_t bsd_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
+	inline std::uint16_t bsd_checksum(const std::uint8_t* bytes, std::size_t len) noexcept
 	{
 		if (!bytes)
 			return {};
