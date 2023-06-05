@@ -15,14 +15,9 @@ namespace substrate
 {
 	namespace advanced
 	{
-		struct readable_t
+		// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+		struct SUBSTRATE_INTERFACE readable_t
 		{
-			readable_t() noexcept = default;
-			readable_t(const readable_t &) noexcept = delete;
-			readable_t(readable_t &&) noexcept = delete;
-			readable_t &operator =(const readable_t &) noexcept = delete;
-			readable_t &operator =(readable_t &&) noexcept = delete;
-			virtual ~readable_t() noexcept = default;
 			SUBSTRATE_NO_DISCARD(virtual ssize_t read(void *bufferPtr,
 				size_t bufferLen, std::nullptr_t) const noexcept) = 0;
 
@@ -152,15 +147,10 @@ namespace substrate
 			}
 		};
 
-		struct writeable_t
+		// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+		struct SUBSTRATE_INTERFACE writeable_t
 		{
 		public:
-			writeable_t() noexcept = default;
-			writeable_t(const writeable_t &) noexcept = delete;
-			writeable_t(writeable_t &&) noexcept = delete;
-			writeable_t &operator =(const writeable_t &) noexcept = delete;
-			writeable_t &operator =(writeable_t &&) noexcept = delete;
-			virtual ~writeable_t() noexcept = default;
 			SUBSTRATE_NO_DISCARD(virtual ssize_t write(const void *bufferPtr,
 				size_t bufferLen, std::nullptr_t) const noexcept) = 0;
 
@@ -304,15 +294,10 @@ namespace substrate
 			}
 		};
 
-		struct seekable_t
+		// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+		struct SUBSTRATE_INTERFACE seekable_t
 		{
 		public:
-			seekable_t() noexcept = default;
-			seekable_t(const seekable_t &) noexcept = delete;
-			seekable_t(seekable_t &&) noexcept = delete;
-			seekable_t &operator =(const seekable_t &) noexcept = delete;
-			seekable_t &operator =(seekable_t &&) noexcept = delete;
-			virtual ~seekable_t() noexcept = default;
 			SUBSTRATE_NO_DISCARD(virtual off_t seek(off_t offset, int32_t whence) const noexcept) = 0;
 			SUBSTRATE_NO_DISCARD(virtual off_t tell() const noexcept) = 0;
 			SUBSTRATE_NO_DISCARD(virtual off_t length() const noexcept) = 0;
@@ -335,18 +320,14 @@ namespace substrate
 			}
 		};
 
-		struct io_t : public readable_t, public writeable_t
+		// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+		struct SUBSTRATE_INTERFACE io_t : public readable_t, public writeable_t
 		{
-			io_t() noexcept = default;
-			io_t(const io_t &) noexcept = delete;
-			io_t(io_t &&) noexcept = delete;
-			io_t &operator =(const io_t &) noexcept = delete;
-			io_t &operator =(io_t &&) noexcept = delete;
-			~io_t() noexcept override = default;
 			SUBSTRATE_NO_DISCARD(virtual bool valid() const noexcept) = 0;
 		};
 
-		struct seekableIO_t : public io_t, public seekable_t { };
+		// NOLINTNEXTLINE(cppcoreguidelines-virtual-class-destructor)
+		struct SUBSTRATE_INTERFACE seekableIO_t : public io_t, public seekable_t { };
 	}
 }
 

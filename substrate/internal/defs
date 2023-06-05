@@ -120,5 +120,11 @@
 #	endif
 #endif
 
+#if defined(_WIN32)
+#define SUBSTRATE_INTERFACE __declspec(novtable)
+#else
+#define SUBSTRATE_INTERFACE
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

@@ -57,7 +57,7 @@ namespace substrate
 		fd_t(fd_t &&other) noexcept : fd_t{}
 			{ *this = std::move(other); }
 
-		~fd_t() noexcept final
+		~fd_t() noexcept
 		{
 			if (fd != -1)
 				close(fd);
