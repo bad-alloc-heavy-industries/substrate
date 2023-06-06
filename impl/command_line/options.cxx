@@ -62,7 +62,8 @@ namespace substrate::commandLine
 		// Now do the conversion
 		const auto result{number.fromDec()};
 		// Check if we have a range restriction
-		if (!std::holds_alternative<optionSignedInt_t>(_valueAllowedRange))
+		if (_valueAllowedRange.valueless_by_exception() ||
+			!std::holds_alternative<optionSignedInt_t>(_valueAllowedRange))
 			// Return the result of conversion unchecked if we do not
 			return result;
 		const auto &range{std::get<optionSignedInt_t>(_valueAllowedRange)};
@@ -82,7 +83,8 @@ namespace substrate::commandLine
 		// Now do the conversion
 		const auto result{number.fromDec()};
 		// Check if we have a range restriction
-		if (!std::holds_alternative<optionUnsignedInt_t>(_valueAllowedRange))
+		if (_valueAllowedRange.valueless_by_exception() ||
+			!std::holds_alternative<optionUnsignedInt_t>(_valueAllowedRange))
 			// Return the result of conversion unchecked if we do not
 			return result;
 		const auto &range{std::get<optionUnsignedInt_t>(_valueAllowedRange)};
@@ -146,6 +148,8 @@ namespace substrate::commandLine
 
 	[[nodiscard]] std::string_view option_t::metaName() const noexcept
 	{
+		if (_option.valueless_by_exception())
+			return ""sv;
 		return std::visit(match_t
 		{
 			[](const std::string_view &option) { return unprefix(option); },
@@ -156,6 +160,8 @@ namespace substrate::commandLine
 
 	[[nodiscard]] std::string option_t::displayName() const noexcept
 	{
+		if (_option.valueless_by_exception())
+			return ""s;
 		return std::visit(match_t
 		{
 			[](const std::string_view &option) { return std::string{option}; },
