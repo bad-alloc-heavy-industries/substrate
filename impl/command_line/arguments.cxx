@@ -367,22 +367,23 @@ namespace substrate::commandLine
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument)
 	{
 		const auto &token{lexer.next()};
-		// If the argument is followed by an '=', grab both parts of it for display
-		if (token.type() == tokenType_t::equals)
+		// If the argument stands alone, display it and fast exit
+		if (token.type() != tokenType_t::equals)
 		{
-			lexer.next();
-			// If there's nothing after the '=', display what we've got
-			if (token.type() == tokenType_t::space)
-				console.error("Unrecognised command line argument '"sv, argument, "='"sv);
-			else
-			{
-				const auto value{token.value()};
-				console.error("Unrecognised command line argument '"sv, argument, '=', value, "'"sv);
-				lexer.next();
-			}
-		}
-		else
 			console.error("Unrecognised command line argument '"sv, argument, "'"sv);
+			return;
+		}
+		// If the argument is followed by an '=', grab both parts of it for display
+		lexer.next();
+		// If there's nothing after the '=', display what we've got
+		if (token.type() == tokenType_t::space)
+			console.error("Unrecognised command line argument '"sv, argument, "='"sv);
+		else
+		{
+			const auto value{token.value()};
+			console.error("Unrecognised command line argument '"sv, argument, '=', value, "'"sv);
+			lexer.next();
+		}
 	}
 
 	// Implementation of the innards of arguments_t as otherwise we get compile errors
