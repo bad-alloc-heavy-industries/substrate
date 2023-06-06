@@ -17,6 +17,8 @@ namespace substrate::commandLine
 
 	static bool operator <(const optionsItem_t &lhs, const optionsItem_t &rhs) noexcept
 	{
+		if (lhs.valueless_by_exception() || rhs.valueless_by_exception())
+			return false;
 		// First, if the alternative held is numerically < then sort on that
 		if (lhs.index() < rhs.index())
 			return true;
@@ -43,6 +45,8 @@ namespace substrate::commandLine
 
 	static bool operator <(const item_t &lhs, const item_t &rhs) noexcept
 	{
+		if (lhs.valueless_by_exception() || rhs.valueless_by_exception())
+			return false;
 		// First extract the item name values
 		const auto lhsName{itemName(lhs)};
 		const auto rhsName{itemName(rhs)};
@@ -52,12 +56,16 @@ namespace substrate::commandLine
 
 	static bool operator <(const item_t &lhs, const std::string_view &rhsName) noexcept
 	{
+		if (lhs.valueless_by_exception())
+			return false;
 		const auto lhsName{itemName(lhs)};
 		return lhsName < rhsName;
 	}
 
 	static bool operator <(const std::string_view &lhsName, const item_t &rhs) noexcept
 	{
+		if (rhs.valueless_by_exception())
+			return false;
 		const auto rhsName{itemName(rhs)};
 		return lhsName < rhsName;
 	}
@@ -97,7 +105,8 @@ namespace substrate::commandLine
 		size_t valueOptions{};
 		for (const auto &option : options)
 		{
-			if (!std::visit(match_t
+			if (option.valueless_by_exception() ||
+				!std::visit(match_t
 				{
 					[&](const option_t &value)
 					{
@@ -121,6 +130,9 @@ namespace substrate::commandLine
 		std::set<internal::optionsItem_t> requiredOptions{};
 		for (const auto &option : options)
 		{
+			// If the optionItem_t is a bad variant, ignore it
+			if (option.valueless_by_exception())
+				continue;
 			std::visit(match_t
 			{
 				// If it's an option_t, and it's required, then add it to the set
