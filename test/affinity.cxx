@@ -7,7 +7,7 @@
 #include <substrate/affinity>
 #include <substrate/fixed_vector>
 
-#ifdef _WIN32 
+#ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
@@ -158,14 +158,16 @@ TEST_CASE("pinning", "[affinity_t]")
 #if defined(_POSIX_THREADS) && !defined(__WINPTHREADS_VERSION)
 	for (const auto &processor : *affinity)
 	{
-		const auto result = std::async(std::launch::async, [&](const uint32_t currentProcessor) noexcept -> int32_t
-		{
-			try
-				{ affinity->pinThreadTo(currentProcessor); }
-			catch (const std::out_of_range &)
-				{ return INT32_MAX; }
-			return sched_getcpu();
-		}, processor).get();
+		const auto result = std::async(std::launch::async,
+			[&](const uint32_t currentProcessor) noexcept -> int32_t
+			{
+				try
+					{ affinity->pinThreadTo(currentProcessor); }
+				catch (const std::out_of_range &)
+					{ return INT32_MAX; }
+				return sched_getcpu();
+			}, processor
+		).get();
 		REQUIRE(result != -1);
 		REQUIRE(result == static_cast<int32_t>(processor));
 	}
@@ -174,7 +176,7 @@ TEST_CASE("pinning", "[affinity_t]")
 	for (const auto &processor : *affinity)
 	{
 		const auto result = std::async(std::launch::async,
-			[&](const uint32_t currentProcessor) noexcept -> GROUP_AFFINITY
+			[&](const uint32_t currentProcessor) -> GROUP_AFFINITY
 			{
 				affinity->pinThreadTo(currentProcessor);
 				GROUP_AFFINITY res{};
@@ -203,7 +205,7 @@ TEST_CASE("thread cap", "[affinity_t]")
 #else
 	const auto processor
 	{
-		[&]() noexcept -> uint32_t
+		[&]() -> uint32_t
 		{
 			cpu_set_t affinitySet{};
 			REQUIRE(sched_getaffinity(0, sizeof(cpu_set_t), &affinitySet) == 0);
@@ -319,38 +321,38 @@ TEST_CASE("pin second core", "[affinity_t]")
 {
 #if defined(_POSIX_THREADS) && defined(_GNU_SOURCE)
 	const auto processor
+	{
+		[&]() -> uint32_t
 		{
-			[&]() -> uint32_t
+			cpu_set_t affinitySet{};
+			REQUIRE(sched_getaffinity(0, sizeof(cpu_set_t), &affinitySet) == 0);
+			if (CPU_COUNT(&affinitySet) < 2)
+				throw std::runtime_error("This test can only be run on a multi-core machine with at "
+					"least 2 cores in the allowed affinity set");
+			bool ready{false};
+			for (uint32_t i{0}; i < CPU_SETSIZE; ++i)
 			{
-				cpu_set_t affinitySet{};
-				REQUIRE(sched_getaffinity(0, sizeof(cpu_set_t), &affinitySet) == 0);
-				if (CPU_COUNT(&affinitySet) < 2)
-					throw std::runtime_error("This test can only be run on a multi-core machine with at "
-						"least 2 cores in the allowed affinity set");
-				bool ready{false};
-				for (uint32_t i{0}; i < CPU_SETSIZE; ++i)
+				if (CPU_ISSET(i, &affinitySet))
 				{
-					if (CPU_ISSET(i, &affinitySet))
-					{
-						if (ready)
-							return i;
-						CPU_CLR(i, &affinitySet);
-						ready = true;
-					}
+					if (ready)
+						return i;
+					CPU_CLR(i, &affinitySet);
+					ready = true;
 				}
-				static_assert(CPU_SETSIZE < UINT32_MAX);
-				return UINT32_MAX;
-			}()
-		};
-		const std::initializer_list<uint32_t> processorList {uint32_t(processor)};
+			}
+			static_assert(CPU_SETSIZE < UINT32_MAX);
+			return UINT32_MAX;
+		}()
+	};
+	const std::initializer_list<uint32_t> processorList {uint32_t(processor)};
 
-		REQUIRE(processor != UINT32_MAX);
-		auto affinity{substrate::make_unique_nothrow<substrate::affinity_t>(0U, processorList)};
+	REQUIRE(processor != UINT32_MAX);
+	auto affinity{substrate::make_unique_nothrow<substrate::affinity_t>(0U, processorList)};
 
-		REQUIRE(affinity);
-		REQUIRE(affinity->numProcessors() == 1);
-		REQUIRE(affinity->begin() != affinity->end());
-		REQUIRE(*affinity->begin() == processor);
+	REQUIRE(affinity);
+	REQUIRE(affinity->numProcessors() == 1);
+	REQUIRE(affinity->begin() != affinity->end());
+	REQUIRE(*affinity->begin() == processor);
 #elif defined(_POSIX_THREADS) && defined(__APPLE__)
 	const auto processor
 	{
