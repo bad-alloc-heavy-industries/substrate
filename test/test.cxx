@@ -6,12 +6,15 @@
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_session.hpp>
+#include "substrate/console"
+
+using substrate::console;
 
 #ifdef _WINDOWS
 void invalidHandler(const wchar_t *, const wchar_t *, const wchar_t *, const uint32_t, const uintptr_t) { }
 #endif
 
-int main(int argCount, char **argList)
+int main(int argCount, char **argList) noexcept
 {
 #ifdef _WINDOWS
 	_set_invalid_parameter_handler(invalidHandler);
@@ -19,6 +22,16 @@ int main(int argCount, char **argList)
 	_CrtSetReportMode(_CRT_ERROR, 0);
 #endif
 
-	return Catch::Session().run(argCount, argList);
+	console = {stdout, stderr};
+
+	try
+	{
+		return Catch::Session().run(argCount, argList);
+	}
+	catch (const std::domain_error &error)
+	{
+		console.error("Error running test suite: ", error.what());
+		return 2;
+	}
 }
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
