@@ -344,7 +344,7 @@ namespace substrate::commandLine
 		return std::visit(match_t
 		{
 			// We got a match and parsing it succeeded?
-			[&]([[maybe_unused]] const auto &result) -> std::optional<bool> { return arguments.add(result); },
+			[&](const auto &result) -> std::optional<bool> { return arguments.add(result); },
 			// Match but inner parsing failed
 			[](std::monostate) -> std::optional<bool> { return std::nullopt; },
 		}, match);
