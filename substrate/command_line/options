@@ -154,6 +154,9 @@ namespace substrate::commandLine
 
 		[[nodiscard]] constexpr bool operator <(const option_t &other) const noexcept
 		{
+			// If either variant holds no value, consider unequal
+			if (_option.valueless_by_exception() || other._option.valueless_by_exception())
+				return false;
 			// Check if the alternative held is numerically <
 			if (_option.index() < other._option.index())
 				return true;
