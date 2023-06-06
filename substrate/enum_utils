@@ -21,19 +21,21 @@ namespace substrate
 
 	template<class T> struct enumPair_t final
 	{
-		using value_type = T;
 	private:
-		T _value;
-		const char* _name;
+		T _value{};
+		const char *_name{};
+
 	public:
-		constexpr enumPair_t() noexcept : _value{}, _name{} { }
+		constexpr enumPair_t() noexcept = default;
 		constexpr enumPair_t(T value, const char* name) noexcept : _value{value}, _name{name} { }
+
+		using value_type = T;
 
 		void value(const T value) noexcept { _value = value; }
 		SUBSTRATE_NO_DISCARD(T value() const noexcept) { return _value; }
 
-		void name(const char* name) noexcept { _name = name; }
-		SUBSTRATE_NO_DISCARD(const char* name() const noexcept) { return _name; }
+		void name(const char *name) noexcept { _name = name; }
+		SUBSTRATE_NO_DISCARD(const char *name() const noexcept) { return _name; }
 	};
 
 	/* Extract a collection of flags set in a field */
@@ -79,8 +81,8 @@ namespace substrate
 		return pos != std::end(map) ? pos->name() : "UNKNOWN";
 	}
 
-	template<class map_t>
-	typename map_t::value_type::value_type enum_value(map_t map, const std::string &name) noexcept
+	template<class map_t> typename map_t::value_type::value_type
+		enum_value(map_t map, const std::string &name) noexcept
 	{
 		auto pos = std::find_if(std::begin(map), std::end(map),
 			[&](const typename map_t::value_type &entry)
