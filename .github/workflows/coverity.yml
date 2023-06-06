@@ -60,7 +60,7 @@ jobs:
       - name: Run Coverity
         shell: bash
         run: |
-          meson build --prefix=$HOME/.local -Dcpp_std=c++17
+          meson setup build --prefix=$HOME/.local -Dcpp_std=c++17
           cov-build --dir cov-int ninja -C build
         env:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
