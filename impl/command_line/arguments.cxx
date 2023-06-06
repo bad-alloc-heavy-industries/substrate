@@ -6,6 +6,7 @@
 #include <substrate/command_line/arguments>
 #include <substrate/command_line/tokeniser>
 
+using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
 
 namespace substrate::commandLine
@@ -150,6 +151,8 @@ namespace substrate::commandLine
 
 	static auto displayName(const optionsItem_t &item)
 	{
+		if (item.valueless_by_exception())
+			return ""s;
 		return std::visit(match_t
 		{
 			[](const option_t &option) { return option.displayName(); },
@@ -433,8 +436,10 @@ namespace substrate::commandLine
 
 	bool operator ==(const item_t &lhs, const item_t &rhs) noexcept
 	{
-		// Check if the items hold the same type, if not they can't be equal
-		if (lhs.index() != rhs.index())
+		// If either is valueless, treat as unequal
+		if (lhs.valueless_by_exception() || rhs.valueless_by_exception() ||
+			// Check if the items hold the same type, if not they can't be equal
+			lhs.index() != rhs.index())
 			return false;
 		// Now convert them to their underlying type and compare those
 		if (std::holds_alternative<flag_t>(lhs))
