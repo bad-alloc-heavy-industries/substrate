@@ -296,20 +296,19 @@ namespace substrate::commandLine
 	{
 		// Check if we're parsing an alternation from a set
 		const auto match{option.matches(argument)};
-		if (match)
-		{
-			// Check which alternation matched, recurse and parse all further options from the
-			// alternation's perspective
-			const auto &alternation{match->get()};
-			lexer.next();
-			arguments_t subarguments{};
-			const auto &suboptions{alternation.suboptions()};
-			if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
-				// If the operation fails, use monostate to signal match-but-fail.
-				return std::monostate{};
-			return choice_t{option.metaName(), argument, std::move(subarguments)};
-		}
-		return std::nullopt;
+		// If that failed, fast-fail
+		if (!match)
+			return std::nullopt;
+		// Check which alternation matched, recurse and parse all further options from the
+		// alternation's perspective
+		const auto &alternation{match->get()};
+		lexer.next();
+		arguments_t subarguments{};
+		const auto &suboptions{alternation.suboptions()};
+		if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
+			// If the operation fails, use monostate to signal match-but-fail.
+			return std::monostate{};
+		return choice_t{option.metaName(), argument, std::move(subarguments)};
 	}
 
 	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited)
