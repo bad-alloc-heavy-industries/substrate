@@ -43,7 +43,7 @@ namespace substrate
 	{
 		std::vector<T> foundFlags{};
 		using enumInt_t = typename substrate::underlying_type_t<T>;
-		for (auto flag : enumTable)
+		for (const auto &flag : enumTable)
 		{
 			if ((flags & flag.value()) == flag.value() && static_cast<enumInt_t>(flag.value()) != 0)
 				foundFlags.emplace_back(flag.value());
@@ -59,7 +59,7 @@ namespace substrate
 	{
 		std::vector<enumPair_t<T>> foundFlags{};
 		using enumInt_t = typename substrate::underlying_type_t<T>;
-		for (auto flag : enumTable)
+		for (const auto &flag : enumTable)
 		{
 			if ((flags & flag.value()) == flag.value() && static_cast<enumInt_t>(flag.value()) != 0)
 				foundFlags.emplace_back(flag);
