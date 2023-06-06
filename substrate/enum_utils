@@ -39,57 +39,55 @@ namespace substrate
 	/* Extract a collection of flags set in a field */
 	/* This is kind of expensive run-time wise, being at leas O(n+1) but *shrug* */
 	template<typename T, typename A> enable_if_t<std::is_enum<T>::value, std::vector<T>>
-		extract_flags(T flags, A& enum_table)
+		extract_flags(T flags, const A &enumTable)
 	{
-		std::vector<T> _found_flags;
-		using ut = typename substrate::underlying_type_t<T>;
-		for (auto flag : enum_table)
+		std::vector<T> foundFlags{};
+		using enumInt_t = typename substrate::underlying_type_t<T>;
+		for (auto flag : enumTable)
 		{
-			if ((flags & flag.value()) == flag.value() && static_cast<ut>(flag.value()) != 0)
-				_found_flags.emplace_back(flag.value());
+			if ((flags & flag.value()) == flag.value() && static_cast<enumInt_t>(flag.value()) != 0)
+				foundFlags.emplace_back(flag.value());
 		}
 
-		if (_found_flags.empty())
-			_found_flags.emplace_back(T{});
-
-		return _found_flags;
+		if (foundFlags.empty())
+			foundFlags.emplace_back(T{});
+		return foundFlags;
 	}
 
 	template<typename T, typename A> enable_if_t<std::is_enum<T>::value, std::vector<enumPair_t<T>>>
-		extract_flag_pairs(T flags, A& enum_table)
+		extract_flag_pairs(T flags, const A &enumTable)
 	{
-		std::vector<enumPair_t<T>> _found_flags;
-		using ut = typename substrate::underlying_type_t<T>;
-		for (auto flag : enum_table)
+		std::vector<enumPair_t<T>> foundFlags{};
+		using enumInt_t = typename substrate::underlying_type_t<T>;
+		for (auto flag : enumTable)
 		{
-			if((flags & flag.value()) == flag.value() && static_cast<ut>(flag.value()) != 0)
-				_found_flags.emplace_back(flag);
+			if ((flags & flag.value()) == flag.value() && static_cast<enumInt_t>(flag.value()) != 0)
+				foundFlags.emplace_back(flag);
 		}
 
-		if(_found_flags.size() == 0)
-			_found_flags.emplace_back(enum_table[0]);
-
-		return _found_flags;
+		if (foundFlags.size() == 0)
+			foundFlags.emplace_back(enumTable[0]);
+		return foundFlags;
 	}
 
-	template<class map_t, class value_t> std::string enum_name(map_t m, value_t v) noexcept
+	template<class map_t, class value_t> std::string enum_name(map_t map, value_t value) noexcept
 	{
-		auto pos = std::find_if(std::begin(m), std::end(m),
-			[&v](const typename map_t::value_type& t)
-				{ return (t.value() == v); }
+		auto pos = std::find_if(std::begin(map), std::end(map),
+			[&](const typename map_t::value_type &entry)
+				{ return (entry.value() == value); }
 		);
-		return pos != std::end(m) ? pos->name() : "UNKNOWN";
+		return pos != std::end(map) ? pos->name() : "UNKNOWN";
 	}
 
 	template<class map_t>
-	typename map_t::value_type::value_type enum_value(map_t m, const std::string& n) noexcept
+	typename map_t::value_type::value_type enum_value(map_t map, const std::string &name) noexcept
 	{
-		auto pos = std::find_if(std::begin(m), std::end(m),
-			[&n](const typename map_t::value_type& t)
-				{ return (t.name() == n); }
+		auto pos = std::find_if(std::begin(map), std::end(map),
+			[&](const typename map_t::value_type &entry)
+				{ return (entry.name() == name); }
 		);
 
-		return pos != std::end(m) ? pos->value() :
+		return pos != std::end(map) ? pos->value() :
 			static_cast<typename map_t::value_type::value_type>(0);
 	}
 }
