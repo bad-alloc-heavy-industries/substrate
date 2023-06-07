@@ -39,11 +39,12 @@ namespace substrate
 	};
 
 	/* Extract a collection of flags set in a field */
-	/* This is kind of expensive run-time wise, being at leas O(n+1) but *shrug* */
+	/* This is kind of expensive run-time wise, being at least O(n+1) but *shrug* */
 	template<typename T, typename A> enable_if_t<std::is_enum<T>::value, std::vector<T>>
 		extract_flags(T flags, const A &enumTable)
 	{
 		std::vector<T> foundFlags{};
+		foundFlags.reserve(substrate::size(enumTable));
 		using enumInt_t = typename substrate::underlying_type_t<T>;
 		for (const auto &flag : enumTable)
 		{
@@ -53,6 +54,7 @@ namespace substrate
 
 		if (foundFlags.empty())
 			foundFlags.emplace_back(T{});
+		foundFlags.shrink_to_fit();
 		return foundFlags;
 	}
 
@@ -60,6 +62,7 @@ namespace substrate
 		extract_flag_pairs(T flags, const A &enumTable)
 	{
 		std::vector<enumPair_t<T>> foundFlags{};
+		foundFlags.reserve(substrate::size(enumTable));
 		using enumInt_t = typename substrate::underlying_type_t<T>;
 		for (const auto &flag : enumTable)
 		{
@@ -69,6 +72,7 @@ namespace substrate
 
 		if (foundFlags.size() == 0)
 			foundFlags.emplace_back(enumTable[0]);
+		foundFlags.shrink_to_fit();
 		return foundFlags;
 	}
 
