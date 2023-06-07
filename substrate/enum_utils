@@ -76,7 +76,7 @@ namespace substrate
 		return foundFlags;
 	}
 
-	template<class map_t, class value_t> std::string
+	template<typename map_t, typename value_t> std::string
 		enum_name(const map_t &map, const value_t &value) noexcept
 	{
 		const auto item
@@ -88,7 +88,7 @@ namespace substrate
 		return item != std::end(map) ? item->name() : "UNKNOWN";
 	}
 
-	template<class map_t> typename map_t::value_type::value_type
+	template<typename map_t> typename map_t::value_type::value_type
 		enum_value(const map_t &map, const std::string &name) noexcept
 	{
 		const auto item
