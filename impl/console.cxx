@@ -63,8 +63,11 @@ namespace substrate
 		if (value)
 		{
 #ifdef _WINDOWS
-			const auto consoleMode{setmode(fd, _O_U8TEXT)};
 			const auto valueLen{charTraits::length(value)};
+			// If there's nothing to convert (0-length string), fast-exit doing nothing.
+			if (!valueLen)
+				return;
+			const auto consoleMode{setmode(fd, _O_U8TEXT)};
 			const auto stringLen{static_cast<size_t>(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS,
 				value, int(valueLen), nullptr, 0))};
 			auto string{make_unique_nothrow<wchar_t []>(stringLen)};
