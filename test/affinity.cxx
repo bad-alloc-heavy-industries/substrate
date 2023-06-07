@@ -158,16 +158,19 @@ TEST_CASE("pinning", "[affinity_t]")
 #if defined(_POSIX_THREADS) && !defined(__WINPTHREADS_VERSION)
 	for (const auto &processor : *affinity)
 	{
-		const auto result = std::async(std::launch::async,
-			[&](const uint32_t currentProcessor) noexcept -> int32_t
-			{
-				try
-					{ affinity->pinThreadTo(currentProcessor); }
-				catch (const std::out_of_range &)
-					{ return INT32_MAX; }
-				return sched_getcpu();
-			}, processor
-		).get();
+		const auto result
+		{
+			std::async(std::launch::async,
+				[&](const uint32_t currentProcessor) noexcept -> int32_t
+				{
+					try
+						{ affinity->pinThreadTo(currentProcessor); }
+					catch (const std::out_of_range &)
+						{ return INT32_MAX; }
+					return sched_getcpu();
+				}, processor
+			).get()
+		};
 		REQUIRE(result != -1);
 		REQUIRE(result == static_cast<int32_t>(processor));
 	}
@@ -175,15 +178,18 @@ TEST_CASE("pinning", "[affinity_t]")
 	uint32_t count{0};
 	for (const auto &processor : *affinity)
 	{
-		const auto result = std::async(std::launch::async,
-			[&](const uint32_t currentProcessor) -> GROUP_AFFINITY
-			{
-				affinity->pinThreadTo(currentProcessor);
-				GROUP_AFFINITY res{};
-				REQUIRE(GetThreadGroupAffinity(GetCurrentThread(), &res));
-				return res;
-			}, count++
-		).get();
+		const auto result
+		{
+			std::async(std::launch::async,
+				[&](const uint32_t currentProcessor) -> GROUP_AFFINITY
+				{
+					affinity->pinThreadTo(currentProcessor);
+					GROUP_AFFINITY res{};
+					REQUIRE(GetThreadGroupAffinity(GetCurrentThread(), &res));
+					return res;
+				}, count++
+			).get()
+		};
 		REQUIRE(result.Mask == UINT64_C(1) << processor.second);
 		REQUIRE(result.Group == processor.first);
 	}
@@ -344,7 +350,7 @@ TEST_CASE("pin second core", "[affinity_t]")
 			return UINT32_MAX;
 		}()
 	};
-	const std::initializer_list<uint32_t> processorList {uint32_t(processor)};
+	const std::initializer_list<uint32_t> processorList{uint32_t(processor)};
 
 	REQUIRE(processor != UINT32_MAX);
 	auto affinity{substrate::make_unique_nothrow<substrate::affinity_t>(0U, processorList)};
