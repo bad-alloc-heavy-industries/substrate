@@ -76,7 +76,8 @@ namespace substrate
 		return foundFlags;
 	}
 
-	template<class map_t, class value_t> std::string enum_name(map_t map, value_t value) noexcept
+	template<class map_t, class value_t> std::string
+		enum_name(const map_t &map, const value_t &value) noexcept
 	{
 		auto pos = std::find_if(std::begin(map), std::end(map),
 			[&](const typename map_t::value_type &entry)
@@ -86,7 +87,7 @@ namespace substrate
 	}
 
 	template<class map_t> typename map_t::value_type::value_type
-		enum_value(map_t map, const std::string &name) noexcept
+		enum_value(const map_t &map, const std::string &name) noexcept
 	{
 		auto pos = std::find_if(std::begin(map), std::end(map),
 			[&](const typename map_t::value_type &entry)
