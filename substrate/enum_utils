@@ -79,22 +79,26 @@ namespace substrate
 	template<class map_t, class value_t> std::string
 		enum_name(const map_t &map, const value_t &value) noexcept
 	{
-		auto pos = std::find_if(std::begin(map), std::end(map),
-			[&](const typename map_t::value_type &entry)
-				{ return (entry.value() == value); }
-		);
-		return pos != std::end(map) ? pos->name() : "UNKNOWN";
+		const auto item
+		{
+			std::find_if(std::begin(map), std::end(map),
+				[&](const typename map_t::value_type &entry)
+					{ return (entry.value() == value); })
+		};
+		return item != std::end(map) ? item->name() : "UNKNOWN";
 	}
 
 	template<class map_t> typename map_t::value_type::value_type
 		enum_value(const map_t &map, const std::string &name) noexcept
 	{
-		auto pos = std::find_if(std::begin(map), std::end(map),
-			[&](const typename map_t::value_type &entry)
-				{ return (entry.name() == name); }
-		);
+		const auto item
+		{
+			std::find_if(std::begin(map), std::end(map),
+				[&](const typename map_t::value_type &entry)
+					{ return (entry.name() == name); })
+		};
 
-		return pos != std::end(map) ? pos->value() :
+		return item != std::end(map) ? item->value() :
 			static_cast<typename map_t::value_type::value_type>(0);
 	}
 }
