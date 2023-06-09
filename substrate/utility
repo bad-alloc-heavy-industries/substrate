@@ -541,7 +541,7 @@ namespace substrate
 	template<typename T> struct is_pod : public std::integral_constant<bool,
 		std::is_trivial<T>::value && std::is_standard_layout<T>::value> { };
 
-#if defined(_MSC_VER) || !defined(__GNU__) || defined(__GXX_RTTI)
+#if defined(_MSC_VER) || !defined(__GNUC__) || defined(__GXX_RTTI)
 	/* typename decoding */
 	SUBSTRATE_NOWARN_UNUSED(SUBSTRATE_CLS_API std::string decode_typename(const char *mangledName));
 
