@@ -154,10 +154,13 @@ variables = {
 	'compile_args': ' '.join(variablesCompileArgs),
 }
 
+nativeDeps = deps
 if targetLibraryBuildable
 	variables += {
 		'link_args': libSubstrate.full_path(),
 	}
+else
+	deps = []
 endif
 
 substrate_dep = declare_dependency(
@@ -180,7 +183,7 @@ endif
 # When we're in a cross-build environment, also declare the native version of the library
 if meson.is_cross_build()
 	substrateNativeArgs = ' '.join(['-I@0@'.format(meson.current_source_dir())] + libSubstrateArgs)
-	substrate_native_dep = declare_dependency(
+	substrateNative_dep = declare_dependency(
 		dependencies: deps,
 		include_directories: include_directories('.'),
 		compile_args: substrateNativeArgs,
