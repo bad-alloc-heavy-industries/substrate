@@ -120,15 +120,14 @@ endif
 
 cxxVersion = cxx.get_define('__cplusplus').substring(0, -1)
 
-subdir('substrate')
-if get_option('build_library')
-	subdir('impl')
-else
+if not get_option('build_library')
 	targetLibraryBuildable = false
-	deps = []
 	libSubstrate = []
 	libSubstrateArgs = []
 endif
+
+subdir('substrate')
+subdir('impl')
 
 if get_option('gen_docs')
 	message('Building documentation')
