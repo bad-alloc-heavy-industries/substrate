@@ -335,6 +335,12 @@ jobs:
           - 11
           - 14
           - 17
+        build_opts:
+          - ''
+        include:
+          - os: macos-latest
+            cpp_std: 17
+            build_opts: '-Db_lto=true -Ddefault_library=static'
       fail-fast: false
     steps:
       - name: Runtime environment
@@ -363,7 +369,7 @@ jobs:
           meson --version
           ninja --version
       - name: Configure
-        run: meson setup build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=c++${{ matrix.cpp_std }} $BUILD_OPTS
+        run: meson setup build --prefix=$HOME/.local -Db_coverage=true -Dcpp_std=c++${{ matrix.cpp_std }} ${{ matrix.build_opts }}
       - name: Build
         run: meson compile -C build
       - name: Test
