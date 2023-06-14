@@ -32,6 +32,9 @@ namespace substrate
 			SUBSTRATE_NO_DISCARD(U *operator ->() noexcept) { return &_obj; }
 			SUBSTRATE_NO_DISCARD(U &operator *() noexcept) { return _obj; }
 		};
+
+		using lockro_t = lockResult_t<const T, std::shared_lock>;
+		using lockrw_t = lockResult_t<T, std::unique_lock>;
 		std::shared_mutex _mutex{};
 		T _obj;
 
@@ -40,11 +43,11 @@ namespace substrate
 		constexpr rwlock_t(args_t &&...args) noexcept :
 			_obj{std::forward<args_t>(args)...} { }
 
-		SUBSTRATE_NO_DISCARD(lockResult_t<const T, std::shared_lock> read() noexcept)
+		SUBSTRATE_NO_DISCARD(lockro_t read() noexcept)
 		{
 			return {_mutex, _obj};
 		}
-		SUBSTRATE_NO_DISCARD(lockResult_t<T, std::unique_lock> write() noexcept)
+		SUBSTRATE_NO_DISCARD(lockrw_t write() noexcept)
 		{
 			return {_mutex, _obj};
 		}
