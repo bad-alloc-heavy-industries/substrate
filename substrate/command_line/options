@@ -310,6 +310,7 @@ namespace substrate::commandLine
 			constexpr auto end() const noexcept { return optionsIterator_t{storage, length, indexFn}; }
 
 			[[nodiscard]] size_t displayPadding() const noexcept;
+			void displayHelp() const noexcept;
 		};
 	}
 
@@ -333,6 +334,7 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
 		[[nodiscard]] size_t displayPadding() const noexcept { return _options.displayPadding(); }
+		void displayHelp() const noexcept { _options.displayHelp(); }
 	};
 
 	namespace internal

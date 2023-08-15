@@ -219,6 +219,24 @@ namespace substrate::commandLine
 				}
 			);
 		}
+
+		void optionsHolder_t::displayHelp() const noexcept
+		{
+			// Figure out how much padding is needed to make everything neat
+			const auto padding{displayPadding() + 1U};
+			std::vector<optionSet_t> optionSets{};
+
+			// Now display the non-alternation options and collect option sets
+			console.writeln("Options:"sv);
+			for (const auto &option : *this)
+			{
+				std::visit(match_t
+				{
+					[=](const option_t &value) { value.displayHelp(padding); },
+					[&](const optionSet_t &value) { optionSets.push_back(value); },
+				}, option);
+			}
+		}
 	} // namespace internal
 } // namespace substrate::commandLine
 
