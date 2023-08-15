@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <filesystem>
 #include <substrate/command_line/options>
-#include <substrate/conversions>
 #include <substrate/console>
+#include <substrate/conversions>
+#include <substrate/index_sequence>
 
 using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
@@ -183,8 +184,13 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
-	void option_t::displayHelp() const noexcept
-		{ console.writeln('\t', displayName(), ' ', _help); }
+	void option_t::displayHelp(const size_t padding) const noexcept
+	{
+		console.writeln('\t', displayName(), nullptr);
+		for ([[maybe_unused]] const auto _ : substrate::indexSequence_t{displayLength(), padding})
+			console.writeln(' ', nullptr);
+		console.writeln(' ', _help);
+	}
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
