@@ -139,6 +139,20 @@ namespace substrate::commandLine
 		);
 	}
 
+	void optionSet_t::displayHelp(const size_t padding) const noexcept
+	{
+		console.writeln();
+		// XXX: Need to capitalise the first letter.
+		console.writeln(metaName(), "s:"sv);
+		for (const auto &alternation : _alternations)
+		{
+			console.writeln('\t', alternation.displayName(), nullptr);
+			for ([[maybe_unused]] const auto _ : substrate::indexSequence_t{alternation.displayLength(), padding})
+				console.writeln(' ', nullptr);
+			console.writeln(' ', alternation.helpText());
+		}
+	}
+
 	// Implementation of the innards of optionSet_t as otherwise we get compile errors
 	const optionAlternation_t *optionSet_t::begin() const noexcept
 		{ return _alternations.begin(); }

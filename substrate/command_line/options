@@ -137,7 +137,6 @@ namespace substrate::commandLine
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] std::optional<std::any> parseValue(const std::string_view &value) const noexcept;
-		void displayHelp(size_t padding = 0U) const noexcept;
 
 		[[nodiscard]] constexpr bool takesParameter() const noexcept
 			{ return _flags.includes(optionFlags_t::takesParameter); }
@@ -151,6 +150,7 @@ namespace substrate::commandLine
 		[[nodiscard]] std::string_view metaName() const noexcept;
 		[[nodiscard]] std::string displayName() const noexcept;
 		[[nodiscard]] size_t displayLength() const noexcept;
+		void displayHelp(size_t padding = 0U) const noexcept;
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 
 		[[nodiscard]] constexpr bool operator <(const option_t &other) const noexcept
@@ -202,6 +202,7 @@ namespace substrate::commandLine
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] size_t displayPadding() const noexcept;
+		void displayHelp(size_t padding = 0U) const noexcept;
 
 		[[nodiscard]] const optionAlternation_t *begin() const noexcept;
 		[[nodiscard]] const optionAlternation_t *end() const noexcept;
