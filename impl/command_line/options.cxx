@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <filesystem>
+#include <numeric>
 #include <substrate/command_line/options>
 #include <substrate/console>
 #include <substrate/conversions>
@@ -127,6 +128,15 @@ namespace substrate::commandLine
 				return std::ref(alternation);
 		}
 		return std::nullopt;
+	}
+
+	// This calculates how much padding is needed for these options to get a consistent padding
+	[[nodiscard]] size_t optionSet_t::displayPadding() const noexcept
+	{
+		return std::accumulate(begin(), end(), size_t{},
+			[](const size_t padding, const optionAlternation_t &alternation) noexcept
+				{ return std::max(padding, alternation.displayLength()); }
+		);
 	}
 
 	// Implementation of the innards of optionSet_t as otherwise we get compile errors

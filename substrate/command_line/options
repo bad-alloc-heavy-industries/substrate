@@ -201,6 +201,8 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto &metaName() const noexcept { return _metaName; }
 		[[nodiscard]] std::optional<std::reference_wrapper<const optionAlternation_t>>
 			matches(const std::string_view &argument) const noexcept;
+		[[nodiscard]] size_t displayPadding() const noexcept;
+
 		[[nodiscard]] const optionAlternation_t *begin() const noexcept;
 		[[nodiscard]] const optionAlternation_t *end() const noexcept;
 
