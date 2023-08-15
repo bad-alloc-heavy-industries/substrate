@@ -237,7 +237,7 @@ namespace substrate::commandLine
 		void optionsHolder_t::displayHelp() const noexcept
 		{
 			// Figure out how much padding is needed to make everything neat
-			const auto padding{displayPadding() + 1U};
+			const auto padding{displayPadding()};
 			std::vector<optionSet_t> optionSets{};
 
 			// Now display the non-alternation options and collect option sets
@@ -250,6 +250,10 @@ namespace substrate::commandLine
 					[&](const optionSet_t &value) { optionSets.push_back(value); },
 				}, option);
 			}
+
+			// Now go through each option alternation set and display those
+			for (const auto &optionSet : optionSets)
+				optionSet.displayHelp(padding);
 		}
 	} // namespace internal
 } // namespace substrate::commandLine
