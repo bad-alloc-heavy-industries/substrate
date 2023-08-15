@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <filesystem>
+#include <locale>
 #include <numeric>
 #include <substrate/command_line/options>
 #include <substrate/console>
@@ -142,8 +143,8 @@ namespace substrate::commandLine
 	void optionSet_t::displayHelp(const size_t padding) const noexcept
 	{
 		console.writeln();
-		// XXX: Need to capitalise the first letter.
-		console.writeln(metaName(), "s:"sv);
+		const auto &metaName{_metaName.substr(1)};
+		console.writeln(std::toupper(_metaName[0], std::locale::classic()), metaName, "s:"sv);
 		for (const auto &alternation : _alternations)
 		{
 			console.writeln('\t', alternation.displayName(), nullptr);
