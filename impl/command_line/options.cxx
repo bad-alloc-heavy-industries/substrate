@@ -171,6 +171,18 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
+	[[nodiscard]] size_t option_t::displayLength() const noexcept
+	{
+		return std::visit(match_t
+		{
+			[](const std::string_view &option) { return option.length(); },
+			[](const optionFlagPair_t &option)
+				// Add the lengths of the two flags together, and the extra ", " that is inserted by displayName()
+				{ return option._shortFlag.length() + option._longFlag.length() + 2U; },
+			[](const optionValue_t &option) { return option.metaName().length(); },
+		}, _option);
+	}
+
 	void option_t::displayHelp() const noexcept
 		{ console.writeln('\t', displayName(), ' ', _help); }
 } // namespace substrate::commandLine
