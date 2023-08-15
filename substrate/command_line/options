@@ -384,6 +384,10 @@ namespace substrate::commandLine
 
 		[[nodiscard]] bool matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] constexpr auto &suboptions() const noexcept { return _suboptions; }
+
+		[[nodiscard]] constexpr auto &displayName() const noexcept { return _value; }
+		[[nodiscard]] constexpr auto displayLength() const noexcept { return _value.length(); }
+		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 	};
 } // namespace substrate::commandLine
 
