@@ -201,6 +201,25 @@ namespace substrate::commandLine
 			console.writeln(' ', nullptr);
 		console.writeln(' ', _help);
 	}
+
+	namespace internal
+	{
+		// This calculates how much padding is needed for these options to get a consistent padding
+		[[nodiscard]] size_t optionsHolder_t::displayPadding() const noexcept
+		{
+			return std::accumulate(begin(), end(), size_t{},
+				[](const size_t padding, const optionsItem_t &option) noexcept
+				{
+					return std::max(padding, std::visit(match_t
+						{
+							[](const option_t &value) { return value.displayLength(); },
+							[](const optionSet_t &value) { return value.displayPadding(); },
+						}, option)
+					);
+				}
+			);
+		}
+	} // namespace internal
 } // namespace substrate::commandLine
 
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

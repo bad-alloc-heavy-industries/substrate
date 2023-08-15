@@ -308,6 +308,8 @@ namespace substrate::commandLine
 			constexpr auto empty() const noexcept { return storage == nullptr; }
 			constexpr auto begin() const noexcept { return optionsIterator_t{storage, 0U, indexFn}; }
 			constexpr auto end() const noexcept { return optionsIterator_t{storage, length, indexFn}; }
+
+			[[nodiscard]] size_t displayPadding() const noexcept;
 		};
 	}
 
@@ -329,6 +331,8 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto empty() const noexcept { return _options.empty(); }
 		[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
+
+		[[nodiscard]] size_t displayPadding() const noexcept { return _options.displayPadding(); }
 	};
 
 	namespace internal
