@@ -244,6 +244,8 @@ namespace substrate::commandLine
 			constexpr optionsStorage_t &operator =(const optionsStorage_t &) noexcept = default;
 			constexpr optionsItem_t operator [](const size_t index) const { return optionAt<0U>(index, _options); }
 			constexpr auto &options() const noexcept { return _options; }
+
+			void displayHelp() const noexcept;
 		};
 
 		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
@@ -313,6 +315,13 @@ namespace substrate::commandLine
 			[[nodiscard]] size_t displayPadding() const noexcept;
 			void displayHelp() const noexcept;
 		};
+
+		template<typename... options_t>
+			void optionsStorage_t<options_t...>::displayHelp() const noexcept
+		{
+			optionsHolder_t holder{*this};
+			holder.displayHelp();
+		}
 	}
 
 	// The base container for a program's command line options
