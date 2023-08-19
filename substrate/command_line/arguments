@@ -48,7 +48,7 @@ namespace substrate::commandLine
 		storage_t _arguments;
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options,
-			optionsVisited_t &optionsVisited);
+			optionsVisited_t &optionsVisited) noexcept;
 
 	public:
 		arguments_t() noexcept;
