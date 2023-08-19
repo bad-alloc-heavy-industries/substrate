@@ -52,6 +52,11 @@ namespace substrate::commandLine
 
 	public:
 		arguments_t() noexcept;
+		arguments_t(const arguments_t &arguments) noexcept;
+		arguments_t(arguments_t &&arguments) noexcept;
+		~arguments_t() noexcept;
+		arguments_t &operator =(const arguments_t &arguments) noexcept;
+		arguments_t &operator =(arguments_t &&arguments) noexcept;
 
 		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
 		[[nodiscard]] bool add(item_t argument) noexcept;
