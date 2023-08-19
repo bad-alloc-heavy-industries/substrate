@@ -76,7 +76,8 @@ namespace substrate::commandLine
 	// This implements a recursive descent parser that efficiently matches the current token from argv against
 	// the set of allowed arguments at the current parsing level, and returns an AST of the results for
 	// later easier exploration by the caller
-	std::optional<arguments_t> parseArguments(size_t argCount, const char *const *argList, const options_t &options)
+	std::optional<arguments_t>
+		parseArguments(size_t argCount, const char *const *argList, const options_t &options) noexcept
 	{
 		constexpr static auto intBits{std::numeric_limits<int>::digits - 1U};
 		// Check if we even got any arguments or if argv was negative, or if the options input is malformed in any way
