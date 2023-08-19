@@ -199,14 +199,14 @@ namespace substrate::commandLine
 	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
 		const std::string_view &argument) noexcept;
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
-		const std::string_view &argument);
-	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited);
+		const std::string_view &argument) noexcept;
+	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited) noexcept;
 	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
 		set_t &optionsVisited, const std::string_view &argument, const optionMatch_t &match) noexcept;
-	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument);
+	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument) noexcept;
 
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options,
-		optionsVisited_t &optionsVisited)
+		optionsVisited_t &optionsVisited) noexcept
 	{
 		// Start by checking we're in a suitable state
 		const auto &token{lexer.token()};
@@ -307,7 +307,7 @@ namespace substrate::commandLine
 	}
 
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
-		const std::string_view &argument)
+		const std::string_view &argument) noexcept
 	{
 		// Check if we're parsing an alternation from a set
 		const auto match{option.matches(argument)};
@@ -326,7 +326,7 @@ namespace substrate::commandLine
 		return choice_t{option.metaName(), argument, std::move(subarguments)};
 	}
 
-	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited)
+	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited) noexcept
 	{
 		// Look for the option in the set
 		const auto &count{optionsVisited.find(option)};
@@ -364,7 +364,7 @@ namespace substrate::commandLine
 		}, match);
 	}
 
-	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument)
+	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument) noexcept
 	{
 		const auto &token{lexer.next()};
 		// If the argument stands alone, display it and fast exit
