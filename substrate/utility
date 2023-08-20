@@ -651,7 +651,7 @@ namespace substrate
 		static const bool value = std::is_same<decltype(_ctor<T>(nullptr)), std::true_type>::value;
 	};
 
-#if ___cplusplus >= 201402L
+#if __cplusplus >= 201402L
 	template<typename T>
 	constexpr bool has_nullable_ctor_v = has_nullable_ctor<T>::value;
 #endif
@@ -737,7 +737,7 @@ namespace substrate
 	template<typename C>
 		[[nodiscard]] inline constexpr auto ssize(const C &c) noexcept -> decltype(std::ssize(c))
 		{ return std::ssize(c); }
-#elif _cplusplus >= 201402L
+#elif __cplusplus >= 201402L
 	template<typename C>
 		SUBSTRATE_NO_DISCARD(inline constexpr auto ssize(const C &c) noexcept -> std::common_type_t<std::ptrdiff_t,
 						  std::make_signed_t<decltype(c.size())>>)
