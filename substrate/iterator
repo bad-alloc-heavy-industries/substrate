@@ -78,7 +78,7 @@ namespace substrate
 			return *this;
 		}
 
-		const iterator_t base() const noexcept { return current; }
+		iterator_t base() const noexcept { return current; }
 	};
 
 	template<typename iteratorL_t, typename iteratorR_t, typename container_t> inline bool operator ==(
