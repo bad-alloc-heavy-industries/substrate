@@ -60,7 +60,7 @@ namespace substrate
 		~fd_t() noexcept
 		{
 			if (fd != -1)
-				close(fd);
+				internal::fdclose(fd);
 		}
 
 		fd_t &operator =(fd_t &&desc) noexcept
@@ -100,7 +100,7 @@ namespace substrate
 			{ return internal::fdwrite(fd, bufferPtr, bufferLen); }
 		SUBSTRATE_NO_DISCARD(off_t tell() const noexcept final) { return internal::fdtell(fd); }
 
-		SUBSTRATE_NO_DISCARD(fd_t dup() const noexcept) { return ::dup(fd); }
+		SUBSTRATE_NO_DISCARD(fd_t dup() const noexcept) { return internal::fddup(fd); }
 
 		SUBSTRATE_NO_DISCARD(internal::stat_t stat() const noexcept)
 		{

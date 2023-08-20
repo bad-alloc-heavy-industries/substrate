@@ -53,6 +53,11 @@ namespace substrate
 			{ return lseek(fd, 0, SEEK_CUR); }
 		inline int32_t fdtruncate(const int32_t fd, const off_t size) noexcept
 			{ return ftruncate(fd, size); }
+
+		inline int32_t fdclose(const int32_t fd) noexcept
+			{ return close(fd); }
+		inline int32_t fddup(const int32_t fd) noexcept
+			{ return dup(fd); }
 #else
 		inline int32_t fdopen(const char *const fileName, const int flags, const mode_t mode) noexcept
 		{
@@ -79,6 +84,11 @@ namespace substrate
 			{ return _telli64(fd); }
 		inline int32_t fdtruncate(const int32_t fd, const off_t size) noexcept
 			{ return _chsize_s(fd, size); }
+
+		inline int32_t fdclose(const int32_t fd) noexcept
+			{ return _close(fd); }
+		inline int32_t fddup(const int32_t fd) noexcept
+			{ return _dup(fd); }
 #endif
 	} // namespace substrate::internal
 } // namespace substrate
