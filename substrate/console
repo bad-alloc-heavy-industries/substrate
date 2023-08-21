@@ -262,8 +262,13 @@ namespace substrate
 			constexpr asHex_t(const T value) noexcept : maxDigits{sizeof(T) * 2},
 			msbShift{uint8_t(4U * (maxDigits - 1U))}, _value(value) { }
 
-		SUBSTRATE_NOINLINE
-		void operator ()(const consoleStream_t &stream) const noexcept final
+		constexpr asHex_t(const asHex_t &) noexcept = default;
+		constexpr asHex_t(asHex_t &&) noexcept = default;
+		~asHex_t() noexcept = default;
+		asHex_t &operator =(const asHex_t &) noexcept = default;
+		asHex_t &operator =(asHex_t &&) noexcept = default;
+
+		SUBSTRATE_NOINLINE void operator ()(const consoleStream_t &stream) const noexcept final
 		{
 			uintmax_t value{_value};
 			// If we've been asked to pad by more than the maximum possible length of the number
