@@ -225,6 +225,11 @@ namespace substrate
 
 	public:
 		constexpr asInt_t(const int_t value) noexcept : value_{value} { }
+		constexpr asInt_t(const asInt_t &) noexcept = default;
+		constexpr asInt_t(asInt_t &&) noexcept = default;
+		~asInt_t() noexcept = default;
+		asInt_t &operator =(const asInt_t &) noexcept = default;
+		asInt_t &operator =(asInt_t &&) noexcept = default;
 		void operator()(const consoleStream_t &stream) const noexcept final
 			{ printTo<int_t>(stream); }
 	};
