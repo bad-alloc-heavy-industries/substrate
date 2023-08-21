@@ -34,14 +34,15 @@ namespace substrate
 
 	struct SUBSTRATE_CLS_API printable_t
 	{
-		printable_t() = default;
+		constexpr printable_t() = default;
 		virtual void operator()(const consoleStream_t &) const noexcept = 0;
 		virtual ~printable_t() noexcept = default;
 
-		printable_t(const printable_t &) = delete;
-		printable_t(printable_t &&) = delete;
-		printable_t &operator =(const printable_t &) = delete;
-		printable_t &operator =(printable_t &&) = delete;
+	protected:
+		constexpr printable_t(const printable_t &) = default;
+		constexpr printable_t(printable_t &&) = default;
+		printable_t &operator =(const printable_t &) = default;
+		printable_t &operator =(printable_t &&) = default;
 	};
 
 	struct SUBSTRATE_CLS_API consoleStream_t final
@@ -227,7 +228,7 @@ namespace substrate
 		constexpr asInt_t(const int_t value) noexcept : value_{value} { }
 		constexpr asInt_t(const asInt_t &) noexcept = default;
 		constexpr asInt_t(asInt_t &&) noexcept = default;
-		~asInt_t() noexcept = default;
+		~asInt_t() noexcept final = default;
 		asInt_t &operator =(const asInt_t &) noexcept = default;
 		asInt_t &operator =(asInt_t &&) noexcept = default;
 		void operator()(const consoleStream_t &stream) const noexcept final
@@ -264,7 +265,7 @@ namespace substrate
 
 		constexpr asHex_t(const asHex_t &) noexcept = default;
 		constexpr asHex_t(asHex_t &&) noexcept = default;
-		~asHex_t() noexcept = default;
+		~asHex_t() noexcept final = default;
 		asHex_t &operator =(const asHex_t &) noexcept = default;
 		asHex_t &operator =(asHex_t &&) noexcept = default;
 
@@ -342,7 +343,7 @@ namespace substrate
 		constexpr asTime_t(const uint64_t _value) noexcept : value{_value} { }
 		constexpr asTime_t(const asTime_t &) noexcept = default;
 		constexpr asTime_t(asTime_t &&) noexcept = default;
-		~asTime_t() noexcept = default;
+		~asTime_t() noexcept final = default;
 		asTime_t &operator =(const asTime_t &) noexcept = default;
 		asTime_t &operator =(asTime_t &&) noexcept = default;
 
