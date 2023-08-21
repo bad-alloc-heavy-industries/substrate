@@ -330,6 +330,11 @@ namespace substrate
 
 	public:
 		constexpr asTime_t(const uint64_t _value) noexcept : value{_value} { }
+		constexpr asTime_t(const asTime_t &) noexcept = default;
+		constexpr asTime_t(asTime_t &&) noexcept = default;
+		~asTime_t() noexcept = default;
+		asTime_t &operator =(const asTime_t &) noexcept = default;
+		asTime_t &operator =(asTime_t &&) noexcept = default;
 
 		void operator ()(const consoleStream_t &stream) const noexcept final
 		{
