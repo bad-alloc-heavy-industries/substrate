@@ -62,7 +62,7 @@
 #elif defined(_WIN32)
 #	define SUBSTRATE_NOINLINE __declspec(noinline)
 #else
-#	define SUBSTRATE_NOINLINE 
+#	define SUBSTRATE_NOINLINE
 #endif
 
 #ifdef _MSC_VER
@@ -118,7 +118,8 @@
 #	define SUBSTRATE_DEDUCTION_GUIDE(...)
 #endif
 
-#if __cplusplus >= 201703L && defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L
+#if __cplusplus >= 201703L && (defined(HAS_FILESYSTEM_PATH) || \
+	(defined(__cpp_lib_filesystem) && __cpp_lib_filesystem >= 201703L))
 #	if !defined(__APPLE__)
 #		define SUBSTRATE_ALLOW_STD_FILESYSTEM_PATH 1
 #	else

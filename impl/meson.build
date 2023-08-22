@@ -5,6 +5,7 @@ libSubstrateSrcs = [
 ]
 
 deps = []
+libSubstrateArgs = []
 
 if target_machine.system() == 'windows'
 	deps += cxx.find_library('ws2_32', required: true)
@@ -81,6 +82,10 @@ if cxxVersion.version_compare('>=201703')
 		dependencies: libstdcppFS,
 	)
 
+	if stdFilesystemPath
+		libSubstrateArgs += ['-DHAVE_FILESYSTEM_PATH']
+	endif
+
 	initializerListTest = '''
 		#include <array>
 		#include <cstdint>
@@ -143,8 +148,6 @@ library_type = get_option('default_library')
 if library_type == 'both' and isWindows
   error('On Windows default_library must be "shared" or "static" but not "both"')
 endif
-
-libSubstrateArgs = []
 
 if library_type == 'static' and isWindows
 	libSubstrateArgs = ['-DSUBSTRATE_BUILD_STATIC']
