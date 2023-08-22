@@ -19,6 +19,7 @@
 
 #include <substrate/internal/defs>
 #include <substrate/utility>
+#include <substrate/promotion_helpers>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -192,7 +193,7 @@ namespace substrate
 	template<typename int_t> struct asInt_t final : public printable_t
 	{
 	private:
-		using uint_t = typename std::make_unsigned<int_t>::type;
+		using uint_t = promoted_type_t<make_unsigned_t<int_t>>;
 		int_t value_;
 
 		SUBSTRATE_NOINLINE uint_t format(const consoleStream_t &stream, const uint_t number) const noexcept
@@ -201,7 +202,8 @@ namespace substrate
 				stream.write(char(number + '0'));
 			else
 			{
-				const char value = char(char(number - format(stream, number / 10) * 10) + '0');
+				const auto digit{number - format(stream, number / 10U) * 10U};
+				const auto value{static_cast<char>(static_cast<char>(digit) + '0')};
 				stream.write(value);
 			}
 			return number;
@@ -218,10 +220,10 @@ namespace substrate
 			if (value_ < 0)
 			{
 				stream.write('-');
-				format(stream, uint_t(uint_t(~uint_t(value_)) + 1U));
+				format(stream, ~static_cast<uint_t>(value_) + 1U);
 			}
 			else
-				format(stream, uint_t(value_));
+				format(stream, static_cast<uint_t>(value_));
 		}
 
 	public:
