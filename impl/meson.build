@@ -208,42 +208,42 @@ endif
 
 # In a cross-build scenario, always build a version of the library for the host too.
 if meson.is_cross_build()
-	hostCXX = meson.get_compiler('cpp', native: true)
+	buildCXX = meson.get_compiler('cpp', native: true)
 
 	depsNative = []
 
 	if build_machine.system() == 'windows'
-		depsNative += hostCXX.find_library('ws2_32', required: true)
-		depsNative += hostCXX.find_library('dbghelp', required: true)
+		depsNative += buildCXX.find_library('ws2_32', required: true)
+		depsNative += buildCXX.find_library('dbghelp', required: true)
 	else
 		libSubstrateNativeSrcs += 'pty.cxx'
 	endif
 
 	depsNative += dependency('threads', native: true)
 
-	if hostCXX.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
+	if buildCXX.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 		# Re-check if we should or can enable the command line handling stuff by checking
 		# everything again against the host compiler
-		friendTypenameTemplate = hostCXX.compiles(
+		friendTypenameTemplate = buildCXX.compiles(
 			friendTypenameTest,
 			name: 'accepts friend declarations for auto functions (LLVM #31852, #33222)'
 		)
 
-		stdVariantGCC = hostCXX.compiles(
+		stdVariantGCC = buildCXX.compiles(
 			stdVariantGCCTest,
 			name: 'has a working std::variant implementation (GCC #80165)'
 		)
 
 		# GCC < 9.1 splits the filesystem module into a separate library
-		libstdcppFS = hostCXX.find_library('stdc++fs', required: false)
+		libstdcppFS = buildCXX.find_library('stdc++fs', required: false)
 
-		stdFilesystemPath = hostCXX.links(
+		stdFilesystemPath = buildCXX.links(
 			stdFilesystemPathTest,
 			name: 'has a working std::filesystem::path implementation (GCC >= 8 in macOS pre 10.15)',
 			dependencies: libstdcppFS,
 		)
 
-		initializerList = hostCXX.compiles(
+		initializerList = buildCXX.compiles(
 			initializerListTest,
 			name: 'accepts nullptr as part of CTAD with pointer type values (GCC #85977)'
 		)
