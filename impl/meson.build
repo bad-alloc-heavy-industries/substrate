@@ -3,9 +3,12 @@ libSubstrateSrcs = [
 	'socket.cxx', 'console.cxx', 'affinity.cxx', 'thread.cxx',
 	'utility.cxx', 'hash.cxx',
 ]
+subdir('command_line')
 
 deps = []
 libSubstrateArgs = []
+# Clone the sources list for the native build if it's required.
+libSubstrateNativeSrcs = [] + libSubstrateSrcs
 
 if target_machine.system() == 'windows'
 	deps += cxx.find_library('ws2_32', required: true)
@@ -128,8 +131,7 @@ if cxxVersion.version_compare('>=201703')
 	substrateCommandLineEnabled = friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
 	if substrateCommandLineEnabled
 		deps += [libstdcppFS]
-
-		subdir('command_line')
+		libSubstrateSrcs += libSubstrateCommandLineSrcs
 	endif
 else
 	substrateCommandLineEnabled = false
@@ -208,6 +210,17 @@ endif
 if meson.is_cross_build()
 	hostCXX = meson.get_compiler('cpp', native: true)
 
+	depsNative = []
+
+	if build_machine.system() == 'windows'
+		depsNative += hostCXX.find_library('ws2_32', required: true)
+		depsNative += hostCXX.find_library('dbghelp', required: true)
+	else
+		libSubstrateNativeSrcs += 'pty.cxx'
+	endif
+
+	depsNative += dependency('threads', native: true)
+
 	if hostCXX.get_define('__cplusplus').substring(0, -1).version_compare('>=201703')
 		# Re-check if we should or can enable the command line handling stuff by checking
 		# everything again against the host compiler
@@ -237,9 +250,8 @@ if meson.is_cross_build()
 
 		substrateNativeCommandLineEnabled = friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
 		if substrateNativeCommandLineEnabled
-			deps += [libstdcppFS]
-
-			subdir('command_line')
+			depsNative += [libstdcppFS]
+			libSubstrateNativeSrcs += libSubstrateCommandLineSrcs
 		endif
 	else
 		substrateNativeCommandLineEnabled = false
@@ -247,11 +259,11 @@ if meson.is_cross_build()
 
 	libSubstrateNative = library(
 		'substrateNative',
-		libSubstrateSrcs,
+		libSubstrateNativeSrcs,
 		c_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
 		cpp_args: ['-DSUBSTRATE_BUILD_INTERNAL'] + libSubstrateArgs,
 		include_directories: include_directories('..'),
-		dependencies: deps,
+		dependencies: depsNative,
 		gnu_symbol_visibility: 'inlineshidden',
 		implicit_include_directories: false,
 		pic: true,

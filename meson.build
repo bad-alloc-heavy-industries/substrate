@@ -188,7 +188,7 @@ endif
 if meson.is_cross_build()
 	substrateNativeArgs = ' '.join(['-I@0@'.format(meson.current_source_dir())] + libSubstrateArgs)
 	substrateNative_dep = declare_dependency(
-		dependencies: deps,
+		dependencies: depsNative,
 		include_directories: include_directories('.'),
 		compile_args: substrateNativeArgs,
 		link_with: libSubstrateNative,

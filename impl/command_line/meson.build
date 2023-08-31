@@ -1,4 +1,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
-libSubstrateSrcs += files(
+libSubstrateCommandLineSrcs = files(
 	'tokeniser.cxx', 'arguments.cxx', 'options.cxx'
 )
