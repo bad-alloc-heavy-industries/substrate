@@ -274,20 +274,40 @@ There are two ways to use this library: installation and embedding.
 ### Installing substrate
 
 To install substrate, it really is as simple as:
-```
-meson build
-ninja -C build install
+
+```bash
+meson setup build
+meson install -C build
 ```
 
-Though, if you want to install to a specific location such as /usr, then you might want to specify `--prefix=/usr` to meson.
+Though, if you want to install to a specific location such as /usr, then you might want to specify `--prefix=/usr` to meson during the `meson setup` step.
 
 ### Embedding substrate
 
 To embed substrate, add the project as a submodule to your project, then set up your build system
 to view the 'substrate' folder in this repo as part of your compiler's include path.
 
-Using meson this is acomplished by selecting this directory using `include_directories()`
-If substrate is in your repo under deps/substrate, that looks like:
-`substrate = include_directories('deps/substrate')`
+Using meson this is acomplished by declaring a subproject dependency and grab the dependency with:
 
-To be included in your root meson.build. You would then specify `substrate` as part of any library or executable include_directories specification.
+```meson
+substrate = subproject(
+  'substrate',
+).get_variable(
+  'substrate_dep'
+)
+```
+
+To be included in your root meson.build. You would then specify `substrate` as a dependency of any library or
+executable using the library.
+
+### Variables defined by the Meson dependency object
+
+The Meson dependency object defines the following variables you can access with `substrate.get_variable()`:
+
+* `compile_args`: Compiler arguments required to build against the library if building custom compiler invocations
+* `link_args`: Linker arguments required to build against the library if build custom linker invocations
+* `command_line_enabled`: Set to 'true' if the command line parser is enabled in a build, 'false' otherwise
+
+There are two dependency objects available from the Meson subproject. These are designed for cross-compilation, with
+the 'substrate_dep' providing a dependency for the target system, and `substrateNative_dep` providing a dependency
+for the build host system.
