@@ -155,6 +155,7 @@ variablesCompileArgs = [
 
 variables = {
 	'compile_args': ' '.join(variablesCompileArgs),
+	'command_line_enabled': substrateCommandLineEnabled.to_string(),
 }
 
 nativeDeps = deps
@@ -193,7 +194,8 @@ if meson.is_cross_build()
 		link_with: libSubstrateNative,
 		variables: {
 			'compile_args': substrateNativeArgs,
-			'link_args': libSubstrateNative.full_path()
+			'link_args': libSubstrateNative.full_path(),
+			'command_line_enabled': substrateNativeCommandLineEnabled.to_string(),
 		},
 		version: meson.project_version()
 	)

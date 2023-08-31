@@ -125,11 +125,14 @@ if cxxVersion.version_compare('>=201703')
 		name: 'accepts nullptr as part of CTAD with pointer type values (GCC #85977)'
 	)
 
-	if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
+	substrateCommandLineEnabled = friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
+	if substrateCommandLineEnabled
 		deps += [libstdcppFS]
 
 		subdir('command_line')
 	endif
+else
+	substrateCommandLineEnabled = false
 endif
 
 # This is by far not a complete set of conditions, however..
@@ -232,11 +235,14 @@ if meson.is_cross_build()
 			name: 'accepts nullptr as part of CTAD with pointer type values (GCC #85977)'
 		)
 
-		if friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
+		substrateNativeCommandLineEnabled = friendTypenameTemplate and stdVariantGCC and stdFilesystemPath and initializerList
+		if substrateNativeCommandLineEnabled
 			deps += [libstdcppFS]
 
 			subdir('command_line')
 		endif
+	else
+		substrateNativeCommandLineEnabled = false
 	endif
 
 	libSubstrateNative = library(
