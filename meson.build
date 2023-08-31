@@ -145,6 +145,9 @@ if not meson.is_subproject() and get_option('build_library')
 		libraries: [libSubstrate, deps],
 		version: meson.project_version(),
 		extra_cflags: libSubstrateArgs,
+		variables: [
+			'command_line_enabled=@0@'.format(substrateCommandLineEnabled),
+		],
 		description: 'A collection of headers containing useful tools and gadgets for building C++ programs'
 	)
 endif
