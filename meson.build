@@ -9,7 +9,7 @@ project(
 		'default_library=shared',
 		'b_ndebug=if-release',
 	],
-	version: '0.0.1',
+	version: '1.0.0',
 	license: 'BSD-3-Clause',
 	subproject_dir: 'deps'
 )
