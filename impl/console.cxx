@@ -72,6 +72,7 @@ namespace substrate
 			const auto consoleMode{_setmode(fd, _O_U8TEXT)};
 			const auto stringLen{static_cast<size_t>(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS,
 				value, int(valueLen), nullptr, 0))};
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			auto string{make_unique_nothrow<wchar_t []>(stringLen)};
 			if (!string)
 				return;
