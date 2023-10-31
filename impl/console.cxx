@@ -21,6 +21,7 @@ using charTraits = std::char_traits<char>;
 #ifdef _WIN32
 using wcharTraits = std::char_traits<wchar_t>;
 #endif
+using char16Traits = std::char_traits<char16_t>;
 
 static const std::string errorPrefix{"[ERR]"_s};
 static const std::string warningPrefix{"[WRN]"_s};
@@ -107,6 +108,28 @@ namespace substrate
 			write(nullString);
 	}
 #endif
+
+	void consoleStream_t::write(const char16_t *const value) const noexcept
+		{ write(value, value ? char16Traits::length(value) : 0U); }
+
+	void consoleStream_t::write(const char16_t *const value, const size_t valueLen) const noexcept
+	{
+		if (value)
+		{
+			// If there's nothing to convert (0-length string), fast-exit doing nothing.
+			if (!valueLen)
+				return;
+#ifdef _WIN32
+			const auto consoleMode{_setmode(fd, _O_U16TEXT)};
+			write(static_cast<const void *>(value), sizeof(char16_t) * valueLen);
+			_setmode(fd, consoleMode);
+#else
+			//
+#endif
+		}
+		else
+			write(nullString);
+	}
 
 	void consoleStream_t::write(const bool value) const noexcept
 		{ write(value ? trueString : falseString); }

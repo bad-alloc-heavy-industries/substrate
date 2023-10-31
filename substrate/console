@@ -71,6 +71,8 @@ namespace substrate
 		void write(const wchar_t *value) const noexcept;
 		void write(const wchar_t *value, size_t valueLen) const noexcept;
 #endif
+		void write(const char16_t *value) const noexcept;
+		void write(const char16_t *value, size_t valueLen) const noexcept;
 		void write(const char value) const noexcept { write(&value, 1U); }
 		template<typename T> enable_if_t<!std::is_array<T>::value>
 			write(const std::unique_ptr<T> &value) const noexcept
@@ -84,6 +86,8 @@ namespace substrate
 		void write(const std::wstring &value) const noexcept
 			{ write(value.data(), value.length()); }
 #endif
+		void write(const std::u16string &value) const noexcept
+			{ write(value.data(), value.length()); }
 #if __cplusplus >= 201703L
 		void write(const std::string_view &value) const noexcept
 			{ write(value.data(), value.length()); }
