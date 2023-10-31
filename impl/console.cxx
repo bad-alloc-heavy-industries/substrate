@@ -18,6 +18,9 @@
 
 using substrate::operator ""_s;
 using charTraits = std::char_traits<char>;
+#ifdef _WIN32
+using wcharTraits = std::char_traits<wchar_t>;
+#endif
 
 static const std::string errorPrefix{"[ERR]"_s};
 static const std::string warningPrefix{"[WRN]"_s};
@@ -83,6 +86,26 @@ namespace substrate
 		else
 			write(nullString);
 	}
+
+#ifdef _WIN32
+	void consoleStream_t::write(const wchar_t *const value) const noexcept
+		{ write(value, value ? wcharTraits::length(value) : 0U); }
+
+	void consoleStream_t::write(const wchar_t *const value, const size_t valueLen) const noexcept
+	{
+		if (value)
+		{
+			// If there's nothing to convert (0-length string), fast-exit doing nothing.
+			if (!valueLen)
+				return;
+			const auto consoleMode{_setmode(fd, _O_WTEXT)};
+			write(static_cast<const void *>(value), sizeof(wchar_t) * valueLen);
+			_setmode(fd, consoleMode);
+		}
+		else
+			write(nullString);
+	}
+#endif
 
 	void consoleStream_t::write(const bool value) const noexcept
 		{ write(value ? trueString : falseString); }
