@@ -8,7 +8,7 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-#include <Winsock2.h>
+#include <winsock2.h>
 #endif
 #include <cstring>
 #include <substrate/socket>

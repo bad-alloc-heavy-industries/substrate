@@ -22,7 +22,7 @@
 using substrate::INVALID_SOCKET;
 inline int closesocket(const int s) { return close(s); }
 #else
-#	include <Winsock2.h>
+#	include <winsock2.h>
 #endif
 
 using namespace substrate;
