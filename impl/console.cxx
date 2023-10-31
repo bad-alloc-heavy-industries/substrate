@@ -56,18 +56,20 @@ namespace substrate
 		errno = 0; // extra insurance.
 	}
 
+	void consoleStream_t::write(const char *const value) const noexcept
+		{ write(value, value ? charTraits::length(value) : 0U); }
+
 	// WARNING: This assumes you're giving it a TEXT stream so no non-printable stuff you want to preserve.
 	// It will (if necessary) automatically UTF-8 => 16 convert whatever passes through for the sake of windows
-	void consoleStream_t::write(const char *const value) const noexcept
+	void consoleStream_t::write(const char *const value, const size_t valueLen) const noexcept
 	{
 		if (value)
 		{
 #ifdef _WINDOWS
-			const auto valueLen{charTraits::length(value)};
 			// If there's nothing to convert (0-length string), fast-exit doing nothing.
 			if (!valueLen)
 				return;
-			const auto consoleMode{setmode(fd, _O_U8TEXT)};
+			const auto consoleMode{_setmode(fd, _O_U8TEXT)};
 			const auto stringLen{static_cast<size_t>(MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS,
 				value, int(valueLen), nullptr, 0))};
 			auto string{make_unique_nothrow<wchar_t []>(stringLen)};
@@ -75,10 +77,10 @@ namespace substrate
 				return;
 			MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED | MB_USEGLYPHCHARS, value, int(valueLen),
 				string.get(), int(stringLen));
-			write(string.get(), sizeof(wchar_t) * stringLen);
-			setmode(fd, consoleMode);
+			write(static_cast<const void *>(string.get()), sizeof(wchar_t) * stringLen);
+			_setmode(fd, consoleMode);
 #else
-			write(value, charTraits::length(value));
+			write(static_cast<const void *>(value), valueLen);
 #endif
 		}
 		else

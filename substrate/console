@@ -65,7 +65,8 @@ namespace substrate
 
 		void write(const void *buffer, size_t bufferLen) const noexcept;
 		void write(const char *value) const noexcept;
-		void write(const char value) const noexcept { write(&value, 1); }
+		void write(const char *value, size_t valueLen) const noexcept;
+		void write(const char value) const noexcept { write(&value, 1U); }
 		template<typename T> enable_if_t<!std::is_array<T>::value>
 			write(const std::unique_ptr<T> &value) const noexcept
 			{ value ? write(*value) : write("(null)"_s); }
