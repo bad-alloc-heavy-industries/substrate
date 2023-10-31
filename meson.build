@@ -55,7 +55,7 @@ extended_warnings = [
 	'-Wpacked',
 #	'-Wpadded',
 	'-Wredundant-decls',
-	'-Winline',
+#	'-Winline',
 	'-Wvla',
 	'-Wstack-protector',
 	'-Wunsuffixed-float-constant',
