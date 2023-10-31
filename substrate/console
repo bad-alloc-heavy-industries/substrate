@@ -60,7 +60,8 @@ namespace substrate
 		SUBSTRATE_NO_DISCARD(constexpr bool valid() const noexcept) { return fd != -1; }
 		SUBSTRATE_NO_DISCARD(constexpr bool isTTY() const noexcept) { return _tty; }
 #if defined(_WIN32)
-		void *handle() const noexcept { return reinterpret_cast<void *>(_get_osfhandle(fd)); }
+		SUBSTRATE_NO_DISCARD(void *handle() const noexcept)
+			{ return reinterpret_cast<void *>(_get_osfhandle(fd)); }
 #endif
 
 		void write(const void *buffer, size_t bufferLen) const noexcept;
