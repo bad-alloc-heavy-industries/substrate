@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: BSD-3-Clause
 #include <cerrno>
-#if defined(_MSC_VER) && !defined(_WINDOWS)
-#	define _WINDOWS 1
-#endif
-#ifndef _WINDOWS
+#ifndef _WIN32
 #	include <unistd.h>
 #else
 #	ifndef NOMINMAX
@@ -27,7 +24,7 @@ static const std::string warningPrefix{"[WRN]"_s};
 static const std::string infoPrefix{"[INF]"_s};
 static const std::string debugPrefix{"[DBG]"_s};
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 static const std::string colourRed{"\033[1;31m"_s};
 static const std::string colourYellow{"\033[1;33m"_s};
 static const std::string colourCyan{"\033[36m"_s};
@@ -48,7 +45,7 @@ namespace substrate
 	void consoleStream_t::write(const void *const buffer, const size_t bufferLen) const noexcept
 	{
 		// We don't actually care if this succeeds. We just try if at all possible.
-#ifndef _WINDOWS
+#ifndef _WIN32
 		SUBSTRATE_NOWARN_UNUSED(const auto result) = ::write(fd, buffer, bufferLen);
 #else
 		SUBSTRATE_NOWARN_UNUSED(const auto result) = ::write(fd, buffer, uint32_t(bufferLen));
@@ -65,7 +62,7 @@ namespace substrate
 	{
 		if (value)
 		{
-#ifdef _WINDOWS
+#ifdef _WIN32
 			// If there's nothing to convert (0-length string), fast-exit doing nothing.
 			if (!valueLen)
 				return;
@@ -94,7 +91,7 @@ namespace substrate
 		outputStream{fileno(outStream)}, errorStream{fileno(errStream)},
 		valid_{outputStream.valid() && errorStream.valid()} { }
 
-#ifndef _WINDOWS
+#ifndef _WIN32
 	inline void red(const consoleStream_t &stream) noexcept
 		{ stream.write(colourRed); }
 	inline void yellow(const consoleStream_t &stream) noexcept
