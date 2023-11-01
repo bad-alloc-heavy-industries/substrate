@@ -269,7 +269,7 @@ if meson.is_cross_build()
 		gnu_symbol_visibility: 'inlineshidden',
 		implicit_include_directories: false,
 		pic: true,
-		install: (not meson.is_subproject()),
+		install: false,
 		native: true,
 	)
 endif
