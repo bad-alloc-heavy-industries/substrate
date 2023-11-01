@@ -42,6 +42,7 @@ static const std::string falseString{"false"_s};
 
 namespace substrate
 {
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 	console_t console;
 
 	void consoleStream_t::checkTTY() noexcept { _tty = isatty(fd); }
