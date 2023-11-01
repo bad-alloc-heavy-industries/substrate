@@ -124,7 +124,7 @@ namespace substrate
 			write(static_cast<const void *>(value), sizeof(char16_t) * valueLen);
 			_setmode(fd, consoleMode);
 #else
-			//
+			convertingWrite(value, valueLen);
 #endif
 		}
 		else
@@ -209,5 +209,62 @@ namespace substrate
 			defaults(outputStream);
 		outputStream.write(' ');
 	}
+
+	// These functions implement streamed UTF-16 to UTF-8 conversion for display
+#ifndef _WIN32
+	// Performs safe indexing into the string array, returning the invalid value 0xffff if outside the bounds of the array
+	static inline uint16_t safeIndex(const char16_t *const string, const size_t length, const size_t index) noexcept
+	{
+		if (index >= length)
+			return UINT16_MAX;
+		uint16_t result{};
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+		memcpy(&result, string + index, sizeof(char16_t));
+		return result;
+	}
+
+	// Convert and stream out the converted code points given by string to the fd
+	void consoleStream_t::convertingWrite(const char16_t *string, const size_t stringLen) const noexcept
+	{
+		for (size_t offset = 0; offset < stringLen; ++offset)
+		{
+			const auto unitA{safeIndex(string, stringLen, offset)};
+			// Check if this is a high-half surrogate pair
+			if ((unitA & 0xfe00U) == 0xd800U)
+			{
+				// Recover the upper 10 (11) bits from the first surrogate of the pair.
+				const auto upper{(unitA & 0x03ffU) + 0x0040U};
+				// Recover the lower 10 bits from the second surrogate of the pair.
+				const auto lower{safeIndex(string, stringLen, ++offset) & 0x03fffU};
+
+				// Encode the 4 code units and write them out
+				write(static_cast<char>(0xf0U | (uint8_t(upper >> 8U) & 0x07U)));
+				write(static_cast<char>(0x80U | (uint8_t(upper >> 2U) & 0x3fU)));
+				write(static_cast<char>(0x80U | (uint8_t(upper << 4U) & 0x30U) | (uint8_t(lower >> 6U) & 0x0fU)));
+				write(static_cast<char>(0x80U | (lower & 0x3fU)));
+			}
+			else
+			{
+				// Something from the Basic Multilingual Plane, figure out how to encode it.
+				// If it's able to be represented as a single byte, write it out as one
+				if (unitA <= 0x007fU)
+					write(static_cast<char>(unitA));
+				// If it's two byte, encode and write out as a code unit pair
+				else if (unitA <= 0x07ffU)
+				{
+					write(static_cast<char>(0xc0U | (uint8_t(unitA >> 6U) & 0x1fU)));
+					write(static_cast<char>(0x80U | uint8_t(unitA & 0x3fU)));
+				}
+				// Otherwise it's 3 byte, encode and write out as a code unit tripple
+				else
+				{
+					write(static_cast<char>(0xe0U | (uint8_t(unitA >> 12U) & 0x0fU)));
+					write(static_cast<char>(0x80U | (uint8_t(unitA >> 6U) & 0x3fU)));
+					write(static_cast<char>(0x80U | (unitA & 0x3fU)));
+				}
+			}
+		}
+	}
+#endif
 } // namespace substrate
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */
