@@ -19,62 +19,98 @@ endif
 
 deps += dependency('threads')
 
-if cxxVersion.version_compare('>=201703')
-	friendTypenameTest = '''
+friendTypenameTest = '''
+	template <typename U>
+	auto foo(U u)
+	{
+		u.v;
+	}
+
+	template <typename T>
+	class X
+	{
+		T v;
+
+	public:
 		template <typename U>
-		auto foo(U u)
-		{
-			u.v;
-		}
+		friend auto foo(U);
+	};
 
-		template <typename T>
-		class X
-		{
-			T v;
+	int main()
+	{
+		::foo(X<int>{});
+	}
+'''
 
-		public:
-			template <typename U>
-			friend auto foo(U);
-		};
+stdVariantGCCTest = '''
+	#include <tuple>
+	#include <variant>
+	int main() {
+		using variant_t = std::variant<short, int, long>;
+		constexpr auto variant_v = variant_t{std::in_place_index_t<0>{}, short{}};
+		constexpr auto tuple = std::make_tuple(variant_v);
+		constexpr std::tuple tuple_v{variant_v};
+	}
+'''
 
-		int main()
-		{
-			::foo(X<int>{});
-		}
-	'''
+stdFilesystemPathTest = '''
+	#include <filesystem>
+	#include <iostream>
+
+	using namespace std::literals::string_view_literals;
+
+	int main() {
+		std::filesystem::path p{"/bin/bash"sv};
+		std::cout << p << std::endl;
+		return 0;
+	}
+'''
+
+initializerListTest = '''
+	#include <array>
+	#include <cstdint>
+
+	using size_t = std::size_t;
+
+	namespace internal
+	{
+	template<std::size_t... seq> using indexSequence_t = std::index_sequence<seq...>;
+	template<std::size_t N> using makeIndexSequence = std::make_index_sequence<N>;
+
+	template<typename T, size_t N, size_t... index> constexpr std::array<T, N>
+		makeArray(T (&&elems)[N], indexSequence_t<index...>)
+	{
+		return {{elems[index]...}};
+	}
+	} // namespace internal
+
+	template<typename T, size_t N> constexpr std::array<T, N>
+		make_array(T (&&elems)[N]) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	{
+		return internal::makeArray(std::move(elems), internal::makeIndexSequence<N>{});
+	}
+
+	int main()
+	{
+		auto test = make_array<const char *>({
+			"program",
+			"choiceC",
+			nullptr,
+		});
+	}
+'''
+
+if cxxVersion.version_compare('>=201703')
 	friendTypenameTemplate = cxx.compiles(
 		friendTypenameTest,
 		name: 'accepts friend declarations for auto functions (LLVM #31852, #33222)'
 	)
 
-	stdVariantGCCTest = '''
-		#include <tuple>
-		#include <variant>
-		int main() {
-			using variant_t = std::variant<short, int, long>;
-			constexpr auto variant_v = variant_t{std::in_place_index_t<0>{}, short{}};
-			constexpr auto tuple = std::make_tuple(variant_v);
-			constexpr std::tuple tuple_v{variant_v};
-		}
-	'''
 
 	stdVariantGCC = cxx.compiles(
 		stdVariantGCCTest,
 		name: 'has a working std::variant implementation (GCC #80165)'
 	)
-
-	stdFilesystemPathTest = '''
-		#include <filesystem>
-		#include <iostream>
-
-		using namespace std::literals::string_view_literals;
-
-		int main() {
-			std::filesystem::path p{"/bin/bash"sv};
-			std::cout << p << std::endl;
-			return 0;
-		}
-	'''
 
 	# GCC < 9.1 splits the filesystem module into a separate library
 	libstdcppFS = cxx.find_library('stdc++fs', required: false)
@@ -88,40 +124,6 @@ if cxxVersion.version_compare('>=201703')
 	if stdFilesystemPath
 		libSubstrateArgs += ['-DHAVE_FILESYSTEM_PATH']
 	endif
-
-	initializerListTest = '''
-		#include <array>
-		#include <cstdint>
-
-		using size_t = std::size_t;
-
-		namespace internal
-		{
-		template<std::size_t... seq> using indexSequence_t = std::index_sequence<seq...>;
-		template<std::size_t N> using makeIndexSequence = std::make_index_sequence<N>;
-
-		template<typename T, size_t N, size_t... index> constexpr std::array<T, N>
-			makeArray(T (&&elems)[N], indexSequence_t<index...>)
-		{
-			return {{elems[index]...}};
-		}
-		} // namespace internal
-
-		template<typename T, size_t N> constexpr std::array<T, N>
-			make_array(T (&&elems)[N]) // NOLINT(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-		{
-			return internal::makeArray(std::move(elems), internal::makeIndexSequence<N>{});
-		}
-
-		int main()
-		{
-			auto test = make_array<const char *>({
-				"program",
-				"choiceC",
-				nullptr,
-			});
-		}
-	'''
 
 	initializerList = cxx.compiles(
 		initializerListTest,
