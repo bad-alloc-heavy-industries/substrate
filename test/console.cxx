@@ -106,7 +106,6 @@ TEST_CASE("console_t PTY write", "[console_t]")
 	console = {};
 	REQUIRE_FALSE(console.valid());
 }
-#endif
 
 void assertPipeRead(const readPipe_t &fd, const std::string &expected)
 {
@@ -115,6 +114,21 @@ void assertPipeRead(const readPipe_t &fd, const std::string &expected)
 	REQUIRE(fd.read(result.data(), result.size()));
 	REQUIRE(memcmp(result.data(), expected.data(), expected.length()) == 0);
 }
+#else
+
+void assertPipeRead(const readPipe_t &fd, const std::string &expected)
+{
+	// Assume all expected strings end in '\n' and thus will translate to '\r\n'
+	fixedVector_t<char> result{expected.length() + 1U};
+	REQUIRE(result.valid());
+	REQUIRE(fd.read(result.data(), result.size()));
+	// Truncate the check on the held data by the '\n'
+	REQUIRE(memcmp(result.data(), expected.data(), expected.length() - 1U) == 0);
+	// And check it manually after to validate the opening assumption
+	REQUIRE(result[expected.length() - 1U] == '\r');
+	REQUIRE(result[expected.length()] == '\n');
+}
+#endif
 
 TEST_CASE("console_t pipe write", "[console_t]")
 {
