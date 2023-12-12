@@ -191,8 +191,8 @@ namespace substrate
 			write(outputStream, std::forward<T>(values)...);
 		}
 
-		void showDebug(const bool show) noexcept
-			{ showDebug_ = show; }
+		void showDebug(const bool show) noexcept { showDebug_ = show; }
+		bool showDebug() const noexcept { return showDebug_; }
 		void dumpBuffer();
 
 		void swap(console_t &other) noexcept
