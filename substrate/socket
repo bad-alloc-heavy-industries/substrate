@@ -27,9 +27,9 @@ namespace substrate
 #ifndef _WIN32
 	using socklen_t = unsigned int;
 	using sockType_t = int32_t;
-	using bufferlen_t = size_t; 
+	using bufferlen_t = size_t;
 	constexpr static sockType_t INVALID_SOCKET{-1};
-	using sa_family_t = sa_family_t;
+	using sa_family_t = ::sa_family_t;
 #else
 	using sa_family_t = ADDRESS_FAMILY;
 	using sockType_t = SOCKET;
@@ -65,14 +65,14 @@ namespace substrate
 		bool bind(const sockaddr_storage &addr) const noexcept;
 		template<typename T> bool connect(const T &addr) const noexcept
 			{ return connect(static_cast<const void *>(&addr), sizeof(T)); }
-		 bool connect(const sockaddr_storage &addr) const noexcept;
-		 bool listen(const int32_t queueLength) const noexcept;
-		 socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
-		 ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
-		 ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
-		 ssize_t writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept;
-		 ssize_t readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept;
-		 char peek() const noexcept;
+		bool connect(const sockaddr_storage &addr) const noexcept;
+		bool listen(const int32_t queueLength) const noexcept;
+		socket_t accept(sockaddr *peerAddr = nullptr, socklen_t *peerAddrLen = nullptr) const noexcept;
+		ssize_t write(const void *const bufferPtr, const size_t len) const noexcept;
+		ssize_t read(void *const bufferPtr, const size_t len) const noexcept;
+		ssize_t writeto(void *const bufferPtr, const size_t len, const sockaddr_storage &addr) const noexcept;
+		ssize_t readfrom(void *const bufferPtr, const size_t len, sockaddr_storage &addr) const noexcept;
+		char peek() const noexcept;
 	};
 
 	inline void swap(socket_t &a, socket_t &b) noexcept
@@ -99,11 +99,8 @@ namespace substrate
 			const uint16_t port, const socketProtocol_t protocol = socketProtocol_t::tcp) noexcept;
 
 		SUBSTRATE_API int typeToFamily(socketType_t type) noexcept;
-
 		SUBSTRATE_API int protocolToHints(socketProtocol_t protocol) noexcept;
-
 		SUBSTRATE_API int protocolToType(socketProtocol_t protocol) noexcept;
-
 		SUBSTRATE_API size_t familyToSize(sa_family_t family) noexcept;
 	}
 }
