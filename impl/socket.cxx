@@ -6,28 +6,29 @@
 #endif
 
 #include <cstring>
-#ifndef _WIN32
+
+#ifdef _WIN32
+#	include <winsock2.h>
+#else
 #	include <sys/socket.h>
 #	include <netdb.h>
 #	include <arpa/inet.h>
 #	include <netinet/in.h>
 #	include <netinet/udp.h>
+#	include <unistd.h>
 #endif
 
 #include <substrate/utility>
 #include <substrate/socket>
 
 #ifndef _WIN32
-#	include <unistd.h>
 using substrate::INVALID_SOCKET;
 inline int closesocket(const int s) { return close(s); }
-#else
-#	include <winsock2.h>
 #endif
 
 using namespace substrate;
 
-size_t sockaddrLen(const sockaddr_storage &addr) noexcept
+inline size_t sockaddrLen(const sockaddr_storage &addr) noexcept
 {
 	switch (addr.ss_family)
 	{
@@ -88,52 +89,6 @@ char socket_t::peek() const noexcept
 	if (::recv(socket, &buffer, 1, MSG_PEEK) != 1)
 		return {};
 	return buffer;
-}
-
-inline int typeToFamily(const socketType_t type) noexcept
-{
-	if (type == socketType_t::ipv4)
-		return AF_INET;
-	else if (type == socketType_t::ipv6)
-		return AF_INET6;
-	return AF_UNSPEC;
-}
-
-inline int protocolToHints(const socketProtocol_t protocol) noexcept
-{
-	switch (protocol)
-	{
-		case socketProtocol_t::udp:
-			return IPPROTO_UDP;
-		case socketProtocol_t::raw:
-			return IPPROTO_RAW;
-		case socketProtocol_t::tcp:
-		default:
-			return IPPROTO_TCP;
-	}
-}
-
-inline int protocolToType(const socketProtocol_t protocol) noexcept
-{
-	switch (protocol)
-	{
-		case socketProtocol_t::udp:
-			return SOCK_DGRAM;
-		case socketProtocol_t::raw:
-			return SOCK_RAW;
-		case socketProtocol_t::tcp:
-		default:
-			return SOCK_STREAM;
-	}
-}
-
-inline size_t familyToSize(const sa_family_t family) noexcept
-{
-	if (family == AF_INET)
-		return sizeof(sockaddr_in);
-	else if (family == AF_INET6)
-		return sizeof(sockaddr_in6);
-	return sizeof(sockaddr_storage);
 }
 
 inline uint16_t toBE(const uint16_t value) noexcept
@@ -202,4 +157,56 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
+
+int substrate::socket::typeToFamily(const socketType_t type) noexcept
+{
+	switch(type)
+	{
+		case socketType_t::ipv4:
+			return AF_INET;
+		case socketType_t::ipv6:
+			return AF_INET6;
+		case socketType_t::unknown:
+			// fallback
+		case socketType_t::dontCare:
+			return AF_UNSPEC;
+	}
+}
+
+int substrate::socket::protocolToHints(const socketProtocol_t protocol) noexcept
+{
+	switch (protocol)
+	{
+		case socketProtocol_t::udp:
+			return IPPROTO_UDP;
+		case socketProtocol_t::raw:
+			return IPPROTO_RAW;
+		case socketProtocol_t::tcp:
+			return IPPROTO_TCP;
+	}
+}
+
+int substrate::socket::protocolToType(const socketProtocol_t protocol) noexcept
+{
+	switch (protocol)
+	{
+		case socketProtocol_t::udp:
+			return SOCK_DGRAM;
+		case socketProtocol_t::raw:
+			return SOCK_RAW;
+		case socketProtocol_t::tcp:
+			return SOCK_STREAM;
+	}
+}
+
+size_t substrate::socket::familyToSize(sa_family_t family) noexcept
+{
+	if (family == AF_INET)
+		return sizeof(sockaddr_in);
+	else if (family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	else
+		return sizeof(sockaddr_storage);
+}
+
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

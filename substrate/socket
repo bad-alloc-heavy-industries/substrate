@@ -4,6 +4,8 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <utility>
+
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -11,18 +13,14 @@
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <ws2tcpip.h>
+#	include <ws2tcpip.h>
 #undef WIN32_LEAN_AND_MEAN
-#include <type_traits>
-
-using ssize_t = typename std::make_signed<size_t>::type;
+#else
+#	include <sys/socket.h>
 #endif
-#include <utility>
 
 #include <substrate/internal/defs>
-
-struct sockaddr;
-struct sockaddr_storage;
+#include <substrate/internal/types>
 
 namespace substrate
 {
@@ -31,6 +29,7 @@ namespace substrate
 	using sockType_t = int32_t;
 	using bufferlen_t = size_t; 
 	constexpr static sockType_t INVALID_SOCKET{-1};
+	using sa_family_t = sa_family_t;
 #else
 	using sa_family_t = ADDRESS_FAMILY;
 	using sockType_t = SOCKET;
@@ -98,6 +97,14 @@ namespace substrate
 	{
 		SUBSTRATE_API sockaddr_storage prepare(const socketType_t family, const char *const where,
 			const uint16_t port, const socketProtocol_t protocol = socketProtocol_t::tcp) noexcept;
+
+		SUBSTRATE_API int typeToFamily(socketType_t type) noexcept;
+
+		SUBSTRATE_API int protocolToHints(socketProtocol_t protocol) noexcept;
+
+		SUBSTRATE_API int protocolToType(socketProtocol_t protocol) noexcept;
+
+		SUBSTRATE_API size_t familyToSize(sa_family_t family) noexcept;
 	}
 }
 
