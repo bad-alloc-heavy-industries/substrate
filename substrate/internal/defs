@@ -137,5 +137,13 @@
 #define SUBSTRATE_INTERFACE
 #endif
 
+#if defined(_MSC_VER) && !defined(__clang__)
+#define SUBSTRATE_ALWAYS_INLINE __forceinline
+#elif defined(__has_attribute) && __has_attribute(always_inline)
+#define SUBSTRATE_ALWAYS_INLINE inline __attribute__((always_inline))
+#else
+#define SUBSTRATE_ALWAYS_INLINE inline
+#endif
+
 #endif /* SUBSTRATE_INTERNAL_DEFS */
 /* vim: set ft=cpp ts=4 sw=4 noexpandtab: */

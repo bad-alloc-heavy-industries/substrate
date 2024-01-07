@@ -8,7 +8,6 @@
 #include <array>
 #include <memory>
 #include <string>
-#include <limits>
 #include <vector>
 #include <chrono>
 #include <utility>
@@ -784,7 +783,26 @@ namespace substrate
 	template<typename C> SUBSTRATE_NO_DISCARD(inline SUBSTRATE_CXX14_CONSTEXPR auto data(const C &c)) -> decltype(c.data()) { return c.data(); }
 	template<typename T, std::size_t N> SUBSTRATE_NO_DISCARD(inline SUBSTRATE_CXX14_CONSTEXPR T *data(T (&array)[N]) noexcept) { return array; }
 	template<typename E> SUBSTRATE_NO_DISCARD(inline SUBSTRATE_CXX14_CONSTEXPR const E *data(std::initializer_list<E> il) noexcept) { return il.begin(); }
+#endif 
+
+#if defined(_MSC_VER)
+#	pragma warning(disable:4702) // abort is unreachable code
 #endif
+[[noreturn]] SUBSTRATE_ALWAYS_INLINE void unreachable()
+{
+#if defined(_MSC_VER) && !defined(__clang__)
+	__assume(false);
+#else
+	__builtin_unreachable();
+#endif
+#ifdef _DEBUG
+	abort();
+#endif
+}
+#if defined(_MSC_VER)
+#	pragma warning(default:4702)
+#endif
+
 } // namespace substrate
 
 #endif /* SUBSTRATE_UTILITIES */

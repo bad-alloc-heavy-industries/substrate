@@ -60,6 +60,8 @@ extended_warnings = [
 	'-Wstack-protector',
 	'-Wunsuffixed-float-constant',
 	'-Wimplicit-fallthrough',
+	'-Werror=switch',
+	'-we4061' # enumerator 'identifier' in switch of enum 'enumeration' is not explicitly handled by a case label
 ]
 
 add_project_arguments(
