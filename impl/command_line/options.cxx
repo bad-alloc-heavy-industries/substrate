@@ -184,28 +184,67 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
+	[[nodiscard]] inline std::string_view option_t::typeToValue() const noexcept
+	{
+		switch (_valueType)
+		{
+			case optionValueType_t::signedInt:
+				return "INT"sv;
+			case optionValueType_t::unsignedInt:
+				return "UINT"sv;
+			case optionValueType_t::boolean:
+				return "BOOL"sv;
+			case optionValueType_t::string:
+				return "STRING"sv;
+			case optionValueType_t::path:
+				return "PATH"sv;
+			case optionValueType_t::userDefined:
+				return "VAL"sv;
+		}
+	}
+
 	[[nodiscard]] std::string option_t::displayName() const noexcept
 	{
 		if (_option.valueless_by_exception())
 			return ""s;
+		const auto typeValue
+		{
+			[&]() -> std::string
+			{
+				if (!takesParameter())
+					return {};
+				return " "s + std::string{typeToValue()};
+			}()
+		};
 		return std::visit(match_t
 		{
-			[](const std::string_view &option) { return std::string{option}; },
-			[](const optionFlagPair_t &option)
-				{ return std::string{option._shortFlag} + ", "s + std::string{option._longFlag}; },
-			[](const optionValue_t &option) { return std::string{option.metaName()}; },
+			[&](const std::string_view &option) { return std::string{option} + typeValue; },
+			[&](const optionFlagPair_t &option)
+			{	
+				return std::string{option._shortFlag} + ", "s + std::string{option._longFlag} + typeValue;
+			},
+			[&](const optionValue_t &option) { return std::string{option.metaName()} + (isRepeatable() ? "..."s : ""s); }
 		}, _option);
 	}
 
 	[[nodiscard]] size_t option_t::displayLength() const noexcept
 	{
+		const auto value_length
+		{
+			[&]() -> size_t
+			{
+				if (!takesParameter())
+					return 0U;
+				return typeToValue().length() + 1U;
+			}()
+		};
 		return std::visit(match_t
 		{
-			[](const std::string_view &option) { return option.length(); },
-			[](const optionFlagPair_t &option)
+			[&](const std::string_view &option) { return option.length() + value_length; },
+			[&](const optionFlagPair_t &option)
 				// Add the lengths of the two flags together, and the extra ", " that is inserted by displayName()
-				{ return option._shortFlag.length() + option._longFlag.length() + 2U; },
-			[](const optionValue_t &option) { return option.metaName().length(); },
+				{ return option._shortFlag.length() + option._longFlag.length() + 2U + value_length; },
+			[&](const optionValue_t &option) { return option.metaName().length() + (isRepeatable() ? 3U : 0U); },
 		}, _option);
 	}
 
