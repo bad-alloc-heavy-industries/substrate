@@ -150,7 +150,7 @@ namespace substrate::commandLine
 		return requiredOptions;
 	}
 
-	static auto displayName(const optionsItem_t &item)
+	[[nodiscard]] static auto displayName(const optionsItem_t &item)
 	{
 		if (item.valueless_by_exception())
 			return ""s;
@@ -159,6 +159,35 @@ namespace substrate::commandLine
 			[](const option_t &option) { return option.displayName(); },
 			[](const optionSet_t &option) { return std::string{option.metaName()}; }
 		}, item);
+	}
+
+	[[nodiscard]] static bool checkExclusivity(const std::set<internal::optionsItem_t> &options) noexcept
+	{
+		std::set<option_t> exclusiveOptions{};
+		// Loop through all the visited options
+		for (const auto &option : options)
+		{
+			// Dispatch on the option type
+			std::visit(match_t
+			{
+				[&](const option_t &value)
+				{
+					if (value.isExclusive())
+						exclusiveOptions.insert(value);
+				},
+				[](const optionSet_t &) { },
+			}, option);
+		}
+		// Now we've collected all the options that are exclusive, display diagnostics
+		// if there is more than one in the set and return failure, otherwise success
+		if (exclusiveOptions.size() > 1)
+		{
+			console.error("Multiple mutually exclusive options given together on command line, only one allowed."sv);
+			console.error("Mutually exclusive options given are:"sv);
+			for (const auto &option : exclusiveOptions)
+				console.error("    "sv, option.displayName());
+		}
+		return exclusiveOptions.size() <= 1;
 	}
 
 	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -181,6 +210,10 @@ namespace substrate::commandLine
 				return false;
 			}
 		}
+		// Having parsed as many options as we can, collect all exclusive options seen and
+		// perform the exclusivity check
+		if (!checkExclusivity(optionsVisited))
+			return false;
 		// Having parsed as many options as we can, collect all the required options into a set
 		const auto requiredOptions{collectRequiredOptions(options)};
 		optionsVisited_t missingOptions{};
