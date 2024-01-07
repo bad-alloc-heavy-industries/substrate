@@ -114,7 +114,7 @@ template<size_t offset> inline void *offsetPtr(void *ptr)
 template<size_t offset, typename T, typename U> inline void copyToOffset(T &dest, const U value)
 	{ memcpy(offsetPtr<offset>(&dest), &value, sizeof(U)); }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #endif
@@ -154,7 +154,7 @@ sockaddr_storage substrate::socket::prepare(const socketType_t family, const cha
 		return {AF_UNSPEC};
 	return service;
 }
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
@@ -171,6 +171,8 @@ int substrate::socket::typeToFamily(const socketType_t type) noexcept
 		case socketType_t::dontCare:
 			return AF_UNSPEC;
 	}
+
+	substrate::unreachable();
 }
 
 int substrate::socket::protocolToHints(const socketProtocol_t protocol) noexcept
@@ -184,6 +186,8 @@ int substrate::socket::protocolToHints(const socketProtocol_t protocol) noexcept
 		case socketProtocol_t::tcp:
 			return IPPROTO_TCP;
 	}
+
+	substrate::unreachable();
 }
 
 int substrate::socket::protocolToType(const socketProtocol_t protocol) noexcept
@@ -197,6 +201,8 @@ int substrate::socket::protocolToType(const socketProtocol_t protocol) noexcept
 		case socketProtocol_t::tcp:
 			return SOCK_STREAM;
 	}
+
+	substrate::unreachable();
 }
 
 size_t substrate::socket::familyToSize(sa_family_t family) noexcept
