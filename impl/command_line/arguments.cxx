@@ -233,7 +233,8 @@ namespace substrate::commandLine
 	static std::optional<optionMatch_t> matchOption(tokeniser_t &lexer, const option_t &option,
 		const std::string_view &argument) noexcept;
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
-		const std::string_view &argument) noexcept;
+		const std::string_view &argument, const options_t &options,
+		const std::set<internal::optionsItem_t> &globalOptions) noexcept;
 	template<typename set_t> static bool checkMatchValid(const optionsItem_t &option, set_t &optionsVisited) noexcept;
 	template<typename set_t> static std::optional<bool> handleResult(arguments_t &arguments, const optionsItem_t &option,
 		set_t &optionsVisited, const std::string_view &argument, const optionMatch_t &match) noexcept;
@@ -277,7 +278,8 @@ namespace substrate::commandLine
 						std::visit(match_t
 						{
 							[&](const option_t &value) { return matchOption(lexer, value, argument); },
-							[&](const optionSet_t &value) { return matchOptionSet(lexer, value, argument); },
+							[&](const optionSet_t &value)
+								{ return matchOptionSet(lexer, value, argument, options, globalOptions); },
 						}, option)
 					};
 
@@ -355,8 +357,31 @@ namespace substrate::commandLine
 		return flag_t{option.metaName(), std::move(*value)};
 	}
 
+	static std::set<internal::optionsItem_t> gatherGlobals(const options_t &options,
+		const std::set<internal::optionsItem_t> &globalOptions) noexcept
+	{
+		// Clone the existing set of global options
+		auto result{globalOptions};
+		// Loop through the current level's options and pull out any that are global
+		for (const auto &option : options)
+		{
+			std::visit(match_t
+			{
+				[&](const option_t &value)
+				{
+					if (value.isGlobal())
+						result.insert(value);
+				},
+				[&](const optionSet_t &) { },
+			}, option);
+		}
+		// Having gathered all of them up, return the new set
+		return result;
+	}
+
 	static std::optional<optionMatch_t> matchOptionSet(tokeniser_t &lexer, const optionSet_t &option,
-		const std::string_view &argument) noexcept
+		const std::string_view &argument, const options_t &options,
+		const std::set<internal::optionsItem_t> &globalOptions) noexcept
 	{
 		// Check if we're parsing an alternation from a set
 		const auto match{option.matches(argument)};
@@ -369,7 +394,7 @@ namespace substrate::commandLine
 		lexer.next();
 		arguments_t subarguments{};
 		const auto &suboptions{alternation.suboptions()};
-		if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions, {}))
+		if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions, gatherGlobals(options, globalOptions)))
 			// If the operation fails, use monostate to signal match-but-fail.
 			return std::monostate{};
 		return choice_t{option.metaName(), argument, std::move(subarguments)};
