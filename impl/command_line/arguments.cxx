@@ -472,12 +472,10 @@ namespace substrate::commandLine
 	}
 
 	// Implementation of the innards of arguments_t as otherwise we get compile errors
-	// NOLINTNEXTLINE(modernize-use-equals-default)
-	arguments_t::arguments_t() noexcept : _arguments{} { }
-	arguments_t::arguments_t(const arguments_t &arguments) noexcept : _arguments{arguments._arguments} { }
-	arguments_t::arguments_t(arguments_t &&arguments) noexcept : _arguments{std::move(arguments._arguments)} { }
-	// NOLINTNEXTLINE(modernize-use-equals-default)
-	arguments_t::~arguments_t() noexcept { }
+	arguments_t::arguments_t() noexcept = default;
+	arguments_t::arguments_t(const arguments_t &arguments) noexcept = default;
+	arguments_t::arguments_t(arguments_t &&arguments) noexcept = default;
+	arguments_t::~arguments_t() noexcept = default;
 	size_t arguments_t::count() const noexcept
 		{ return _arguments.size(); }
 	size_t arguments_t::countMatching(const std::string_view &option) const noexcept
@@ -489,17 +487,9 @@ namespace substrate::commandLine
 	arguments_t::iterator_t arguments_t::find(const std::string_view &option) const noexcept
 		{ return _arguments.find(option); }
 
-	arguments_t &arguments_t::operator =(const arguments_t &arguments) noexcept
-	{
-		_arguments = arguments._arguments;
-		return *this;
-	}
+	arguments_t &arguments_t::operator =(const arguments_t &arguments) noexcept = default;
 
-	arguments_t &arguments_t::operator =(arguments_t &&arguments) noexcept
-	{
-		_arguments = std::move(arguments._arguments);
-		return *this;
-	}
+	arguments_t &arguments_t::operator =(arguments_t &&arguments) noexcept = default;
 
 	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 	std::vector<const item_t *> arguments_t::findAll(const std::string_view &option) const noexcept
