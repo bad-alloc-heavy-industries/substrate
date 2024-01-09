@@ -161,7 +161,7 @@ namespace substrate::commandLine
 		}, item);
 	}
 
-	[[nodiscard]] static bool checkExclusivity(const std::set<internal::optionsItem_t> &options) noexcept
+	[[nodiscard]] static size_t checkExclusivity(const std::set<internal::optionsItem_t> &options) noexcept
 	{
 		std::set<option_t> exclusiveOptions{};
 		// Loop through all the visited options
@@ -179,7 +179,7 @@ namespace substrate::commandLine
 			}, option);
 		}
 		// Now we've collected all the options that are exclusive, display diagnostics
-		// if there is more than one in the set and return failure, otherwise success
+		// if there is more than one in the set and then return how many there are
 		if (exclusiveOptions.size() > 1)
 		{
 			console.error("Multiple mutually exclusive options given together on command line, only one allowed."sv);
@@ -187,7 +187,7 @@ namespace substrate::commandLine
 			for (const auto &option : exclusiveOptions)
 				console.error("    "sv, option.displayName());
 		}
-		return exclusiveOptions.size() <= 1;
+		return exclusiveOptions.size();
 	}
 
 	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
@@ -211,9 +211,13 @@ namespace substrate::commandLine
 			}
 		}
 		// Having parsed as many options as we can, collect all exclusive options seen and
-		// perform the exclusivity check
-		if (!checkExclusivity(optionsVisited))
+		// perform the exclusivity check (there may not be more than 1 exclusive option given)
+		const auto exclusiveOptions{checkExclusivity(optionsVisited)};
+		if (exclusiveOptions > 1U)
 			return false;
+		// If there was just one exclusive option, return true to short-circuit the required options check
+		if (exclusiveOptions == 1U)
+			return true;
 		// Having parsed as many options as we can, collect all the required options into a set
 		const auto requiredOptions{collectRequiredOptions(options)};
 		optionsVisited_t missingOptions{};
