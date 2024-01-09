@@ -40,10 +40,12 @@ namespace substrate::commandLine
 
 	struct SUBSTRATE_CLS_API arguments_t
 	{
+	public:
+		using optionsVisited_t = std::set<internal::optionsItem_t>;
+
 	private:
 		using storage_t = std::multiset<item_t, std::less<void>>;
 		using iterator_t = typename storage_t::const_iterator;
-		using optionsVisited_t = std::set<internal::optionsItem_t>;
 
 		storage_t _arguments;
 
