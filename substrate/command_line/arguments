@@ -48,7 +48,7 @@ namespace substrate::commandLine
 		storage_t _arguments;
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options,
-			optionsVisited_t &optionsVisited) noexcept;
+			const optionsVisited_t &globalOptions, optionsVisited_t &optionsVisited) noexcept;
 
 	public:
 		arguments_t() noexcept;
@@ -58,7 +58,8 @@ namespace substrate::commandLine
 		arguments_t &operator =(const arguments_t &arguments) noexcept;
 		arguments_t &operator =(arguments_t &&arguments) noexcept;
 
-		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options);
+		[[nodiscard]] bool parseFrom(internal::tokeniser_t &lexer, const options_t &options,
+			optionsVisited_t globalOptions);
 		[[nodiscard]] bool add(item_t argument) noexcept;
 
 		[[nodiscard]] size_t count() const noexcept;

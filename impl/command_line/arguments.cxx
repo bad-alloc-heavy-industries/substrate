@@ -88,7 +88,7 @@ namespace substrate::commandLine
 		tokeniser_t lexer{argCount - 1U, argList + 1};
 		arguments_t result{};
 		// Try to parse all available arguments against the options tree for the program
-		if (!result.parseFrom(lexer, options))
+		if (!result.parseFrom(lexer, options, {}))
 			return std::nullopt;
 		return result;
 	}
@@ -191,13 +191,13 @@ namespace substrate::commandLine
 	}
 
 	// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
-	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options)
+	bool arguments_t::parseFrom(tokeniser_t &lexer, const options_t &options, const optionsVisited_t globalOptions)
 	{
 		const auto &token{lexer.token()};
 		optionsVisited_t optionsVisited{};
 		while (token.valid())
 		{
-			const auto result{parseArgument(lexer, options, optionsVisited)};
+			const auto result{parseArgument(lexer, options, globalOptions, optionsVisited)};
 			// If the result is a nullopt, we're unwinding an inner failure
 			if (!result)
 				return false;
@@ -240,7 +240,7 @@ namespace substrate::commandLine
 	static void handleUnrecognised(tokeniser_t &lexer, const std::string_view &argument) noexcept;
 
 	std::optional<bool> arguments_t::parseArgument(tokeniser_t &lexer, const options_t &options,
-		optionsVisited_t &optionsVisited) noexcept
+		const optionsVisited_t &globalOptions, optionsVisited_t &optionsVisited) noexcept
 	{
 		// Start by checking we're in a suitable state
 		const auto &token{lexer.token()};
@@ -253,34 +253,49 @@ namespace substrate::commandLine
 		const auto argument{token.value()};
 		// Initialise look-aside for optionValue_t{} options
 		std::optional<option_t> valueOption{};
-		for (const auto &option : options)
+		const auto matchOptions
 		{
-			// Check if this option is an option_t that is valueOnly() (optionValue_t{})
-			if (std::holds_alternative<option_t>(option))
+			[&](const auto &optionsSet) -> std::variant<std::monostate, std::optional<bool>>
 			{
-				const auto &value{std::get<option_t>(option)};
-				if (value.valueOnly())
+				for (const auto &option : optionsSet)
 				{
-					valueOption = value;
-					continue;
+					// Check if this option is an option_t that is valueOnly() (optionValue_t{})
+					if (std::holds_alternative<option_t>(option))
+					{
+						const auto &value{std::get<option_t>(option)};
+						if (value.valueOnly())
+						{
+							valueOption = value;
+							continue;
+						}
+					}
+
+					// Otherwise, process the option normally
+					const auto match
+					{
+						// Dispatch based on the option type
+						std::visit(match_t
+						{
+							[&](const option_t &value) { return matchOption(lexer, value, argument); },
+							[&](const optionSet_t &value) { return matchOptionSet(lexer, value, argument); },
+						}, option)
+					};
+
+					// If we got a valid match, use the result
+					if (match)
+						return handleResult(*this, option, optionsVisited, argument, *match);
 				}
+				return std::monostate{};
 			}
-
-			// Otherwise, process the option normally
-			const auto match
-			{
-				// Dispatch based on the option type
-				std::visit(match_t
-				{
-					[&](const option_t &value) { return matchOption(lexer, value, argument); },
-					[&](const optionSet_t &value) { return matchOptionSet(lexer, value, argument); },
-				}, option)
-			};
-
-			// If we got a valid match, use the result
-			if (match)
-				return handleResult(*this, option, optionsVisited, argument, *match);
-		}
+		};
+		// Try matching on the arguments from this level of the recursion
+		const auto localsMatch{matchOptions(options)};
+		if (std::holds_alternative<std::optional<bool>>(localsMatch))
+			return std::get<std::optional<bool>>(localsMatch);
+		// If that fails, now try matching on the global options
+		const auto globalsMatch{matchOptions(globalOptions)};
+		if (std::holds_alternative<std::optional<bool>>(globalsMatch))
+			return std::get<std::optional<bool>>(globalsMatch);
 		// If there's an optionValue_t{} and we got no match so far, try matching on it
 		if (valueOption)
 		{
@@ -354,7 +369,7 @@ namespace substrate::commandLine
 		lexer.next();
 		arguments_t subarguments{};
 		const auto &suboptions{alternation.suboptions()};
-		if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions))
+		if (!suboptions.empty() && !subarguments.parseFrom(lexer, suboptions, {}))
 			// If the operation fails, use monostate to signal match-but-fail.
 			return std::monostate{};
 		return choice_t{option.metaName(), argument, std::move(subarguments)};
