@@ -6,6 +6,7 @@
 #include <substrate/console>
 #include <substrate/conversions>
 #include <substrate/index_sequence>
+#include <substrate/utility>
 
 using namespace std::literals::string_literals;
 using namespace std::literals::string_view_literals;
@@ -201,6 +202,7 @@ namespace substrate::commandLine
 			case optionValueType_t::userDefined:
 				return "VAL"sv;
 		}
+		substrate::unreachable();
 	}
 
 	[[nodiscard]] std::string option_t::displayName() const noexcept
@@ -220,9 +222,7 @@ namespace substrate::commandLine
 		{
 			[&](const std::string_view &option) { return std::string{option} + typeValue; },
 			[&](const optionFlagPair_t &option)
-			{	
-				return std::string{option._shortFlag} + ", "s + std::string{option._longFlag} + typeValue;
-			},
+				{ return std::string{option._shortFlag} + ", "s + std::string{option._longFlag} + typeValue; },
 			[&](const optionValue_t &option) { return std::string{option.metaName()} + (isRepeatable() ? "..."s : ""s); }
 		}, _option);
 	}
