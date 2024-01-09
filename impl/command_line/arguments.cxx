@@ -363,18 +363,23 @@ namespace substrate::commandLine
 		// Clone the existing set of global options
 		auto result{globalOptions};
 		// Loop through the current level's options and pull out any that are global
-		for (const auto &option : options)
-		{
-			std::visit(match_t
+		std::for_each
+		(
+			options.begin(),
+			options.end(),
+			[&](const internal::optionsItem_t &option)
 			{
-				[&](const option_t &value)
+				std::visit(match_t
 				{
-					if (value.isGlobal())
-						result.insert(value);
-				},
-				[&](const optionSet_t &) { },
-			}, option);
-		}
+					[&](const option_t &value)
+					{
+						if (value.isGlobal())
+							result.insert(value);
+					},
+					[&](const optionSet_t &) { },
+				}, option);
+			}
+		);
 		// Having gathered all of them up, return the new set
 		return result;
 	}
