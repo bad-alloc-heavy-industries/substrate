@@ -47,7 +47,7 @@ namespace substrate::commandLine
 		using storage_t = std::multiset<item_t, std::less<void>>;
 		using iterator_t = typename storage_t::const_iterator;
 
-		storage_t _arguments;
+		storage_t _arguments{};
 
 		[[nodiscard]] std::optional<bool> parseArgument(internal::tokeniser_t &lexer, const options_t &options,
 			const optionsVisited_t &globalOptions, optionsVisited_t &optionsVisited) noexcept;
