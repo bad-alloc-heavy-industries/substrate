@@ -473,10 +473,10 @@ namespace substrate::commandLine
 
 	// Implementation of the innards of arguments_t as otherwise we get compile errors
 	arguments_t::arguments_t() noexcept = default;
-	arguments_t::arguments_t(const arguments_t &arguments) noexcept = default;
+	arguments_t::arguments_t(const arguments_t &arguments) = default;
 	arguments_t::arguments_t(arguments_t &&arguments) noexcept = default;
 	arguments_t::~arguments_t() noexcept = default;
-	arguments_t &arguments_t::operator =(const arguments_t &arguments) noexcept = default;
+	arguments_t &arguments_t::operator =(const arguments_t &arguments) = default;
 	arguments_t &arguments_t::operator =(arguments_t &&arguments) noexcept = default;
 	size_t arguments_t::count() const noexcept
 		{ return _arguments.size(); }
