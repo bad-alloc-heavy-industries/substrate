@@ -1,0 +1,69 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
+#ifndef SUBSTRATE_FILE_UTILS
+#define SUBSTRATE_FILE_UTILS
+
+#include <algorithm>
+#include <iterator>
+#include <string>
+#include <vector>
+#include <substrate/fd>
+#include <substrate/mmap>
+
+namespace substrate
+{
+	template<typename Str = std::string>
+		std::vector<Str> read_lines(fd_t &file, typename Str::value_type separator = '\n') noexcept
+	{
+		using char_t = typename Str::value_type;
+
+		if (!file.valid())
+			return {};
+
+		const auto map{file.map(PROT_READ)};
+		if (!map.valid())
+			return {};
+
+		std::vector<Str> result;
+
+		const auto *const cbegin{map.address<char_t>()};
+
+		const auto *const cend
+		{
+			[&]()
+			{
+				const auto *begin{cbegin};
+				std::advance(begin, map.length() / sizeof(char_t));
+				return begin;
+			}()
+		};
+
+		for (const auto *begin{cbegin}; begin != cend;)
+		{
+			const auto *boundary
+			{
+				std::find_if
+				(
+					begin,
+					cend,
+					[&](const auto chr) { return chr == separator || (separator == '\n' && chr == '\r'); }
+				)
+			};
+
+			result.emplace_back(begin, boundary);
+
+			if (boundary != cend) {
+				if (separator == '\n' && *boundary == '\r' && (boundary + 1) != cend && *(boundary + 1) == '\n')
+					std::advance(boundary, 2);
+				else
+					std::advance(boundary, 1);
+			}
+
+			begin = boundary;
+		}
+
+		return result;
+	}
+} // namespace substrate
+
+#endif // SUBSTRATE_FILE_UTILS
