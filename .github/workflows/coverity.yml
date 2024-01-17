@@ -50,32 +50,17 @@ jobs:
           $GCOV --version
           meson --version
           ninja --version
-      - name: Install Coverity
-        shell: bash
-        run: |
-          .github/installCoverity.sh
-        env:
-          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
-          COVERITY_PROJECT_NAME: substrate
-      - name: Run Coverity
+      - name: Configure
         shell: bash
         run: |
           meson setup build --prefix=$HOME/.local -Dcpp_std=c++17
-          cov-build --dir cov-int ninja -C build
-        env:
-          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
-      - name: Upload Coverity
-        shell: bash
-        run: |
-          VERSION=`meson introspect build --projectinfo | jq -r '.["version"]'`-`git rev-parse --short HEAD`
-          tar cJf substrate.tar.xz cov-int
-          curl --form token=${{ secrets.COVERITY_SCAN_TOKEN }} \
-            --form email=dx-mon@users.sourceforge.net \
-            --form file=@substrate.tar.xz \
-            --form version=$VERSION \
-            --form description="A collection of headers containing useful tools and gadgets for building C++ programs" \
-            https://scan.coverity.com/builds?project=${COVERITY_PROJECT_NAME}
-      - name: Debug
-        if: failure()
-        shell: bash
-        run: cat cov-int/build-log.txt
+          echo "SUBSTRATE_VERSION=`meson introspect build --projectinfo | jq -r '.["version"]'`-`git rev-parse --short HEAD`" >> $GITHUB_ENV
+      - name: Run and upload Coverity
+        uses: vapier/coverity-scan-action@v1
+        with:
+          command: ninja -C build
+          email: dx-mon@users.sourceforge.net
+          project: substrate
+          version: ${{ env.SUBSTRATE_VERSION }}
+          description: A collection of headers containing useful tools and gadgets for building C++ programs
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
