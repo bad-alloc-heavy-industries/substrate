@@ -25,6 +25,9 @@
 #		include <share.h>
 #		undef fstat // macro conflicts with fstat definition below
 #	endif
+#else
+#	define O_TEXT 0
+#	define O_BINARY 0
 #endif
 
 
