@@ -225,6 +225,8 @@ namespace substrate
 #ifdef _WIN32
 			if (_mapping)
 				CloseHandle(_mapping);
+			if (_fd != -1)
+				_close(_fd);
 #else
 			if (_fd != -1)
 				::close(_fd);
