@@ -87,7 +87,7 @@ namespace substrate
 		static constexpr bool matches_extent = extent_v == dynamic_extent;
 
 		template<size_t count>
-			using count_is_dynamic_extent = substrate::bool_constant<count == dynamic_extent>; 
+			using count_is_dynamic_extent = substrate::bool_constant<count == dynamic_extent>;
 
 		template<size_t offset, size_t count> static constexpr
 			substrate::enable_if_t<!count_is_dynamic_extent<count>(), size_t>
