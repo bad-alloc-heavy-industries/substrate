@@ -2,14 +2,20 @@
 #ifndef SUBSTRATE_FLAGS
 #define SUBSTRATE_FLAGS
 
+#include <atomic>
 #include <type_traits>
 
 namespace substrate
 {
+	template<typename T> struct isAtomicIntegral : std::is_integral<T> { };
+	template<typename T> struct isAtomicIntegral<std::atomic<T>> : std::is_integral<T> { };
+
+	template<typename T> constexpr inline bool isAtomicIntegral_v = isAtomicIntegral<T>::value;
+
 	template<typename storage_t, typename enum_t> struct bitFlags_t
 	{
 	private:
-		static_assert(std::is_integral_v<storage_t>, "bitFlags_t must be backed by an integral type");
+		static_assert(isAtomicIntegral_v<storage_t>, "bitFlags_t must be backed by an integral type");
 		static_assert(std::is_enum_v<enum_t>, "bitFlags_t must be enumerated by an enum");
 		storage_t value{};
 
