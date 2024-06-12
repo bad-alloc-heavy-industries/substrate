@@ -3,7 +3,7 @@
 #define SUBSTRATE_RWLOCK
 
 #if __cplusplus < 201703L
-#error "rwlock is on available on C++17 and above"
+#error "rwlock is only available on C++17 and above"
 #endif
 
 #include <substrate/internal/defs>
