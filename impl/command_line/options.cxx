@@ -308,7 +308,17 @@ namespace substrate::commandLine
 		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 		void optionsRoot_t::displayHelp() const noexcept
 		{
+			if (!_helpHeader.empty())
+			{
+				console.writeln(_helpHeader);
+				console.writeln();
+			}
 			_options.displayHelp();
+			if (!_helpFooter.empty())
+			{
+				console.writeln();
+				console.writeln(_helpFooter);
+			}
 		}
 	} // namespace internal
 } // namespace substrate::commandLine
