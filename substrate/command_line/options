@@ -264,7 +264,7 @@ namespace substrate::commandLine
 			constexpr optionsItem_t operator [](const size_t index) const { return optionAt<0U>(index, _options); }
 			constexpr auto &options() const noexcept { return _options; }
 
-			void displayHelp() const noexcept;
+			void displayHelp(const std::string_view &optionsTitle) const noexcept;
 		};
 
 		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
@@ -332,14 +332,14 @@ namespace substrate::commandLine
 			constexpr auto end() const noexcept { return optionsIterator_t{storage, length, indexFn}; }
 
 			[[nodiscard]] size_t displayPadding() const noexcept;
-			void displayHelp() const noexcept;
+			void displayHelp(const std::string_view &optionsTitle) const noexcept;
 		};
 
 		template<typename... options_t>
-			void optionsStorage_t<options_t...>::displayHelp() const noexcept
+			void optionsStorage_t<options_t...>::displayHelp(const std::string_view &optionsTitle) const noexcept
 		{
 			optionsHolder_t holder{*this};
-			holder.displayHelp();
+			holder.displayHelp(optionsTitle);
 		}
 	}
 
@@ -363,7 +363,7 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
 		[[nodiscard]] size_t displayPadding() const noexcept { return _options.displayPadding(); }
-		void displayHelp() const noexcept { _options.displayHelp(); }
+		void displayHelp(std::string_view optionsTitle = {}) const noexcept { _options.displayHelp(optionsTitle); }
 	};
 
 	namespace internal

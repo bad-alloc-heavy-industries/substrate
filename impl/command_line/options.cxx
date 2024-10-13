@@ -284,14 +284,19 @@ namespace substrate::commandLine
 		}
 
 		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
-		void optionsHolder_t::displayHelp() const noexcept
+		void optionsHolder_t::displayHelp(const std::string_view &optionsTitle) const noexcept
 		{
 			// Figure out how much padding is needed to make everything neat
 			const auto padding{displayPadding()};
 			std::vector<optionSet_t> optionSets{};
 
+			if (optionsTitle.empty())
+				console.writeln("Options:"sv);
+			else
+				console.writeln(std::toupper(optionsTitle[0], std::locale::classic()), optionsTitle.substr(1),
+					"s options:"sv);
+
 			// Now display the non-alternation options and collect option sets
-			console.writeln("Options:"sv);
 			for (const auto &option : *this)
 			{
 				std::visit(match_t
@@ -334,7 +339,7 @@ namespace substrate::commandLine
 							{
 								// If the alternation matches the one actually selected, display it
 								if (alternation.matches(choice.value()))
-									alternation.suboptions().displayHelp();
+									alternation.suboptions().displayHelp(optionSet.metaName());
 							}
 						}
 						// Return if we found a match
