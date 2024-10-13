@@ -304,6 +304,12 @@ namespace substrate::commandLine
 			for (const auto &optionSet : optionSets)
 				optionSet.displayHelp(padding);
 		}
+
+		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
+		void optionsRoot_t::displayHelp() const noexcept
+		{
+			_options.displayHelp();
+		}
 	} // namespace internal
 } // namespace substrate::commandLine
 
