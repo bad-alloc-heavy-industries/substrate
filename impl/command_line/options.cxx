@@ -57,6 +57,7 @@ namespace substrate::commandLine
 		return std::nullopt;
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	std::optional<std::any> option_t::parseSignedValue(const std::string_view &value) const noexcept
 	{
 		toInt_t<int64_t> number{value.data()};
@@ -78,6 +79,7 @@ namespace substrate::commandLine
 		return result;
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	std::optional<std::any> option_t::parseUnsignedValue(const std::string_view &value) const noexcept
 	{
 		toInt_t<uint64_t> number{value.data()};
@@ -99,6 +101,7 @@ namespace substrate::commandLine
 		return result;
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	std::optional<std::any> option_t::parseBoolValue(const std::string_view &value) noexcept
 	{
 		// If the value matches the strings "true" or "false", convert to the boolean equivilent
@@ -110,6 +113,7 @@ namespace substrate::commandLine
 		return std::nullopt;
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	std::optional<std::any> option_t::parsePathValue(const std::string_view &value) noexcept
 	{
 		// There's unfortunately not much of any validation can be done on a path, so..
@@ -121,6 +125,7 @@ namespace substrate::commandLine
 	bool optionAlternation_t::matches(const std::string_view &argument) const noexcept
 		{ return argument == _value; }
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	std::optional<std::reference_wrapper<const optionAlternation_t>>
 		optionSet_t::matches(const std::string_view &argument) const noexcept
 	{
@@ -141,6 +146,7 @@ namespace substrate::commandLine
 		);
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	void optionSet_t::displayHelp(const size_t padding) const noexcept
 	{
 		console.writeln();
@@ -205,6 +211,7 @@ namespace substrate::commandLine
 		substrate::unreachable();
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	[[nodiscard]] std::string option_t::displayName() const noexcept
 	{
 		if (_option.valueless_by_exception())
@@ -227,6 +234,7 @@ namespace substrate::commandLine
 		}, _option);
 	}
 
+	// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 	[[nodiscard]] size_t option_t::displayLength() const noexcept
 	{
 		const auto value_length
@@ -274,6 +282,7 @@ namespace substrate::commandLine
 			);
 		}
 
+		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
 		void optionsHolder_t::displayHelp() const noexcept
 		{
 			// Figure out how much padding is needed to make everything neat
