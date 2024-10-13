@@ -68,6 +68,7 @@ namespace substrate::commandLine
 	};
 
 	struct optionAlternation_t;
+	struct arguments_t;
 	using optionValueParser_t = std::optional<std::any> (*)(const std::string_view &) noexcept;
 
 	// A singular command line option such as a simple flag
@@ -222,6 +223,7 @@ namespace substrate::commandLine
 			matches(const std::string_view &argument) const noexcept;
 		[[nodiscard]] size_t displayPadding() const noexcept;
 		void displayHelp(size_t padding = 0U) const noexcept;
+		bool displayHelp(const arguments_t &args) const noexcept;
 
 		[[nodiscard]] const optionAlternation_t *begin() const noexcept;
 		[[nodiscard]] const optionAlternation_t *end() const noexcept;
@@ -264,7 +266,7 @@ namespace substrate::commandLine
 			constexpr optionsItem_t operator [](const size_t index) const { return optionAt<0U>(index, _options); }
 			constexpr auto &options() const noexcept { return _options; }
 
-			void displayHelp(const std::string_view &optionsTitle) const noexcept;
+			void displayHelp(const arguments_t &args, const std::string_view &optionsTitle) const noexcept;
 		};
 
 		template<typename... options_t> optionsStorage_t(const std::tuple<options_t...> &) ->
@@ -332,14 +334,15 @@ namespace substrate::commandLine
 			constexpr auto end() const noexcept { return optionsIterator_t{storage, length, indexFn}; }
 
 			[[nodiscard]] size_t displayPadding() const noexcept;
-			void displayHelp(const std::string_view &optionsTitle) const noexcept;
+			void displayHelp(const arguments_t &args, const std::string_view &optionsTitle) const noexcept;
 		};
 
 		template<typename... options_t>
-			void optionsStorage_t<options_t...>::displayHelp(const std::string_view &optionsTitle) const noexcept
+			void optionsStorage_t<options_t...>::displayHelp(const arguments_t &args,
+				const std::string_view &optionsTitle) const noexcept
 		{
 			optionsHolder_t holder{*this};
-			holder.displayHelp(optionsTitle);
+			holder.displayHelp(args, optionsTitle);
 		}
 	}
 
@@ -363,7 +366,8 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
 		[[nodiscard]] size_t displayPadding() const noexcept { return _options.displayPadding(); }
-		void displayHelp(std::string_view optionsTitle = {}) const noexcept { _options.displayHelp(optionsTitle); }
+		void displayHelp(const arguments_t &args, std::string_view optionsTitle = {}) const noexcept
+			{ _options.displayHelp(args, optionsTitle); }
 	};
 
 	namespace internal
@@ -426,8 +430,6 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto displayLength() const noexcept { return _value.length(); }
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 	};
-
-	struct arguments_t;
 
 	namespace internal
 	{

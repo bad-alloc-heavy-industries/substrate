@@ -162,6 +162,25 @@ namespace substrate::commandLine
 		}
 	}
 
+	bool optionSet_t::displayHelp(const arguments_t &args) const noexcept
+	{
+		const auto arg{args[_metaName]};
+		// We found a match so we now need to find out which one matched
+		if (arg)
+		{
+			// Extract the choice made and loop through the possible choice alternations
+			const auto &choice{std::get<choice_t>(*arg)};
+			for (const auto &option : _alternations)
+			{
+				// If the alternation matches the one actually selected, display it
+				if (option.matches(choice.value()))
+					option.suboptions().displayHelp(choice.arguments(), _metaName);
+			}
+		}
+		// Return if we found a match
+		return arg;
+	}
+
 	// Implementation of the innards of optionSet_t as otherwise we get compile errors
 	const optionAlternation_t *optionSet_t::begin() const noexcept
 		{ return _alternations.begin(); }
@@ -284,12 +303,29 @@ namespace substrate::commandLine
 		}
 
 		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
-		void optionsHolder_t::displayHelp(const std::string_view &optionsTitle) const noexcept
+		void optionsHolder_t::displayHelp(const arguments_t &args, const std::string_view &optionsTitle) const noexcept
 		{
-			// Figure out how much padding is needed to make everything neat
+			// First check to see if we should actually be displaying some alternation's help
+			for (const auto &option : *this)
+			{
+				const auto handled
+				{
+					std::visit(match_t
+					{
+						[](const option_t &) { return false; },
+						[&](const optionSet_t &optionSet) { return optionSet.displayHelp(args); },
+					}, option)
+				};
+				// If we have indeed managed to handle things, finish early
+				if (handled)
+					return;
+			}
+
+			// No optionSet_t's to traverse, so now figure out how much padding is needed to make everything neat
 			const auto padding{displayPadding()};
 			std::vector<optionSet_t> optionSets{};
 
+			// Display the title block for the non-alternation options
 			if (optionsTitle.empty())
 				console.writeln("Options:"sv);
 			else
@@ -320,36 +356,8 @@ namespace substrate::commandLine
 				console.writeln(_helpHeader);
 				console.writeln();
 			}
-			// Now see if any of the option sets appear in the arguments parsed
-			auto foundMatch{false};
-			for (const auto &option : _options)
-			{
-				foundMatch |= std::visit(match_t
-				{
-					[](const option_t &) { return false; },
-					[&](const optionSet_t &optionSet) -> bool
-					{
-						const auto arg{args[optionSet.metaName()]};
-						// We found a match so we now need to find out which one matched
-						if (arg)
-						{
-							// Extract the choice made and loop through the possible choice alternations
-							const auto &choice{std::get<choice_t>(*arg)};
-							for (const auto &alternation : optionSet)
-							{
-								// If the alternation matches the one actually selected, display it
-								if (alternation.matches(choice.value()))
-									alternation.suboptions().displayHelp(optionSet.metaName());
-							}
-						}
-						// Return if we found a match
-						return arg;
-					},
-				}, option);
-			}
-			// If we found no matching options, display the base help
-			if (!foundMatch)
-				_options.displayHelp();
+			// Now display the appropriate options help
+			_options.displayHelp(args);
 
 			// Finish up by displaying the help footer
 			if (!_helpFooter.empty())
