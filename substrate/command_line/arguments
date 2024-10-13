@@ -56,6 +56,7 @@ namespace substrate::commandLine
 		arguments_t() noexcept;
 		arguments_t(const arguments_t &arguments);
 		arguments_t(arguments_t &&arguments) noexcept;
+		// NOTLINTNEXTLINE(performance-trivially-destructible)
 		~arguments_t() noexcept;
 		arguments_t &operator =(const arguments_t &arguments);
 		arguments_t &operator =(arguments_t &&arguments) noexcept;
