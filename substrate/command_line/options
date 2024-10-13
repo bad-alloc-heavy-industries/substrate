@@ -438,7 +438,8 @@ namespace substrate::commandLine
 
 		public:
 			constexpr optionsRoot_t(const optionsHolder_t &options) : _options{options} { }
-			constexpr optionsRoot_t(const optionsRoot_t &) noexcept = default;
+			constexpr optionsRoot_t(const optionsRoot_t &other, const optionsHolder_t &options) noexcept :
+				_options{options}, _helpHeader{other._helpHeader}, _helpFooter{other._helpFooter} { }
 			constexpr optionsRoot_t(optionsRoot_t &&) noexcept = default;
 
 			constexpr optionsRoot_t &operator =(const optionsRoot_t &) noexcept = default;
@@ -465,7 +466,8 @@ namespace substrate::commandLine
 
 	public:
 		constexpr optionsRoot_t(const internal::optionsStorage_t<options_t...> &options) : _optionsStorage{options} { }
-		constexpr optionsRoot_t(const optionsRoot_t &) noexcept = default;
+		constexpr optionsRoot_t(const optionsRoot_t &other) noexcept : _optionsStorage{other._optionsStorage},
+			_options{other._options, _optionsStorage} { }
 		constexpr optionsRoot_t(optionsRoot_t &&) noexcept = default;
 
 		constexpr optionsRoot_t &operator =(const optionsRoot_t &) noexcept = default;
