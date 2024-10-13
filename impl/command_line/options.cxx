@@ -3,6 +3,7 @@
 #include <locale>
 #include <numeric>
 #include <substrate/command_line/options>
+#include <substrate/command_line/arguments>
 #include <substrate/console>
 #include <substrate/conversions>
 #include <substrate/index_sequence>
@@ -306,14 +307,46 @@ namespace substrate::commandLine
 		}
 
 		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
-		void optionsRoot_t::displayHelp() const noexcept
+		void optionsRoot_t::displayHelp(const arguments_t &args) const noexcept
 		{
+			// Display the help header first
 			if (!_helpHeader.empty())
 			{
 				console.writeln(_helpHeader);
 				console.writeln();
 			}
-			_options.displayHelp();
+			// Now see if any of the option sets appear in the arguments parsed
+			auto foundMatch{false};
+			for (const auto &option : _options)
+			{
+				foundMatch |= std::visit(match_t
+				{
+					[](const option_t &) { return false; },
+					[&](const optionSet_t &optionSet) -> bool
+					{
+						const auto arg{args[optionSet.metaName()]};
+						// We found a match so we now need to find out which one matched
+						if (arg)
+						{
+							// Extract the choice made and loop through the possible choice alternations
+							const auto &choice{std::get<choice_t>(*arg)};
+							for (const auto &alternation : optionSet)
+							{
+								// If the alternation matches the one actually selected, display it
+								if (alternation.matches(choice.value()))
+									alternation.suboptions().displayHelp();
+							}
+						}
+						// Return if we found a match
+						return arg;
+					},
+				}, option);
+			}
+			// If we found no matching options, display the base help
+			if (!foundMatch)
+				_options.displayHelp();
+
+			// Finish up by displaying the help footer
 			if (!_helpFooter.empty())
 			{
 				console.writeln();

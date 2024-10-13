@@ -427,6 +427,8 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto &helpText() const noexcept { return _help; }
 	};
 
+	struct arguments_t;
+
 	namespace internal
 	{
 		struct optionsRoot_t final
@@ -454,7 +456,7 @@ namespace substrate::commandLine
 			constexpr void helpHeader(const std::string_view &header) noexcept { _helpHeader = header; }
 			constexpr void helpFooter(const std::string_view &footer) noexcept { _helpFooter = footer; }
 
-			void displayHelp() const noexcept;
+			void displayHelp(const arguments_t &args) const noexcept;
 		};
 	} // namespace internal
 
@@ -490,7 +492,7 @@ namespace substrate::commandLine
 			return *this;
 		}
 
-		void displayHelp() const noexcept { _options.displayHelp(); }
+		void displayHelp(const arguments_t &args) const noexcept { _options.displayHelp(args); }
 	};
 
 	template<typename... options_t> optionsRoot_t(options_t...) -> optionsRoot_t<options_t...>;
