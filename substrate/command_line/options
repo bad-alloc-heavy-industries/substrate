@@ -433,8 +433,8 @@ namespace substrate::commandLine
 		{
 		private:
 			options_t _options;
-			std::optional<std::string_view> _helpHeader{};
-			std::optional<std::string_view> _helpFooter{};
+			std::string_view _helpHeader{};
+			std::string_view _helpFooter{};
 
 		public:
 			constexpr optionsRoot_t(const optionsHolder_t &options) : _options{options} { }
@@ -444,11 +444,14 @@ namespace substrate::commandLine
 			constexpr optionsRoot_t &operator =(const optionsRoot_t &) noexcept = default;
 			constexpr optionsRoot_t &operator =(optionsRoot_t &&) noexcept = default;
 
+			[[nodiscard]] constexpr auto &options() const noexcept { return _options; }
+
 			[[nodiscard]] constexpr auto empty() const noexcept { return _options.empty(); }
 			[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 			[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
-			[[nodiscard]] constexpr auto &options() const noexcept { return _options; }
+			constexpr void helpHeader(const std::string_view &header) noexcept { _helpHeader = header; }
+			constexpr void helpFooter(const std::string_view &footer) noexcept { _helpFooter = footer; }
 
 			void displayHelp() const noexcept;
 		};
@@ -467,12 +470,23 @@ namespace substrate::commandLine
 
 		constexpr optionsRoot_t &operator =(const optionsRoot_t &) noexcept = default;
 		constexpr optionsRoot_t &operator =(optionsRoot_t &&) noexcept = default;
+		[[nodiscard]] constexpr auto &options() const noexcept { return _options.options(); }
 
 		[[nodiscard]] constexpr auto empty() const noexcept { return _options.empty(); }
 		[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
-		[[nodiscard]] constexpr auto &options() const noexcept { return _options.options(); }
+		[[nodiscard]] constexpr auto &helpHeader(const std::string_view &header) noexcept
+		{
+			_options.helpHeader(header);
+			return *this;
+		}
+
+		[[nodiscard]] constexpr auto &helpFooter(const std::string_view &footer) noexcept
+		{
+			_options.helpFooter(footer);
+			return *this;
+		}
 
 		void displayHelp() const noexcept { _options.displayHelp(); }
 	};
