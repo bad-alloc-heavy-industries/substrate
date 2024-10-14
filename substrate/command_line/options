@@ -437,13 +437,15 @@ namespace substrate::commandLine
 		{
 		private:
 			options_t _options;
+			std::string_view _usage{};
 			std::string_view _helpHeader{};
 			std::string_view _helpFooter{};
 
 		public:
 			constexpr optionsRoot_t(const optionsHolder_t &options) : _options{options} { }
 			constexpr optionsRoot_t(const optionsRoot_t &other, const optionsHolder_t &options) noexcept :
-				_options{options}, _helpHeader{other._helpHeader}, _helpFooter{other._helpFooter} { }
+				_options{options}, _usage{other._usage}, _helpHeader{other._helpHeader}, _helpFooter{other._helpFooter}
+					{ }
 			constexpr optionsRoot_t(optionsRoot_t &&) noexcept = default;
 
 			constexpr optionsRoot_t &operator =(const optionsRoot_t &) noexcept = default;
@@ -455,6 +457,7 @@ namespace substrate::commandLine
 			[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 			[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
 
+			constexpr void usage(const std::string_view &usage) noexcept { _usage = usage; }
 			constexpr void helpHeader(const std::string_view &header) noexcept { _helpHeader = header; }
 			constexpr void helpFooter(const std::string_view &footer) noexcept { _helpFooter = footer; }
 
@@ -481,6 +484,12 @@ namespace substrate::commandLine
 		[[nodiscard]] constexpr auto empty() const noexcept { return _options.empty(); }
 		[[nodiscard]] constexpr auto begin() const noexcept { return _options.begin(); }
 		[[nodiscard]] constexpr auto end() const noexcept { return _options.end(); }
+
+		[[nodiscard]] constexpr auto &usage(const std::string_view &usage) noexcept
+		{
+			_options.usage(usage);
+			return *this;
+		}
 
 		[[nodiscard]] constexpr auto &helpHeader(const std::string_view &header) noexcept
 		{

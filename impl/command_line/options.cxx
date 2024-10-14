@@ -356,6 +356,14 @@ namespace substrate::commandLine
 				console.writeln(_helpHeader);
 				console.writeln();
 			}
+
+			if (!_usage.empty())
+			{
+				console.writeln("Usage:"sv);
+				console.writeln('\t', _usage);
+				console.writeln();
+			}
+
 			// Now display the appropriate options help
 			_options.displayHelp(args);
 
