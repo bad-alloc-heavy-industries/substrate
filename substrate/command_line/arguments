@@ -105,9 +105,7 @@ namespace substrate::commandLine
 	template<typename... options_t> [[nodiscard]] inline std::optional<arguments_t>
 		parseArguments(size_t argCount, const char *const *argList,
 			const optionsRoot_t<options_t...> &optionsRoot) noexcept
-	{
-		return parseArguments(argCount, argList, optionsRoot.options());
-	}
+		{ return parseArguments(argCount, argList, optionsRoot.options()); }
 
 	[[nodiscard]] SUBSTRATE_API bool operator ==(const item_t &lhs, const item_t &rhs) noexcept;
 	[[nodiscard]] SUBSTRATE_API bool operator !=(const item_t &lhs, const item_t &rhs) noexcept;
