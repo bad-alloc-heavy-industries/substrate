@@ -162,7 +162,7 @@ namespace substrate::commandLine
 		}
 	}
 
-	bool optionSet_t::displayHelp(const arguments_t &args) const noexcept
+	bool optionSet_t::displayHelp(const arguments_t &args, const std::string_view &usage) const noexcept
 	{
 		const auto arg{args[_metaName]};
 		// We found a match so we now need to find out which one matched
@@ -174,7 +174,34 @@ namespace substrate::commandLine
 			{
 				// If the alternation matches the one actually selected, display it
 				if (option.matches(choice.value()))
-					option.suboptions().displayHelp(choice.arguments(), _metaName);
+				{
+					constexpr static auto npos{std::string_view::npos};
+					// Update the usage text for this alternation before passing it on to the next layer
+					// of the help display system so the text shown is sensible
+					std::string optionUsage{usage};
+					for (size_t offset{0U}; offset != npos;)
+					{
+						// See if we can find the next opening '{'
+						const auto begin{usage.find('{', offset)};
+						// And see if we can then find the next closing '}'
+						const auto end{usage.find('}', begin)};
+						// If one or both were not found, we're done
+						if (begin == npos || end == npos)
+							break;
+						// Check what we matched vs the optionSet's name
+						if (usage.substr(begin + 1U, (end - begin) - 1U) == _metaName)
+						{
+							// We did, so replace that chunk of the string with the alternation's value
+							optionUsage.replace(begin, (end - begin) + 1U, choice.value());
+							// Now exit because we're done
+							break;
+						}
+						// If we did not succeed, prep to find the next match if possible
+						offset = end;
+					}
+					// Recurse to display the alternation's help
+					option.suboptions().displayHelp(choice.arguments(), optionUsage, _metaName);
+				}
 			}
 		}
 		// Return if we found a match
@@ -303,7 +330,8 @@ namespace substrate::commandLine
 		}
 
 		// NOTLINENEXTLINE(readability-convert-member-functions-to-static)
-		void optionsHolder_t::displayHelp(const arguments_t &args, const std::string_view &optionsTitle) const noexcept
+		void optionsHolder_t::displayHelp(const arguments_t &args, const std::string_view &usage,
+			const std::string_view &optionsTitle) const noexcept
 		{
 			// First check to see if we should actually be displaying some alternation's help
 			for (const auto &option : *this)
@@ -313,12 +341,20 @@ namespace substrate::commandLine
 					std::visit(match_t
 					{
 						[](const option_t &) { return false; },
-						[&](const optionSet_t &optionSet) { return optionSet.displayHelp(args); },
+						[&](const optionSet_t &optionSet) { return optionSet.displayHelp(args, usage); },
 					}, option)
 				};
 				// If we have indeed managed to handle things, finish early
 				if (handled)
 					return;
+			}
+
+			// If the usage string is valid, display it
+			if (!usage.empty())
+			{
+				console.writeln("Usage:"sv);
+				console.writeln('\t', usage);
+				console.writeln();
 			}
 
 			// No optionSet_t's to traverse, so now figure out how much padding is needed to make everything neat
@@ -357,15 +393,8 @@ namespace substrate::commandLine
 				console.writeln();
 			}
 
-			if (!_usage.empty())
-			{
-				console.writeln("Usage:"sv);
-				console.writeln('\t', _usage);
-				console.writeln();
-			}
-
 			// Now display the appropriate options help
-			_options.displayHelp(args);
+			_options.displayHelp(args, _usage);
 
 			// Finish up by displaying the help footer
 			if (!_helpFooter.empty())
