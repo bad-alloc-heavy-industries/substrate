@@ -30,7 +30,7 @@ namespace substrate
 		constexpr bitFlags_t(const bitFlags_t &flags) noexcept : value{flags.value} { }
 		// move ctor omitted as it doesn't really make sense for this type
 		template<typename... values_t, typename = std::enable_if_t<(std::is_same_v<values_t, enum_t> && ...)>>
-			constexpr bitFlags_t(const values_t ...flags) noexcept : value{(flagAsBit(flags) | ...)} { }
+			constexpr bitFlags_t(const values_t ...flags) noexcept : value{storage_t((flagAsBit(flags) | ...))} { }
 
 		constexpr bitFlags_t &operator =(const bitFlags_t &flags) noexcept
 		{
