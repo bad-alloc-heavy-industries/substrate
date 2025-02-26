@@ -28,11 +28,15 @@ namespace substrate
 		template<typename T> inline void writeBE(const T value, void *const buffer) noexcept
 			{ internal::helper_t<T>::writeBE(value, buffer); }
 
+		template<typename T> inline T readLE(const span<uint8_t> buffer) noexcept
+			{ return readLE<T>(buffer.data()); }
 		template<typename T> inline T readLE(const span<const uint8_t> buffer) noexcept
 			{ return readLE<T>(buffer.data()); }
 		template<typename T> inline void writeLE(const T value, span<uint8_t> buffer) noexcept
 			{ return writeLE(value, buffer.data()); }
 
+		template<typename T> inline T readBE(const span<uint8_t> buffer) noexcept
+			{ return readBE<T>(buffer.data()); }
 		template<typename T> inline T readBE(const span<const uint8_t> buffer) noexcept
 			{ return readBE<T>(buffer.data()); }
 		template<typename T> inline void writeBE(const T value, span<uint8_t> buffer) noexcept
