@@ -137,10 +137,14 @@ namespace substrate
 			constexpr span(type_t (&array)[N]) noexcept : span(static_cast<pointer>(array), N) { }
 		template<typename type_t, size_t N, substrate::enable_if_t<isCompatArray<type_t, N>(), void *> = nullptr>
 			constexpr span(std::array<type_t, N> &array) noexcept :
-			span(static_cast<pointer>(array.data()), N) { }
+			span{static_cast<pointer>(array.data()), N} { }
 		template<typename type_t, size_t N, substrate::enable_if_t<isCompatArray<const type_t, N>(), void *> = nullptr>
 			constexpr span(const std::array<type_t, N> &array) noexcept :
-			span(static_cast<pointer>(array.data()), N) { }
+			span{static_cast<pointer>(array.data()), N} { }
+
+		// Allow converting a less-const span into a more const one
+		template<typename type_t, size_t N, substrate::enable_if_t<std::is_same_v<T, const type_t>, void *> = nullptr>
+			constexpr span(const span<type_t, N> &other) noexcept : span{other.data(), other.size()} { }
 
 		template<class container_t, substrate::enable_if_t<extent_v == dynamic_extent &&
 			internal::isContainer<container_t>(), void *> = nullptr>
